@@ -347,6 +347,16 @@
 			"notes": "Layout objects + templates; re-author in Studio when restyled."
 		},
 		{
+			"id": "ui:InteractPrompt",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiTemplates/InteractPrompt.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Floating ProximityPrompt card (Custom style), drawn beside the object by PromptController."
+		},
+		{
 			"id": "ui:StatusChip",
 			"type": "ui",
 			"path": "src/ReplicatedStorage/UiTemplates/StatusChip.model.json",

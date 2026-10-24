@@ -9,21 +9,23 @@
 				],
 				[
 					0,
-					22
+					20
 				]
 			]
 		},
 		"AutomaticSize": "X",
 		"BackgroundColor3": [
-			0.18,
-			0.15,
-			0.12
+			0.145,
+			0.176,
+			0.227
 		],
+		"BackgroundTransparency": 0.1,
+		"BorderSizePixel": 0,
 		"Text": "",
 		"TextColor3": [
-			0.95,
-			0.93,
-			0.88
+			0.902,
+			0.875,
+			0.812
 		],
 		"FontFace": {
 			"Font": {
@@ -32,7 +34,7 @@
 				"style": "Normal"
 			}
 		},
-		"TextSize": 13
+		"TextSize": 12
 	},
 	"children": [
 		{
@@ -42,9 +44,23 @@
 				"CornerRadius": {
 					"UDim": [
 						0,
-						4
+						3
 					]
 				}
+			}
+		},
+		{
+			"name": "UIStroke",
+			"className": "UIStroke",
+			"properties": {
+				"Color": [
+					0.824,
+					0.718,
+					0.514
+				],
+				"Thickness": 1.5,
+				"Transparency": 0,
+				"ApplyStrokeMode": "Border"
 			}
 		},
 		{
@@ -54,25 +70,25 @@
 				"PaddingTop": {
 					"UDim": [
 						0,
-						4
-					]
-				},
-				"PaddingBottom": {
-					"UDim": [
-						0,
-						4
-					]
-				},
-				"PaddingLeft": {
-					"UDim": [
-						0,
-						4
+						3
 					]
 				},
 				"PaddingRight": {
 					"UDim": [
 						0,
-						4
+						7
+					]
+				},
+				"PaddingBottom": {
+					"UDim": [
+						0,
+						3
+					]
+				},
+				"PaddingLeft": {
+					"UDim": [
+						0,
+						7
 					]
 				}
 			}

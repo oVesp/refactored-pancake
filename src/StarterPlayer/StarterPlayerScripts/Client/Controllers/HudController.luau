@@ -12,12 +12,14 @@ local NetClient = require(ReplicatedStorage.Shared.Net.Client)
 local Skills = require(ReplicatedStorage.Content.Skills)
 local Statuses = require(ReplicatedStorage.Content.Statuses)
 local Strings = require(ReplicatedStorage.Content.Strings)
+local Theme = require(ReplicatedStorage.Shared.Theme)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 local Zones = require(ReplicatedStorage.Content.Zones)
 
 local Attributes = Constants.Attributes
 -- Cast fill tint once the slidecast window opens (moving no longer cancels).
-local SLIDECAST_COLOR = Color3.fromRGB(110, 200, 120)
+local SLIDECAST_COLOR = Theme.Green
+local TARGET_ATTRIBUTES = { Attributes.Hp, Attributes.MaxHp, "Level", "DisplayName", "Elite", "Casting" }
 local TOAST_SECONDS = 4
 local MAX_TOASTS = 5
 local KEY_LABELS = { "1", "2", "3", "4", "5", "6", "7", "8" }
@@ -41,9 +43,11 @@ local HudController = {}
 local UIController: any
 local ProfileController: any
 local CombatController: any
+local TargetController: any
 
 local player = Players.LocalPlayer
 local characterMaid = Maid.new()
+local targetMaid = Maid.new()
 local bound: { [string]: GuiObject }
 local slotFrames: { { frame: Frame, cooldown: Frame, id: string, kind: string } } = {}
 local castEndsAt = 0
@@ -83,8 +87,15 @@ function HudController.Toast(key: string, args: { any }?)
 	end
 	task.delay(TOAST_SECONDS, function()
 		if toast.Parent then
-			local tween =
-				TweenService:Create(toast, TweenInfo.new(0.4), { TextTransparency = 1, BackgroundTransparency = 1 })
+			local fade = TweenInfo.new(0.4)
+			for _, part in toast:GetDescendants() do
+				if part:IsA("UIStroke") then
+					TweenService:Create(part, fade, { Transparency = 1 }):Play()
+				elseif part:IsA("Frame") then
+					TweenService:Create(part, fade, { BackgroundTransparency = 1 }):Play()
+				end
+			end
+			local tween = TweenService:Create(toast, fade, { TextTransparency = 1, BackgroundTransparency = 1 })
 			tween:Play()
 			tween.Completed:Wait()
 			toast:Destroy()
@@ -117,7 +128,10 @@ local function renderStatuses(character: Model)
 		local def = Statuses.ById[id]
 		local chip = UIController.Clone("StatusChip") :: TextLabel
 		chip.Text = if def then def.name else id
-		chip.BackgroundColor3 = if def and def.harmful then Color3.fromRGB(110, 35, 35) else Color3.fromRGB(35, 80, 50)
+		local edge = chip:FindFirstChildOfClass("UIStroke")
+		if edge then
+			edge.Color = if def and def.harmful then Theme.HpBright else Theme.Green
+		end
 		chip.Parent = bound.Bind_Statuses
 	end
 end
@@ -148,8 +162,41 @@ local function watchCharacter(character: Model)
 	renderStatuses(character)
 end
 
+local function renderTarget(model: Model?, locked: boolean)
+	targetMaid:Clean()
+	bound.Bind_TargetFrame.Visible = model ~= nil
+	if not model then
+		return
+	end
+	local target = model
+	local function render()
+		local name = target:GetAttribute("DisplayName") or target.Name
+		local level = target:GetAttribute("Level")
+		local elite = if target:GetAttribute("Elite") == true then "  \u{2605}" else ""
+		setText("Bind_TargetName", string.format("Lv %s  %s%s", tostring(level or "?"), tostring(name), elite))
+		local hp = target:GetAttribute(Attributes.Hp)
+		local maxHp = target:GetAttribute(Attributes.MaxHp)
+		if type(hp) == "number" and type(maxHp) == "number" then
+			fill(bound.Bind_TargetHpFill, bound.Bind_TargetHpText, hp, maxHp)
+		end
+		local casting = target:GetAttribute("Casting")
+		local info = {}
+		if locked then
+			table.insert(info, "Locked")
+		end
+		if type(casting) == "string" then
+			table.insert(info, "Casting " .. casting)
+		end
+		setText("Bind_TargetInfo", table.concat(info, " \u{00b7} "))
+	end
+	for _, name in TARGET_ATTRIBUTES do
+		targetMaid:Give(target:GetAttributeChangedSignal(name):Connect(render))
+	end
+	render()
+end
+
 local function renderProfile(snapshot: { [string]: any })
-	setText("Bind_LevelText", string.format("Level %d", snapshot.level))
+	setText("Bind_LevelText", tostring(snapshot.level))
 	if snapshot.xpNeed then
 		fill(bound.Bind_XpFill, bound.Bind_XpText, snapshot.xpInto, snapshot.xpNeed, "XP %d / %d")
 	else
@@ -174,6 +221,7 @@ local function renderProfile(snapshot: { [string]: any })
 		table.insert(hints, string.format("%d spell pick(s): press B", picks))
 	end
 	setText("Bind_HintText", table.concat(hints, "\n"))
+	bound.Bind_HintPanel.Visible = #hints > 0
 end
 
 local function renderZone()
@@ -188,6 +236,7 @@ end
 local function renderHotbar(slots: { any })
 	UIController.ClearRows(bound.Bind_Hotbar)
 	table.clear(slotFrames)
+	bound.Bind_Hotbar.Visible = #slots > 0
 	for index, slot in slots do
 		local frame = UIController.Clone("HotbarSlot") :: Frame
 		frame.LayoutOrder = index
@@ -236,7 +285,7 @@ local function updateCooldowns()
 			local def = Disciplines.ById[slot.id]
 			local on = type(active) == "string" and table.find(string.split(active, ","), def.status) ~= nil
 			slot.cooldown.Size = UDim2.fromScale(1, 0)
-			slot.frame.BackgroundColor3 = if on then Color3.fromRGB(60, 90, 50) else Color3.fromRGB(18, 18, 23)
+			slot.frame.BackgroundColor3 = if on then Theme.GreenDeep else Theme.PanelRaised
 		end
 	end
 
@@ -259,6 +308,7 @@ function HudController.Init(deps: { [string]: any })
 	UIController = deps.UIController
 	ProfileController = deps.ProfileController
 	CombatController = deps.CombatController
+	TargetController = deps.TargetController
 end
 
 function HudController.Start()
@@ -271,8 +321,10 @@ function HudController.Start()
 		"Bind_StaminaFill",
 		"Bind_StaminaText",
 		"Bind_FocusText",
+		"Bind_NameText",
 		"Bind_LevelText",
 		"Bind_ZoneText",
+		"Bind_HintPanel",
 		"Bind_HintText",
 		"Bind_Statuses",
 		"Bind_Hotbar",
@@ -283,7 +335,15 @@ function HudController.Start()
 		"Bind_CastText",
 		"Bind_Toasts",
 		"Bind_KeysText",
+		"Bind_TargetFrame",
+		"Bind_TargetName",
+		"Bind_TargetHpFill",
+		"Bind_TargetHpText",
+		"Bind_TargetInfo",
 	})
+	setText("Bind_NameText", player.DisplayName)
+	TargetController.Changed:Connect(renderTarget)
+	renderTarget(TargetController.Enemy(), TargetController.IsLocked())
 
 	player.CharacterAdded:Connect(watchCharacter)
 	if player.Character then

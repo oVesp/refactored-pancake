@@ -1,0 +1,778 @@
+{
+	"className": "BillboardGui",
+	"properties": {
+		"Size": {
+			"UDim2": [
+				[
+					0,
+					210
+				],
+				[
+					0,
+					58
+				]
+			]
+		},
+		"StudsOffset": [
+			3.2,
+			1.2,
+			0
+		],
+		"AlwaysOnTop": true,
+		"LightInfluence": 0,
+		"ResetOnSpawn": false,
+		"Active": true,
+		"ClipsDescendants": false
+	},
+	"children": [
+		{
+			"name": "Bind_Button",
+			"className": "TextButton",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							-8
+						],
+						[
+							1,
+							-8
+						]
+					]
+				},
+				"Position": {
+					"UDim2": [
+						[
+							0,
+							4
+						],
+						[
+							0,
+							4
+						]
+					]
+				},
+				"BackgroundColor3": [
+					1,
+					1,
+					1
+				],
+				"BackgroundTransparency": 0.06,
+				"BorderSizePixel": 0,
+				"Text": "",
+				"AutoButtonColor": false
+			},
+			"children": [
+				{
+					"name": "UICorner",
+					"className": "UICorner",
+					"properties": {
+						"CornerRadius": {
+							"UDim": [
+								0,
+								3
+							]
+						}
+					}
+				},
+				{
+					"name": "UIStroke",
+					"className": "UIStroke",
+					"properties": {
+						"Color": [
+							0.824,
+							0.718,
+							0.514
+						],
+						"Thickness": 1.5,
+						"Transparency": 0.05,
+						"ApplyStrokeMode": "Border"
+					}
+				},
+				{
+					"name": "UIGradient",
+					"className": "UIGradient",
+					"properties": {
+						"Color": {
+							"ColorSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"color": [
+											0.145,
+											0.176,
+											0.227
+										]
+									},
+									{
+										"time": 1.0,
+										"color": [
+											0.082,
+											0.098,
+											0.133
+										]
+									}
+								]
+							}
+						},
+						"Rotation": 90
+					}
+				},
+				{
+					"name": "InnerBorder",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									-6
+								],
+								[
+									1,
+									-6
+								]
+							]
+						},
+						"Position": {
+							"UDim2": [
+								[
+									0,
+									3
+								],
+								[
+									0,
+									3
+								]
+							]
+						},
+						"BackgroundTransparency": 1
+					},
+					"children": [
+						{
+							"name": "UICorner",
+							"className": "UICorner",
+							"properties": {
+								"CornerRadius": {
+									"UDim": [
+										0,
+										2
+									]
+								}
+							}
+						},
+						{
+							"name": "UIStroke",
+							"className": "UIStroke",
+							"properties": {
+								"Color": [
+									0.824,
+									0.718,
+									0.514
+								],
+								"Thickness": 1,
+								"Transparency": 0.65,
+								"ApplyStrokeMode": "Border"
+							}
+						}
+					]
+				},
+				{
+					"name": "CornerTL",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									0,
+									8
+								],
+								[
+									0,
+									8
+								]
+							]
+						},
+						"Position": {
+							"UDim2": [
+								[
+									0,
+									0
+								],
+								[
+									0,
+									0
+								]
+							]
+						},
+						"AnchorPoint": [
+							0.5,
+							0.5
+						],
+						"Rotation": 45,
+						"BackgroundColor3": [
+							0.824,
+							0.718,
+							0.514
+						],
+						"BorderSizePixel": 0
+					},
+					"children": [
+						{
+							"name": "Core",
+							"className": "Frame",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											0,
+											3
+										],
+										[
+											0,
+											3
+										]
+									]
+								},
+								"Position": {
+									"UDim2": [
+										[
+											0.5,
+											0
+										],
+										[
+											0.5,
+											0
+										]
+									]
+								},
+								"AnchorPoint": [
+									0.5,
+									0.5
+								],
+								"BackgroundColor3": [
+									0.082,
+									0.098,
+									0.133
+								],
+								"BorderSizePixel": 0
+							}
+						}
+					]
+				},
+				{
+					"name": "CornerTR",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									0,
+									8
+								],
+								[
+									0,
+									8
+								]
+							]
+						},
+						"Position": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									0,
+									0
+								]
+							]
+						},
+						"AnchorPoint": [
+							0.5,
+							0.5
+						],
+						"Rotation": 45,
+						"BackgroundColor3": [
+							0.824,
+							0.718,
+							0.514
+						],
+						"BorderSizePixel": 0
+					},
+					"children": [
+						{
+							"name": "Core",
+							"className": "Frame",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											0,
+											3
+										],
+										[
+											0,
+											3
+										]
+									]
+								},
+								"Position": {
+									"UDim2": [
+										[
+											0.5,
+											0
+										],
+										[
+											0.5,
+											0
+										]
+									]
+								},
+								"AnchorPoint": [
+									0.5,
+									0.5
+								],
+								"BackgroundColor3": [
+									0.082,
+									0.098,
+									0.133
+								],
+								"BorderSizePixel": 0
+							}
+						}
+					]
+				},
+				{
+					"name": "CornerBL",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									0,
+									8
+								],
+								[
+									0,
+									8
+								]
+							]
+						},
+						"Position": {
+							"UDim2": [
+								[
+									0,
+									0
+								],
+								[
+									1,
+									0
+								]
+							]
+						},
+						"AnchorPoint": [
+							0.5,
+							0.5
+						],
+						"Rotation": 45,
+						"BackgroundColor3": [
+							0.824,
+							0.718,
+							0.514
+						],
+						"BorderSizePixel": 0
+					},
+					"children": [
+						{
+							"name": "Core",
+							"className": "Frame",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											0,
+											3
+										],
+										[
+											0,
+											3
+										]
+									]
+								},
+								"Position": {
+									"UDim2": [
+										[
+											0.5,
+											0
+										],
+										[
+											0.5,
+											0
+										]
+									]
+								},
+								"AnchorPoint": [
+									0.5,
+									0.5
+								],
+								"BackgroundColor3": [
+									0.082,
+									0.098,
+									0.133
+								],
+								"BorderSizePixel": 0
+							}
+						}
+					]
+				},
+				{
+					"name": "CornerBR",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									0,
+									8
+								],
+								[
+									0,
+									8
+								]
+							]
+						},
+						"Position": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									1,
+									0
+								]
+							]
+						},
+						"AnchorPoint": [
+							0.5,
+							0.5
+						],
+						"Rotation": 45,
+						"BackgroundColor3": [
+							0.824,
+							0.718,
+							0.514
+						],
+						"BorderSizePixel": 0
+					},
+					"children": [
+						{
+							"name": "Core",
+							"className": "Frame",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											0,
+											3
+										],
+										[
+											0,
+											3
+										]
+									]
+								},
+								"Position": {
+									"UDim2": [
+										[
+											0.5,
+											0
+										],
+										[
+											0.5,
+											0
+										]
+									]
+								},
+								"AnchorPoint": [
+									0.5,
+									0.5
+								],
+								"BackgroundColor3": [
+									0.082,
+									0.098,
+									0.133
+								],
+								"BorderSizePixel": 0
+							}
+						}
+					]
+				},
+				{
+					"name": "KeyFrame",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									0,
+									34
+								],
+								[
+									0,
+									34
+								]
+							]
+						},
+						"Position": {
+							"UDim2": [
+								[
+									0,
+									10
+								],
+								[
+									0.5,
+									0
+								]
+							]
+						},
+						"AnchorPoint": [
+							0,
+							0.5
+						],
+						"BackgroundColor3": [
+							0.082,
+							0.098,
+							0.133
+						],
+						"BorderSizePixel": 0,
+						"ZIndex": 2
+					},
+					"children": [
+						{
+							"name": "UICorner",
+							"className": "UICorner",
+							"properties": {
+								"CornerRadius": {
+									"UDim": [
+										0,
+										3
+									]
+								}
+							}
+						},
+						{
+							"name": "UIStroke",
+							"className": "UIStroke",
+							"properties": {
+								"Color": [
+									0.824,
+									0.718,
+									0.514
+								],
+								"Thickness": 1.5,
+								"Transparency": 0,
+								"ApplyStrokeMode": "Border"
+							}
+						},
+						{
+							"name": "Bind_HoldFill",
+							"className": "Frame",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											1,
+											0
+										],
+										[
+											0,
+											0
+										]
+									]
+								},
+								"Position": {
+									"UDim2": [
+										[
+											0,
+											0
+										],
+										[
+											1,
+											0
+										]
+									]
+								},
+								"AnchorPoint": [
+									0,
+									1
+								],
+								"BackgroundColor3": [
+									0.824,
+									0.718,
+									0.514
+								],
+								"BackgroundTransparency": 0.45,
+								"BorderSizePixel": 0,
+								"ZIndex": 2
+							},
+							"children": [
+								{
+									"name": "UICorner",
+									"className": "UICorner",
+									"properties": {
+										"CornerRadius": {
+											"UDim": [
+												0,
+												3
+											]
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Bind_Key",
+							"className": "TextLabel",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											1,
+											0
+										],
+										[
+											1,
+											0
+										]
+									]
+								},
+								"BackgroundTransparency": 1,
+								"Text": "E",
+								"TextColor3": [
+									0.941,
+									0.867,
+									0.69
+								],
+								"FontFace": {
+									"Font": {
+										"family": "rbxasset://fonts/families/AccanthisADFStd.json",
+										"weight": "Bold",
+										"style": "Normal"
+									}
+								},
+								"TextSize": 18,
+								"TextXAlignment": "Center",
+								"TextYAlignment": "Center",
+								"TextWrapped": true,
+								"ZIndex": 3
+							}
+						}
+					]
+				},
+				{
+					"name": "Bind_Action",
+					"className": "TextLabel",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									-60
+								],
+								[
+									0,
+									20
+								]
+							]
+						},
+						"BackgroundTransparency": 1,
+						"Text": "",
+						"TextColor3": [
+							0.941,
+							0.867,
+							0.69
+						],
+						"FontFace": {
+							"Font": {
+								"family": "rbxasset://fonts/families/AccanthisADFStd.json",
+								"weight": "Bold",
+								"style": "Normal"
+							}
+						},
+						"TextSize": 16,
+						"TextXAlignment": "Left",
+						"TextYAlignment": "Center",
+						"TextWrapped": true,
+						"Position": {
+							"UDim2": [
+								[
+									0,
+									52
+								],
+								[
+									0,
+									7
+								]
+							]
+						},
+						"TextTruncate": "AtEnd",
+						"ZIndex": 2
+					}
+				},
+				{
+					"name": "Bind_Object",
+					"className": "TextLabel",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									-60
+								],
+								[
+									0,
+									14
+								]
+							]
+						},
+						"BackgroundTransparency": 1,
+						"Text": "",
+						"TextColor3": [
+							0.682,
+							0.706,
+							0.749
+						],
+						"FontFace": {
+							"Font": {
+								"family": "rbxasset://fonts/families/BuilderSans.json",
+								"weight": "Medium",
+								"style": "Normal"
+							}
+						},
+						"TextSize": 12,
+						"TextXAlignment": "Left",
+						"TextYAlignment": "Center",
+						"TextWrapped": true,
+						"Position": {
+							"UDim2": [
+								[
+									0,
+									52
+								],
+								[
+									0,
+									28
+								]
+							]
+						},
+						"TextTruncate": "AtEnd",
+						"ZIndex": 2
+					}
+				}
+			]
+		}
+	]
+}

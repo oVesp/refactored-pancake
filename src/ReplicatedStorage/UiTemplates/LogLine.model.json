@@ -16,9 +16,9 @@
 		"BackgroundTransparency": 1,
 		"Text": "",
 		"TextColor3": [
-			0.8,
-			0.95,
-			0.8
+			0.651,
+			0.82,
+			0.69
 		],
 		"FontFace": {
 			"Font": {
@@ -27,7 +27,7 @@
 				"style": "Normal"
 			}
 		},
-		"TextSize": 13,
+		"TextSize": 12,
 		"TextXAlignment": "Left",
 		"TextTruncate": "AtEnd"
 	}

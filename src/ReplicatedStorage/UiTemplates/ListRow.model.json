@@ -9,16 +9,16 @@
 				],
 				[
 					0,
-					54
+					58
 				]
 			]
 		},
 		"BackgroundColor3": [
-			0.12,
-			0.11,
-			0.1
+			0.145,
+			0.176,
+			0.227
 		],
-		"BackgroundTransparency": 0.1
+		"BorderSizePixel": 0
 	},
 	"children": [
 		{
@@ -28,9 +28,52 @@
 				"CornerRadius": {
 					"UDim": [
 						0,
-						6
+						3
 					]
 				}
+			}
+		},
+		{
+			"name": "UIStroke",
+			"className": "UIStroke",
+			"properties": {
+				"Color": [
+					0.549,
+					0.471,
+					0.325
+				],
+				"Thickness": 1,
+				"Transparency": 0.3,
+				"ApplyStrokeMode": "Border"
+			}
+		},
+		{
+			"name": "UIGradient",
+			"className": "UIGradient",
+			"properties": {
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									1,
+									1,
+									1
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.6,
+									0.6,
+									0.6
+								]
+							}
+						]
+					}
+				},
+				"Rotation": 0
 			}
 		},
 		{
@@ -40,27 +83,68 @@
 				"PaddingTop": {
 					"UDim": [
 						0,
-						6
-					]
-				},
-				"PaddingBottom": {
-					"UDim": [
-						0,
-						6
-					]
-				},
-				"PaddingLeft": {
-					"UDim": [
-						0,
-						6
+						7
 					]
 				},
 				"PaddingRight": {
 					"UDim": [
 						0,
-						6
+						10
+					]
+				},
+				"PaddingBottom": {
+					"UDim": [
+						0,
+						7
+					]
+				},
+				"PaddingLeft": {
+					"UDim": [
+						0,
+						10
 					]
 				}
+			}
+		},
+		{
+			"name": "Bullet",
+			"className": "Frame",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							0,
+							8
+						],
+						[
+							0,
+							8
+						]
+					]
+				},
+				"Position": {
+					"UDim2": [
+						[
+							0,
+							2
+						],
+						[
+							0,
+							10
+						]
+					]
+				},
+				"AnchorPoint": [
+					0.5,
+					0.5
+				],
+				"Rotation": 45,
+				"BackgroundColor3": [
+					0.824,
+					0.718,
+					0.514
+				],
+				"BorderSizePixel": 0
 			}
 		},
 		{
@@ -71,7 +155,7 @@
 					"UDim2": [
 						[
 							1,
-							-120
+							-136
 						],
 						[
 							0,
@@ -82,21 +166,33 @@
 				"BackgroundTransparency": 1,
 				"Text": "",
 				"TextColor3": [
-					0.95,
-					0.93,
-					0.88
+					0.941,
+					0.867,
+					0.69
 				],
 				"FontFace": {
 					"Font": {
-						"family": "rbxasset://fonts/families/BuilderSans.json",
+						"family": "rbxasset://fonts/families/AccanthisADFStd.json",
 						"weight": "Bold",
 						"style": "Normal"
 					}
 				},
+				"TextSize": 15,
 				"TextXAlignment": "Left",
-				"TextSize": 16,
-				"TextScaled": false,
-				"TextWrapped": true
+				"TextYAlignment": "Center",
+				"TextWrapped": true,
+				"Position": {
+					"UDim2": [
+						[
+							0,
+							16
+						],
+						[
+							0,
+							0
+						]
+					]
+				}
 			}
 		},
 		{
@@ -107,7 +203,7 @@
 					"UDim2": [
 						[
 							1,
-							-120
+							-136
 						],
 						[
 							0,
@@ -118,9 +214,9 @@
 				"BackgroundTransparency": 1,
 				"Text": "",
 				"TextColor3": [
-					0.7,
-					0.68,
-					0.62
+					0.682,
+					0.706,
+					0.749
 				],
 				"FontFace": {
 					"Font": {
@@ -129,23 +225,22 @@
 						"style": "Normal"
 					}
 				},
+				"TextSize": 12,
 				"TextXAlignment": "Left",
-				"TextSize": 13,
-				"TextScaled": false,
+				"TextYAlignment": "Top",
 				"TextWrapped": true,
 				"Position": {
 					"UDim2": [
 						[
 							0,
-							0
+							16
 						],
 						[
 							0,
-							20
+							21
 						]
 					]
-				},
-				"TextYAlignment": "Top"
+				}
 			}
 		},
 		{
@@ -156,7 +251,7 @@
 					"UDim2": [
 						[
 							0,
-							104
+							108
 						],
 						[
 							0,
@@ -165,24 +260,25 @@
 					]
 				},
 				"BackgroundColor3": [
-					0.22,
-					0.18,
-					0.12
+					0.824,
+					0.718,
+					0.514
 				],
+				"BorderSizePixel": 0,
 				"Text": "Learn",
 				"TextColor3": [
-					0.95,
-					0.93,
-					0.88
+					0.106,
+					0.086,
+					0.063
 				],
 				"FontFace": {
 					"Font": {
-						"family": "rbxasset://fonts/families/BuilderSans.json",
+						"family": "rbxasset://fonts/families/AccanthisADFStd.json",
 						"weight": "Bold",
 						"style": "Normal"
 					}
 				},
-				"TextSize": 16,
+				"TextSize": 15,
 				"AutoButtonColor": true,
 				"Position": {
 					"UDim2": [
@@ -209,7 +305,7 @@
 						"CornerRadius": {
 							"UDim": [
 								0,
-								4
+								3
 							]
 						}
 					}
@@ -219,13 +315,42 @@
 					"className": "UIStroke",
 					"properties": {
 						"Color": [
-							0.85,
-							0.72,
-							0.45
+							0.941,
+							0.867,
+							0.69
 						],
 						"Thickness": 1,
-						"Transparency": 0.4,
+						"Transparency": 0.15,
 						"ApplyStrokeMode": "Border"
+					}
+				},
+				{
+					"name": "UIGradient",
+					"className": "UIGradient",
+					"properties": {
+						"Color": {
+							"ColorSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"color": [
+											1,
+											1,
+											1
+										]
+									},
+									{
+										"time": 1.0,
+										"color": [
+											0.68,
+											0.68,
+											0.68
+										]
+									}
+								]
+							}
+						},
+						"Rotation": 90
 					}
 				}
 			]

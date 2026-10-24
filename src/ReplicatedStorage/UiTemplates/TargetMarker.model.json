@@ -5,11 +5,11 @@
 			"UDim2": [
 				[
 					0,
-					36
+					34
 				],
 				[
 					0,
-					36
+					34
 				]
 			]
 		},
@@ -40,11 +40,11 @@
 					]
 				},
 				"BackgroundTransparency": 1,
-				"Text": "▼",
+				"Text": "\u25bc",
 				"TextColor3": [
-					0.95,
-					0.93,
-					0.88
+					0.824,
+					0.718,
+					0.514
 				],
 				"FontFace": {
 					"Font": {
@@ -53,8 +53,17 @@
 						"style": "Normal"
 					}
 				},
-				"TextScaled": true,
-				"TextStrokeTransparency": 0.3
+				"TextSize": 28,
+				"TextXAlignment": "Center",
+				"TextYAlignment": "Center",
+				"TextWrapped": true,
+				"TextStrokeTransparency": 0.1,
+				"TextStrokeColor3": [
+					0.051,
+					0.063,
+					0.086
+				],
+				"TextScaled": true
 			}
 		}
 	]

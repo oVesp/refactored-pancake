@@ -9,13 +9,14 @@ local UserInputService = game:GetService("UserInputService")
 local Constants = require(ReplicatedStorage.Shared.Constants)
 local Signal = require(ReplicatedStorage.Shared.Signal)
 local Targeting = require(ReplicatedStorage.Shared.Targeting)
+local Theme = require(ReplicatedStorage.Shared.Theme)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 
 local ENEMY_TAGS = { "Enemy", "TrainingDummy" }
 local REFRESH_SECONDS = 0.1
 local PICK_RAY = 300
-local SOFT_COLOR = Color3.fromRGB(242, 237, 224)
-local LOCK_COLOR = Color3.fromRGB(255, 80, 60)
+local SOFT_COLOR = Theme.Gold
+local LOCK_COLOR = Theme.HpBright
 
 local Attributes = Constants.Attributes
 local player = Players.LocalPlayer

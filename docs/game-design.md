@@ -361,6 +361,9 @@ UI is **authored with Roblox's own services and objects**, then bound to logic. 
 ### 6.4 Screens needed (core)
 HUD (HP/MP/Focus/XP/hotbar/buffs/minimap), character sheet (classes path), skill/spell book, discipline list, inventory + equipment, item inspector (Capacity bar, Imprint slots), crafting, quest log, map, party/guild, chat, shop/trade, settings, death/respawn, loading/teleport, tutorial prompts, damage numbers, nameplates.
 
+### 6.5 Visual style and floating UI
+Dark-navy panels, gold trim, serif headings; palette, fonts, frame recipes and HUD layout in [art/ui-style.md](art/ui-style.md). UI floats in the world where it can: object interactions show a card beside the object (`ProximityPrompt` with the Custom style drawn by `PromptController`), nameplates and damage numbers are BillboardGuis; personal menus stay centred screen windows.
+
 ---
 
 ## 7. Content curation and pipeline
@@ -512,6 +515,7 @@ Define target concurrency per place, server count per realm, and what happens wh
 | Test automation hook | Dev commands are chat-only | Studio-only `ServerStorage.RunDevCommand` BindableFunction runs the same handlers | Studio MCP cannot send chat from plugin context; the hook is server-side and absent outside Studio |
 | Combat feel | §12.8: prototype tab-hybrid and free-aim in M1 | Hybrid soft target + optional lock replaces pure free-aim (2026-10-24); per-delivery aim rules; no AoE target cap; ranged physical class deferred | Owner decision after targeting research (FFXIV, BDO, TERA, Lost Ark, GW2); one system that works on phone, pad and mouse |
 | Player-facing text | §6.3: all strings through LocalizationTable | M0.5 keeps strings in `Content/Strings` and content names; LocalizationTable deferred to M1 | Single source table makes the later move mechanical |
+| UI look | §6.1: shared Style Editor / StyleSheet | Dark-navy and gold style from the owner's reference (2026-10-24), colours written per element in the `.model.json` files plus `Shared/Theme` for runtime tints; frames built from strokes, gradients and rotated frames instead of uploaded 9-slice art; Accanthis replaces Cinzel (not on Roblox) | StyleSheet rules do not round-trip through hand-authored Rojo JSON yet; procedural frames need no upload or licence and stay sharp at any scale |
 | Skill timing | Real-time action cooldowns per skill; cast speed from Agility | FFXIV-style GCD (2.5 s) / oGCD with animation lock, queue, slidecast and move-cancel replaces per-skill-only timing (2026-10-24); basic attacks and enemies stay off the GCD; only the item affix `Haste` shortens GCD and casts | Owner decision; readable rotation with weaving, gear-driven speed instead of a stat |
 | Roblox PlayerModule bug | Not specified | Studio 0.744 ships `VRBaseCamera` with a `VRbaseCamera` typo that breaks default player scripts; `EngineFixes` swaps in `vendor/PlayerModulePatch` at server start | Temporary; delete both once Roblox ships the fix |
 

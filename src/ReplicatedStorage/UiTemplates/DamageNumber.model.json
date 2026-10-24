@@ -48,16 +48,22 @@
 				],
 				"FontFace": {
 					"Font": {
-						"family": "rbxasset://fonts/families/BuilderSans.json",
+						"family": "rbxasset://fonts/families/AccanthisADFStd.json",
 						"weight": "Bold",
 						"style": "Normal"
 					}
 				},
-				"TextXAlignment": "Center",
 				"TextSize": 16,
-				"TextScaled": true,
+				"TextXAlignment": "Center",
+				"TextYAlignment": "Center",
 				"TextWrapped": true,
-				"TextStrokeTransparency": 0.2
+				"TextStrokeTransparency": 0.15,
+				"TextStrokeColor3": [
+					0.051,
+					0.063,
+					0.086
+				],
+				"TextScaled": true
 			}
 		}
 	]
