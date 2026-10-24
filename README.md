@@ -6,8 +6,8 @@ Roblox action MMORPG. Design: [docs/game-design.md](docs/game-design.md). Curren
 
 ```sh
 rokit install
-git config core.hooksPath .githooks
 git lfs install --local
+git config core.hooksPath .githooks
 ```
 
 The source scan needs the forbidden-terms list outside the repo at `~/.yggdrasil/forbidden-terms.txt` (or `$YGG_FORBIDDEN_TERMS`). Ask the content reviewer for it.

@@ -292,7 +292,7 @@ Rules from day one:
 
 | Rule | Detail |
 |---|---|
-| Repository | Git, initialized at M0. `main` is always buildable. After cloning: `rokit install`, `git config core.hooksPath .githooks`, `git lfs install --local`. |
+| Repository | Git, initialized at M0. `main` is always buildable. After cloning: `rokit install`, `git lfs install --local`, `git config core.hooksPath .githooks`. |
 | Branching | Short-lived `feat/…`, `fix/…`, `content/…`, `chore/…` branches off `main`; squash or rebase merge; no long-lived feature branches. |
 | Commit unit | One logical change per commit: a feature slice, a fix, a content batch, a refactor. Never mix refactor + behavior change, or code + unrelated content. |
 | Trigger | Automatic after a unit passes its gate: format, lint, typecheck, tests, `rojo build`, content validators. A failing gate means no commit and a reported failure. |
@@ -496,6 +496,8 @@ Define target concurrency per place, server count per realm, and what happens wh
 | Spell picks at M0.5 | 3 spells per caster level (§3.2) | 1 pick per level in M0.5 (`SPELL_PICKS_PER_LEVEL`) | 3 picks would need ≥15 Circle 0–1 spells per class for a placeholder place |
 | Circle pacing | Research estimate: levels 1–5 reach tier 2 | Circle 2 unlocks at casting-line level 6 | Owner wants Circle 2 later; keeps low levels readable |
 | Public-domain names | Old §2 asked for Norse-neutral realm labels | Myth/folklore names allowed (Midgard first); source pairings and coinages still forbidden | Owner decision; myth predates the series |
+| Unit tests | §5.1 named TestEZ or Jest-Lua | Lune unit tests for pure modules; Studio playtests for integration | Runs in CI and pre-commit without Studio |
+| Toolchain manager | Not specified | Rokit pins every tool, including luau-lsp; Roblox type definitions pinned to the same luau-lsp tag | Reproducible gate on every machine |
 
 ---
 
