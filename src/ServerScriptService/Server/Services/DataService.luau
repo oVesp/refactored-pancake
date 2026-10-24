@@ -4,8 +4,8 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Items = require(ReplicatedStorage.Content.Items)
 local Logger = require(ReplicatedStorage.Shared.Logger)
-local NetServer = require(ReplicatedStorage.Shared.Net.Server)
 local Profile = require(script.Parent.Parent.Data.Profile)
 local Signal = require(ReplicatedStorage.Shared.Signal)
 
@@ -34,7 +34,7 @@ local function resumeWaiting(player: Player)
 end
 
 local function load(player: Player)
-	profiles[player] = Profile.Migrate(Profile.new())
+	profiles[player] = Profile.Migrate(Profile.new(Items.Starter))
 	log:Debug("Loaded profile for %d", player.UserId)
 	resumeWaiting(player)
 end
@@ -87,14 +87,7 @@ function DataService.Release(player: Player)
 	resumeWaiting(player)
 end
 
-function DataService.Init(_deps: { [string]: any })
-	NetServer.Connect("RequestProfile", function(player: Player)
-		local profile = profiles[player]
-		if profile then
-			NetServer.Fire("SendProfileSnapshot", player, table.clone(profile))
-		end
-	end)
-end
+function DataService.Init(_deps: { [string]: any }) end
 
 function DataService.Start()
 	Players.PlayerAdded:Connect(load)

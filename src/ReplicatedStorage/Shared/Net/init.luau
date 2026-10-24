@@ -15,8 +15,31 @@ export type RemoteSpec = {
 	validate: ((...any) -> boolean)?,
 }
 
-local function noArguments(...: any): boolean
-	return select("#", ...) == 0
+local MAX_ID_LENGTH = 40
+local MAX_COORDINATE = 1e5
+
+local function isId(value: any): boolean
+	return type(value) == "string" and #value > 0 and #value <= MAX_ID_LENGTH and string.match(value, "^[%w_]+$") ~= nil
+end
+
+local function isFiniteVector(value: any): boolean
+	if typeof(value) ~= "Vector3" then
+		return false
+	end
+	for _, axis in { value.X, value.Y, value.Z } do
+		if axis ~= axis or math.abs(axis) > MAX_COORDINATE then
+			return false
+		end
+	end
+	return true
+end
+
+local function isCount(value: any): boolean
+	return type(value) == "number" and value == value and value >= 0 and value < 2 ^ 31 and value % 1 == 0
+end
+
+local function arity(n: number, ...: any): boolean
+	return select("#", ...) == n
 end
 
 --[=[
@@ -27,11 +50,77 @@ local Remotes: { [string]: RemoteSpec } = {
 	RequestProfile = {
 		direction = "ClientToServer",
 		rateLimit = { capacity = 3, perSecond = 0.5 },
-		validate = noArguments,
+		validate = function(...)
+			return arity(0, ...)
+		end,
 	},
-	SendProfileSnapshot = {
-		direction = "ServerToClient",
+	UseSkill = {
+		direction = "ClientToServer",
+		rateLimit = { capacity = 10, perSecond = 8 },
+		validate = function(...)
+			local skillId, aim, seq = ...
+			return arity(3, ...) and isId(skillId) and isFiniteVector(aim) and isCount(seq)
+		end,
 	},
+	SetGuard = {
+		direction = "ClientToServer",
+		rateLimit = { capacity = 6, perSecond = 4 },
+		validate = function(...)
+			return arity(1, ...) and type((...)) == "boolean"
+		end,
+	},
+	Dodge = {
+		direction = "ClientToServer",
+		rateLimit = { capacity = 3, perSecond = 2 },
+		validate = function(...)
+			local direction, seq = ...
+			return arity(2, ...) and isFiniteVector(direction) and isCount(seq)
+		end,
+	},
+	ToggleDiscipline = {
+		direction = "ClientToServer",
+		rateLimit = { capacity = 6, perSecond = 3 },
+		validate = function(...)
+			return arity(1, ...) and isId((...))
+		end,
+	},
+	LearnSpell = {
+		direction = "ClientToServer",
+		rateLimit = { capacity = 6, perSecond = 3 },
+		validate = function(...)
+			return arity(1, ...) and isId((...))
+		end,
+	},
+	EquipItem = {
+		direction = "ClientToServer",
+		rateLimit = { capacity = 6, perSecond = 3 },
+		validate = function(...)
+			return arity(1, ...) and isCount((...))
+		end,
+	},
+	UnequipSlot = {
+		direction = "ClientToServer",
+		rateLimit = { capacity = 6, perSecond = 3 },
+		validate = function(...)
+			return arity(1, ...) and isId((...))
+		end,
+	},
+	UseItem = {
+		direction = "ClientToServer",
+		rateLimit = { capacity = 6, perSecond = 3 },
+		validate = function(...)
+			return arity(1, ...) and isCount((...))
+		end,
+	},
+
+	SendProfileSnapshot = { direction = "ServerToClient" },
+	RejectSkill = { direction = "ServerToClient" },
+	ShowCast = { direction = "ServerToClient" },
+	ShowImpact = { direction = "ServerToClient" },
+	ShowDamage = { direction = "ServerToClient" },
+	Notify = { direction = "ServerToClient" },
+	SendDeathState = { direction = "ServerToClient" },
+	SendDevLog = { direction = "ServerToClient" },
 }
 
 for name, spec in Remotes do

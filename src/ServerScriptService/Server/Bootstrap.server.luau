@@ -15,7 +15,18 @@ type Service = {
 -- Order matters: each service receives the services listed before it as `deps` in Init.
 local SERVICE_ORDER = {
 	"DataService",
+	"ZoneService",
+	"EntityService",
 	"StatService",
+	"StatusService",
+	"CombatService",
+	"SkillService",
+	"DisciplineService",
+	"InventoryService",
+	"ProgressionService",
+	"AIService",
+	"SpawnService",
+	"DevService",
 }
 
 local log = Logger.new("Bootstrap")

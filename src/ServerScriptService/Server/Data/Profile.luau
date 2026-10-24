@@ -5,12 +5,25 @@ export type ClassEntry = {
 	level: number,
 }
 
+export type ItemStack = {
+	uid: number,
+	id: string,
+	count: number,
+}
+
 export type Profile = {
 	schemaVersion: number,
 	heritage: string,
 	--[=[ Build path: classes in the order they were taken (game-design.md 3.1). ]=]
 	classes: { ClassEntry },
 	xp: number,
+	xpDebt: number,
+	spells: { string },
+	disciplines: { string },
+	inventory: { ItemStack },
+	--[=[ Slot name -> item uid. ]=]
+	equipment: { [string]: number },
+	nextUid: number,
 }
 
 local SCHEMA_VERSION = 1
@@ -19,14 +32,28 @@ local Profile = {}
 
 Profile.SchemaVersion = SCHEMA_VERSION
 
---[=[ Returns a fresh profile for a new character. Persistent state only; no session data. ]=]
-function Profile.new(): Profile
-	return {
+--[=[
+	Returns a fresh profile for a new character, holding `starter` items. Persistent state only;
+	no session data.
+]=]
+function Profile.new(starter: { { id: string, count: number } }?): Profile
+	local profile: Profile = {
 		schemaVersion = SCHEMA_VERSION,
 		heritage = "Human",
 		classes = {},
 		xp = 0,
+		xpDebt = 0,
+		spells = {},
+		disciplines = {},
+		inventory = {},
+		equipment = {},
+		nextUid = 1,
 	}
+	for _, entry in (starter or {}) :: { { id: string, count: number } } do
+		table.insert(profile.inventory, { uid = profile.nextUid, id = entry.id, count = entry.count })
+		profile.nextUid += 1
+	end
+	return profile
 end
 
 --[=[
@@ -77,6 +104,59 @@ end
 ]=]
 function Profile.IsSerializable(value: any): (boolean, string?)
 	return check(value, "profile", {})
+end
+
+--[=[ Finds an inventory stack by uid. ]=]
+function Profile.FindStack(profile: Profile, uid: number): (ItemStack?, number?)
+	for index, stack in profile.inventory do
+		if stack.uid == uid then
+			return stack, index
+		end
+	end
+	return nil, nil
+end
+
+--[=[
+	Adds `count` of an item, filling existing stacks up to `stackSize` first. Returns how many
+	could not fit because the inventory is full.
+]=]
+function Profile.AddItem(profile: Profile, itemId: string, count: number, stackSize: number, capacity: number): number
+	local remaining = count
+	for _, stack in profile.inventory do
+		if remaining <= 0 then
+			break
+		end
+		if stack.id == itemId and stack.count < stackSize then
+			local add = math.min(stackSize - stack.count, remaining)
+			stack.count += add
+			remaining -= add
+		end
+	end
+	while remaining > 0 and #profile.inventory < capacity do
+		local add = math.min(stackSize, remaining)
+		table.insert(profile.inventory, { uid = profile.nextUid, id = itemId, count = add })
+		profile.nextUid += 1
+		remaining -= add
+	end
+	return remaining
+end
+
+--[=[ Removes one item from a stack, dropping the stack when empty and clearing equipment that pointed at it. ]=]
+function Profile.ConsumeOne(profile: Profile, uid: number): boolean
+	local stack, index = Profile.FindStack(profile, uid)
+	if not stack or not index then
+		return false
+	end
+	stack.count -= 1
+	if stack.count <= 0 then
+		table.remove(profile.inventory, index)
+		for slot, equipped in profile.equipment do
+			if equipped == uid then
+				profile.equipment[slot] = nil
+			end
+		end
+	end
+	return true
 end
 
 return Profile
