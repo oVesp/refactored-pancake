@@ -1,0 +1,30 @@
+# Build output and generated files
+/build/
+sourcemap.json
+*.rbxl
+*.rbxlx
+*.rbxl.lock
+*.rbxlx.lock
+
+# Wally output
+/Packages/
+/ServerPackages/
+/DevPackages/
+
+# Tool caches
+/.cache/
+
+# Secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Blender autosaves
+*.blend1
+*.blend@
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+desktop.ini

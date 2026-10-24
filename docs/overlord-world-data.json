@@ -1,0 +1,41 @@
+{
+  "_note": "Spoiler cutoff: Vol 8. Confidence: C=confirmed in fetched source, K=recalled, ~=heuristic. See overlord-world-compendium.md",
+  "game": {
+    "name": "Yggdrasil", "launch": 2126, "run_years": 12, "levelCap": 100,
+    "worlds": ["Asgard","Alfheim","Vanaheim","Nidavellir","Midgard","Jotunheim","Niflheim","Helheim","Muspelheim"],
+    "raceCount": 700, "classCount": 2000,
+    "raceCategories": ["Human","Demi-Human","Heteromorph"],
+    "classTiers": {"base": 15, "high": 10, "rare": 5},
+    "minClassesFor100": 7,
+    "stats": ["HP","MP","PhysAtk","PhysDef","Agility","MagAtk","MagDef","Resistance","SpecialAbility"],
+    "death": {"levelLoss": 5, "dropEquipment": 1, "deleteAtOrBelowLevel": 5, "playerProtectedToLevel1": true},
+    "magic": {"tiers": 10, "superTier": {"minLevel": 70, "castsPerDayMax": 4}, "totalSpells": 6000, "typicalL100Spells": 300, "branches": ["arcane","divine","spiritual"]},
+    "items": {
+      "grades": ["Low","Middle","High","Top","Rare","Legacy","Relic","Legendary","Artifact","World-Class"],
+      "gradeOrderConfidence": "approximate",
+      "gradeBasis": "data capacity",
+      "worldItems": 200, "theTwenty": 20,
+      "guildWeapon": "separate category; destroyed = guild collapses",
+      "ringsPerHand": 1
+    },
+    "guild": {"castleNpcLevelBudgetMin": 700, "npcLevelMax": 100, "npcsBoundToBase": true, "friendlyFire": false},
+    "rules": ["undead immune to mental effects","buff/debuff icons visible","World Champion: 9 titles, one per world"]
+  },
+  "newWorld": {
+    "magicBenchmarks": {"commoner": 2, "elite": 3, "nationBest": 5, "humanMax": 6, "summonedAngelsSunlight": 7},
+    "heroClassFromLevel": 30, "humanTalentEffortCap": 29,
+    "adventurerRanks": ["Copper","Iron","Silver","Gold","Platinum","Mithril","Orichalcum","Adamantite"],
+    "crFormula": "totalLevels/4 (Pathfinder conversion)",
+    "nations": [
+      {"id":"re_estize","name":"Re-Estize Kingdom","type":"monarchy"},
+      {"id":"baharuth","name":"Baharuth Empire","type":"absolute monarchy","ruler":"Jircniv Rune Farlord El-Nix"},
+      {"id":"slane","name":"Slane Theocracy","type":"theocracy","military":"Six Scriptures"},
+      {"id":"lizardmen","name":"Lizardman tribes","type":"tribal"}
+    ]
+  },
+  "volumes": [
+    {"n":1,"title":"The Undead King"},{"n":2,"title":"The Dark Warrior"},{"n":3,"title":"The Bloody Valkyrie"},
+    {"n":4,"title":"The Lizardman Heroes"},{"n":5,"title":"The Men of the Kingdom Part I"},{"n":6,"title":"The Men of the Kingdom Part II"},
+    {"n":7,"title":"The Invaders of the Great Tomb"},{"n":8,"title":"The Two Leaders"}
+  ]
+}

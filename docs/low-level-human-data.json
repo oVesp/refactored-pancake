@@ -1,0 +1,65 @@
+{
+  "_note": "Spoiler cutoff Vol 8. src: C=confirmed wiki, K=recalled, proposal=design placeholder. See low-level-human-design.md",
+  "human": {
+    "racialLevels": 0,
+    "levelsGoTo": "job classes",
+    "classCap": {"base": 15, "high": 10, "rare": 5},
+    "spellsPerCasterLevel": 3,
+    "spellTierCeilingBy": "levels in one compatible casting line, not total level",
+    "genius": "slightly more spells, never very strong",
+    "deathAtLevel5OrBelow": "player reset to level 1 (canon: character deleted unless player-protected)",
+    "stats": ["HP","MP","PhysAtk","PhysDef","Agility","MagAtk","MagDef","Resistance","Special"]
+  },
+  "buildTemplates": [
+    {"id":"specialist","layout":[5]},
+    {"id":"duo","layout":[3,2]},
+    {"id":"dabbler","layout":[2,1,1,1]}
+  ],
+  "lowStatProposal": {
+    "src": "proposal",
+    "level1": {"HP":[8,12],"MP":[0,6],"PhysAtk":[4,8],"MagAtk":[0,8],"Agility":[4,8]},
+    "level5": {"HP":[25,45],"MP":[0,30],"PhysAtk":[10,20],"MagAtk":[0,20],"Agility":[8,18]}
+  },
+  "classes": {
+    "warrior": ["Fighter","Archer","Barbarian","Monk","Mercenary","Fencer","Knight","Guardian"],
+    "thief": ["Rogue","Ranger","Assassin","Forest Stalker","Bushwhacker"],
+    "magic": ["Wizard","Sorcerer","Cleric","Priest","Druid","Alchemist","Pharmacist","Bard","Illusionist","Necromancer","Elementalist","Shaman"],
+    "production": ["Blacksmith","Armor Smith","Weapon Smith","Cook","Farmer","Sage","Merchant","Doctor","Craftsman"],
+    "commander": ["Sergeant","Commander","Squire","Noble","Actor","Maid"],
+    "notStarters": ["Champion","Paladin","Sword Master","Sword Saint","Ki Master","Martial Lord","Eclipse","High Wizard","Ninja(lvl60+)"],
+    "classSkillsCanon": {"Monk": ["Iron Natural Weapon","Iron Skin","Resistance Massive"]}
+  },
+  "magic": {
+    "tier0": ["Lifestyle Magic (costs as tier 1)"],
+    "tier1": ["Magic Arrow","Light Healing","Create Water","Destruction Water","Anti-Evil Protection","Floating Board","Compass","Clean","Odorless","Rabbit Ears","Rabbit Foot","Bunny Tail","Lesser Mind Protection","Summon Monster 1st","Summon Undead 1st"],
+    "tier1WebNovelOnly": ["Camouflage","Quick March","Repair","Sleep"],
+    "tier2": ["Acid Arrow","Thunderlance","Shock Wave","Silence","Invisibility","Hawk Eye","Lesser Strength","Lesser Dexterity","Mass Compass","Protection Energy - Negative","Temperature Change","Message","Cure Disease","Summon Angel 2nd"],
+    "growthReference": {"tier3":["Fireball","Lightning","Fly","Haste","Slow","Animate Dead"],"tier5":["Raise Dead","Teleportation"],"resurrection":{"Raise Dead":5,"Resurrection":7,"TrueResurrection":9}},
+    "nativeHumanCasterTierCap": 3
+  },
+  "martialArts": {
+    "focusFormulaProposal": "2 + floor(level/7); +1 emergency",
+    "costProposal": {"basic":1,"greater":2,"signatureChain":3},
+    "gazefSimultaneous": {"normal": 6, "extreme": 7},
+    "learnTimeNovice": "about 1 year",
+    "learnMethods": ["training with sparring partner","real battle","fighting stronger foes","facing killing intent","copying another user","genius learns above level","Talent: Increase in Focus Capacity"],
+    "tierA": ["Ability Boost","Body Strengthening","Reinforce Defense","Reinforce Hide","Evasion","Strengthen Perception","Strong Strike","Heavy Blow","Smash","Slashing Strike","Piercing Strike","Front Cut","Vertical Strike","Oblique Strike","Iron Fist","Dull Pain","Pace of the Wind","Air Slash","Cutting Edge","Shield Bash","Strong Assault"],
+    "tierB": ["Greater Ability Boost","Greater Evasion","Greater Reinforce Defense","Fortress","Flow Acceleration","Focus Battle Aura","Magical Weapon Enchantment","Instant Counter","Possibility Sense","Sense Weakness","Double Air Slash","Piercing Dragon Tusk","Fatal Edge","Fourfold Slash of Light"],
+    "tierC": ["Field","Sixfold Slash of Light","Limit Breaker: Mind"],
+    "playersCanLearn": false
+  },
+  "talents": {
+    "rate": "1 in 200",
+    "fixedAtBirth": true,
+    "list": ["Increase in Focus Capacity","Magic Item Affinity","Spell Copy","Psychometry","Intuition","Enhanced Summoned Monster","Magic Talent","All-Seeing Eyes","Float","Water Step","Meteorologist","Harvest Speed-Up"]
+  },
+  "gear": {
+    "grade": "Low class at best at level 1-5",
+    "weapons": ["Short Sword","Broadsword","Great Sword","Rapier","Scimitar","Falchion","Claymore","Katana","Kukri","Combat Knife","Long Spear","Morningstar","Sling","Composite Bow","Crossbow","Hammer Axe"],
+    "armor": ["Scale Mail","Banded Armor","Tower Shield"],
+    "magic": ["Ring of Protection","Ring of Deflection","Ring of Resistance","Boots of Silence","Belt of Constitution","Amulet of Health","Gauntlets of Strength","Gauntlets of Endurance"],
+    "consumables": ["Minor Healing Potion","Blue Potion","Potion of Lesser Strength","Potion of Lesser Dexterity","Stamina Potion","Magic Weapon Oil"],
+    "scrollRule": "needs mastery of the matching magic system unless a Talent bypasses it"
+  },
+  "nativeLevelReference": {"commoner":[1,3],"guardOrCopper":[5,10],"humanCapTalentPlusEffort":29}
+}
