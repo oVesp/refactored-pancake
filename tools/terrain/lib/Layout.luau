@@ -9,11 +9,13 @@ export type Rect = { name: string, cx: number, cz: number, hx: number, hz: numbe
 export type Point = { x: number, z: number }
 
 export type Layout = {
-	pads: { Rect }, -- flat ground at height 0 under the greybox slabs
+	pads: { Rect }, -- flat gameplay ground (the Map zones), terrain held at padHeight
 	blockers: { Rect }, -- footprints of greybox props: no scatter
 	lake: { cx: number, cz: number, radius: number },
 	creek: { Point },
 	padDistance: (x: number, z: number) -> number,
+	padAt: (x: number, z: number) -> string?, -- name of the pad containing the point
+	roadDistance: (x: number, z: number) -> number,
 	blockerDistance: (x: number, z: number) -> number,
 	creekDistance: (x: number, z: number) -> (number, number), -- distance, arc length at nearest point
 	creekLength: number,
@@ -40,11 +42,18 @@ end
 	Builds the layout. `map` is the deserialized greybox Map model (or nil in tests, which pass
 	their own pads).
 ]=]
-function Layout.build(seed: number, map: any?, overridePads: { Rect }?): Layout
+local function segmentDistance(x: number, z: number, ax: number, az: number, bx: number, bz: number): number
+	local abx, abz = bx - ax, bz - az
+	local len2 = math.max(abx * abx + abz * abz, 1e-6)
+	local t = math.clamp(((x - ax) * abx + (z - az) * abz) / len2, 0, 1)
+	return math.sqrt((x - ax - abx * t) ^ 2 + (z - az - abz * t) ^ 2)
+end
+
+function Layout.build(seed: number, map: any?, overridePads: { Rect }?, roads: { { number } }?): Layout
 	local pads: { Rect } = overridePads or {}
 	local blockers: { Rect } = {}
 	if map then
-		for _, part in map:FindFirstChild("Ground"):GetChildren() do
+		for _, part in map:FindFirstChild("Zones"):GetChildren() do
 			local p = part.CFrame.Position
 			table.insert(pads, { name = part.Name, cx = p.X, cz = p.Z, hx = part.Size.X / 2, hz = part.Size.Z / 2 })
 		end
@@ -139,6 +148,21 @@ function Layout.build(seed: number, map: any?, overridePads: { Rect }?): Layout
 		creek = creek,
 		padDistance = function(x: number, z: number): number
 			return nearest(pads, x, z)
+		end,
+		padAt = function(x: number, z: number): string?
+			for _, r in pads do
+				if math.abs(x - r.cx) <= r.hx and math.abs(z - r.cz) <= r.hz then
+					return r.name
+				end
+			end
+			return nil
+		end,
+		roadDistance = function(x: number, z: number): number
+			local best = math.huge
+			for _, r in roads or {} do
+				best = math.min(best, segmentDistance(x, z, r[1], r[2], r[3], r[4]))
+			end
+			return best
 		end,
 		blockerDistance = function(x: number, z: number): number
 			return nearest(blockers, x, z)

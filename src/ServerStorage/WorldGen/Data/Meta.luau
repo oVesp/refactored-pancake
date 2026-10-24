@@ -1030,27 +1030,27 @@ return {
 			name = "Paths",
 		},
 		{
-			count = 2321,
+			count = 4444,
 			module = "ScatterTrees",
 			name = "Trees",
 		},
 		{
-			count = 1668,
+			count = 3011,
 			module = "ScatterRocks",
 			name = "Rocks",
 		},
 		{
-			count = 1026,
+			count = 4135,
 			module = "ScatterUnderstory",
 			name = "Understory",
 		},
 		{
-			count = 3425,
+			count = 4273,
 			module = "ScatterCover",
 			name = "Cover",
 		},
 		{
-			count = 1980,
+			count = 3554,
 			module = "ScatterPebbles",
 			name = "Pebbles",
 		},

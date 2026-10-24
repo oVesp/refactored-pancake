@@ -67,43 +67,44 @@ local function concat(...: { string }): { string }
 	return out
 end
 
--- Footprint radii are about 40% of each model's largest horizontal extent in the pack.
+-- Footprint radii are about 40% of each model's largest horizontal extent in the pack (at scale 1).
+-- Scales follow the reference look the owner shared (2026-10-24): canopy trees about 2x pack size.
 local GROUPS: { [string]: GroupDef } = {
 	HeroTree = {
 		layer = "Trees",
 		collide = "trunk",
 		shadow = true,
-		assets = assets(numbered("F1_Tree", 1, 4), 20, { 0.85, 1.15 }, 0, 0.04, 15),
+		assets = assets(numbered("F1_Tree", 1, 4), 20, { 1.0, 1.45 }, 0, 0.04, 15),
 	},
 	CommonTree = {
 		layer = "Trees",
 		collide = "trunk",
 		shadow = true,
-		assets = assets(numbered("CommonTree_", 1, 5), 7.5, { 0.8, 1.2 }, 0.05, 0.03, 25),
+		assets = assets(numbered("CommonTree_", 1, 5), 7.5, { 1.4, 2.3 }, 0.05, 0.03, 25),
 	},
 	Pine = {
 		layer = "Trees",
 		collide = "trunk",
 		shadow = true,
-		assets = assets(numbered("Pine_", 1, 5), 8.5, { 0.8, 1.3 }, 0, 0.03, 35),
+		assets = assets(numbered("Pine_", 1, 5), 8.5, { 1.3, 2.1 }, 0, 0.03, 35),
 	},
 	TwistedTree = {
 		layer = "Trees",
 		collide = "trunk",
 		shadow = true,
-		assets = assets(numbered("TwistedTree_", 1, 5), 10, { 0.8, 1.2 }, 0.15, 0.03, 40),
+		assets = assets(numbered("TwistedTree_", 1, 5), 10, { 1.4, 2.6 }, 0.15, 0.03, 40),
 	},
 	DeadTree = {
 		layer = "Trees",
 		collide = "trunk",
 		shadow = true,
-		assets = assets(numbered("DeadTree_", 1, 5), 8, { 0.9, 1.2 }, 0.1, 0.03, 35),
+		assets = assets(numbered("DeadTree_", 1, 5), 8, { 1.2, 1.8 }, 0.1, 0.03, 35),
 	},
 	Rock = {
 		layer = "Rocks",
 		collide = "all",
 		shadow = true,
-		assets = assets(numbered("Rock_Medium_", 1, 3), 5, { 0.6, 1.6 }, 0.7, 0.18, 45),
+		assets = assets(numbered("Rock_Medium_", 1, 3), 5, { 1.0, 2.6 }, 0.7, 0.18, 45),
 	},
 	Bush = {
 		layer = "Understory",
@@ -112,7 +113,7 @@ local GROUPS: { [string]: GroupDef } = {
 		assets = assets(
 			{ "F1_BushLow", "F1_BushMid", "F1_BushHigh", "Bush_Common", "Bush_Common_Flowers" },
 			4,
-			{ 0.7, 1.2 },
+			{ 1.1, 1.8 },
 			0.5,
 			0.08,
 			30
@@ -125,7 +126,7 @@ local GROUPS: { [string]: GroupDef } = {
 		assets = assets(
 			{ "Fern_1", "Plant_1", "Plant_1_Big", "Plant_7", "Plant_7_Big", "Mushroom_Common" },
 			2,
-			{ 0.6, 1.2 },
+			{ 1.0, 1.8 },
 			0.8,
 			0.05,
 			25
@@ -143,7 +144,7 @@ local GROUPS: { [string]: GroupDef } = {
 			"Grass_Common_Tall",
 			"Grass_Wispy_Short",
 			"Grass_Wispy_Tall",
-		}, 1.5, { 0.7, 1.3 }, 1, 0.05, 30),
+		}, 1.5, { 1.2, 2.0 }, 1, 0.05, 30),
 	},
 	Flower = {
 		layer = "Cover",
@@ -158,7 +159,7 @@ local GROUPS: { [string]: GroupDef } = {
 				{ "Clover_1", "Clover_2" }
 			),
 			1.5,
-			{ 0.7, 1.3 },
+			{ 1.0, 1.6 },
 			1,
 			0.05,
 			20
@@ -176,7 +177,7 @@ local GROUPS: { [string]: GroupDef } = {
 				numbered("Misc_Folliage.", 1, 27)
 			),
 			1.5,
-			{ 0.7, 1.3 },
+			{ 1.2, 2.0 },
 			1,
 			0.05,
 			35
@@ -219,12 +220,12 @@ local BIOMES: { BiomeDef } = {
 	{
 		id = 1,
 		name = "Meadow",
-		trees = 0.02,
-		treeWeights = { HeroTree = 0.6, CommonTree = 0.4 },
-		understory = { 0, 1 },
+		trees = 0.12,
+		treeWeights = { HeroTree = 0.35, TwistedTree = 0.45, CommonTree = 0.2 },
+		understory = { 0, 2 },
 		understoryWeights = { Bush = 1 },
-		rocks = 0.02,
-		cover = 0.1,
+		rocks = 0.25,
+		cover = 0.12,
 		coverWeights = { Grass = 0.55, Flower = 0.45 },
 	},
 	{
@@ -241,55 +242,55 @@ local BIOMES: { BiomeDef } = {
 	{
 		id = 3,
 		name = "MixedForest",
-		trees = 1.2,
-		treeWeights = { CommonTree = 0.5, HeroTree = 0.12, Pine = 0.25, DeadTree = 0.05, TwistedTree = 0.08 },
+		trees = 3.4,
+		treeWeights = { TwistedTree = 0.5, CommonTree = 0.3, HeroTree = 0.06, Pine = 0.1, DeadTree = 0.04 },
 		understory = { 1, 3 },
 		understoryWeights = { Bush = 0.55, Shade = 0.45 },
-		rocks = 0.05,
-		cover = 0.07,
+		rocks = 0.3,
+		cover = 0.09,
 		coverWeights = { Foliage = 0.7, Grass = 0.2, Flower = 0.1 },
 	},
 	{
 		id = 4,
 		name = "PineForest",
-		trees = 1.4,
+		trees = 3.0,
 		treeWeights = { Pine = 0.85, DeadTree = 0.08, TwistedTree = 0.07 },
 		understory = { 0, 2 },
 		understoryWeights = { Shade = 0.6, Bush = 0.4 },
-		rocks = 0.1,
+		rocks = 0.35,
 		cover = 0.04,
 		coverWeights = { Foliage = 0.8, Grass = 0.2 },
 	},
 	{
 		id = 5,
 		name = "WetForest",
-		trees = 1.0,
-		treeWeights = { Pine = 0.45, CommonTree = 0.4, DeadTree = 0.1, HeroTree = 0.05 },
+		trees = 2.6,
+		treeWeights = { TwistedTree = 0.35, CommonTree = 0.3, Pine = 0.25, DeadTree = 0.1 },
 		understory = { 2, 4 },
 		understoryWeights = { Shade = 0.8, Bush = 0.2 },
-		rocks = 0.05,
+		rocks = 0.2,
 		cover = 0.09,
 		coverWeights = { Foliage = 0.6, Grass = 0.4 },
 	},
 	{
 		id = 6,
 		name = "Bog",
-		trees = 0.08,
+		trees = 0.15,
 		treeWeights = { DeadTree = 0.7, Pine = 0.3 },
 		understory = { 1, 3 },
 		understoryWeights = { Shade = 1 },
-		rocks = 0.01,
+		rocks = 0.05,
 		cover = 0.12,
 		coverWeights = { Grass = 0.8, Foliage = 0.2 },
 	},
 	{
 		id = 7,
 		name = "Ridge",
-		trees = 0.15,
+		trees = 0.25,
 		treeWeights = { TwistedTree = 0.6, Pine = 0.25, DeadTree = 0.15 },
 		understory = { 0, 1 },
 		understoryWeights = { Bush = 1 },
-		rocks = 0.4,
+		rocks = 0.6,
 		cover = 0.02,
 		coverWeights = { Grass = 1 },
 	},
@@ -319,6 +320,19 @@ return table.freeze({
 	originZ = -1360,
 	floorY = -80, -- terrain is filled down to here (streaming drops features thinner than 64 studs)
 	waterLevel = -3, -- lake surface
+	padHeight = 0.2, -- ground level of the Map zones (tools/world/build.luau G)
+	-- Terrain material under each Map zone, by zone part name.
+	padMaterials = {
+		VillageCore = "Grass",
+		DevYard = "Pavement",
+		WheatFields = "Grass",
+		OrchardEdge = "LeafyGrass",
+		GoblinCamp = "Mud",
+	},
+	-- Dirt roads painted into the terrain: x0, z0, x1, z1, half-width.
+	roads = {
+		{ 0, -80, 0, -770, 8 },
+	},
 
 	heightfield = {
 		valleyNear = 40, -- distance from pads where hills start rising
@@ -365,7 +379,7 @@ return table.freeze({
 
 	paths = {
 		maxGradeDeg = 20,
-		halfWidth = 4,
+		halfWidth = 5,
 		feather = 6,
 		slopeCost = 12,
 		waterCost = 40,
@@ -376,7 +390,9 @@ return table.freeze({
 
 	scatter = {
 		treeSampleRadius = 9, -- Poisson radius for canopy candidates
-		rockSampleRadius = 14,
+		rockSampleRadius = 12,
+		canopyOverlap = 0.45, -- tree spacing as a share of summed footprint radii; crowns may interlock
+		trunkClearance = 0.3, -- understory and cover keep this share of a tree or rock footprint clear
 		coverCell = 6,
 		padMargin = 6, -- keep props this far from gameplay pads and greybox parts
 		maxCover = 9000,

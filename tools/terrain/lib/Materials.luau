@@ -21,6 +21,14 @@ function Materials.classify(cfg: any, layout: any, maps: any, water: any, extra:
 	local biome = buffer.create(n * n)
 	local material = buffer.create(n * n)
 	local threshold = cfg.water.riverThreshold
+	local roadHalfWidth = 0
+	for _, r in cfg.roads do
+		roadHalfWidth = math.max(roadHalfWidth, r[5])
+	end
+	local edgeAt = Noise.fbm(Noise.layerSeed(cfg.seed, "roadEdge"), 24, 2, 2, 0.5)
+	local function roadWidth(x: number, z: number): number
+		return roadHalfWidth + edgeAt(x, z) * 2.5
+	end
 	local margin = cfg.scatter.padMargin
 
 	for j = 0, n - 1 do
@@ -41,9 +49,14 @@ function Materials.classify(cfg: any, layout: any, maps: any, water: any, extra:
 			local poi = Grid.get(extra.poiMask, i, j)
 			local jit = jitterAt(x, z)
 			local dither = Noise.hash01(seed, i, j) - 0.5
+			local road = layout.roadDistance(x, z) - roadWidth(x, z) - dither * 2
+			-- Pad materials end on a ragged line so zones do not read as rectangles.
+			local pad = if dp <= margin
+				then layout.padAt(x + edgeAt(x, z + 300) * 14, z + edgeAt(x + 300, z) * 14)
+				else nil
 
 			local b
-			if dp <= margin or wet or onPath or poi > 0 then
+			if dp <= margin or wet or onPath or poi > 0 or road < margin then
 				b = 0
 			elseif slope + dither * 6 > 32 + 4 * jit or h > 200 + 20 * jit then
 				b = 7
@@ -58,7 +71,7 @@ function Materials.classify(cfg: any, layout: any, maps: any, water: any, extra:
 				b = 5
 			elseif h > 105 + 25 * jit or z < -880 + 60 * jit then
 				b = 4
-			elseif dp < 170 + 50 * jit then
+			elseif dp < 90 + 40 * jit then
 				b = 1
 			else
 				b = 3
@@ -66,8 +79,10 @@ function Materials.classify(cfg: any, layout: any, maps: any, water: any, extra:
 			buffer.writeu8(biome, k, b)
 
 			local m
-			if onPath then
+			if onPath or road < 0 then
 				m = "Ground"
+			elseif pad and cfg.padMaterials[pad] then
+				m = cfg.padMaterials[pad]
 			elseif poi > 0 then
 				m = if poi > 1 then "Pavement" else "Ground"
 			elseif wet then

@@ -28,7 +28,7 @@ end
 local cfg = Config
 local n = cfg.n
 local map = roblox.deserializeModel(fs.readFile("src/Workspace/Map.rbxmx"))[1]
-local layout = Layout.build(cfg.seed, map)
+local layout = Layout.build(cfg.seed, map, nil, cfg.roads)
 step(`layout: {#layout.pads} pads, {#layout.blockers} blockers`)
 
 local maps = Heightfield.generate(cfg, layout)

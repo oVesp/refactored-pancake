@@ -249,7 +249,7 @@ function Scatter.run(cfg: any, layout: any, maps: any, water: any, surface: any,
 				local asset = assetOf(group, Noise.hash01(treeSeed, s, 3))
 				local scale = scaleOf(asset, Noise.hash01(treeSeed, s, 4))
 				local r = asset.radius * scale
-				if slopeAt(x, z) <= asset.maxSlope and not solid.hits(x, z, r, 0.75) then
+				if slopeAt(x, z) <= asset.maxSlope and not solid.hits(x, z, r, sc.canopyOverlap) then
 					solid.add({ x = x, z = z, r = r })
 					table.insert(trees, { x = x, z = z, r = r, b = b })
 					place(group, asset, x, z, Noise.hash01(treeSeed, s, 5) * 360, scale)
@@ -276,9 +276,9 @@ function Scatter.run(cfg: any, layout: any, maps: any, water: any, surface: any,
 			local density = biomes[b].rocks / 1000 * rockArea * boost
 			if Noise.hash01(rockSeed, s, 1) < density then
 				local asset = assetOf("Rock", Noise.hash01(rockSeed, s, 2))
-				local scale = 0.9 + 0.7 * Noise.hash01(rockSeed, s, 3)
+				local scale = scaleOf(asset, Noise.hash01(rockSeed, s, 3))
 				local r = asset.radius * scale
-				if slope <= asset.maxSlope and not solid.hits(x, z, r, 0.9) then
+				if slope <= asset.maxSlope and not solid.hits(x, z, r, sc.canopyOverlap) then
 					solid.add({ x = x, z = z, r = r })
 					place("Rock", asset, x, z, Noise.hash01(rockSeed, s, 4) * 360, scale)
 					local children = 2 + math.floor(Noise.hash01(rockSeed, s, 5) * 3)
@@ -289,8 +289,8 @@ function Scatter.run(cfg: any, layout: any, maps: any, water: any, surface: any,
 						if biomeAt(cx, cz) > 0 and dry(cx, cz) and inside(cx, cz) then
 							if c <= 1 then
 								local small = assetOf("Rock", Noise.hash01(rockSeed, s, 30 + c))
-								local ss = 0.45 + 0.3 * Noise.hash01(rockSeed, s, 40 + c)
-								if not solid.hits(cx, cz, small.radius * ss, 0.9) then
+								local ss = scale * (0.35 + 0.25 * Noise.hash01(rockSeed, s, 40 + c))
+								if not solid.hits(cx, cz, small.radius * ss, sc.canopyOverlap) then
 									solid.add({ x = cx, z = cz, r = small.radius * ss })
 									place("Rock", small, cx, cz, Noise.hash01(rockSeed, s, 50 + c) * 360, ss)
 								end
@@ -327,7 +327,11 @@ function Scatter.run(cfg: any, layout: any, maps: any, water: any, surface: any,
 				local asset = assetOf(group, Noise.hash01(underSeed, t, 40 + c))
 				local scale = scaleOf(asset, Noise.hash01(underSeed, t, 50 + c))
 				local r = asset.radius * scale
-				if slopeAt(x, z) <= asset.maxSlope and not shrubs.hits(x, z, r, 0.8) and not solid.hits(x, z, 1, 1) then
+				if
+					slopeAt(x, z) <= asset.maxSlope
+					and not shrubs.hits(x, z, r, 0.8)
+					and not solid.hits(x, z, 1, sc.trunkClearance)
+				then
 					shrubs.add({ x = x, z = z, r = r })
 					place(group, asset, x, z, Noise.hash01(underSeed, t, 60 + c) * 360, scale)
 				end
@@ -356,7 +360,7 @@ function Scatter.run(cfg: any, layout: any, maps: any, water: any, surface: any,
 						group = "Grass"
 					end
 					local asset = assetOf(group, Noise.hash01(coverSeed, ci, cj, 5))
-					if slopeAt(x, z) <= asset.maxSlope and not solid.hits(x, z, 0.5, 1) then
+					if slopeAt(x, z) <= asset.maxSlope and not solid.hits(x, z, 0.5, sc.trunkClearance) then
 						table.insert(cover, {
 							group = group,
 							asset = asset.name,

@@ -82,7 +82,7 @@ function Heightfield.flattenPads(cfg: any, maps: Maps)
 			local dp = Grid.get(maps.padDistance, i, j)
 			if dp < feather then
 				local w = Noise.smoothstep(feather, 4, dp)
-				Grid.set(maps.height, i, j, Noise.lerp(Grid.get(maps.height, i, j), 0, w))
+				Grid.set(maps.height, i, j, Noise.lerp(Grid.get(maps.height, i, j), cfg.padHeight, w))
 			end
 		end
 	end

@@ -13,7 +13,7 @@ local CFrame = roblox.CFrame
 local Color3 = roblox.Color3
 local Enum = roblox.Enum
 
--- Top of every ground slab; sits just above a default baseplate to avoid z-fighting.
+-- Ground level of the gameplay areas; tools/terrain flattens the terrain to this height under them.
 local G = 0.2
 
 type Props = { [string]: any }
@@ -73,11 +73,6 @@ local function rgb(r: number, g: number, b: number): any
 end
 
 local COLORS = {
-	grass = rgb(98, 140, 72),
-	field = rgb(120, 150, 70),
-	orchard = rgb(86, 128, 66),
-	mud = rgb(110, 92, 70),
-	dirt = rgb(130, 105, 75),
 	stone = rgb(150, 150, 145),
 	wood = rgb(120, 85, 55),
 	darkWood = rgb(80, 58, 40),
@@ -86,29 +81,26 @@ local COLORS = {
 	wheat = rgb(215, 190, 100),
 	leaf = rgb(70, 125, 55),
 	canvas = rgb(150, 130, 100),
-	devFloor = rgb(70, 75, 85),
 	devLine = rgb(230, 200, 60),
 }
 
 local map = model(nil, "Map")
-local groundFolder = folder(map, "Ground")
 local zoneFolder = folder(map, "Zones")
 local spawnerFolder = folder(map, "Spawners")
 local npcFolder = folder(map, "Npcs")
 local propFolder = folder(map, "Props")
 
--- Areas: id, zone id, center X/Z, size X/Z, color, material
+-- Areas: id, zone id, center X/Z, size X/Z. The ground under them is terrain (tools/terrain).
 local AREAS = {
-	{ "VillageCore", "village_core", 0, 0, 180, 180, COLORS.grass, Enum.Material.Grass },
-	{ "DevYard", "dev_yard", -165, 0, 150, 180, COLORS.devFloor, Enum.Material.SmoothPlastic },
-	{ "WheatFields", "wheat_fields", 0, -205, 220, 230, COLORS.field, Enum.Material.Grass },
-	{ "OrchardEdge", "orchard_edge", 0, -440, 220, 240, COLORS.orchard, Enum.Material.LeafyGrass },
-	{ "GoblinCamp", "goblin_camp", 0, -660, 200, 200, COLORS.mud, Enum.Material.Mud },
+	{ "VillageCore", "village_core", 0, 0, 180, 180 },
+	{ "DevYard", "dev_yard", -165, 0, 150, 180 },
+	{ "WheatFields", "wheat_fields", 0, -205, 220, 230 },
+	{ "OrchardEdge", "orchard_edge", 0, -440, 220, 240 },
+	{ "GoblinCamp", "goblin_camp", 0, -660, 200, 200 },
 }
 
 for _, area in AREAS do
-	local name, zoneId, x, z, sx, sz, color, material = table.unpack(area)
-	part(groundFolder, name, Vector3.new(sx, 2, sz), at(x, G - 1, z), color, material)
+	local name, zoneId, x, z, sx, sz = table.unpack(area)
 	part(zoneFolder, name, Vector3.new(sx, 80, sz), at(x, G + 40, z), Color3.new(1, 1, 1), Enum.Material.ForceField, {
 		Transparency = 1,
 		CanCollide = false,
@@ -118,9 +110,6 @@ for _, area in AREAS do
 		Attributes = { ZoneId = zoneId },
 	})
 end
-
--- North road from the village to the camp gate
-part(groundFolder, "Road", Vector3.new(12, 2, 670), at(0, G - 0.95, -425), COLORS.dirt, Enum.Material.Ground)
 
 local function house(parent: any, name: string, x: number, z: number, rotation: number)
 	local m = model(parent, name)

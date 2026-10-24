@@ -73,7 +73,7 @@ return {
 			Expect.truthy(math.abs(Encode.decodeHeight(Encode.height(h)) - h) <= 1 / 32, `height {h}`)
 		end
 	end,
-	["heightfield is deterministic and pads end flat at 0"] = function()
+	["heightfield is deterministic and pads end flat at padHeight"] = function()
 		local cfg = smallConfig()
 		local a = Heightfield.generate(cfg, smallLayout(cfg))
 		local b = Heightfield.generate(cfg, smallLayout(cfg))
@@ -82,7 +82,8 @@ return {
 		for j = 0, cfg.n - 1 do
 			for i = 0, cfg.n - 1 do
 				if Grid.get(a.padDistance, i, j) <= 0 then
-					Expect.equal(Grid.get(a.height, i, j), 0, `pad cell {i},{j}`)
+					local h = Grid.get(a.height, i, j)
+					Expect.truthy(math.abs(h - cfg.padHeight) < 1e-4, `pad cell {i},{j} at {h}`)
 				end
 			end
 		end
