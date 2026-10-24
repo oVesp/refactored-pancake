@@ -2,9 +2,11 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local Disciplines = require(ReplicatedStorage.Content.Disciplines)
+local Formulas = require(ReplicatedStorage.Shared.Formulas)
 local NetClient = require(ReplicatedStorage.Shared.Net.Client)
 local Signal = require(ReplicatedStorage.Shared.Signal)
 local Skills = require(ReplicatedStorage.Content.Skills)
@@ -15,6 +17,8 @@ local AIM_RANGE = 300
 local PAD_AIM_DISTANCE = 30
 local DODGE_SECONDS = 0.2
 local HOTBAR_SIZE = 8
+-- Seconds a queued action may wait past its predicted ready time for the server's cast to end.
+local QUEUE_GRACE = 0.5
 
 local player = Players.LocalPlayer
 
@@ -24,8 +28,9 @@ export type Slot = {
 }
 
 --[=[
-	Client side of combat: aim, predicted cooldowns, `UseSkill` with sequence numbers and rollback
-	on `RejectSkill`, guard and dodge. Each delivery reads the target from TargetController its own
+	Client side of combat: aim, predicted cooldowns, GCD and animation lock, a one-action input
+	queue, `UseSkill` with sequence numbers and rollback on `RejectSkill` or an interrupted cast,
+	guard and dodge. Each delivery reads the target from TargetController its own
 	way (docs/systems/combat.md, Targeting). The server decides every outcome (game-design.md 5.5).
 ]=]
 local CombatController = {}
@@ -43,6 +48,11 @@ local TargetController: any
 local seq = 0
 local pending: { [number]: string } = {}
 local predictedReady: { [string]: number } = {}
+local gcdStartedAt = 0
+local gcdReadyAt = 0
+local lockedUntil = 0
+local queued: string? = nil
+local queuedUntil = 0
 local hotbar: { Slot } = {}
 
 local function character(): (Model?, BasePart?, Humanoid?)
@@ -127,31 +137,101 @@ local function aimFor(skill: any, root: BasePart): (Vector3?, Model?)
 	return aim, nil
 end
 
---[=[ Seconds until the client predicts a skill is ready. ]=]
-function CombatController.Remaining(skillId: string): number
-	return math.max(0, (predictedReady[skillId] or 0) - os.clock())
+local function hasted(seconds: number): number
+	local haste = player.Character and player.Character:GetAttribute("Extra_Haste")
+	return Formulas.Hasted(seconds, if type(haste) == "number" then haste else 0, Tuning.Combat.Gcd.MaxHaste)
 end
 
---[=[ Sends a skill use if the local prediction allows it. ]=]
-function CombatController.UseSkill(skillId: string)
+--[=[
+	Seconds until the client predicts a skill is ready, and the length of the timer it is waiting
+	on (its own cooldown, or the GCD when that is longer).
+]=]
+function CombatController.Cooldown(skillId: string): (number, number)
+	local now = os.clock()
+	local skill = Skills.ById[skillId]
+	local own = math.max(0, (predictedReady[skillId] or 0) - now)
+	local total = if skill then skill.cooldown or 0 else 0
+	if skill and skill.gcd then
+		local gcd = math.max(0, gcdReadyAt - now)
+		if gcd > own then
+			return gcd, gcdReadyAt - gcdStartedAt
+		end
+	end
+	return own, total
+end
+
+--[=[ Seconds until the client predicts a skill is ready. ]=]
+function CombatController.Remaining(skillId: string): number
+	return (CombatController.Cooldown(skillId))
+end
+
+-- Seconds until this skill could be sent: its timers and the animation lock.
+local function waitFor(skillId: string): number
+	return math.max(CombatController.Remaining(skillId), lockedUntil - os.clock())
+end
+
+-- Sends the use now. Returns false while the character is stunned or still casting.
+local function send(skillId: string): boolean
 	local skill = Skills.ById[skillId]
 	local model, root = character()
-	if not skill or not model or not root or CombatController.Remaining(skillId) > 0 then
-		return
+	if not skill or not model or not root or waitFor(skillId) > 0 then
+		return false
 	end
 	if model:GetAttribute("Stunned") == true or model:GetAttribute("Casting") ~= nil then
-		return
+		return false
 	end
 	local aim, target = aimFor(skill, root)
 	if not aim then
 		CombatController.Rejected:Fire(skillId, "NoTarget")
-		return
+		return true
 	end
+	local now = os.clock()
 	seq += 1
 	pending[seq] = skillId
-	predictedReady[skillId] = os.clock() + (skill.cooldown or 0)
+	if skill.cooldown then
+		predictedReady[skillId] = now + skill.cooldown
+	end
+	if skill.gcd then
+		gcdStartedAt = now
+		gcdReadyAt = now + hasted(Tuning.Combat.Gcd.Base)
+	end
+	if skill.source ~= "Basic" then
+		local cast = if skill.castTime then hasted(skill.castTime) else 0
+		lockedUntil = now + math.max(cast, Tuning.Combat.Gcd.AnimationLock)
+	end
 	NetClient.Fire("UseSkill", skillId, aim, seq, target)
 	CombatController.Used:Fire(skillId, aim)
+	return true
+end
+
+--[=[
+	Sends a skill use if the local prediction allows it. A hotbar skill pressed within
+	`QueueWindow` of becoming ready is queued (one at a time, the latest press wins) and sent the
+	moment it is; basic attacks are never queued.
+]=]
+function CombatController.UseSkill(skillId: string)
+	local skill = Skills.ById[skillId]
+	if not skill then
+		return
+	end
+	local wait = waitFor(skillId)
+	if wait <= 0 then
+		queued = nil
+		send(skillId)
+	elseif skill.source ~= "Basic" and wait <= Tuning.Combat.Gcd.QueueWindow then
+		queued = skillId
+		queuedUntil = os.clock() + wait + QUEUE_GRACE
+	end
+end
+
+-- Gives back predicted timers after a rejected use or an interrupted cast.
+local function rollback(skillId: string)
+	local skill = Skills.ById[skillId]
+	predictedReady[skillId] = nil
+	if skill and skill.gcd then
+		gcdReadyAt = 0
+	end
+	lockedUntil = 0
 end
 
 --[=[ Toggles a Discipline. ]=]
@@ -188,6 +268,7 @@ function CombatController.Dodge()
 	if not root or not humanoid or CombatController.Remaining("__dodge") > 0 then
 		return
 	end
+	queued = nil
 	local dodge = Tuning.Combat.Dodge
 	local direction = humanoid.MoveDirection
 	if direction.Magnitude < 0.1 then
@@ -242,9 +323,25 @@ function CombatController.Start()
 	NetClient.Connect("RejectSkill", function(rejectedSeq: number, reason: string)
 		local skillId = pending[rejectedSeq]
 		pending[rejectedSeq] = nil
-		if skillId then
+		if skillId == "__dodge" then
 			predictedReady[skillId] = nil
+		elseif skillId then
+			rollback(skillId)
 			CombatController.Rejected:Fire(skillId, reason)
+		end
+	end)
+	NetClient.Connect("ShowCast", function(info: { [string]: any })
+		if info.kind == "Interrupted" and info.caster == player.Character then
+			rollback(info.skillId)
+		end
+	end)
+	RunService.Heartbeat:Connect(function()
+		local skillId = queued
+		if not skillId then
+			return
+		end
+		if os.clock() > queuedUntil or (waitFor(skillId) <= 0 and send(skillId)) then
+			queued = nil
 		end
 	end)
 	ProfileController.Changed:Connect(rebuildHotbar)

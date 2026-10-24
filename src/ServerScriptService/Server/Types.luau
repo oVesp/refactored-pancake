@@ -13,6 +13,8 @@ export type Cast = {
 	target: Entity?,
 	interruptible: boolean,
 	token: number,
+	--[=[ Resource paid when a cast completes; a cancelled cast costs nothing. ]=]
+	cost: { resource: "Mp" | "Stamina", amount: number }?,
 }
 
 export type StatusInstance = {
@@ -51,6 +53,10 @@ export type Entity = {
 	god: boolean,
 	lastCombatAt: number,
 	cooldowns: { [string]: number },
+	--[=[ os.clock() when the shared global cooldown is ready again. ]=]
+	gcdReadyAt: number,
+	--[=[ os.clock() when the animation lock of the last action ends. ]=]
+	lockedUntil: number,
 	casting: Cast?,
 	castToken: number,
 	guardSince: number?,

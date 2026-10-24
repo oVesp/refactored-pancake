@@ -27,6 +27,7 @@ return table.freeze({
 	Kindled = "The brazier catches fire.",
 	Purified = "The water runs clear.",
 	EnteredZone = "%s (%s)",
+	CastNoResource = "Not enough resource to finish the cast.",
 	DevOnly = "Dev command refused.",
 	DevDone = "%s",
 })

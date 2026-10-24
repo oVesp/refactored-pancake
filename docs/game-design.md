@@ -71,7 +71,7 @@ All numbers below are **starting points** to be tuned. They live in data modules
 - **Heritage**: Human at launch. Humans have **no heritage levels**; all levels go into classes. Future heritages with heritage levels (stat-heavy, ability-heavy, drawbacks) slot in without schema changes.
 - **Classes**: base cap 15, high cap 10, rare cap 5. Minimum 7 classes to reach 100. Prerequisites gate high/rare classes. Every strong class carries a penalty.
 - **Class slots**: a character can hold many classes; UI must show *build path* (order + levels).
-- **Stats** (9): HP, MP, Physical Attack, Physical Defense, Agility, Magic Attack, Magic Defense, Resistance, Special. Derived: crit, move speed, cast speed.
+- **Stats** (9): HP, MP, Physical Attack, Physical Defense, Agility, Magic Attack, Magic Defense, Resistance, Special. Derived: crit, move speed. Stats never shorten the GCD or cast times; only the `Haste` item affix does (§3.5).
 - **Death & progression safety**: see §3.9.
 
 ### 3.2 Magic (Circles)
@@ -104,11 +104,13 @@ Starter set (≈12 for the vertical slice, original names TBD): strike power, bo
 - **Scrolls** require mastery of the matching magic line to use (drives class value).
 - **Singular relics**: hard-capped world count, unique, rule-bending; may be lost on death in PvP zones. Launch with **zero**; they arrive in a timed event design, never from random drop tables.
 - Metal gear: high defense, low item HP, resists pure energy. Durability exists and is slow.
+- **Haste** is an item-only affix: it shortens the GCD and cast times (capped at `Tuning.Combat.Gcd.MaxHaste`). No stat, passive or status grants it.
 
 ### 3.5 Combat (action)
 - **Client** sends intent (skill id, aim vector, sequence, optional target). **Server** validates and resolves. See §6.4.
 - Controls: tap/click light attack chain, hold for heavy, skill hotbar (6 slots mobile, 8–10 desktop), dodge, block/parry window.
 - **Targeting (hybrid)**: an automatic soft target (enemy nearest the screen centre, sticky in crowds) plus an optional lock (Tab / R3 / Target button cycle; tap an enemy on touch). Each delivery uses it differently, so archetypes play differently: melee swings where you face with short-range magnetism; skillshots (`Projectile`) are free-aim with a small touch/pad assist; mage `Target` spells seek the target and cannot miss but have a cast time and stop on walls; `Ground` lands on the cursor, or on the target off the mouse; support (`Ally`) takes the ally under the mouse or the wounded ally nearest the centre, else the caster. AoE has no target cap. Details: `docs/systems/combat.md`.
+- **Timing (FFXIV-style)**: spells and weaponskills share a **global cooldown** (GCD, 2.5 s); other class actives are **off-GCD** (oGCD) with their own cooldowns and are woven between GCDs. Every non-basic action has a 0.6 s **animation lock**, giving two weaves per GCD. Cast-time spells are cancelled by moving, except in the last 0.5 s (**slidecast**); a cancelled cast costs nothing and gives the GCD back. A press within 0.5 s of an action becoming ready is queued. Basic attacks (light/heavy) stay outside the GCD with short cooldowns of their own; enemies keep per-skill cooldowns. No action combos yet. Details: `docs/systems/combat.md`.
 - **Damage model**: `(base + stat × ratio) × (1 + bonus) × type multiplier × crit × level gap × 100 / (100 + defense)` (`Shared/Formulas.ResolveDamage`), with damage types (physical, fire, cold, lightning, acid, holy, negative energy, poison, mental) and resist/immune/vulnerable tags.
 - **Level gap curve**: strong smoothing instead of a hard wall: ≥10 levels above → large reductions, ≥30 → near-zero without penetration items/skills. The wall is faithful; the smoothness avoids hard-lock frustration.
 - **Status effects**: stun, slow, root, silence, fear, charm, burn, poison, bleed. Boss immunity pattern is explicit in data (e.g. "immune: mental").
@@ -232,11 +234,11 @@ tests/                        Lune runner + specs/*.spec.luau
 
 ### 5.5 Combat implementation
 1. Client: input → target pick (`TargetController`) → local predicted animation/VFX → `UseSkill(skillId, aim, seq, target?)`.
-2. Server: check alive, not stunned, skill known, cooldown, target (alive, hostile or allied as the delivery needs, in range with rewind), resource cost, cast state, facing tolerance.
+2. Server: check alive, not stunned, skill known, cast state and animation lock, cooldown and GCD, target (alive, hostile or allied as the delivery needs, in range with rewind), resource cost, cast state, facing tolerance.
 3. Server simulates the hit via spatial queries (`GetPartBoundsInRadius`, raycasts, overlap shapes) in the **skill's authoritative timeline**; animation markers are cosmetic cues, never proof of a hit.
 4. **Lag compensation**: keep a short ring buffer (~250 ms) of enemy/player positions; rewind within a validated window for hit checks. Cap the rewind; never trust a client timestamp beyond it.
 5. Damage → `DamageService` (type, resist, level-gap curve, crit, status). Result replicated; client reconciles prediction (rollback on reject).
-6. Skills are **data**: id, class requirement, cost, cooldown, cast time, delivery, hit shape, effects list, animation id, VFX id, sound id.
+6. Skills are **data**: id, class requirement, cost, GCD flag, cooldown, cast time, delivery, hit shape, effects list, animation id, VFX id, sound id.
 
 ### 5.6 Enemies and AI
 - Server-only AI: state machine (idle, patrol, aggro, attack, return, flee).
@@ -510,6 +512,7 @@ Define target concurrency per place, server count per realm, and what happens wh
 | Test automation hook | Dev commands are chat-only | Studio-only `ServerStorage.RunDevCommand` BindableFunction runs the same handlers | Studio MCP cannot send chat from plugin context; the hook is server-side and absent outside Studio |
 | Combat feel | §12.8: prototype tab-hybrid and free-aim in M1 | Hybrid soft target + optional lock replaces pure free-aim (2026-10-24); per-delivery aim rules; no AoE target cap; ranged physical class deferred | Owner decision after targeting research (FFXIV, BDO, TERA, Lost Ark, GW2); one system that works on phone, pad and mouse |
 | Player-facing text | §6.3: all strings through LocalizationTable | M0.5 keeps strings in `Content/Strings` and content names; LocalizationTable deferred to M1 | Single source table makes the later move mechanical |
+| Skill timing | Real-time action cooldowns per skill; cast speed from Agility | FFXIV-style GCD (2.5 s) / oGCD with animation lock, queue, slidecast and move-cancel replaces per-skill-only timing (2026-10-24); basic attacks and enemies stay off the GCD; only the item affix `Haste` shortens GCD and casts | Owner decision; readable rotation with weaving, gear-driven speed instead of a stat |
 | Roblox PlayerModule bug | Not specified | Studio 0.744 ships `VRBaseCamera` with a `VRbaseCamera` typo that breaks default player scripts; `EngineFixes` swaps in `vendor/PlayerModulePatch` at server start | Temporary; delete both once Roblox ships the fix |
 
 ---

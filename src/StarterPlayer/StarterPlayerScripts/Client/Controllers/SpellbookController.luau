@@ -69,10 +69,17 @@ local function render(snapshot: { [string]: any }?)
 				parts.Bind_Title,
 				string.format("%s  ·  Circle %d  ·  %s", spell.name, spell.circle or 0, class.name)
 			)
-			local cost = if spell.cost then string.format("%d MP", spell.cost.amount) else "free"
+			local timing = {
+				if spell.cost then string.format("%d MP", spell.cost.amount) else "free",
+				if spell.castTime then string.format("%.1fs cast", spell.castTime) else "instant",
+				if spell.gcd then "GCD" else "off-GCD",
+			}
+			if spell.cooldown then
+				table.insert(timing, string.format("%.0fs cd", spell.cooldown))
+			end
 			UIController.SetText(
 				parts.Bind_Detail,
-				string.format("%s (%s, %.1fs cd)", spell.description, cost, spell.cooldown or 0)
+				string.format("%s (%s)", spell.description, table.concat(timing, ", "))
 			)
 			local action = parts.Bind_Action :: TextButton
 			if ok then

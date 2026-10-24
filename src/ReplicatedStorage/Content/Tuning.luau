@@ -61,7 +61,22 @@ return table.freeze({
 		--[=[ Harmful status duration scales by 100 / (100 + Resistance). ]=]
 		ResistanceConstant = 100,
 		MoveSpeedPerAgility = 0.005,
-		CastSpeedPerAgility = 0.002,
+		--[=[
+			Global cooldown and casting (docs/systems/combat.md, Timing). Only the `Haste` item affix
+			shortens the GCD and cast times, never stats; it is capped at MaxHaste.
+		]=]
+		Gcd = table.freeze({
+			Base = 2.5,
+			MaxHaste = 0.3,
+			--[=[ Every non-basic action locks further actions for this long (two weaves per GCD). ]=]
+			AnimationLock = 0.6,
+			--[=[ A press this close to an action becoming ready is queued and fires when it is. ]=]
+			QueueWindow = 0.5,
+			--[=[ Moving during the last seconds of a cast no longer cancels it. ]=]
+			SlidecastWindow = 0.5,
+			--[=[ Flat studs a caster may drift before the slidecast window without cancelling. ]=]
+			MoveTolerance = 1.5,
+		}),
 		Guard = table.freeze({ DamageMultiplier = 0.4, ParryWindow = 0.25, StaminaPerHit = 10, Arc = 120 }),
 		Dodge = table.freeze({ Invulnerable = 0.3, Cooldown = 1, StaminaCost = 20, Distance = 14 }),
 		--[=[ Max seconds a player's hit check may rewind target positions (lag compensation). ]=]

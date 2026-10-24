@@ -53,7 +53,21 @@ return {
 			if skill.kind == "Active" then
 				Expect.truthy(skill.delivery, `{id} delivery`)
 				Expect.truthy(skill.targets, `{id} targets`)
-				Expect.truthy(skill.cooldown, `{id} cooldown`)
+				if skill.gcd then
+					Expect.truthy(
+						skill.source == "Class" or skill.source == "Spell",
+						`{id}: only class and spells use the GCD`
+					)
+					Expect.equal(skill.windup, nil, `{id}: GCD skills cast, they do not wind up`)
+				else
+					Expect.truthy(skill.cooldown, `{id} off-GCD needs a cooldown`)
+				end
+				if skill.source == "Spell" then
+					Expect.truthy(skill.gcd, `{id}: spells are on the GCD`)
+				end
+				if skill.castTime and skill.source ~= "Enemy" then
+					Expect.truthy(skill.gcd, `{id}: off-GCD actions are instant`)
+				end
 				if skill.delivery == "Projectile" or skill.delivery == "Target" then
 					Expect.truthy(skill.speed and skill.range, `{id} projectile speed/range`)
 				end
@@ -89,6 +103,14 @@ return {
 		end
 		for _, entry in Items.Starter do
 			Expect.truthy(Items.ById[entry.id], `starter {entry.id}`)
+		end
+	end,
+	["only item affixes carry Haste"] = function()
+		for id, skill in Skills do
+			Expect.equal(skill.modifiers and skill.modifiers.Haste, nil, `{id}: Haste comes only from items`)
+		end
+		for id, status in Statuses do
+			Expect.equal(status.modifiers and status.modifiers.Haste, nil, `{id}: Haste comes only from items`)
 		end
 	end,
 	["disciplines map to statuses"] = function()

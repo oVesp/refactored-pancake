@@ -59,7 +59,11 @@ export type SkillDef = {
 	delivery: Delivery?,
 	targets: ("Enemy" | "Ally" | "Self")?,
 	cost: { resource: "Mp" | "Stamina", amount: number }?,
+	--[=[ Weaponskill or spell on the shared global cooldown (Tuning.Combat.Gcd); otherwise off-GCD. ]=]
+	gcd: boolean?,
+	--[=[ Seconds between uses of this skill; a GCD skill may add its own on top of the GCD. ]=]
 	cooldown: number?,
+	--[=[ Seconds of casting; moving before the slidecast window cancels it. ]=]
 	castTime: number?,
 	interruptible: boolean?,
 	windup: number?,

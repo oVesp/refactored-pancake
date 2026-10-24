@@ -71,6 +71,8 @@ function EntityService.Register(info: NewEntity): Entity
 		god = false,
 		lastCombatAt = -math.huge,
 		cooldowns = {},
+		gcdReadyAt = 0,
+		lockedUntil = 0,
 		casting = nil,
 		castToken = 0,
 		guardSince = nil,

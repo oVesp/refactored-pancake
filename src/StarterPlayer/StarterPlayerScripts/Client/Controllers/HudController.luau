@@ -12,9 +12,12 @@ local NetClient = require(ReplicatedStorage.Shared.Net.Client)
 local Skills = require(ReplicatedStorage.Content.Skills)
 local Statuses = require(ReplicatedStorage.Content.Statuses)
 local Strings = require(ReplicatedStorage.Content.Strings)
+local Tuning = require(ReplicatedStorage.Content.Tuning)
 local Zones = require(ReplicatedStorage.Content.Zones)
 
 local Attributes = Constants.Attributes
+-- Cast fill tint once the slidecast window opens (moving no longer cancels).
+local SLIDECAST_COLOR = Color3.fromRGB(110, 200, 120)
 local TOAST_SECONDS = 4
 local MAX_TOASTS = 5
 local KEY_LABELS = { "1", "2", "3", "4", "5", "6", "7", "8" }
@@ -45,6 +48,7 @@ local bound: { [string]: GuiObject }
 local slotFrames: { { frame: Frame, cooldown: Frame, id: string, kind: string } } = {}
 local castEndsAt = 0
 local castStartedAt = 0
+local castFillColor: Color3? = nil
 
 local function fill(barFill: GuiObject, text: GuiObject, value: number, max: number, format: string?)
 	local ratio = if max > 0 then math.clamp(value / max, 0, 1) else 0
@@ -226,9 +230,7 @@ local function updateCooldowns()
 	local active = if character then character:GetAttribute("Statuses") else nil
 	for _, slot in slotFrames do
 		if slot.kind == "Skill" then
-			local skill = Skills.ById[slot.id]
-			local remaining = CombatController.Remaining(slot.id)
-			local total = skill.cooldown or 1
+			local remaining, total = CombatController.Cooldown(slot.id)
 			slot.cooldown.Size = UDim2.fromScale(1, if total > 0 then math.clamp(remaining / total, 0, 1) else 0)
 		else
 			local def = Disciplines.ById[slot.id]
@@ -241,9 +243,13 @@ local function updateCooldowns()
 	local castBar = bound.Bind_CastBar
 	local now = os.clock()
 	if now < castEndsAt then
+		local castFill = bound.Bind_CastFill
+		castFillColor = castFillColor or castFill.BackgroundColor3
 		castBar.Visible = true
-		bound.Bind_CastFill.Size =
-			UDim2.fromScale((now - castStartedAt) / math.max(castEndsAt - castStartedAt, 1e-3), 1)
+		castFill.Size = UDim2.fromScale((now - castStartedAt) / math.max(castEndsAt - castStartedAt, 1e-3), 1)
+		castFill.BackgroundColor3 = if castEndsAt - now <= Tuning.Combat.Gcd.SlidecastWindow
+			then SLIDECAST_COLOR
+			else castFillColor :: Color3
 	else
 		castBar.Visible = false
 	end

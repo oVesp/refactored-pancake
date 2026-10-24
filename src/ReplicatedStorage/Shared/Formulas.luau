@@ -23,6 +23,7 @@ local EXTRA_NAMES = {
 	"DamageDone",
 	"SpellDamage",
 	"SpellCost",
+	"Haste",
 }
 Formulas.ExtraNames = table.freeze(EXTRA_NAMES)
 
@@ -57,6 +58,14 @@ end
 --[=[ Fraction of damage that gets through a defense value. ]=]
 function Formulas.Mitigation(defense: number, constant: number): number
 	return constant / (constant + math.max(defense, 0))
+end
+
+--[=[
+	Duration of the GCD or a cast after the `Haste` item affix (a fraction, clamped to
+	[0, maxHaste]). Stats never shorten either.
+]=]
+function Formulas.Hasted(seconds: number, haste: number, maxHaste: number): number
+	return seconds * (1 - math.clamp(haste, 0, maxHaste))
 end
 
 --[=[ Crit chance from agility, clamped to [0, 0.75]. ]=]

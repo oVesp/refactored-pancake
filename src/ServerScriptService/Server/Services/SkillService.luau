@@ -22,6 +22,8 @@ local OBJECT_PICK_RADIUS = 10
 local CAST_ORIGIN_HEIGHT = 1.5
 -- Aim is a direction hint; deliveries clamp to their own range. Farther aims are malformed.
 local MAX_AIM_DISTANCE = 300
+-- Seconds a use may arrive early for its cooldown, GCD or lock (network jitter).
+local LATENCY_SLACK = 0.05
 
 local log = Logger.new("SkillService")
 
@@ -37,8 +39,9 @@ worldParams.FilterType = Enum.RaycastFilterType.Exclude
 
 --[=[
 	Resolves every skill use, for players (validated `UseSkill`) and NPCs (`Cast`), through one
-	authoritative timeline (game-design.md 5.5): checks, cost, cooldown, windup/cast, then the
-	delivery's hit test. Clients only predict visuals.
+	authoritative timeline (game-design.md 5.5): checks, GCD/cooldown/animation lock, windup or
+	cast (cancelled by moving before the slidecast window), cost, then the delivery's hit test.
+	Clients only predict visuals and timers.
 ]=]
 local SkillService = {}
 
@@ -419,10 +422,13 @@ local function resolve(caster: Entity, skill: SkillDef, aim: Vector3, target: En
 	end
 end
 
+local function hasted(caster: Entity, seconds: number): number
+	return Formulas.Hasted(seconds, caster.extras.Haste or 0, Tuning.Combat.Gcd.MaxHaste)
+end
+
 local function castDuration(caster: Entity, skill: SkillDef): (number, boolean)
 	if skill.castTime then
-		local speed = 1 + (caster.stats.Agility or 0) * Tuning.Combat.CastSpeedPerAgility
-		return skill.castTime / speed, true
+		return hasted(caster, skill.castTime), true
 	end
 	if skill.windup then
 		local windup = skill.windup
@@ -434,21 +440,55 @@ local function castDuration(caster: Entity, skill: SkillDef): (number, boolean)
 	return 0, false
 end
 
+-- Cancels the cast when the caster drifts more than MoveTolerance before the slidecast window.
+local function watchMovement(caster: Entity, token: number, slideAt: number)
+	local start = flat(caster.root.Position)
+	local connection: RBXScriptConnection
+	connection = RunService.Heartbeat:Connect(function()
+		local cast = caster.casting
+		if not cast or cast.token ~= token or os.clock() >= slideAt then
+			connection:Disconnect()
+			return
+		end
+		if (flat(caster.root.Position) - start).Magnitude > Tuning.Combat.Gcd.MoveTolerance then
+			connection:Disconnect()
+			SkillService.Interrupt(caster)
+		end
+	end)
+end
+
 --[=[
-	Starts a skill for any entity after its checks have passed: pays nothing, sets the cooldown,
-	broadcasts the cast or telegraph, waits out the windup/cast (interruptible by stun or
-	knockback) and resolves it. `target` is the chosen enemy (Target, Dash) or ally (Ally); it is
-	re-validated when the skill resolves. NPCs call this directly.
+	Starts a skill for any entity after its checks have passed. Sets the skill's own cooldown, the
+	GCD (`gcd` skills) and the animation lock (non-basic player actions), broadcasts the cast or
+	telegraph, waits out the windup/cast and resolves it. A cast is cancelled by stun, knockback,
+	dodging or moving before the slidecast window (players and interruptible NPC casts); `cost`,
+	when given, is paid only if the cast completes. `target` is the chosen enemy (Target, Dash) or
+	ally (Ally); it is re-validated when the skill resolves. NPCs call this directly.
 ]=]
-function SkillService.Cast(caster: Entity, skillId: string, aim: Vector3, target: Entity?)
+function SkillService.Cast(
+	caster: Entity,
+	skillId: string,
+	aim: Vector3,
+	target: Entity?,
+	cost: { resource: "Mp" | "Stamina", amount: number }?
+)
 	local skill = Skills.ById[skillId]
 	if not skill or not caster.alive then
 		return
 	end
 	local now = os.clock()
-	caster.cooldowns[skillId] = now + (skill.cooldown or 0)
+	local timing = Tuning.Combat.Gcd
+	if skill.cooldown then
+		caster.cooldowns[skillId] = now + skill.cooldown
+	end
+	if skill.gcd then
+		caster.gcdReadyAt = now + hasted(caster, timing.Base)
+	end
 
 	local duration, isCast = castDuration(caster, skill)
+	if caster.player and skill.source ~= "Basic" then
+		caster.lockedUntil = now + math.max(duration, timing.AnimationLock)
+	end
 	if duration <= 0 then
 		resolve(caster, skill, aim, target)
 		return
@@ -463,6 +503,7 @@ function SkillService.Cast(caster: Entity, skillId: string, aim: Vector3, target
 		target = target,
 		interruptible = true,
 		token = token,
+		cost = cost,
 	}
 	local id = castId()
 	broadcast({
@@ -476,36 +517,66 @@ function SkillService.Cast(caster: Entity, skillId: string, aim: Vector3, target
 		duration = duration,
 	})
 	caster.model:SetAttribute("Casting", skillId)
+	if isCast and (caster.player or skill.interruptible) then
+		watchMovement(caster, token, now + duration - timing.SlidecastWindow)
+	end
 
 	task.delay(duration, function()
 		local cast = caster.casting
 		if not cast or cast.token ~= token then
 			return
 		end
+		if not caster.alive or StatusService.IsDisabled(caster) then
+			SkillService.Interrupt(caster)
+			return
+		end
+		if cast.cost and not StatService.Spend(caster, cast.cost.resource, cast.cost.amount) then
+			SkillService.Interrupt(caster)
+			if caster.player then
+				NetServer.Fire("Notify", caster.player, "CastNoResource", {})
+			end
+			return
+		end
 		caster.casting = nil
 		caster.model:SetAttribute("Casting", nil)
-		if caster.alive and not StatusService.IsDisabled(caster) then
-			resolve(caster, skill, aim, target)
-		end
+		resolve(caster, skill, aim, target)
 	end)
 end
 
---[=[ Cancels a cast in progress. Returns true if one was cancelled. ]=]
+--[=[
+	Cancels a cast in progress and gives back its GCD, cooldown and lock, so the caster can act
+	at once (nothing was paid yet). Returns true if one was cancelled.
+]=]
 function SkillService.Interrupt(caster: Entity): boolean
 	local cast = caster.casting
 	if not cast then
 		return false
 	end
+	local skill = Skills.ById[cast.skillId]
+	local now = os.clock()
 	caster.casting = nil
+	caster.lockedUntil = now
+	if skill and skill.gcd then
+		caster.gcdReadyAt = now
+	end
+	if skill and skill.cooldown then
+		caster.cooldowns[cast.skillId] = now
+	end
 	caster.model:SetAttribute("Casting", nil)
 	impact(0, caster.root.Position, "interrupt")
 	NetServer.FireAll("ShowCast", { kind = "Interrupted", caster = caster.model, skillId = cast.skillId })
 	return true
 end
 
---[=[ Seconds until a skill is ready for an entity. ]=]
+--[=[ Seconds until a skill is ready for an entity: its own cooldown and, for `gcd` skills, the GCD. ]=]
 function SkillService.CooldownRemaining(caster: Entity, skillId: string): number
-	return math.max(0, (caster.cooldowns[skillId] or 0) - os.clock())
+	local now = os.clock()
+	local remaining = (caster.cooldowns[skillId] or 0) - now
+	local skill = Skills.ById[skillId]
+	if skill and skill.gcd then
+		remaining = math.max(remaining, caster.gcdReadyAt - now)
+	end
+	return math.max(0, remaining)
 end
 
 local function reject(player: Player, seq: number, reason: string)
@@ -528,11 +599,11 @@ local function handleUseSkill(player: Player, skillId: string, aim: Vector3, seq
 		reject(player, seq, "Disabled")
 		return
 	end
-	if caster.casting then
+	if caster.casting or caster.lockedUntil - os.clock() > LATENCY_SLACK then
 		reject(player, seq, "Busy")
 		return
 	end
-	if SkillService.CooldownRemaining(caster, skillId) > 0.05 then
+	if SkillService.CooldownRemaining(caster, skillId) > LATENCY_SLACK then
 		reject(player, seq, "Cooldown")
 		return
 	end
@@ -558,21 +629,30 @@ local function handleUseSkill(player: Player, skillId: string, aim: Vector3, seq
 	else
 		target = nil
 	end
+	-- Instant actions pay now; casts check now and pay when they complete.
+	local cost: { resource: "Mp" | "Stamina", amount: number }? = nil
 	if skill.cost then
 		local amount = skill.cost.amount
 		if skill.source == "Spell" and caster.statuses.overcharge then
 			amount *= 1 + caster.extras.SpellCost
 		end
-		if not StatService.Spend(caster, skill.cost.resource, amount) then
+		local resource: "Mp" | "Stamina" = skill.cost.resource
+		local available = if resource == "Mp" then caster.mp else caster.stamina
+		if available < amount then
 			reject(player, seq, "Resource")
 			return
+		end
+		if skill.castTime then
+			cost = { resource = resource, amount = amount }
+		else
+			StatService.Spend(caster, resource, amount)
 		end
 	end
 	if caster.guardSince then
 		caster.guardSince = nil
 		caster.model:SetAttribute("Guarding", false)
 	end
-	SkillService.Cast(caster, skillId, aim, target)
+	SkillService.Cast(caster, skillId, aim, target, cost)
 end
 
 local function withLatency(player: Player, fn: () -> ())
@@ -602,7 +682,7 @@ local function handleDodge(player: Player, direction: Vector3, seq: number)
 	local entity = EntityService.ForPlayer(player)
 	local dodge = Tuning.Combat.Dodge
 	local now = os.clock()
-	if not entity or not entity.alive or StatusService.IsImmobile(entity) or entity.casting then
+	if not entity or not entity.alive or StatusService.IsImmobile(entity) then
 		reject(player, seq, "Dodge")
 		return
 	end
@@ -616,6 +696,7 @@ local function handleDodge(player: Player, direction: Vector3, seq: number)
 	end
 	dodgeReadyAt[player] = now + dodge.Cooldown
 	entity.invulnerableUntil = now + dodge.Invulnerable
+	SkillService.Interrupt(entity)
 end
 
 function SkillService.Init(deps: { [string]: any })

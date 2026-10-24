@@ -190,4 +190,11 @@ return {
 		Expect.equal(Formulas.InArc(0, 0, 0, -1, 0, 5, 8, 90), false)
 		Expect.equal(Formulas.InArc(0, 0, 0, -1, 0, -9, 8, 90), false)
 	end,
+	["haste shortens the GCD and casts up to its cap"] = function()
+		local gcd = Tuning.Combat.Gcd
+		near(Formulas.Hasted(gcd.Base, 0, gcd.MaxHaste), 2.5, "no haste")
+		near(Formulas.Hasted(gcd.Base, 0.1, gcd.MaxHaste), 2.25, "10%")
+		near(Formulas.Hasted(gcd.Base, 5, gcd.MaxHaste), 2.5 * (1 - gcd.MaxHaste), "capped")
+		near(Formulas.Hasted(1.5, -1, gcd.MaxHaste), 1.5, "never slower")
+	end,
 }
