@@ -168,9 +168,10 @@ From [low-level-human-design.md](low-level-human-design.md), adapted to this doc
 | Code source of truth | **Rojo 7** project + Git | Reviewable diffs, linting, CI. *Script Sync* is the official alternative but offers less project-file control. Do not run both on the same scripts. |
 | UI/instance authoring | **Roblox Studio** (visual), saved as `.rbxmx` into the repo | Visual layouts must be authored visually (§7). |
 | Studio automation | **Studio MCP** for inspection, UI edits, playtesting, Luau probes | Complements Rojo; does not replace it. |
+| Toolchain | **Rokit** (`rokit.toml`) pins rojo, stylua, selene, luau-lsp, lune, wally | One `rokit install` reproduces every tool version. |
 | Typing & lint | `--!strict` Luau everywhere, `luau-lsp`, `selene`, `stylua` | Catches bugs at edit time. |
 | Packages | **Wally** with pinned versions; vendor reviewed copies | No unpinned dependencies. |
-| Tests | TestEZ (or Jest-Lua), Studio playtests, MicroProfiler | Per testing guidance. |
+| Tests | **Lune** unit tests for pure modules (`tests/specs/*.spec.luau`), Studio playtests for integration, MicroProfiler | Lune runs in CI without Studio. Pure modules take no instance requires so they load in both runtimes. |
 | Build/publish | `rojo build` in CI; Open Cloud upload with scoped keys | Keys never in repo. |
 | External tools | Blender (bpy headless), Python or Node scripts, Lune | §8. |
 
@@ -198,9 +199,10 @@ src/
       Controllers/            InputController, CombatController, UIController, CameraController, ...
   StarterGui/                 Authored ScreenGuis (from .rbxmx)
 assets/                       Source art (Blender, PSD, SVG), not synced into the place
-tools/                        Python/Node/Lune/Blender scripts
+tools/                        gate.sh (quality gate), scan.sh, Python/Node/Lune/Blender scripts
 docs/
-tests/
+tests/                        Lune runner + specs/*.spec.luau
+.githooks/                    pre-commit (gate), commit-msg, Git LFS hooks
 ```
 
 ### 5.3 Script standards
@@ -290,14 +292,15 @@ Rules from day one:
 
 | Rule | Detail |
 |---|---|
-| Repository | Git, initialized at M0 (the folder is not a repo yet). `main` is always buildable. |
+| Repository | Git, initialized at M0. `main` is always buildable. After cloning: `rokit install`, `git config core.hooksPath .githooks`, `git lfs install --local`. |
 | Branching | Short-lived `feat/…`, `fix/…`, `content/…`, `chore/…` branches off `main`; squash or rebase merge; no long-lived feature branches. |
 | Commit unit | One logical change per commit: a feature slice, a fix, a content batch, a refactor. Never mix refactor + behavior change, or code + unrelated content. |
 | Trigger | Automatic after a unit passes its gate: format, lint, typecheck, tests, `rojo build`, content validators. A failing gate means no commit and a reported failure. |
 | Message format | Conventional Commits: `type(scope): imperative summary` (≤72 chars). Types: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `content`, `build`, `chore`. Body explains *why*, not what. Closing attribution line as required by the tooling. |
 | History lives in Git | Change history, authorship, dates, ticket notes and "what changed" never go in script headers or inline comments (§5.12). `CHANGELOG.md` is generated from commit types at release. |
 | Never committed | Place files (`.rbxl`, `.rbxlx`), `sourcemap.json`, build output, Open Cloud keys, cookies, `.env`, Blender autosaves, large raw sources (use Git LFS or external storage for `assets/` binaries). |
-| Hooks | Pre-commit: `stylua --check`, `selene`, `luau-lsp analyze`, secret scan, forbidden-terms scan (§2). Commit-msg: Conventional Commits validator. Hooks are never bypassed with `--no-verify`. |
+| Hooks | Pre-commit runs `tools/gate.sh`: `stylua --check`, `selene`, `luau-lsp analyze`, Lune tests, `rojo build`, raw-print scan, secret scan, forbidden-terms scan (§2). Commit-msg: Conventional Commits validator. Hooks are never bypassed with `--no-verify`. |
+| Forbidden-terms list | Outside the repo: `$YGG_FORBIDDEN_TERMS` or `~/.yggdrasil/forbidden-terms.txt`; CI reads the `FORBIDDEN_TERMS` secret. The scan fails closed when the list is missing. Myth names allowed by §2 are not on it. |
 | Pushing | Manual only: a human pushes, opens the PR, and merges. No force-push to shared branches. |
 | Rewriting | Local unpublished commits may be amended or squashed; published history is not rewritten. |
 | Content commits | Content batches reference their register entries (§7.1); assets and the data rows that use them land together so `main` never has dangling ids. |
@@ -464,7 +467,7 @@ Define target concurrency per place, server count per realm, and what happens wh
 
 | Milestone | Deliverable | Exit criteria |
 |---|---|---|
-| **M0 Foundations** | Rojo project, bootstrap, Net layer, Data stub, UI shell, CI | A player joins, a profile loads in memory, HUD shows replicated HP, tests and lint pass, Git initialized with hooks and the auto-commit gate working |
+| **M0 Foundations** (done 2026-10-23) | Rojo project, bootstrap, Net layer, Data stub, UI shell, CI | A player joins, a profile loads in memory, HUD shows replicated HP, tests and lint pass, Git initialized with hooks and the auto-commit gate working |
 | **M0.5 Testing Grounds** | One dev place in Midgard: Farming Village, fields, goblin camp; Warrior/Mage/Healer to level 5; dev commands ([scope 01](scope/01-midgard-testing-grounds.md)) | Every skill, passive and spell resolves server-side; Circle 2 refused at line level 5; Rabble AI states and leash work; dev commands gated; all assets registered |
 | **M1 Vertical slice** | Levels 1–5, 3 classes, 12 Disciplines, ~20 spells, 6 enemies + boss, tutorial zone | 30-minute loop playable on phone and desktop; combat feel signed off; no exploit found in rate-limit/validation tests |
 | **M2 Alpha** | Hub + 3 zones, 8 classes, crafting v1, parties, trading v1, cap 20 | Soak test with bots at target concurrency; telemetry live |
@@ -502,7 +505,7 @@ Define target concurrency per place, server count per realm, and what happens wh
 3. Realm theming for the nine realms. Midgard is the starter realm (farmland, goblins); the other eight are open.
 4. Who produces rigs and animations (in-house animator, commission, licensed packs)?
 5. Target concurrency per realm and server cost envelope.
-6. Real Data module delivery date, and whether the schema version starts at 1.
+6. Real Data module delivery date. (Schema version starts at 1.)
 7. Guild siege schedule and protections for casual players.
 8. Which core combat feel: tab-hybrid/soft lock vs free-aim (prototype both in M1).
 9. M1 spell picks: with Circles 0–1 only at level 5, 3 picks per level needs ≥15 spells per caster class. Grow the lists, or keep picks below 3 until Circle 2?
