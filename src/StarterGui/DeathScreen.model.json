@@ -1,0 +1,135 @@
+{
+	"className": "ScreenGui",
+	"properties": {
+		"ResetOnSpawn": false,
+		"ZIndexBehavior": "Sibling",
+		"Enabled": false,
+		"DisplayOrder": 10,
+		"ScreenInsets": "None",
+		"IgnoreGuiInset": false
+	},
+	"children": [
+		{
+			"name": "Shade",
+			"className": "Frame",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							0
+						],
+						[
+							1,
+							0
+						]
+					]
+				},
+				"BackgroundColor3": [
+					0.1,
+					0,
+					0
+				],
+				"BackgroundTransparency": 0.55
+			},
+			"children": [
+				{
+					"name": "Title",
+					"className": "TextLabel",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									0,
+									60
+								]
+							]
+						},
+						"BackgroundTransparency": 1,
+						"Text": "Defeated",
+						"TextColor3": [
+							1,
+							0.8,
+							0.7
+						],
+						"FontFace": {
+							"Font": {
+								"family": "rbxasset://fonts/families/BuilderSans.json",
+								"weight": "Bold",
+								"style": "Normal"
+							}
+						},
+						"TextXAlignment": "Center",
+						"TextSize": 48,
+						"TextScaled": false,
+						"TextWrapped": true,
+						"Position": {
+							"UDim2": [
+								[
+									0,
+									0
+								],
+								[
+									0.38,
+									0
+								]
+							]
+						}
+					}
+				},
+				{
+					"name": "Bind_DeathText",
+					"className": "TextLabel",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									0,
+									30
+								]
+							]
+						},
+						"BackgroundTransparency": 1,
+						"Text": "",
+						"TextColor3": [
+							0.95,
+							0.93,
+							0.88
+						],
+						"FontFace": {
+							"Font": {
+								"family": "rbxasset://fonts/families/BuilderSans.json",
+								"weight": "Medium",
+								"style": "Normal"
+							}
+						},
+						"TextXAlignment": "Center",
+						"TextSize": 20,
+						"TextScaled": false,
+						"TextWrapped": true,
+						"Position": {
+							"UDim2": [
+								[
+									0,
+									0
+								],
+								[
+									0.38,
+									64
+								]
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}

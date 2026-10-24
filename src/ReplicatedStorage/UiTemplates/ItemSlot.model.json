@@ -1,0 +1,197 @@
+{
+	"className": "TextButton",
+	"properties": {
+		"Size": {
+			"UDim2": [
+				[
+					0,
+					72
+				],
+				[
+					0,
+					72
+				]
+			]
+		},
+		"BackgroundColor3": [
+			0.12,
+			0.11,
+			0.1
+		],
+		"Text": "",
+		"AutoButtonColor": true
+	},
+	"children": [
+		{
+			"name": "UICorner",
+			"className": "UICorner",
+			"properties": {
+				"CornerRadius": {
+					"UDim": [
+						0,
+						6
+					]
+				}
+			}
+		},
+		{
+			"name": "UIStroke",
+			"className": "UIStroke",
+			"properties": {
+				"Color": [
+					0.85,
+					0.72,
+					0.45
+				],
+				"Thickness": 1,
+				"Transparency": 0.5,
+				"ApplyStrokeMode": "Border"
+			}
+		},
+		{
+			"name": "Bind_Name",
+			"className": "TextLabel",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							-6
+						],
+						[
+							0.7,
+							0
+						]
+					]
+				},
+				"BackgroundTransparency": 1,
+				"Text": "",
+				"TextColor3": [
+					0.95,
+					0.93,
+					0.88
+				],
+				"FontFace": {
+					"Font": {
+						"family": "rbxasset://fonts/families/BuilderSans.json",
+						"weight": "Bold",
+						"style": "Normal"
+					}
+				},
+				"TextXAlignment": "Center",
+				"TextSize": 16,
+				"TextScaled": true,
+				"TextWrapped": true,
+				"Position": {
+					"UDim2": [
+						[
+							0,
+							3
+						],
+						[
+							0,
+							3
+						]
+					]
+				}
+			}
+		},
+		{
+			"name": "Bind_Count",
+			"className": "TextLabel",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							-4
+						],
+						[
+							0,
+							14
+						]
+					]
+				},
+				"BackgroundTransparency": 1,
+				"Text": "",
+				"TextColor3": [
+					0.85,
+					0.72,
+					0.45
+				],
+				"FontFace": {
+					"Font": {
+						"family": "rbxasset://fonts/families/BuilderSans.json",
+						"weight": "Bold",
+						"style": "Normal"
+					}
+				},
+				"TextXAlignment": "Right",
+				"TextSize": 13,
+				"TextScaled": false,
+				"TextWrapped": true,
+				"Position": {
+					"UDim2": [
+						[
+							0,
+							0
+						],
+						[
+							1,
+							-15
+						]
+					]
+				}
+			}
+		},
+		{
+			"name": "Bind_Equipped",
+			"className": "TextLabel",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							0,
+							14
+						],
+						[
+							0,
+							14
+						]
+					]
+				},
+				"BackgroundTransparency": 1,
+				"Text": "E",
+				"TextColor3": [
+					0.5,
+					1,
+					0.5
+				],
+				"FontFace": {
+					"Font": {
+						"family": "rbxasset://fonts/families/BuilderSans.json",
+						"weight": "Bold",
+						"style": "Normal"
+					}
+				},
+				"TextXAlignment": "Left",
+				"TextSize": 13,
+				"TextScaled": false,
+				"TextWrapped": true,
+				"Position": {
+					"UDim2": [
+						[
+							0,
+							3
+						],
+						[
+							1,
+							-15
+						]
+					]
+				},
+				"Visible": false
+			}
+		}
+	]
+}

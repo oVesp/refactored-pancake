@@ -1,0 +1,66 @@
+{
+	"className": "TextLabel",
+	"properties": {
+		"Size": {
+			"UDim2": [
+				[
+					1,
+					0
+				],
+				[
+					0,
+					26
+				]
+			]
+		},
+		"BackgroundColor3": [
+			0.07,
+			0.07,
+			0.09
+		],
+		"BackgroundTransparency": 0.2,
+		"Text": "",
+		"TextColor3": [
+			0.95,
+			0.93,
+			0.88
+		],
+		"FontFace": {
+			"Font": {
+				"family": "rbxasset://fonts/families/BuilderSans.json",
+				"weight": "Bold",
+				"style": "Normal"
+			}
+		},
+		"TextSize": 16,
+		"TextWrapped": true
+	},
+	"children": [
+		{
+			"name": "UICorner",
+			"className": "UICorner",
+			"properties": {
+				"CornerRadius": {
+					"UDim": [
+						0,
+						6
+					]
+				}
+			}
+		},
+		{
+			"name": "UIStroke",
+			"className": "UIStroke",
+			"properties": {
+				"Color": [
+					0.85,
+					0.72,
+					0.45
+				],
+				"Thickness": 1,
+				"Transparency": 0.5,
+				"ApplyStrokeMode": "Border"
+			}
+		}
+	]
+}

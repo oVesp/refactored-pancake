@@ -15,7 +15,18 @@ type Controller = {
 -- Order matters: each controller receives the controllers listed before it as `deps` in Init.
 local CONTROLLER_ORDER = {
 	"UIController",
+	"ProfileController",
+	"CombatController",
+	"AudioController",
+	"VfxController",
+	"InputController",
 	"HudController",
+	"SpellbookController",
+	"InventoryController",
+	"CharacterController",
+	"DeathController",
+	"NameplateController",
+	"DebugController",
 }
 
 local log = Logger.new("Bootstrap")

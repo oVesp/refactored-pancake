@@ -1,0 +1,1156 @@
+{
+	"className": "ScreenGui",
+	"properties": {
+		"ResetOnSpawn": false,
+		"ZIndexBehavior": "Sibling",
+		"Enabled": true,
+		"DisplayOrder": 0,
+		"ScreenInsets": "CoreUISafeInsets",
+		"IgnoreGuiInset": false
+	},
+	"children": [
+		{
+			"name": "Vitals",
+			"className": "Frame",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							0.26,
+							0
+						],
+						[
+							0,
+							96
+						]
+					]
+				},
+				"Position": {
+					"UDim2": [
+						[
+							0,
+							12
+						],
+						[
+							1,
+							-96
+						]
+					]
+				},
+				"AnchorPoint": [
+					0,
+					1
+				],
+				"BackgroundTransparency": 1
+			},
+			"children": [
+				{
+					"name": "UISizeConstraint",
+					"className": "UISizeConstraint",
+					"properties": {
+						"MinSize": [
+							180,
+							0
+						],
+						"MaxSize": [
+							360,
+							200
+						]
+					}
+				},
+				{
+					"name": "UIListLayout",
+					"className": "UIListLayout",
+					"properties": {
+						"FillDirection": "Vertical",
+						"Padding": {
+							"UDim": [
+								0,
+								4
+							]
+						},
+						"HorizontalAlignment": "Left",
+						"VerticalAlignment": "Top",
+						"SortOrder": "LayoutOrder"
+					}
+				},
+				{
+					"name": "HpBar",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									0,
+									24
+								]
+							]
+						},
+						"BackgroundColor3": [
+							0.12,
+							0.1,
+							0.1
+						],
+						"BackgroundTransparency": 0.2,
+						"ClipsDescendants": true
+					},
+					"children": [
+						{
+							"name": "UICorner",
+							"className": "UICorner",
+							"properties": {
+								"CornerRadius": {
+									"UDim": [
+										0,
+										4
+									]
+								}
+							}
+						},
+						{
+							"name": "UIStroke",
+							"className": "UIStroke",
+							"properties": {
+								"Color": [
+									0.85,
+									0.72,
+									0.45
+								],
+								"Thickness": 1,
+								"Transparency": 0.5,
+								"ApplyStrokeMode": "Border"
+							}
+						},
+						{
+							"name": "Bind_HpFill",
+							"className": "Frame",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											1,
+											0
+										],
+										[
+											1,
+											0
+										]
+									]
+								},
+								"BackgroundColor3": [
+									0.72,
+									0.16,
+									0.16
+								],
+								"BorderSizePixel": 0
+							},
+							"children": [
+								{
+									"name": "UICorner",
+									"className": "UICorner",
+									"properties": {
+										"CornerRadius": {
+											"UDim": [
+												0,
+												4
+											]
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Bind_HpText",
+							"className": "TextLabel",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											1,
+											0
+										],
+										[
+											1,
+											0
+										]
+									]
+								},
+								"BackgroundTransparency": 1,
+								"Text": "",
+								"TextColor3": [
+									0.95,
+									0.93,
+									0.88
+								],
+								"FontFace": {
+									"Font": {
+										"family": "rbxasset://fonts/families/BuilderSans.json",
+										"weight": "Bold",
+										"style": "Normal"
+									}
+								},
+								"TextXAlignment": "Center",
+								"TextSize": 16,
+								"TextScaled": true,
+								"TextWrapped": true,
+								"ZIndex": 2
+							}
+						}
+					]
+				},
+				{
+					"name": "MpBar",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									0,
+									18
+								]
+							]
+						},
+						"BackgroundColor3": [
+							0.12,
+							0.1,
+							0.1
+						],
+						"BackgroundTransparency": 0.2,
+						"ClipsDescendants": true
+					},
+					"children": [
+						{
+							"name": "UICorner",
+							"className": "UICorner",
+							"properties": {
+								"CornerRadius": {
+									"UDim": [
+										0,
+										4
+									]
+								}
+							}
+						},
+						{
+							"name": "UIStroke",
+							"className": "UIStroke",
+							"properties": {
+								"Color": [
+									0.85,
+									0.72,
+									0.45
+								],
+								"Thickness": 1,
+								"Transparency": 0.5,
+								"ApplyStrokeMode": "Border"
+							}
+						},
+						{
+							"name": "Bind_MpFill",
+							"className": "Frame",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											1,
+											0
+										],
+										[
+											1,
+											0
+										]
+									]
+								},
+								"BackgroundColor3": [
+									0.2,
+									0.35,
+									0.8
+								],
+								"BorderSizePixel": 0
+							},
+							"children": [
+								{
+									"name": "UICorner",
+									"className": "UICorner",
+									"properties": {
+										"CornerRadius": {
+											"UDim": [
+												0,
+												4
+											]
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Bind_MpText",
+							"className": "TextLabel",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											1,
+											0
+										],
+										[
+											1,
+											0
+										]
+									]
+								},
+								"BackgroundTransparency": 1,
+								"Text": "",
+								"TextColor3": [
+									0.95,
+									0.93,
+									0.88
+								],
+								"FontFace": {
+									"Font": {
+										"family": "rbxasset://fonts/families/BuilderSans.json",
+										"weight": "Bold",
+										"style": "Normal"
+									}
+								},
+								"TextXAlignment": "Center",
+								"TextSize": 16,
+								"TextScaled": true,
+								"TextWrapped": true,
+								"ZIndex": 2
+							}
+						}
+					]
+				},
+				{
+					"name": "StaminaBar",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									0,
+									14
+								]
+							]
+						},
+						"BackgroundColor3": [
+							0.12,
+							0.1,
+							0.1
+						],
+						"BackgroundTransparency": 0.2,
+						"ClipsDescendants": true
+					},
+					"children": [
+						{
+							"name": "UICorner",
+							"className": "UICorner",
+							"properties": {
+								"CornerRadius": {
+									"UDim": [
+										0,
+										4
+									]
+								}
+							}
+						},
+						{
+							"name": "UIStroke",
+							"className": "UIStroke",
+							"properties": {
+								"Color": [
+									0.85,
+									0.72,
+									0.45
+								],
+								"Thickness": 1,
+								"Transparency": 0.5,
+								"ApplyStrokeMode": "Border"
+							}
+						},
+						{
+							"name": "Bind_StaminaFill",
+							"className": "Frame",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											1,
+											0
+										],
+										[
+											1,
+											0
+										]
+									]
+								},
+								"BackgroundColor3": [
+									0.75,
+									0.62,
+									0.2
+								],
+								"BorderSizePixel": 0
+							},
+							"children": [
+								{
+									"name": "UICorner",
+									"className": "UICorner",
+									"properties": {
+										"CornerRadius": {
+											"UDim": [
+												0,
+												4
+											]
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Bind_StaminaText",
+							"className": "TextLabel",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											1,
+											0
+										],
+										[
+											1,
+											0
+										]
+									]
+								},
+								"BackgroundTransparency": 1,
+								"Text": "",
+								"TextColor3": [
+									0.95,
+									0.93,
+									0.88
+								],
+								"FontFace": {
+									"Font": {
+										"family": "rbxasset://fonts/families/BuilderSans.json",
+										"weight": "Bold",
+										"style": "Normal"
+									}
+								},
+								"TextXAlignment": "Center",
+								"TextSize": 16,
+								"TextScaled": true,
+								"TextWrapped": true,
+								"ZIndex": 2
+							}
+						}
+					]
+				},
+				{
+					"name": "Bind_FocusText",
+					"className": "TextLabel",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									0,
+									18
+								]
+							]
+						},
+						"BackgroundTransparency": 1,
+						"Text": "Focus",
+						"TextColor3": [
+							0.85,
+							0.72,
+							0.45
+						],
+						"FontFace": {
+							"Font": {
+								"family": "rbxasset://fonts/families/BuilderSans.json",
+								"weight": "Bold",
+								"style": "Normal"
+							}
+						},
+						"TextXAlignment": "Left",
+						"TextSize": 16,
+						"TextScaled": false,
+						"TextWrapped": true
+					}
+				}
+			]
+		},
+		{
+			"name": "TopLeft",
+			"className": "Frame",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							0,
+							320
+						],
+						[
+							0,
+							80
+						]
+					]
+				},
+				"Position": {
+					"UDim2": [
+						[
+							0,
+							12
+						],
+						[
+							0,
+							12
+						]
+					]
+				},
+				"BackgroundTransparency": 1
+			},
+			"children": [
+				{
+					"name": "UIListLayout",
+					"className": "UIListLayout",
+					"properties": {
+						"FillDirection": "Vertical",
+						"Padding": {
+							"UDim": [
+								0,
+								2
+							]
+						},
+						"HorizontalAlignment": "Left",
+						"VerticalAlignment": "Top",
+						"SortOrder": "LayoutOrder"
+					}
+				},
+				{
+					"name": "Bind_LevelText",
+					"className": "TextLabel",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									0,
+									26
+								]
+							]
+						},
+						"BackgroundTransparency": 1,
+						"Text": "Level 1",
+						"TextColor3": [
+							0.85,
+							0.72,
+							0.45
+						],
+						"FontFace": {
+							"Font": {
+								"family": "rbxasset://fonts/families/BuilderSans.json",
+								"weight": "Bold",
+								"style": "Normal"
+							}
+						},
+						"TextXAlignment": "Left",
+						"TextSize": 22,
+						"TextScaled": false,
+						"TextWrapped": true
+					}
+				},
+				{
+					"name": "Bind_ZoneText",
+					"className": "TextLabel",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									0,
+									20
+								]
+							]
+						},
+						"BackgroundTransparency": 1,
+						"Text": "",
+						"TextColor3": [
+							0.95,
+							0.93,
+							0.88
+						],
+						"FontFace": {
+							"Font": {
+								"family": "rbxasset://fonts/families/BuilderSans.json",
+								"weight": "Medium",
+								"style": "Normal"
+							}
+						},
+						"TextXAlignment": "Left",
+						"TextSize": 16,
+						"TextScaled": false,
+						"TextWrapped": true
+					}
+				},
+				{
+					"name": "Bind_HintText",
+					"className": "TextLabel",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									0,
+									36
+								]
+							]
+						},
+						"BackgroundTransparency": 1,
+						"Text": "",
+						"TextColor3": [
+							1,
+							0.85,
+							0.5
+						],
+						"FontFace": {
+							"Font": {
+								"family": "rbxasset://fonts/families/BuilderSans.json",
+								"weight": "Bold",
+								"style": "Normal"
+							}
+						},
+						"TextXAlignment": "Left",
+						"TextSize": 16,
+						"TextScaled": false,
+						"TextWrapped": true
+					}
+				}
+			]
+		},
+		{
+			"name": "Bind_Statuses",
+			"className": "Frame",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							0.26,
+							0
+						],
+						[
+							0,
+							24
+						]
+					]
+				},
+				"Position": {
+					"UDim2": [
+						[
+							0,
+							12
+						],
+						[
+							1,
+							-102
+						]
+					]
+				},
+				"AnchorPoint": [
+					0,
+					1
+				],
+				"BackgroundTransparency": 1
+			},
+			"children": [
+				{
+					"name": "UIListLayout",
+					"className": "UIListLayout",
+					"properties": {
+						"FillDirection": "Horizontal",
+						"Padding": {
+							"UDim": [
+								0,
+								4
+							]
+						},
+						"HorizontalAlignment": "Left",
+						"VerticalAlignment": "Top",
+						"SortOrder": "LayoutOrder"
+					}
+				}
+			]
+		},
+		{
+			"name": "Bind_Hotbar",
+			"className": "Frame",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							0,
+							0
+						],
+						[
+							0,
+							64
+						]
+					]
+				},
+				"AutomaticSize": "X",
+				"Position": {
+					"UDim2": [
+						[
+							0.5,
+							0
+						],
+						[
+							1,
+							-22
+						]
+					]
+				},
+				"AnchorPoint": [
+					0.5,
+					1
+				],
+				"BackgroundTransparency": 1
+			},
+			"children": [
+				{
+					"name": "UIListLayout",
+					"className": "UIListLayout",
+					"properties": {
+						"FillDirection": "Horizontal",
+						"Padding": {
+							"UDim": [
+								0,
+								6
+							]
+						},
+						"HorizontalAlignment": "Center",
+						"VerticalAlignment": "Bottom",
+						"SortOrder": "LayoutOrder"
+					}
+				}
+			]
+		},
+		{
+			"name": "XpBar",
+			"className": "Frame",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							0.5,
+							0
+						],
+						[
+							0,
+							12
+						]
+					]
+				},
+				"BackgroundColor3": [
+					0.12,
+					0.1,
+					0.1
+				],
+				"BackgroundTransparency": 0.2,
+				"ClipsDescendants": true,
+				"Position": {
+					"UDim2": [
+						[
+							0.5,
+							0
+						],
+						[
+							1,
+							-92
+						]
+					]
+				},
+				"AnchorPoint": [
+					0.5,
+					1
+				]
+			},
+			"children": [
+				{
+					"name": "UICorner",
+					"className": "UICorner",
+					"properties": {
+						"CornerRadius": {
+							"UDim": [
+								0,
+								4
+							]
+						}
+					}
+				},
+				{
+					"name": "UIStroke",
+					"className": "UIStroke",
+					"properties": {
+						"Color": [
+							0.85,
+							0.72,
+							0.45
+						],
+						"Thickness": 1,
+						"Transparency": 0.5,
+						"ApplyStrokeMode": "Border"
+					}
+				},
+				{
+					"name": "Bind_XpFill",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									1,
+									0
+								]
+							]
+						},
+						"BackgroundColor3": [
+							0.55,
+							0.4,
+							0.85
+						],
+						"BorderSizePixel": 0
+					},
+					"children": [
+						{
+							"name": "UICorner",
+							"className": "UICorner",
+							"properties": {
+								"CornerRadius": {
+									"UDim": [
+										0,
+										4
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Bind_XpText",
+					"className": "TextLabel",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									1,
+									0
+								]
+							]
+						},
+						"BackgroundTransparency": 1,
+						"Text": "",
+						"TextColor3": [
+							0.95,
+							0.93,
+							0.88
+						],
+						"FontFace": {
+							"Font": {
+								"family": "rbxasset://fonts/families/BuilderSans.json",
+								"weight": "Bold",
+								"style": "Normal"
+							}
+						},
+						"TextXAlignment": "Center",
+						"TextSize": 16,
+						"TextScaled": true,
+						"TextWrapped": true,
+						"ZIndex": 2
+					}
+				}
+			]
+		},
+		{
+			"name": "Bind_CastBar",
+			"className": "Frame",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							0,
+							260
+						],
+						[
+							0,
+							18
+						]
+					]
+				},
+				"Position": {
+					"UDim2": [
+						[
+							0.5,
+							0
+						],
+						[
+							1,
+							-110
+						]
+					]
+				},
+				"AnchorPoint": [
+					0.5,
+					1
+				],
+				"BackgroundColor3": [
+					0.12,
+					0.1,
+					0.1
+				],
+				"Visible": false
+			},
+			"children": [
+				{
+					"name": "UICorner",
+					"className": "UICorner",
+					"properties": {
+						"CornerRadius": {
+							"UDim": [
+								0,
+								4
+							]
+						}
+					}
+				},
+				{
+					"name": "UIStroke",
+					"className": "UIStroke",
+					"properties": {
+						"Color": [
+							0.85,
+							0.72,
+							0.45
+						],
+						"Thickness": 1,
+						"Transparency": 0.4,
+						"ApplyStrokeMode": "Border"
+					}
+				},
+				{
+					"name": "Bind_CastFill",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									0,
+									0
+								],
+								[
+									1,
+									0
+								]
+							]
+						},
+						"BackgroundColor3": [
+							0.85,
+							0.72,
+							0.45
+						],
+						"BorderSizePixel": 0
+					},
+					"children": [
+						{
+							"name": "UICorner",
+							"className": "UICorner",
+							"properties": {
+								"CornerRadius": {
+									"UDim": [
+										0,
+										4
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Bind_CastText",
+					"className": "TextLabel",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									1,
+									0
+								]
+							]
+						},
+						"BackgroundTransparency": 1,
+						"Text": "",
+						"TextColor3": [
+							0.1,
+							0.08,
+							0.05
+						],
+						"FontFace": {
+							"Font": {
+								"family": "rbxasset://fonts/families/BuilderSans.json",
+								"weight": "Bold",
+								"style": "Normal"
+							}
+						},
+						"TextXAlignment": "Center",
+						"TextSize": 16,
+						"TextScaled": true,
+						"TextWrapped": true,
+						"ZIndex": 2
+					}
+				}
+			]
+		},
+		{
+			"name": "Bind_Toasts",
+			"className": "Frame",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							0,
+							420
+						],
+						[
+							0,
+							200
+						]
+					]
+				},
+				"Position": {
+					"UDim2": [
+						[
+							0.5,
+							0
+						],
+						[
+							0,
+							70
+						]
+					]
+				},
+				"AnchorPoint": [
+					0.5,
+					0
+				],
+				"BackgroundTransparency": 1
+			},
+			"children": [
+				{
+					"name": "UIListLayout",
+					"className": "UIListLayout",
+					"properties": {
+						"FillDirection": "Vertical",
+						"Padding": {
+							"UDim": [
+								0,
+								4
+							]
+						},
+						"HorizontalAlignment": "Center",
+						"VerticalAlignment": "Top",
+						"SortOrder": "LayoutOrder"
+					}
+				}
+			]
+		},
+		{
+			"name": "Bind_KeysText",
+			"className": "TextLabel",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							0.6,
+							0
+						],
+						[
+							0,
+							16
+						]
+					]
+				},
+				"BackgroundTransparency": 1,
+				"Text": "LMB attack (hold: heavy) \u00b7 1-8 skills \u00b7 Q dodge \u00b7 F guard \u00b7 Z/X disciplines \u00b7 B spells \u00b7 I bag \u00b7 C sheet",
+				"TextColor3": [
+					0.7,
+					0.68,
+					0.62
+				],
+				"FontFace": {
+					"Font": {
+						"family": "rbxasset://fonts/families/BuilderSans.json",
+						"weight": "Medium",
+						"style": "Normal"
+					}
+				},
+				"TextXAlignment": "Center",
+				"TextSize": 13,
+				"TextScaled": false,
+				"TextWrapped": true,
+				"Position": {
+					"UDim2": [
+						[
+							0.5,
+							0
+						],
+						[
+							1,
+							-4
+						]
+					]
+				},
+				"AnchorPoint": [
+					0.5,
+					1
+				]
+			}
+		}
+	]
+}

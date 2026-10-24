@@ -1,0 +1,81 @@
+{
+	"className": "TextLabel",
+	"properties": {
+		"Size": {
+			"UDim2": [
+				[
+					0,
+					0
+				],
+				[
+					0,
+					22
+				]
+			]
+		},
+		"AutomaticSize": "X",
+		"BackgroundColor3": [
+			0.18,
+			0.15,
+			0.12
+		],
+		"Text": "",
+		"TextColor3": [
+			0.95,
+			0.93,
+			0.88
+		],
+		"FontFace": {
+			"Font": {
+				"family": "rbxasset://fonts/families/BuilderSans.json",
+				"weight": "Bold",
+				"style": "Normal"
+			}
+		},
+		"TextSize": 13
+	},
+	"children": [
+		{
+			"name": "UICorner",
+			"className": "UICorner",
+			"properties": {
+				"CornerRadius": {
+					"UDim": [
+						0,
+						4
+					]
+				}
+			}
+		},
+		{
+			"name": "UIPadding",
+			"className": "UIPadding",
+			"properties": {
+				"PaddingTop": {
+					"UDim": [
+						0,
+						4
+					]
+				},
+				"PaddingBottom": {
+					"UDim": [
+						0,
+						4
+					]
+				},
+				"PaddingLeft": {
+					"UDim": [
+						0,
+						4
+					]
+				},
+				"PaddingRight": {
+					"UDim": [
+						0,
+						4
+					]
+				}
+			}
+		}
+	]
+}

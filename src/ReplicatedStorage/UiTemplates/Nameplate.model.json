@@ -1,0 +1,201 @@
+{
+	"className": "BillboardGui",
+	"properties": {
+		"Size": {
+			"UDim2": [
+				[
+					0,
+					150
+				],
+				[
+					0,
+					46
+				]
+			]
+		},
+		"StudsOffset": [
+			0,
+			3.2,
+			0
+		],
+		"AlwaysOnTop": false,
+		"MaxDistance": 90,
+		"LightInfluence": 0,
+		"ResetOnSpawn": false
+	},
+	"children": [
+		{
+			"name": "Bind_Name",
+			"className": "TextLabel",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							0
+						],
+						[
+							0,
+							16
+						]
+					]
+				},
+				"BackgroundTransparency": 1,
+				"Text": "",
+				"TextColor3": [
+					0.95,
+					0.93,
+					0.88
+				],
+				"FontFace": {
+					"Font": {
+						"family": "rbxasset://fonts/families/BuilderSans.json",
+						"weight": "Bold",
+						"style": "Normal"
+					}
+				},
+				"TextXAlignment": "Center",
+				"TextSize": 14,
+				"TextScaled": false,
+				"TextWrapped": true,
+				"TextStrokeTransparency": 0.4
+			}
+		},
+		{
+			"name": "HpBar",
+			"className": "Frame",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							0
+						],
+						[
+							0,
+							8
+						]
+					]
+				},
+				"Position": {
+					"UDim2": [
+						[
+							0,
+							0
+						],
+						[
+							0,
+							18
+						]
+					]
+				},
+				"BackgroundColor3": [
+					0.1,
+					0.08,
+					0.08
+				]
+			},
+			"children": [
+				{
+					"name": "UICorner",
+					"className": "UICorner",
+					"properties": {
+						"CornerRadius": {
+							"UDim": [
+								0,
+								3
+							]
+						}
+					}
+				},
+				{
+					"name": "Bind_HpFill",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									1,
+									0
+								]
+							]
+						},
+						"BackgroundColor3": [
+							0.75,
+							0.2,
+							0.15
+						],
+						"BorderSizePixel": 0
+					},
+					"children": [
+						{
+							"name": "UICorner",
+							"className": "UICorner",
+							"properties": {
+								"CornerRadius": {
+									"UDim": [
+										0,
+										3
+									]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Bind_Info",
+			"className": "TextLabel",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							0
+						],
+						[
+							0,
+							14
+						]
+					]
+				},
+				"BackgroundTransparency": 1,
+				"Text": "",
+				"TextColor3": [
+					1,
+					0.85,
+					0.5
+				],
+				"FontFace": {
+					"Font": {
+						"family": "rbxasset://fonts/families/BuilderSans.json",
+						"weight": "Bold",
+						"style": "Normal"
+					}
+				},
+				"TextXAlignment": "Center",
+				"TextSize": 12,
+				"TextScaled": false,
+				"TextWrapped": true,
+				"Position": {
+					"UDim2": [
+						[
+							0,
+							0
+						],
+						[
+							0,
+							28
+						]
+					]
+				},
+				"TextStrokeTransparency": 0.5
+			}
+		}
+	]
+}
