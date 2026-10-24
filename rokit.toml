@@ -1,0 +1,9 @@
+# Toolchain pinned for this project. Install with `rokit install`.
+
+[tools]
+rojo = "rojo-rbx/rojo@7.7.1"
+stylua = "JohnnyMorganz/StyLua@2.0.2"
+selene = "Kampfkarren/selene@0.28.0"
+lune = "lune-org/lune@0.11.1"
+wally = "UpliftGames/wally@0.3.2"
+luau-lsp = "JohnnyMorganz/luau-lsp@1.70.1"

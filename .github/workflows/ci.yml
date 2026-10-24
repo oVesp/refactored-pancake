@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: CompeyDev/setup-rokit@v0.1.2
+      - name: Write forbidden-terms list
+        env:
+          FORBIDDEN_TERMS: ${{ secrets.FORBIDDEN_TERMS }}
+        run: |
+          test -n "$FORBIDDEN_TERMS" || { echo "FORBIDDEN_TERMS secret is not set"; exit 1; }
+          printf '%s\n' "$FORBIDDEN_TERMS" > "$RUNNER_TEMP/forbidden-terms.txt"
+          echo "YGG_FORBIDDEN_TERMS=$RUNNER_TEMP/forbidden-terms.txt" >> "$GITHUB_ENV"
+      - name: Quality gate
+        run: sh tools/gate.sh

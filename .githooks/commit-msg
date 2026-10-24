@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+# Conventional Commits: type(scope): summary, first line at most 72 characters.
+first=$(head -n 1 "$1")
+pattern='^(feat|fix|refactor|perf|test|docs|content|build|chore)(\([a-z0-9-]+\))?!?: [^ ].*$'
+if ! printf '%s' "$first" | grep -Eq "$pattern"; then
+	printf 'Commit message must follow Conventional Commits: type(scope): summary\n' >&2
+	exit 1
+fi
+if [ "${#first}" -gt 72 ]; then
+	printf 'Commit summary is %d characters; limit is 72\n' "${#first}" >&2
+	exit 1
+fi

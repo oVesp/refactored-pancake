@@ -1,0 +1,4 @@
+#!/bin/sh
+# Git LFS hook; core.hooksPath points here, so LFS hooks must live here too.
+command -v git-lfs >/dev/null 2>&1 || { printf >&2 "Git LFS is required (https://git-lfs.com)\n"; exit 2; }
+git lfs pre-push "$@"
