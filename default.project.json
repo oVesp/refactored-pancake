@@ -8,6 +8,9 @@
 			},
 			"Content": {
 				"$path": "src/ReplicatedStorage/Content"
+			},
+			"UiTemplates": {
+				"$path": "src/ReplicatedStorage/UiTemplates"
 			}
 		},
 		"ServerScriptService": {
@@ -31,6 +34,17 @@
 		"Workspace": {
 			"$properties": {
 				"StreamingEnabled": true
+			},
+			"Map": {
+				"$path": "src/Workspace/Map.rbxmx"
+			}
+		},
+		"ServerStorage": {
+			"Templates": {
+				"$path": "src/ServerStorage/Templates"
+			},
+			"ContentServerOnly": {
+				"$path": "src/ServerStorage/ContentServerOnly"
 			}
 		}
 	}
