@@ -242,16 +242,16 @@ Verified by Studio playtest (single client, Studio) and Lune unit tests.
 
 | Exit criterion | Result |
 |---|---|
-| 1. Class pick at trainer, kill goblins, reach level 5 | Pass on desktop: trainer prompts train classes, kills grant XP, `/level` covers the climb. **Phone emulator not tested.** |
-| 2. Skills, passives, spells resolve server-side; rejects roll back | Pass: melee, cone, projectile, ground, ally, self, dash and blink paths exercised; passives show in stats; cooldown and malformed calls rejected; the client clears its predicted cooldown on reject. |
+| 1. Class pick at trainer, kill goblins, reach level 5 | Pass on desktop: trainer prompts train classes; kills grant XP; each class taken to level 5 in play (via `/level 5` plus the same `TrainClass` path the trainer uses). **Phone emulator not tested.** |
+| 2. Skills, passives, spells resolve server-side; rejects roll back | Pass: every Warrior, Mage and Healer active and all 16 spells fired in play with the expected damage, heal, shield, status, teleport or prop change; all 9 passives observed through `Stat_*`/`Extra_*` attributes; cooldown, unknown-skill and malformed calls rejected; the client clears its predicted cooldown on reject. |
 | 3. Circle 2 refused at line level 5 | Pass in unit tests (`Formulas.spec`); no Circle 2 content exists to try in play. |
 | 4. Rabble AI states, leash, respawn; Hexer interrupt | Pass: idle, patrol, aggro, attack, return observed; leash resets HP; Charge interrupts the Hexer's cast; Chieftain phase 2 summons two Raiders. |
 | 5. Multiclass with each template | Pass in unit tests for all four templates; 2+2+1 and 3+1+1 also exercised in play. |
 | 6. Dev commands refused for non-allowlisted users | **Not verified**: needs a published test; Studio always allows dev commands. |
-| 7. Every asset registered, no hard-coded ids | Pass: `Register.spec` validates `content/register.json`, the manifest and all content, UI and world files. |
+| 7. Every asset registered, no hard-coded ids | Pass: `Register.spec` validates `content/register.json`, the manifest and all content, UI and world files. All 10 audio ids preload in Studio (`IsLoaded`, non-zero length). |
 | 8. Format, lint, typecheck, tests, build | Pass (`tools/gate.sh`). |
 
-Also verified: guard (parry window, then 40% damage and stamina cost), dodge i-frames, Disciplines with Focus capacity, XP debt on death repaid by later XP, Weakened after respawn, loot to inventory, equip/unequip changing stats, potions.
+Also verified: guard (parry window, then 40% damage and stamina cost), dodge i-frames, Disciplines with Focus capacity, XP debt on death repaid by later XP, Weakened after respawn, loot to inventory, equip/unequip changing stats, potions, fire immunity, holy vulnerability, Rebuke knockback.
 
 Deviations and open items:
 - The greybox world is generated Parts with Roblox materials; Kenney meshes and textures wait for uploads.
