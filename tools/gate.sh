@@ -3,8 +3,9 @@
 set -eu
 cd "$(git rev-parse --show-toplevel)"
 
-DEFS_URL="https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/main/scripts/globalTypes.d.luau"
-DEFS=".cache/globalTypes.d.luau"
+LUAU_LSP_VERSION="1.70.1" # keep in step with rokit.toml
+DEFS_URL="https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/$LUAU_LSP_VERSION/scripts/globalTypes.d.luau"
+DEFS=".cache/globalTypes-$LUAU_LSP_VERSION.d.luau"
 
 step() { printf '\n== %s\n' "$1"; }
 
