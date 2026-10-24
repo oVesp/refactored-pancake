@@ -251,7 +251,7 @@ Verified by Studio playtest (single client, Studio) and Lune unit tests.
 | 7. Every asset registered, no hard-coded ids | Pass: `Register.spec` validates `content/register.json`, the manifest and all content, UI and world files. All 10 audio ids preload in Studio (`IsLoaded`, non-zero length). |
 | 8. Format, lint, typecheck, tests, build | Pass (`tools/gate.sh`). |
 
-Also verified: guard (parry window, then 40% damage and stamina cost), dodge i-frames, Disciplines with Focus capacity, XP debt on death repaid by later XP, Weakened after respawn, loot to inventory, equip/unequip changing stats, potions, fire immunity, holy vulnerability, Rebuke knockback.
+Also verified: guard (parry window, then 40% damage and stamina cost), dodge i-frames, Disciplines with Focus capacity, XP debt on death repaid by later XP, Weakened after respawn, loot to inventory, equip/unequip changing stats, potions, fire immunity, physical resistance, Rebuke knockback.
 
 Deviations and open items:
 - The greybox world is generated Parts with Roblox materials; Kenney meshes and textures wait for uploads.
