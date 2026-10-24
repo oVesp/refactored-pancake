@@ -7,3 +7,4 @@ Code: `Server/Services/DevService.luau`, `ServerStorage/ContentServerOnly/DevAll
 - `ServerStorage.RunDevCommand` (BindableFunction, Studio only) runs the same handlers for automation, such as Studio MCP playtests.
 - Dev players receive the damage log stream; F2 opens the overlay and shows AI states on nameplates.
 - World regeneration: `lune run tools/world/build` rewrites `src/Workspace/Map.rbxmx` and the Goblin template.
+- Terrain regeneration: `lune run tools/terrain/build` rewrites `src/ServerStorage/WorldGen/Data` and `build/terrain-preview.ppm`; then in Studio (Edit mode) `require(game.ServerStorage.WorldGen.Apply).Apply()`. See `docs/systems/world-generation.md`.

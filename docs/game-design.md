@@ -197,6 +197,7 @@ src/
   ServerStorage/
     Templates/                Enemy models, hold interiors
     ContentServerOnly/        Drop tables, dev allowlist, formulas players must not see
+    WorldGen/                 Terrain applier (Apply.luau) + generated Data/ (tools/terrain/build.luau)
   Workspace/Map.rbxmx         Generated greybox world (tools/world/build.luau)
   StarterPlayer/StarterPlayerScripts/
     Client/
@@ -204,7 +205,7 @@ src/
       Controllers/            InputController, CombatController, UIController, CameraController, ...
   StarterGui/                 Authored ScreenGuis (.model.json)
 assets/                       Source art (Blender, PSD, SVG), not synced into the place
-tools/                        gate.sh (quality gate), scan.sh, world/build.luau (greybox + templates), Python/Node/Lune/Blender scripts
+tools/                        gate.sh (quality gate), scan.sh, world/build.luau (greybox + templates), terrain/build.luau (Midgard terrain), Python/Node/Lune/Blender scripts
 content/register.json         Content register (§7.1), validated by tests/specs/Register.spec.luau
 docs/
 tests/                        Lune runner + specs/*.spec.luau
@@ -520,6 +521,7 @@ Define target concurrency per place, server count per realm, and what happens wh
 | Skill timing | Real-time action cooldowns per skill; cast speed from Agility | FFXIV-style GCD (2.5 s) / oGCD with animation lock, queue, slidecast and move-cancel replaces per-skill-only timing (2026-10-24); basic attacks and enemies stay off the GCD; only the item affix `Haste` shortens GCD and casts | Owner decision; readable rotation with weaving, gear-driven speed instead of a stat |
 | Goblin art | §8.2: no agent modelling, rigging or animation | Owner override for a test (2026-10-24): placeholder skinned goblin replaces the part rig; clips ship as KeyframeSequences registered at runtime until uploaded, and enemy animation plays client-side from a replicated `AnimCue` attribute | Studio's 3D importer is UI-only, so the mesh upload is a manual step; runtime KeyframeSequence registration only works in Studio, so live servers need uploaded ids in `Assets.Animations` |
 | Roblox PlayerModule bug | Not specified | Studio 0.744 ships `VRBaseCamera` with a `VRbaseCamera` typo that breaks default player scripts; `EngineFixes` swaps in `vendor/PlayerModulePatch` at server start | Temporary; delete both once Roblox ships the fix |
+| Midgard terrain | Not specified; base world for the Midgard realm | Offline Lune generator (`tools/terrain`) bakes a deterministic 2048-stud tile (heightfield, droplet + thermal erosion, authored creek spline and lake, A* trails, biomes, layered Poisson scatter of the Nature pack) into `ServerStorage/WorldGen/Data`; a Studio-only applier writes it with `WriteVoxelChannels`. Standard terrain materials instead of Expanded Terrain; the greybox pads stay and terrain is flattened to y=0 around them | Reproducible, diffable and testable output; the Lune and Studio runs match bit for bit; Expanded Terrain and native grass decoration need an owner toggle in Studio |
 
 ---
 
