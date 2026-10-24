@@ -43,6 +43,18 @@ export type SweepSpec = {
 
 export type TrailSpec = SweepSpec & { width: number }
 
+export type BeamSpec = {
+	texture: string,
+	color: ColorSequence,
+	width: number,
+	lifetime: number,
+	curve: number?,
+	speed: number?,
+	length: number?,
+	emission: number?,
+	segments: number?,
+}
+
 --[=[
 	Building blocks for spell visuals: textured particle emitters, trails and lights on invisible
 	anchors. Every visible shape comes from a texture, never from part geometry. Client-only and
@@ -235,6 +247,84 @@ function Particles.Follow(anchor: BasePart, target: BasePart, offset: CFrame, du
 		anchor.CFrame = target.CFrame * offset
 	end)
 	anchor.CFrame = target.CFrame * offset
+end
+
+--[=[
+	Textured ribbon between two points that thins and fades out over `spec.lifetime`. Endpoints are
+	attachments on invisible anchors; pass parts to keep an end on a moving target.
+]=]
+function Particles.Beam(from: Vector3 | BasePart, to: Vector3 | BasePart, spec: BeamSpec): Beam
+	local function endpoint(point: Vector3 | BasePart): (Attachment, BasePart?)
+		local attachment = Instance.new("Attachment")
+		if typeof(point) == "Vector3" then
+			local anchor = Particles.Anchor(CFrame.new(point))
+			attachment.Parent = anchor
+			return attachment, anchor
+		end
+		attachment.Parent = point
+		return attachment, nil
+	end
+	local a0, owner0 = endpoint(from)
+	local a1, owner1 = endpoint(to)
+	local beam = Instance.new("Beam")
+	beam.Attachment0 = a0
+	beam.Attachment1 = a1
+	beam.Texture = Particles.Texture(spec.texture)
+	beam.TextureMode = Enum.TextureMode.Stretch
+	beam.TextureLength = spec.length or 1
+	beam.TextureSpeed = spec.speed or 0
+	beam.Color = spec.color
+	beam.LightEmission = spec.emission or 1
+	beam.LightInfluence = 0
+	beam.FaceCamera = true
+	beam.Segments = spec.segments or 10
+	beam.CurveSize0 = spec.curve or 0
+	beam.CurveSize1 = -(spec.curve or 0)
+	beam.Width0 = spec.width
+	beam.Width1 = spec.width
+	beam.Parent = owner0 or owner1 or a0.Parent
+
+	local elapsed = 0
+	local connection: RBXScriptConnection
+	connection = RunService.RenderStepped:Connect(function(dt)
+		elapsed += dt
+		local alpha = math.min(elapsed / spec.lifetime, 1)
+		beam.Transparency = NumberSequence.new(alpha ^ 2)
+		beam.Width0 = spec.width * (1 - alpha * 0.7)
+		beam.Width1 = beam.Width0
+		if alpha >= 1 or not beam.Parent then
+			connection:Disconnect()
+			beam:Destroy()
+			a0:Destroy()
+			a1:Destroy()
+			for _, owner in { owner0, owner1 } do
+				if owner then
+					owner:Destroy()
+				end
+			end
+		end
+	end)
+	return beam
+end
+
+--[=[ Slides an anchor from `from` to `to` over `duration` seconds (ease out), then releases it. ]=]
+function Particles.Travel(anchor: BasePart, from: Vector3, to: Vector3, duration: number, linger: number)
+	local look = if (to - from).Magnitude > 1e-3 then CFrame.lookAt(from, to) else CFrame.new(from)
+	local elapsed = 0
+	local connection: RBXScriptConnection
+	connection = RunService.RenderStepped:Connect(function(dt)
+		elapsed += dt
+		local alpha = math.min(elapsed / duration, 1)
+		local eased = 1 - (1 - alpha) ^ 2
+		anchor.CFrame = look.Rotation + from:Lerp(to, eased)
+		if alpha >= 1 or not anchor.Parent then
+			connection:Disconnect()
+			if anchor.Parent then
+				Particles.Release(anchor, linger)
+			end
+		end
+	end)
+	anchor.CFrame = look
 end
 
 --[=[

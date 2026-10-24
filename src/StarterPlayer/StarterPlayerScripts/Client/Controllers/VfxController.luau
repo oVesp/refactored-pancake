@@ -248,7 +248,8 @@ local function onResolve(info: { [string]: any }, skill: any)
 	end
 	if recipe.resolve then
 		recipe.resolve(info :: any)
-	elseif recipe.swing and not isLocalCaster(info.caster) then
+	elseif recipe.swing and not (isLocalCaster(info.caster) and not skill.windup) then
+		-- The local player's instant swings were already predicted; wound-up ones were not.
 		recipe.swing(info.origin, info.aim, skill.range or 6, skill.angle or 90)
 	end
 end

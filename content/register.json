@@ -617,6 +617,78 @@
 			"assetId": "101253281014930"
 		},
 		{
+			"id": "texture:Arc",
+			"type": "texture",
+			"name": "spark_05.png",
+			"path": "assets/third_party/kenney/particle_pack/spark_05.png",
+			"origin": "Kenney Particle Pack 1.1 (https://kenney.nl/assets/particle-pack)",
+			"license": "CC0 1.0",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Uploaded 2026-10-24; smoke-test in Studio.",
+			"assetId": "76645719834557"
+		},
+		{
+			"id": "texture:Wisp",
+			"type": "texture",
+			"name": "flame_04.png",
+			"path": "assets/third_party/kenney/particle_pack/flame_04.png",
+			"origin": "Kenney Particle Pack 1.1 (https://kenney.nl/assets/particle-pack)",
+			"license": "CC0 1.0",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Uploaded 2026-10-24; smoke-test in Studio.",
+			"assetId": "103777070793203"
+		},
+		{
+			"id": "texture:Slash",
+			"type": "texture",
+			"name": "slash_02.png",
+			"path": "assets/third_party/kenney/particle_pack/slash_02.png",
+			"origin": "Kenney Particle Pack 1.1 (https://kenney.nl/assets/particle-pack)",
+			"license": "CC0 1.0",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Uploaded 2026-10-24; smoke-test in Studio.",
+			"assetId": "127453760247576"
+		},
+		{
+			"id": "texture:Jet",
+			"type": "texture",
+			"name": "muzzle_02.png",
+			"path": "assets/third_party/kenney/particle_pack/muzzle_02.png",
+			"origin": "Kenney Particle Pack 1.1 (https://kenney.nl/assets/particle-pack)",
+			"license": "CC0 1.0",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Uploaded 2026-10-24; smoke-test in Studio.",
+			"assetId": "120800620406258"
+		},
+		{
+			"id": "texture:Ray",
+			"type": "texture",
+			"name": "trace_06.png",
+			"path": "assets/third_party/kenney/particle_pack/trace_06.png",
+			"origin": "Kenney Particle Pack 1.1 (https://kenney.nl/assets/particle-pack)",
+			"license": "CC0 1.0",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Uploaded 2026-10-24; smoke-test in Studio.",
+			"assetId": "79575982972486"
+		},
+		{
+			"id": "texture:Rubble",
+			"type": "texture",
+			"name": "dirt_03.png",
+			"path": "assets/third_party/kenney/particle_pack/dirt_03.png",
+			"origin": "Kenney Particle Pack 1.1 (https://kenney.nl/assets/particle-pack)",
+			"license": "CC0 1.0",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Uploaded 2026-10-24; smoke-test in Studio.",
+			"assetId": "139885643232674"
+		},
+		{
 			"id": "data:GoblinRig",
 			"type": "data",
 			"name": "goblin_rig.json",

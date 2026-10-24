@@ -76,6 +76,15 @@ local Textures: { [string]: TextureAsset } = {
 		id = "rbxassetid://113979896413209",
 		fallback = "rbxasset://textures/particles/forcefield_vortex_main.dds",
 	},
+	Arc = { id = "rbxassetid://76645719834557", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
+	Wisp = { id = "rbxassetid://103777070793203", fallback = "rbxasset://textures/particles/smoke_main.dds" },
+	Slash = { id = "rbxassetid://127453760247576", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
+	Jet = { id = "rbxassetid://120800620406258", fallback = "rbxasset://textures/particles/fire_main.dds" },
+	Ray = { id = "rbxassetid://79575982972486", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
+	Rubble = {
+		id = "rbxassetid://139885643232674",
+		fallback = "rbxasset://textures/particles/explosion01_smoke_main.dds",
+	},
 }
 
 --[=[
