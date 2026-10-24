@@ -337,6 +337,16 @@
 			"notes": "Layout objects + templates; re-author in Studio when restyled."
 		},
 		{
+			"id": "ui:TargetMarker",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiTemplates/TargetMarker.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Layout objects + templates; re-author in Studio when restyled."
+		},
+		{
 			"id": "ui:StatusChip",
 			"type": "ui",
 			"path": "src/ReplicatedStorage/UiTemplates/StatusChip.model.json",

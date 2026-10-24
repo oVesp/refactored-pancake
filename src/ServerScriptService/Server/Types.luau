@@ -10,6 +10,7 @@ export type Cast = {
 	skillId: string,
 	endsAt: number,
 	aim: Vector3,
+	target: Entity?,
 	interruptible: boolean,
 	token: number,
 }

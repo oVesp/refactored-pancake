@@ -58,8 +58,10 @@ local Remotes: { [string]: RemoteSpec } = {
 		direction = "ClientToServer",
 		rateLimit = { capacity = 10, perSecond = 8 },
 		validate = function(...)
-			local skillId, aim, seq = ...
-			return arity(3, ...) and isId(skillId) and isFiniteVector(aim) and isCount(seq)
+			local skillId, aim, seq, target = ...
+			local count = select("#", ...)
+			local targetOk = target == nil or (typeof(target) == "Instance" and target:IsA("Model"))
+			return (count == 3 or count == 4) and isId(skillId) and isFiniteVector(aim) and isCount(seq) and targetOk
 		end,
 	},
 	SetGuard = {

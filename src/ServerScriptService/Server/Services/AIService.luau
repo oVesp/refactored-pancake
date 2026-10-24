@@ -214,8 +214,9 @@ local function alliesNear(brain: Brain, radius: number): number
 	return count
 end
 
--- Picks the first ready skill in data order whose conditions hold. Returns skill id and aim.
-local function chooseSkill(brain: Brain, target: Entity, distance: number): (string?, Vector3?)
+-- Picks the first ready skill in data order whose conditions hold. Returns skill id, aim and the
+-- entity it is aimed at.
+local function chooseSkill(brain: Brain, target: Entity, distance: number): (string?, Vector3?, Entity?)
 	local entity = brain.entity
 	for _, skillId in brain.def.skills do
 		local skill = Skills.ById[skillId]
@@ -225,23 +226,23 @@ local function chooseSkill(brain: Brain, target: Entity, distance: number): (str
 		if skill.targets == "Ally" then
 			if skill.delivery == "SelfArea" then
 				if alliesNear(brain, skill.radius or 20) > 0 then
-					return skillId, entity.root.Position
+					return skillId, entity.root.Position, nil
 				end
 			else
 				local ally = woundedAlly(brain, skill.range or 30)
 				if ally then
-					return skillId, ally.root.Position
+					return skillId, ally.root.Position, ally
 				end
 			end
 		elseif skill.delivery == "Dash" then
 			if distance > 8 and distance <= (skill.range or 20) then
-				return skillId, target.root.Position
+				return skillId, target.root.Position, target
 			end
 		elseif distance <= skillReach(skill) then
-			return skillId, target.root.Position
+			return skillId, target.root.Position, target
 		end
 	end
-	return nil, nil
+	return nil, nil, nil
 end
 
 local function preferredRange(brain: Brain): number
@@ -343,12 +344,12 @@ local function think(brain: Brain, now: number)
 
 	bossPhase(brain)
 	local distance = (target.root.Position - root.Position).Magnitude
-	local skillId, aim = chooseSkill(brain, target, distance)
+	local skillId, aim, aimedAt = chooseSkill(brain, target, distance)
 	if skillId and aim then
 		setState(brain, "Attack")
 		stop(brain)
 		face(brain, aim)
-		SkillService.Cast(entity, skillId, aim)
+		SkillService.Cast(entity, skillId, aim, aimedAt)
 		return
 	end
 

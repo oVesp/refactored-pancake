@@ -71,6 +71,25 @@ return table.freeze({
 		InCombatSeconds = 6,
 	}),
 
+	--[=[ Soft target, lock and aim assist (docs/systems/combat.md, Targeting). Studs and degrees. ]=]
+	Targeting = table.freeze({
+		--[=[ Max distance for the soft target and for keeping a lock. ]=]
+		Range = 60,
+		--[=[ Half-angle around the camera centre where enemies can become the soft target. ]=]
+		ConeDegrees = 40,
+		--[=[ Score bonus that keeps the current target until another is clearly more central. ]=]
+		Stickiness = 0.25,
+		--[=[ Weight of screen-centre angle vs distance in the score (1 = angle only). ]=]
+		AngleWeight = 0.7,
+		--[=[ Melee swings turn toward a target within skill range + this and MeleeAssistDegrees of the aim. ]=]
+		MeleeAssistRange = 10,
+		MeleeAssistDegrees = 60,
+		--[=[ Touch and gamepad skillshots bend toward the target when it is within this angle. ]=]
+		AimAssistDegrees = 8,
+		--[=[ Homing spells give up after travelling this multiple of their range. ]=]
+		HomingRangeFactor = 1.5,
+	}),
+
 	Disciplines = table.freeze({
 		--[=[ Capacity = CapacityBase + floor(level / CapacityPerLevels). ]=]
 		CapacityBase = 2,

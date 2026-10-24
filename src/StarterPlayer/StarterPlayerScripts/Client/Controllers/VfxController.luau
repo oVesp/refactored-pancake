@@ -185,20 +185,32 @@ local function launch(info: { [string]: any }, skill: any)
 	projectiles[id] = { part = part, recipe = recipe }
 	AudioController.PlayAt(soundFor(skill), info.origin)
 	local travelled = 0
+	local position: Vector3 = info.origin
+	local direction: Vector3 = info.direction
+	local homing: Instance? = info.homing
 	local connection: RBXScriptConnection
 	connection = RunService.RenderStepped:Connect(function(dt)
 		if not part.Parent or not projectiles[id] then
 			connection:Disconnect()
 			return
 		end
-		travelled += info.speed * dt
+		local step = info.speed * dt
+		travelled += step
 		if travelled >= info.range then
 			connection:Disconnect()
 			endFlight(id)
 			return
 		end
-		part.CFrame =
-			CFrame.lookAt(info.origin + info.direction * travelled, info.origin + info.direction * (travelled + 1))
+		-- Homing spells steer toward the target's current position; the server decides the hit.
+		local targetRoot = homing and homing:FindFirstChild("HumanoidRootPart")
+		if targetRoot and targetRoot:IsA("BasePart") then
+			local offset = targetRoot.Position - position
+			if offset.Magnitude > 1e-3 then
+				direction = offset.Unit
+			end
+		end
+		position += direction * step
+		part.CFrame = CFrame.lookAt(position, position + direction)
 	end)
 	Debris:AddItem(part, info.range / info.speed + 1.5)
 end
@@ -315,10 +327,10 @@ function VfxController.Start()
 	NetClient.Connect("ShowCast", onCast)
 	NetClient.Connect("ShowImpact", onImpact)
 	NetClient.Connect("ShowDamage", onDamage)
-	CombatController.Used:Connect(function(skillId: string)
+	CombatController.Used:Connect(function(skillId: string, aim: Vector3)
 		local root = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 		if root and root:IsA("BasePart") then
-			VfxController.PredictSwing(skillId, root.Position, CombatController.GetAim())
+			VfxController.PredictSwing(skillId, root.Position, aim)
 		end
 	end)
 	NetClient.Connect("Notify", function(key: string)

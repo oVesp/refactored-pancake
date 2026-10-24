@@ -18,7 +18,6 @@ type SkillDef = any
 
 local PROJECTILE_RADIUS = 2.5
 local ENTITY_RADIUS = 2
-local ALLY_PICK_RADIUS = 8
 local OBJECT_PICK_RADIUS = 10
 local CAST_ORIGIN_HEIGHT = 1.5
 -- Aim is a direction hint; deliveries clamp to their own range. Farther aims are malformed.
@@ -178,15 +177,25 @@ local function arcTargets(caster: Entity, aim: Vector3, range: number, angle: nu
 	return hits
 end
 
-local function nearestTo(pool: { Entity }, point: Vector3, within: number, rewind: number): Entity?
-	local best, bestDistance = nil, within
-	for _, other in pool do
-		local distance = (EntityService.PositionAt(other, rewind) - point).Magnitude
-		if distance <= bestDistance then
-			best, bestDistance = other, distance
-		end
-	end
-	return best
+local function inRange(caster: Entity, target: Entity, range: number): boolean
+	local position = EntityService.PositionAt(target, rewindFor(caster))
+	return (position - caster.root.Position).Magnitude <= range + Tuning.Combat.RangeTolerance
+end
+
+--[=[ True when a skill needs an enemy target chosen by the caster (no target, no cast). ]=]
+local function needsEnemyTarget(skill: SkillDef): boolean
+	return skill.delivery == "Target" or skill.delivery == "Dash"
+end
+
+local function validEnemy(caster: Entity, target: Entity?, skill: SkillDef): boolean
+	return target ~= nil
+		and target.alive
+		and EntityService.AreEnemies(caster, target)
+		and inRange(caster, target, skill.range or 0)
+end
+
+local function validAlly(caster: Entity, target: Entity?, skill: SkillDef): boolean
+	return target ~= nil and target.alive and target.team == caster.team and inRange(caster, target, skill.range or 0)
 end
 
 local function groundBelow(position: Vector3): Vector3
@@ -252,6 +261,53 @@ local function launchProjectile(caster: Entity, skill: SkillDef, aim: Vector3, b
 	end)
 end
 
+-- Homing spell: chases one target, cannot hit anyone else, stops on walls and gives up after
+-- HomingRangeFactor x range (Tuning.Targeting).
+local function launchHoming(caster: Entity, skill: SkillDef, target: Entity, bonus: number)
+	local origin = caster.root.Position + Vector3.new(0, CAST_ORIGIN_HEIGHT, 0)
+	local toTarget = target.root.Position - origin
+	local id = castId()
+	broadcast({
+		id = id,
+		kind = "Projectile",
+		caster = caster.model,
+		skillId = skill.id,
+		origin = origin,
+		direction = if toTarget.Magnitude > 1e-3 then toTarget.Unit else caster.root.CFrame.LookVector,
+		speed = skill.speed,
+		range = skill.range * Tuning.Targeting.HomingRangeFactor,
+		homing = target.model,
+	})
+
+	local maxTravel = skill.range * Tuning.Targeting.HomingRangeFactor
+	local travelled = 0
+	local position = origin
+	local connection: RBXScriptConnection
+	connection = RunService.Heartbeat:Connect(function(dt)
+		if not target.alive or not target.root.Parent then
+			connection:Disconnect()
+			impact(id, position, "miss")
+			return
+		end
+		local offset = target.root.Position - position
+		local step = math.min(skill.speed * dt, maxTravel - travelled)
+		if offset.Magnitude <= step + PROJECTILE_RADIUS + ENTITY_RADIUS then
+			connection:Disconnect()
+			impact(id, target.root.Position, "hit")
+			hitEnemy(caster, target, skill, bonus)
+			return
+		end
+		local direction = offset.Unit
+		local wall = workspace:Raycast(position, direction * step, worldParams)
+		travelled += step
+		position = if wall then wall.Position else position + direction * step
+		if wall or travelled >= maxTravel then
+			connection:Disconnect()
+			impact(id, position, "miss")
+		end
+	end)
+end
+
 local function useObject(caster: Entity, skill: SkillDef, aim: Vector3)
 	local best: BasePart?, bestDistance = nil, OBJECT_PICK_RADIUS
 	for _, instance in CollectionService:GetTagged(skill.objectTag) do
@@ -277,7 +333,7 @@ local function useObject(caster: Entity, skill: SkillDef, aim: Vector3)
 	end
 end
 
-local function resolve(caster: Entity, skill: SkillDef, aim: Vector3)
+local function resolve(caster: Entity, skill: SkillDef, aim: Vector3, target: Entity?)
 	if not caster.alive then
 		return
 	end
@@ -290,39 +346,41 @@ local function resolve(caster: Entity, skill: SkillDef, aim: Vector3)
 	local origin = caster.root.Position
 	local shownTarget: Model? = nil
 	if delivery == "Melee" or delivery == "Cone" then
-		for _, target in arcTargets(caster, aim, skill.range, skill.angle) do
-			hitEnemy(caster, target, skill, bonus)
+		for _, victim in arcTargets(caster, aim, skill.range, skill.angle) do
+			hitEnemy(caster, victim, skill, bonus)
 		end
 	elseif delivery == "SelfArea" then
-		for _, target in areaTargets(caster, skill, origin, skill.radius) do
+		for _, victim in areaTargets(caster, skill, origin, skill.radius) do
 			if skill.targets == "Ally" then
-				supportAlly(caster, target, skill)
+				supportAlly(caster, victim, skill)
 			else
-				hitEnemy(caster, target, skill, bonus)
+				hitEnemy(caster, victim, skill, bonus)
 			end
 		end
 	elseif delivery == "Ground" then
 		local offset = flat(aim - origin)
 		local center = if offset.Magnitude > skill.range then origin + offset.Unit * skill.range else aim
-		for _, target in areaTargets(caster, skill, center, skill.radius) do
-			hitEnemy(caster, target, skill, bonus)
+		for _, victim in areaTargets(caster, skill, center, skill.radius) do
+			hitEnemy(caster, victim, skill, bonus)
 		end
 	elseif delivery == "Projectile" then
 		launchProjectile(caster, skill, aim, bonus)
-	elseif delivery == "Ally" then
-		local target = nearestTo(alliesOf(caster), aim, ALLY_PICK_RADIUS, rewindFor(caster))
-		if not target or (target.root.Position - origin).Magnitude > skill.range + Tuning.Combat.RangeTolerance then
-			target = caster
+	elseif delivery == "Target" then
+		if target and validEnemy(caster, target, skill) then
+			launchHoming(caster, skill, target, bonus)
+		else
+			impact(0, origin, "miss")
 		end
-		shownTarget = (target :: Entity).model
-		supportAlly(caster, target :: Entity, skill)
+	elseif delivery == "Ally" then
+		local ally = if target and validAlly(caster, target, skill) then target else caster
+		shownTarget = ally.model
+		supportAlly(caster, ally, skill)
 	elseif delivery == "Self" then
 		if skill.shield then
 			supportAlly(caster, caster, skill)
 		end
 	elseif delivery == "Dash" then
-		local target = nearestTo(enemiesOf(caster), aim, ALLY_PICK_RADIUS, rewindFor(caster))
-		if target and (target.root.Position - origin).Magnitude <= skill.range + Tuning.Combat.RangeTolerance then
+		if target and validEnemy(caster, target, skill) then
 			local away = flat(origin - target.root.Position)
 			local offset = if away.Magnitude > 1e-3 then away.Unit * 3.5 else Vector3.new(0, 0, 3.5)
 			teleport(caster, target.root.Position + offset, target.root.Position)
@@ -345,7 +403,7 @@ local function resolve(caster: Entity, skill: SkillDef, aim: Vector3)
 	elseif delivery == "Object" then
 		useObject(caster, skill, aim)
 	end
-	if delivery ~= "Projectile" then
+	if delivery ~= "Projectile" and delivery ~= "Target" then
 		broadcast({
 			kind = "Resolve",
 			caster = caster.model,
@@ -379,9 +437,10 @@ end
 --[=[
 	Starts a skill for any entity after its checks have passed: pays nothing, sets the cooldown,
 	broadcasts the cast or telegraph, waits out the windup/cast (interruptible by stun or
-	knockback) and resolves it. NPCs call this directly.
+	knockback) and resolves it. `target` is the chosen enemy (Target, Dash) or ally (Ally); it is
+	re-validated when the skill resolves. NPCs call this directly.
 ]=]
-function SkillService.Cast(caster: Entity, skillId: string, aim: Vector3)
+function SkillService.Cast(caster: Entity, skillId: string, aim: Vector3, target: Entity?)
 	local skill = Skills.ById[skillId]
 	if not skill or not caster.alive then
 		return
@@ -391,7 +450,7 @@ function SkillService.Cast(caster: Entity, skillId: string, aim: Vector3)
 
 	local duration, isCast = castDuration(caster, skill)
 	if duration <= 0 then
-		resolve(caster, skill, aim)
+		resolve(caster, skill, aim, target)
 		return
 	end
 
@@ -401,6 +460,7 @@ function SkillService.Cast(caster: Entity, skillId: string, aim: Vector3)
 		skillId = skillId,
 		endsAt = now + duration,
 		aim = aim,
+		target = target,
 		interruptible = true,
 		token = token,
 	}
@@ -412,6 +472,7 @@ function SkillService.Cast(caster: Entity, skillId: string, aim: Vector3)
 		skillId = skillId,
 		origin = caster.root.Position,
 		aim = aim,
+		target = if target then target.model else nil,
 		duration = duration,
 	})
 	caster.model:SetAttribute("Casting", skillId)
@@ -424,7 +485,7 @@ function SkillService.Cast(caster: Entity, skillId: string, aim: Vector3)
 		caster.casting = nil
 		caster.model:SetAttribute("Casting", nil)
 		if caster.alive and not StatusService.IsDisabled(caster) then
-			resolve(caster, skill, aim)
+			resolve(caster, skill, aim, target)
 		end
 	end)
 end
@@ -451,7 +512,7 @@ local function reject(player: Player, seq: number, reason: string)
 	NetServer.Fire("RejectSkill", player, seq, reason)
 end
 
-local function handleUseSkill(player: Player, skillId: string, aim: Vector3, seq: number)
+local function handleUseSkill(player: Player, skillId: string, aim: Vector3, seq: number, targetModel: Model?)
 	local caster = EntityService.ForPlayer(player)
 	local profile = DataService.Get(player)
 	if not caster or not profile or not caster.alive then
@@ -479,6 +540,24 @@ local function handleUseSkill(player: Player, skillId: string, aim: Vector3, seq
 		reject(player, seq, "Range")
 		return
 	end
+	-- The client's target is a suggestion: it must still be alive, on the right side and in range.
+	local target = if targetModel then EntityService.Get(targetModel) else nil
+	if needsEnemyTarget(skill) then
+		if not target or not target.alive or not EntityService.AreEnemies(caster, target) then
+			reject(player, seq, "NoTarget")
+			return
+		end
+		if not inRange(caster, target, skill.range or 0) then
+			reject(player, seq, "Range")
+			return
+		end
+	elseif skill.delivery == "Ally" then
+		if not validAlly(caster, target, skill) then
+			target = nil
+		end
+	else
+		target = nil
+	end
 	if skill.cost then
 		local amount = skill.cost.amount
 		if skill.source == "Spell" and caster.statuses.overcharge then
@@ -493,7 +572,7 @@ local function handleUseSkill(player: Player, skillId: string, aim: Vector3, seq
 		caster.guardSince = nil
 		caster.model:SetAttribute("Guarding", false)
 	end
-	SkillService.Cast(caster, skillId, aim)
+	SkillService.Cast(caster, skillId, aim, target)
 end
 
 local function withLatency(player: Player, fn: () -> ())
@@ -546,9 +625,9 @@ function SkillService.Init(deps: { [string]: any })
 	StatService = deps.StatService
 	StatusService = deps.StatusService
 
-	NetServer.Connect("UseSkill", function(player: Player, skillId: string, aim: Vector3, seq: number)
+	NetServer.Connect("UseSkill", function(player: Player, skillId: string, aim: Vector3, seq: number, target: Model?)
 		withLatency(player, function()
-			handleUseSkill(player, skillId, aim, seq)
+			handleUseSkill(player, skillId, aim, seq, target)
 		end)
 	end)
 	NetServer.Connect("SetGuard", function(player: Player, on: boolean)

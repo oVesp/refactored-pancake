@@ -116,9 +116,9 @@ Every class level grants **one class skill**, either **Active** (hotbar) or **Pa
 |---|---|---|---|
 | Light | 0 | Self | Utility cost rule |
 | Kindle | 0 | Target object | Interactable world props |
-| Spark | 1 | Projectile | Basic projectile |
-| Firebolt | 1 | Projectile | Burn status |
-| Frost Shard | 1 | Projectile | Slow status |
+| Spark | 1 | Projectile | Free-aim skillshot |
+| Firebolt | 1 | Target (homing) | Burn status, targeted spell |
+| Frost Shard | 1 | Target (homing) | Slow status |
 | Flame Fan | 1 | Cone | Cone hit shape |
 | Ice Patch | 1 | Ground target | Ground AoE, root |
 | Arcane Shield | 1 | Self | Damage absorb |
@@ -128,7 +128,7 @@ Every class level grants **one class skill**, either **Active** (hotbar) or **Pa
 | Glow | 0 | Ally | Utility cost rule |
 | Purify Water | 0 | Target object | Interactable world props |
 | Mend | 1 | Ally | Direct heal, ally targeting |
-| Smite | 1 | Projectile | Holy damage |
+| Smite | 1 | Target (homing) | Holy damage |
 | Cleanse | 1 | Ally | Remove poison/bleed |
 | Renew | 1 | Ally | Heal over time |
 | Shelter | 1 | Ally | Shield, friendly-target rules |

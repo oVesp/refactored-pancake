@@ -8,6 +8,7 @@ local Disciplines = require(ReplicatedStorage.Content.Disciplines)
 local NetClient = require(ReplicatedStorage.Shared.Net.Client)
 local Signal = require(ReplicatedStorage.Shared.Signal)
 local Skills = require(ReplicatedStorage.Content.Skills)
+local Targeting = require(ReplicatedStorage.Shared.Targeting)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 
 local AIM_RANGE = 300
@@ -24,7 +25,8 @@ export type Slot = {
 
 --[=[
 	Client side of combat: aim, predicted cooldowns, `UseSkill` with sequence numbers and rollback
-	on `RejectSkill`, guard and dodge. The server decides every outcome (game-design.md 5.5).
+	on `RejectSkill`, guard and dodge. Each delivery reads the target from TargetController its own
+	way (docs/systems/combat.md, Targeting). The server decides every outcome (game-design.md 5.5).
 ]=]
 local CombatController = {}
 
@@ -32,16 +34,16 @@ local CombatController = {}
 CombatController.HotbarChanged = Signal.new() :: Signal.Signal<{ Slot }>
 --[=[ Fires `(skillId, reason)` when the server rejects a predicted use. ]=]
 CombatController.Rejected = Signal.new() :: Signal.Signal<string, string>
---[=[ Fires `(skillId)` when a use is sent (local feedback). ]=]
-CombatController.Used = Signal.new() :: Signal.Signal<string>
+--[=[ Fires `(skillId, aim)` when a use is sent (local feedback). ]=]
+CombatController.Used = Signal.new() :: Signal.Signal<string, Vector3>
 
 local ProfileController: any
+local TargetController: any
 
 local seq = 0
 local pending: { [number]: string } = {}
 local predictedReady: { [string]: number } = {}
 local hotbar: { Slot } = {}
-local lastPointerWasMouse = UserInputService.MouseEnabled
 
 local function character(): (Model?, BasePart?, Humanoid?)
 	local model = player.Character
@@ -57,7 +59,7 @@ end
 function CombatController.GetAim(): Vector3
 	local model, root = character()
 	local camera = workspace.CurrentCamera
-	if lastPointerWasMouse and camera then
+	if TargetController.UsingMouse() and camera then
 		local mouse = UserInputService:GetMouseLocation()
 		local ray = camera:ViewportPointToRay(mouse.X, mouse.Y)
 		local params = RaycastParams.new()
@@ -75,6 +77,56 @@ function CombatController.GetAim(): Vector3
 	return Vector3.zero
 end
 
+local function positionOf(model: Model?): Vector3?
+	local root = model and (model:FindFirstChild("HumanoidRootPart") or model.PrimaryPart)
+	return if root and root:IsA("BasePart") then root.Position else nil
+end
+
+local function face(root: BasePart, point: Vector3)
+	local look = Vector3.new(point.X - root.Position.X, 0, point.Z - root.Position.Z)
+	if look.Magnitude > 1e-3 then
+		root.CFrame = CFrame.lookAt(root.Position, root.Position + look)
+	end
+end
+
+-- Aim point and target for a skill. Melee turns toward a close target in front of the aim
+-- (magnetism); skillshots stay free-aim, with a small bend toward the target off the mouse;
+-- Target and Dash need an enemy target; Ground lands on the target off the mouse; Ally takes the
+-- ally target (nil means self). Returns nil aim when the skill cannot be used without a target.
+local function aimFor(skill: any, root: BasePart): (Vector3?, Model?)
+	local aim = CombatController.GetAim()
+	local delivery = skill.delivery
+	local enemy = TargetController.Enemy()
+	local enemyAt = positionOf(enemy)
+	local t = Tuning.Targeting
+	if delivery == "Target" or delivery == "Dash" then
+		if not enemy or not enemyAt then
+			return nil, nil
+		end
+		return enemyAt, enemy
+	elseif delivery == "Ally" then
+		local ally = TargetController.Ally(skill.range or 0)
+		return positionOf(ally) or root.Position, ally
+	elseif not enemyAt then
+		return aim, nil
+	end
+	local angle = Targeting.FlatAngle(aim - root.Position, enemyAt - root.Position)
+	if delivery == "Melee" or delivery == "Cone" then
+		local close = (enemyAt - root.Position).Magnitude <= t.MeleeAssistRange + (skill.range or 0)
+		if close and (angle <= t.MeleeAssistDegrees or TargetController.IsLocked()) then
+			face(root, enemyAt)
+			return enemyAt, nil
+		end
+	elseif delivery == "Projectile" and not TargetController.UsingMouse() then
+		if angle <= t.AimAssistDegrees or TargetController.IsLocked() then
+			return enemyAt, nil
+		end
+	elseif delivery == "Ground" and not TargetController.UsingMouse() then
+		return enemyAt, nil
+	end
+	return aim, nil
+end
+
 --[=[ Seconds until the client predicts a skill is ready. ]=]
 function CombatController.Remaining(skillId: string): number
 	return math.max(0, (predictedReady[skillId] or 0) - os.clock())
@@ -83,18 +135,23 @@ end
 --[=[ Sends a skill use if the local prediction allows it. ]=]
 function CombatController.UseSkill(skillId: string)
 	local skill = Skills.ById[skillId]
-	local model = character()
-	if not skill or not model or CombatController.Remaining(skillId) > 0 then
+	local model, root = character()
+	if not skill or not model or not root or CombatController.Remaining(skillId) > 0 then
 		return
 	end
 	if model:GetAttribute("Stunned") == true or model:GetAttribute("Casting") ~= nil then
 		return
 	end
+	local aim, target = aimFor(skill, root)
+	if not aim then
+		CombatController.Rejected:Fire(skillId, "NoTarget")
+		return
+	end
 	seq += 1
 	pending[seq] = skillId
 	predictedReady[skillId] = os.clock() + (skill.cooldown or 0)
-	NetClient.Fire("UseSkill", skillId, CombatController.GetAim(), seq)
-	CombatController.Used:Fire(skillId)
+	NetClient.Fire("UseSkill", skillId, aim, seq, target)
+	CombatController.Used:Fire(skillId, aim)
 end
 
 --[=[ Toggles a Discipline. ]=]
@@ -178,6 +235,7 @@ end
 
 function CombatController.Init(deps: { [string]: any })
 	ProfileController = deps.ProfileController
+	TargetController = deps.TargetController
 end
 
 function CombatController.Start()
@@ -190,13 +248,6 @@ function CombatController.Start()
 		end
 	end)
 	ProfileController.Changed:Connect(rebuildHotbar)
-	UserInputService.LastInputTypeChanged:Connect(function(inputType)
-		if inputType == Enum.UserInputType.MouseMovement or inputType == Enum.UserInputType.MouseButton1 then
-			lastPointerWasMouse = true
-		elseif inputType == Enum.UserInputType.Touch or inputType == Enum.UserInputType.Gamepad1 then
-			lastPointerWasMouse = false
-		end
-	end)
 	-- Old sequence numbers never resolve on success; trim them so the table stays small.
 	task.spawn(function()
 		while true do

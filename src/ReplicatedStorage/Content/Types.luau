@@ -39,6 +39,7 @@ export type Amount = {
 export type Delivery =
 	"Melee"
 	| "Projectile"
+	| "Target"
 	| "Cone"
 	| "Ground"
 	| "Self"

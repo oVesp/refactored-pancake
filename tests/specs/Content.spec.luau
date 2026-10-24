@@ -54,8 +54,11 @@ return {
 				Expect.truthy(skill.delivery, `{id} delivery`)
 				Expect.truthy(skill.targets, `{id} targets`)
 				Expect.truthy(skill.cooldown, `{id} cooldown`)
-				if skill.delivery == "Projectile" then
+				if skill.delivery == "Projectile" or skill.delivery == "Target" then
 					Expect.truthy(skill.speed and skill.range, `{id} projectile speed/range`)
+				end
+				if skill.delivery == "Target" or skill.delivery == "Dash" or skill.delivery == "Ally" then
+					Expect.truthy(skill.range, `{id} needs a range to validate its target`)
 				end
 				if skill.delivery == "Object" then
 					Expect.truthy(skill.objectTag, `{id} objectTag`)

@@ -25,6 +25,8 @@ local REJECT_TEXT: { [string]: string } = {
 	Disabled = "You cannot act",
 	Busy = "Already casting",
 	Dodge = "Cannot dodge",
+	NoTarget = "No target",
+	Range = "Out of range",
 }
 
 --[=[

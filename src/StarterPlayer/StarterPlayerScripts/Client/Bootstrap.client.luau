@@ -16,6 +16,7 @@ type Controller = {
 local CONTROLLER_ORDER = {
 	"UIController",
 	"ProfileController",
+	"TargetController",
 	"CombatController",
 	"AudioController",
 	"VfxController",

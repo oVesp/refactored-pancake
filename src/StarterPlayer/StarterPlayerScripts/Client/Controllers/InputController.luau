@@ -21,11 +21,13 @@ local TOUCH_SLOTS = 4
 
 --[=[
 	Input bindings through ContextActionService (remappable later, gamepad and touch buttons
-	included). Tap attack = light, hold = heavy. Screens: B spellbook, I inventory, C sheet, F2 debug.
+	included). Tap attack = light, hold = heavy. Tab / R3 / Target button cycle the target lock.
+	Screens: B spellbook, I inventory, C sheet, F2 debug.
 ]=]
 local InputController = {}
 
 local CombatController: any
+local TargetController: any
 local UIController: any
 
 local attackPressedAt: number? = nil
@@ -74,6 +76,7 @@ end
 
 function InputController.Init(deps: { [string]: any })
 	CombatController = deps.CombatController
+	TargetController = deps.TargetController
 	UIController = deps.UIController
 end
 
@@ -90,6 +93,14 @@ function InputController.Start()
 	ContextActionService:SetTitle("Dodge", "Dodge")
 	ContextActionService:BindAction("Guard", onGuard, true, Enum.KeyCode.F, Enum.KeyCode.ButtonL2)
 	ContextActionService:SetTitle("Guard", "Guard")
+	ContextActionService:BindAction(
+		"CycleTarget",
+		onPress(TargetController.Cycle),
+		true,
+		Enum.KeyCode.Tab,
+		Enum.KeyCode.ButtonR3
+	)
+	ContextActionService:SetTitle("CycleTarget", "Target")
 
 	for index, key in HOTBAR_KEYS do
 		ContextActionService:BindAction(`Slot{index}`, onSlot(index), index <= TOUCH_SLOTS, key)
