@@ -1,0 +1,420 @@
+{
+	"statuses": [
+		"draft",
+		"reviewed",
+		"approved",
+		"shipped"
+	],
+	"entries": [
+		{
+			"id": "audio:Swing",
+			"type": "audio",
+			"assetId": "134671877618939",
+			"name": "Sword Swing Sound",
+			"origin": "Creator Store",
+			"creator": "0FFZ3TI",
+			"license": "Creator Store public audio",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Toolbox audio while upload quota is limited; smoke-test in Studio."
+		},
+		{
+			"id": "audio:Hit",
+			"type": "audio",
+			"assetId": "126976659766267",
+			"name": "Hit - Impact - Punch - Blunt",
+			"origin": "Creator Store",
+			"creator": "lorenzosaudiostash",
+			"license": "Creator Store public audio",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Toolbox audio while upload quota is limited; smoke-test in Studio."
+		},
+		{
+			"id": "audio:Fire",
+			"type": "audio",
+			"assetId": "9114446852",
+			"name": "Fire Whoosh 15 (SFX)",
+			"origin": "Creator Store",
+			"creator": "ProSoundEffects",
+			"license": "Roblox-licensed (Pro Sound Effects)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Toolbox audio while upload quota is limited; smoke-test in Studio."
+		},
+		{
+			"id": "audio:Zap",
+			"type": "audio",
+			"assetId": "9114277757",
+			"name": "Electric Zaps 12 (SFX)",
+			"origin": "Creator Store",
+			"creator": "ProSoundEffects",
+			"license": "Roblox-licensed (Pro Sound Effects)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Toolbox audio while upload quota is limited; smoke-test in Studio."
+		},
+		{
+			"id": "audio:Heal",
+			"type": "audio",
+			"assetId": "9116394545",
+			"name": "Magic Glows Soft Clusters Of Chiming Hits 1 (SFX)",
+			"origin": "Creator Store",
+			"creator": "ProSoundEffects",
+			"license": "Roblox-licensed (Pro Sound Effects)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Toolbox audio while upload quota is limited; smoke-test in Studio."
+		},
+		{
+			"id": "audio:LevelUp",
+			"type": "audio",
+			"assetId": "9116395085",
+			"name": "Magic Glows Soft Clusters Of Chiming Hits 5 (SFX)",
+			"origin": "Creator Store",
+			"creator": "ProSoundEffects",
+			"license": "Roblox-licensed (Pro Sound Effects)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Toolbox audio while upload quota is limited; smoke-test in Studio."
+		},
+		{
+			"id": "audio:GoblinBark",
+			"type": "audio",
+			"assetId": "9125475729",
+			"name": "Creature Vocal Spider Growl Belch Hiss Snarl (SFX)",
+			"origin": "Creator Store",
+			"creator": "ProSoundEffects",
+			"license": "Roblox-licensed (Pro Sound Effects)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Toolbox audio while upload quota is limited; smoke-test in Studio."
+		},
+		{
+			"id": "audio:UiClick",
+			"type": "audio",
+			"assetId": "9119717529",
+			"name": "Switch Click On Or Off Toggle Button 1 (SFX)",
+			"origin": "Creator Store",
+			"creator": "ProSoundEffects",
+			"license": "Roblox-licensed (Pro Sound Effects)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Toolbox audio while upload quota is limited; smoke-test in Studio."
+		},
+		{
+			"id": "audio:VillageAmbience",
+			"type": "audio",
+			"assetId": "9112835056",
+			"name": "Neighborhood Birds 1 (SFX)",
+			"origin": "Creator Store",
+			"creator": "ProSoundEffects",
+			"license": "Roblox-licensed (Pro Sound Effects)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Toolbox audio while upload quota is limited; smoke-test in Studio."
+		},
+		{
+			"id": "audio:FieldMusic",
+			"type": "audio",
+			"assetId": "1842008726",
+			"name": "Into the Blue Sky (b 60)",
+			"origin": "Creator Store",
+			"creator": "APMOfficial",
+			"license": "Roblox-licensed (APM Music)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Toolbox audio while upload quota is limited; smoke-test in Studio."
+		},
+		{
+			"id": "content:Classes",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Classes.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Placeholder names, plain descriptive (game-design.md 2)."
+		},
+		{
+			"id": "content:Skills",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Skills.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Placeholder names, plain descriptive (game-design.md 2)."
+		},
+		{
+			"id": "content:Statuses",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Statuses.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Placeholder names, plain descriptive (game-design.md 2)."
+		},
+		{
+			"id": "content:Enemies",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Enemies.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Placeholder names, plain descriptive (game-design.md 2)."
+		},
+		{
+			"id": "content:Items",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Items.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Placeholder names, plain descriptive (game-design.md 2)."
+		},
+		{
+			"id": "content:Disciplines",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Disciplines.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Placeholder names, plain descriptive (game-design.md 2)."
+		},
+		{
+			"id": "content:Zones",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Zones.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Placeholder names, plain descriptive (game-design.md 2)."
+		},
+		{
+			"id": "content:Tuning",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Tuning.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Placeholder names, plain descriptive (game-design.md 2)."
+		},
+		{
+			"id": "content:Strings",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Strings.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Placeholder names, plain descriptive (game-design.md 2)."
+		},
+		{
+			"id": "content:Assets",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Assets.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Placeholder names, plain descriptive (game-design.md 2)."
+		},
+		{
+			"id": "content:Types",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Types.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Placeholder names, plain descriptive (game-design.md 2)."
+		},
+		{
+			"id": "content:Loot",
+			"type": "data",
+			"path": "src/ServerStorage/ContentServerOnly/Loot.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Server-only."
+		},
+		{
+			"id": "content:DevAllowlist",
+			"type": "data",
+			"path": "src/ServerStorage/ContentServerOnly/DevAllowlist.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Server-only."
+		},
+		{
+			"id": "world:Map",
+			"type": "world",
+			"path": "src/Workspace/Map.rbxmx",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Generated greybox by tools/world/build.luau; Roblox materials only."
+		},
+		{
+			"id": "template:Goblin",
+			"type": "model",
+			"path": "src/ServerStorage/Templates/Goblin.rbxmx",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Part rig generated by tools/world/build.luau."
+		},
+		{
+			"id": "ui:DamageNumber",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiTemplates/DamageNumber.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Layout objects + templates; re-author in Studio when restyled."
+		},
+		{
+			"id": "ui:HotbarSlot",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiTemplates/HotbarSlot.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Layout objects + templates; re-author in Studio when restyled."
+		},
+		{
+			"id": "ui:ItemSlot",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiTemplates/ItemSlot.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Layout objects + templates; re-author in Studio when restyled."
+		},
+		{
+			"id": "ui:ListRow",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiTemplates/ListRow.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Layout objects + templates; re-author in Studio when restyled."
+		},
+		{
+			"id": "ui:LogLine",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiTemplates/LogLine.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Layout objects + templates; re-author in Studio when restyled."
+		},
+		{
+			"id": "ui:Nameplate",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiTemplates/Nameplate.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Layout objects + templates; re-author in Studio when restyled."
+		},
+		{
+			"id": "ui:StatusChip",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiTemplates/StatusChip.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Layout objects + templates; re-author in Studio when restyled."
+		},
+		{
+			"id": "ui:Toast",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiTemplates/Toast.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Layout objects + templates; re-author in Studio when restyled."
+		},
+		{
+			"id": "ui:CharacterSheet",
+			"type": "ui",
+			"path": "src/StarterGui/CharacterSheet.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Layout objects + templates; re-author in Studio when restyled."
+		},
+		{
+			"id": "ui:DeathScreen",
+			"type": "ui",
+			"path": "src/StarterGui/DeathScreen.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Layout objects + templates; re-author in Studio when restyled."
+		},
+		{
+			"id": "ui:DebugOverlay",
+			"type": "ui",
+			"path": "src/StarterGui/DebugOverlay.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Layout objects + templates; re-author in Studio when restyled."
+		},
+		{
+			"id": "ui:Hud",
+			"type": "ui",
+			"path": "src/StarterGui/Hud.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Layout objects + templates; re-author in Studio when restyled."
+		},
+		{
+			"id": "ui:Inventory",
+			"type": "ui",
+			"path": "src/StarterGui/Inventory.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Layout objects + templates; re-author in Studio when restyled."
+		},
+		{
+			"id": "ui:Spellbook",
+			"type": "ui",
+			"path": "src/StarterGui/Spellbook.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Layout objects + templates; re-author in Studio when restyled."
+		}
+	]
+}
