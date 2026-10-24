@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Logger = require(ReplicatedStorage.Shared.Logger)
 local NetServer = require(ReplicatedStorage.Shared.Net.Server)
+local EngineFixes = require(script.Parent.EngineFixes)
 
 local Services = script.Parent.Services
 
@@ -31,6 +32,7 @@ local SERVICE_ORDER = {
 
 local log = Logger.new("Bootstrap")
 
+EngineFixes.Apply()
 NetServer.Init()
 
 local deps: { [string]: any } = {}

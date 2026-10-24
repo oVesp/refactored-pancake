@@ -45,6 +45,9 @@
 			},
 			"ContentServerOnly": {
 				"$path": "src/ServerStorage/ContentServerOnly"
+			},
+			"EngineFixes": {
+				"$path": "vendor/PlayerModulePatch"
 			}
 		}
 	}

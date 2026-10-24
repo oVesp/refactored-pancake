@@ -508,6 +508,7 @@ Define target concurrency per place, server count per realm, and what happens wh
 | Greybox world | Kenney meshes listed for the village (§7.5) | Generated Part greybox (`tools/world/build.luau`), Roblox materials only | Mesh uploads not available yet; generator is deterministic and re-runnable |
 | Test automation hook | Dev commands are chat-only | Studio-only `ServerStorage.RunDevCommand` BindableFunction runs the same handlers | Studio MCP cannot send chat from plugin context; the hook is server-side and absent outside Studio |
 | Player-facing text | §6.3: all strings through LocalizationTable | M0.5 keeps strings in `Content/Strings` and content names; LocalizationTable deferred to M1 | Single source table makes the later move mechanical |
+| Roblox PlayerModule bug | Not specified | Studio 0.744 ships `VRBaseCamera` with a `VRbaseCamera` typo that breaks default player scripts; `EngineFixes` swaps in `vendor/PlayerModulePatch` at server start | Temporary; delete both once Roblox ships the fix |
 
 ---
 
