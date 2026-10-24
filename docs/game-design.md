@@ -396,6 +396,8 @@ HUD (HP/MP/Focus/XP/hotbar/buffs/minimap), character sheet (classes path), skill
 - Meshes and images still pass Roblox upload moderation; ids go in the `Assets` manifest only.
 - Fits: retro-fantasy-kit (village, walls, palisades), retro-textures-fantasy, prototype-textures (greybox), foliage-sprites, game-icons (+expansion), ui-pack + Kenney Future font, fantasy-ui-borders, input-prompts, crosshair/cursor packs, particle/smoke/light-mask packs, pattern-pack, development-essentials. Audio packs (impact, rpg, interface, ui) are usable once upload quota allows. sci-fi-sounds and digital-audio are off-tone and excluded.
 
+**Local VFX texture library** (`D:\Projects\Games\VFX-Library`, not in git): particle, flipbook, noise and trail packs indexed in its `INDEX.md`. Only CC0 packs may be uploaded to Roblox; same copy, LFS and register rules as above. See [docs/art/vfx-library.md](art/vfx-library.md).
+
 **Toolbox (Creator Store) audio**, used while upload quota is limited:
 - Only Roblox-owned or licensed public audio; private user uploads will not play in our place.
 - Ids go in the `Assets` manifest and the register (origin: Creator Store, license as listed). Smoke-test each id in Studio; replace failures.
