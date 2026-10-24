@@ -11,6 +11,9 @@
 			},
 			"UiTemplates": {
 				"$path": "src/ReplicatedStorage/UiTemplates"
+			},
+			"Animations": {
+				"$path": "src/ReplicatedStorage/Animations"
 			}
 		},
 		"ServerScriptService": {

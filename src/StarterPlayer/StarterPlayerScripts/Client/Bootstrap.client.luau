@@ -28,6 +28,7 @@ local CONTROLLER_ORDER = {
 	"CharacterController",
 	"DeathController",
 	"NameplateController",
+	"EnemyAnimationController",
 	"DebugController",
 }
 

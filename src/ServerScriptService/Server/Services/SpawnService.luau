@@ -58,17 +58,11 @@ local function activeInZone(zone: string?): number
 	return count
 end
 
+-- The body's SurfaceAppearance leaves the skin transparent, so the part colour shows through.
 local function tint(model: Model, color: Color3)
-	for _, descendant in model:GetDescendants() do
-		if descendant:IsA("BasePart") and descendant.Name ~= "HumanoidRootPart" then
-			if descendant.Name == "Torso" then
-				descendant.Color = color:Lerp(Color3.new(0.25, 0.18, 0.1), 0.6)
-			elseif descendant.Name == "Weapon" then
-				continue
-			else
-				descendant.Color = color
-			end
-		end
+	local body = model:FindFirstChild("Body")
+	if body and body:IsA("BasePart") then
+		body.Color = color
 	end
 end
 
@@ -89,7 +83,8 @@ function SpawnService.Spawn(enemyId: string, level: number, position: Vector3, h
 	-- Rojo does not keep PrimaryPart on a model file's root instance, so resolve it by name.
 	local root = model:FindFirstChild("HumanoidRootPart") :: BasePart
 	model.PrimaryPart = root
-	model:ScaleTo(def.scale)
+	local baseScale = model:GetAttribute("BaseScale")
+	model:ScaleTo(def.scale * (if type(baseScale) == "number" then baseScale else 1))
 	tint(model, def.color)
 	local humanoid = model:FindFirstChildOfClass("Humanoid") :: Humanoid
 	local height = root.Size.Y / 2 + humanoid.HipHeight

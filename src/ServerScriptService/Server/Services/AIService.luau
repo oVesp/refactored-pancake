@@ -44,6 +44,7 @@ local ZoneService: any
 local SpawnService: any
 
 local brains: { [Entity]: Brain } = {}
+local cueSequence = 0
 local random = Random.new()
 local blockParams = RaycastParams.new()
 blockParams.FilterType = Enum.RaycastFilterType.Exclude
@@ -64,6 +65,12 @@ local function setState(brain: Brain, state: State)
 		brain.state = state
 		brain.entity.model:SetAttribute("AiState", state)
 	end
+end
+
+-- One-shot animation cue for clients ("<clip>:<sequence>"); the sequence makes repeats fire.
+local function cue(entity: Entity, clip: string)
+	cueSequence += 1
+	entity.model:SetAttribute("AnimCue", string.format("%s:%d", clip, cueSequence))
 end
 
 local function lineBlocked(from: Vector3, to: Vector3): boolean
@@ -350,6 +357,8 @@ local function think(brain: Brain, now: number)
 		stop(brain)
 		face(brain, aim)
 		SkillService.Cast(entity, skillId, aim, aimedAt)
+		local delivery = Skills.ById[skillId].delivery
+		cue(entity, if delivery == "Melee" or delivery == "Dash" or delivery == "SelfArea" then "Attack" else "Throw")
 		return
 	end
 
@@ -424,6 +433,17 @@ function AIService.Start()
 		task.defer(refreshFilter)
 	end)
 	EntityService.Added:Connect(refreshFilter)
+
+	CombatService.Damaged:Connect(function(target: Entity, amount: number)
+		if brains[target] and target.alive and amount > 0 then
+			cue(target, "Hit")
+		end
+	end)
+	CombatService.Died:Connect(function(target: Entity)
+		if brains[target] then
+			cue(target, "Death")
+		end
+	end)
 
 	-- Damage from far away still pulls the victim's pack into the fight.
 	CombatService.Damaged:Connect(function(target: Entity, _amount: number, _type: string, source: Entity?)

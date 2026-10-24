@@ -5,6 +5,7 @@
 -- Greybox uses Roblox materials only; Kenney meshes replace props once uploads are possible.
 local fs = require("@lune/fs")
 local roblox = require("@lune/roblox")
+local serde = require("@lune/serde")
 
 local Instance = roblox.Instance
 local Vector3 = roblox.Vector3
@@ -507,13 +508,28 @@ make("PointLight", { Name = "PlazaLight", Range = 40, Brightness = 0.5 }, villag
 
 fs.writeFile("src/Workspace/Map.rbxmx", roblox.serializeModel({ map }, true))
 
--- Goblin template: part rig driven by a Humanoid. Scaled and tinted per enemy at spawn.
+-- Goblin template: skinned mesh (assets/blender/goblin) on a Humanoid. Bone data comes from
+-- tools/blender/export_goblin.py; scaled and tinted per enemy at spawn.
+local Assets = require("../../src/ReplicatedStorage/Content/Assets")
+local rig = serde.decode("json", fs.readFile("tools/world/goblin_rig.json"))
+local goblinMesh = Assets.Meshes.Goblin
+
+local function vec(values: { number }): any
+	return Vector3.new(values[1], values[2], values[3])
+end
+
+local bodyHeight = rig.rootHeight
 local goblin = model(nil, "Goblin")
+-- Streams in whole, so clients see the rig and Animator together with the Enemy tag.
+goblin.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
+goblin:SetAttribute("AnimSet", "Goblin")
+-- Spawn multiplies the enemy scale by this so a level-1 raider stands about 4 studs tall.
+goblin:SetAttribute("BaseScale", 1.5)
 local root = part(
 	goblin,
 	"HumanoidRootPart",
 	Vector3.new(2, 2, 1),
-	at(0, 3.4, 0),
+	at(0, bodyHeight, 0),
 	Color3.new(1, 1, 1),
 	Enum.Material.SmoothPlastic,
 	{
@@ -521,32 +537,62 @@ local root = part(
 		Anchored = false,
 	}
 )
-local function limb(name: string, size: any, cframe: any, color: any)
-	local p = part(goblin, name, size, cframe, color, Enum.Material.SmoothPlastic, {
+local body = make("MeshPart", {
+	Name = "Body",
+	MeshId = goblinMesh.id,
+	-- Serialized flag the importer sets; without it the mesh renders unskinned.
+	HasSkinnedMesh = true,
+	InitialSize = vec(rig.initialSize),
+	Size = vec(rig.size),
+	CFrame = at(0, bodyHeight, 0),
+	Color = rgb(110, 150, 70),
+	DoubleSided = true,
+	Anchored = false,
+	CanCollide = false,
+	CanQuery = false,
+	Massless = true,
+}, goblin)
+-- Overlay alpha lets the part colour show through the texture's transparent skin.
+make("SurfaceAppearance", { Name = "Palette", ColorMap = goblinMesh.texture, AlphaMode = Enum.AlphaMode.Overlay }, body)
+make("Motor6D", { Name = "Root", Part0 = root, Part1 = body }, root)
+
+local bones: { [string]: any } = {}
+for _, bone in rig.bones do
+	local c = bone.cframe
+	local parent = if bone.parent then bones[bone.parent] else body
+	bones[bone.name] = make("Bone", {
+		Name = bone.name,
+		CFrame = CFrame.new(c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11], c[12]),
+	}, parent)
+end
+
+-- Invisible anchor at head height for nameplates and the target marker.
+local head = part(
+	goblin,
+	"Head",
+	Vector3.new(1, 1, 1),
+	at(0, bodyHeight + 1.25, 0),
+	Color3.new(1, 1, 1),
+	Enum.Material.SmoothPlastic,
+	{
+		Transparency = 1,
 		Anchored = false,
 		CanCollide = false,
+		CanQuery = false,
 		Massless = true,
-	})
-	make("WeldConstraint", { Name = "Weld", Part0 = root, Part1 = p }, p)
-	return p
-end
-local skin = rgb(110, 150, 70)
-limb("Torso", Vector3.new(1.8, 1.8, 1.1), at(0, 3.4, 0), rgb(110, 85, 60))
-limb("Head", Vector3.new(1.5, 1.3, 1.3), at(0, 4.95, 0), skin)
-limb("EarLeft", Vector3.new(0.9, 0.3, 0.3), at(-1.1, 5.1, 0), skin)
-limb("EarRight", Vector3.new(0.9, 0.3, 0.3), at(1.1, 5.1, 0), skin)
-limb("LegLeft", Vector3.new(0.6, 1.4, 0.6), at(-0.45, 1.6, 0), skin)
-limb("LegRight", Vector3.new(0.6, 1.4, 0.6), at(0.45, 1.6, 0), skin)
-limb("ArmLeft", Vector3.new(0.5, 1.5, 0.5), at(-1.2, 3.3, 0), skin)
-limb("ArmRight", Vector3.new(0.5, 1.5, 0.5), at(1.2, 3.3, 0), skin)
-limb("Weapon", Vector3.new(0.3, 0.3, 2.2), at(1.2, 2.7, -1), rgb(140, 140, 140))
-make("Humanoid", {
+	}
+)
+make("WeldConstraint", { Name = "Weld", Part0 = root, Part1 = head }, head)
+
+local humanoid = make("Humanoid", {
 	Name = "Humanoid",
-	HipHeight = 2.4,
+	RigType = Enum.HumanoidRigType.R15,
+	HipHeight = bodyHeight - 1,
 	DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None,
 	HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff,
 	BreakJointsOnDeath = false,
 }, goblin)
+make("Animator", { Name = "Animator" }, humanoid)
 goblin.PrimaryPart = root
 
 fs.writeFile("src/ServerStorage/Templates/Goblin.rbxmx", roblox.serializeModel({ goblin }, true))

@@ -424,6 +424,7 @@ Dark-navy panels, gold trim, serif headings; palette, fonts, frame recipes and H
 - Characters use Roblox standard rigs (R15), with accessories/clothing from approved sources.
 - Monsters start as **Part-based or simple-mesh rigs** assembled with `Motor6D` in Studio, or licensed/commissioned rigs.
 - Animations: Roblox Animation Editor by an animator, or licensed catalog animations that pass §7.2. The agent *wires* animations (priorities, markers, preload), it does not author them.
+- Exception (owner request, 2026-10-24): the goblin enemy is an agent-made **placeholder** (`assets/blender/goblin/goblin.blend`): low-poly mesh, rig with the reference armature's bone names, and clips retargeted from that armature's library. `tools/blender/export_goblin.py` writes the Roblox bone data and KeyframeSequences; replace with production art when available.
 
 ### 8.3 Pipeline shape
 ```
@@ -517,6 +518,7 @@ Define target concurrency per place, server count per realm, and what happens wh
 | Player-facing text | §6.3: all strings through LocalizationTable | M0.5 keeps strings in `Content/Strings` and content names; LocalizationTable deferred to M1 | Single source table makes the later move mechanical |
 | UI look | §6.1: shared Style Editor / StyleSheet | Dark-navy and gold style from the owner's reference (2026-10-24), colours written per element in the `.model.json` files plus `Shared/Theme` for runtime tints; frames built from strokes, gradients and rotated frames instead of uploaded 9-slice art; Accanthis replaces Cinzel (not on Roblox) | StyleSheet rules do not round-trip through hand-authored Rojo JSON yet; procedural frames need no upload or licence and stay sharp at any scale |
 | Skill timing | Real-time action cooldowns per skill; cast speed from Agility | FFXIV-style GCD (2.5 s) / oGCD with animation lock, queue, slidecast and move-cancel replaces per-skill-only timing (2026-10-24); basic attacks and enemies stay off the GCD; only the item affix `Haste` shortens GCD and casts | Owner decision; readable rotation with weaving, gear-driven speed instead of a stat |
+| Goblin art | §8.2: no agent modelling, rigging or animation | Owner override for a test (2026-10-24): placeholder skinned goblin replaces the part rig; clips ship as KeyframeSequences registered at runtime until uploaded, and enemy animation plays client-side from a replicated `AnimCue` attribute | Studio's 3D importer is UI-only, so the mesh upload is a manual step; runtime KeyframeSequence registration only works in Studio, so live servers need uploaded ids in `Assets.Animations` |
 | Roblox PlayerModule bug | Not specified | Studio 0.744 ships `VRBaseCamera` with a `VRbaseCamera` typo that breaks default player scripts; `EngineFixes` swaps in `vendor/PlayerModulePatch` at server start | Temporary; delete both once Roblox ships the fix |
 
 ---

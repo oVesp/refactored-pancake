@@ -63,6 +63,29 @@ return {
 			end
 		end
 	end,
+	["every manifest animation has a clip file row and a matching id once uploaded"] = function()
+		local rows = rowsById()
+		for key, asset in Assets.Animations do
+			local row = rows["animation:" .. key]
+			Expect.truthy(row, `animation {key} has no register row`)
+			Expect.equal(
+				`src/ReplicatedStorage/Animations/Goblin/{asset.keyframes}.rbxmx`,
+				row.path,
+				`animation {key} path`
+			)
+			if asset.id or row.assetId then
+				Expect.equal("rbxassetid://" .. tostring(row.assetId), asset.id, `animation {key} id`)
+			end
+		end
+	end,
+	["every manifest mesh is registered with the same id"] = function()
+		local rows = rowsById()
+		for key, asset in Assets.Meshes do
+			local row = rows["mesh:" .. key]
+			Expect.truthy(row, `mesh {key} has no register row`)
+			Expect.equal("rbxassetid://" .. row.assetId, asset.id, `mesh {key} id`)
+		end
+	end,
 	["every content, UI and world file is registered"] = function()
 		local registered = {}
 		for _, row in register.entries do
@@ -76,6 +99,7 @@ return {
 				"src/ServerStorage",
 				"src/StarterGui",
 				"src/ReplicatedStorage/UiTemplates",
+				"src/ReplicatedStorage/Animations",
 				"src/Workspace",
 			}
 		do

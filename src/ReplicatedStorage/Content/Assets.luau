@@ -11,6 +11,16 @@ export type TextureAsset = {
 	fallback: string,
 }
 
+export type AnimationAsset = {
+	id: string?,
+	keyframes: string,
+}
+
+export type MeshAsset = {
+	id: string,
+	texture: string,
+}
+
 --[=[
 	Asset manifest (game-design.md 7.3): the only place asset ids live. Every key has a row in
 	content/register.json (origin, license, review state). Audio comes from the Creator Store
@@ -68,7 +78,33 @@ local Textures: { [string]: TextureAsset } = {
 	},
 }
 
+--[=[
+	Enemy animation clips, keyed `<AnimSet><Clip>` (game-design.md 7.3). Source is
+	assets/blender/goblin/goblin.blend, retargeted from the reference armature. `keyframes` names the
+	KeyframeSequence under ReplicatedStorage.Animations that stands in for any entry without an
+	uploaded `id`; runtime registration of a KeyframeSequence only works in Studio.
+]=]
+local Animations: { [string]: AnimationAsset } = {
+	GoblinIdle = { keyframes = "GoblinIdle" },
+	GoblinWalk = { keyframes = "GoblinWalk" },
+	GoblinRun = { keyframes = "GoblinRun" },
+	GoblinAttack = { keyframes = "GoblinAttack" },
+	GoblinThrow = { keyframes = "GoblinThrow" },
+	GoblinHit = { keyframes = "GoblinHit" },
+	GoblinDeath = { keyframes = "GoblinDeath" },
+}
+
+--[=[
+	Skinned meshes uploaded through the Studio 3D importer. Read by tools/world/build.luau when it
+	writes NPC templates; scripts never reference these at runtime.
+]=]
+local Meshes: { [string]: MeshAsset } = {
+	Goblin = { id = "rbxassetid://123543422748212", texture = "rbxassetid://101253281014930" },
+}
+
 return table.freeze({
 	Audio = table.freeze(Audio),
 	Textures = table.freeze(Textures),
+	Animations = table.freeze(Animations),
+	Meshes = table.freeze(Meshes),
 })

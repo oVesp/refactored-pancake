@@ -257,6 +257,6 @@ Deviations and open items:
 - The greybox world is generated Parts with Roblox materials; Kenney meshes and textures wait for uploads.
 - Audio ids are Creator Store picks (mostly Roblox-licensed Pro Sound Effects and APM); status `draft` in the register until a reviewer signs off.
 - Player-facing text lives in `Content/Strings`; LocalizationTable is deferred to M1.
-- No animations: attacks show placeholder neon arcs, telegraph discs and projectiles.
+- Player attacks have no animations: they show placeholder neon arcs, telegraph discs and projectiles. Goblins use a placeholder skinned mesh with idle, walk, run, attack, throw, hit and death clips that play only in Studio until uploaded.
 - Lag compensation rewinds target positions up to 250 ms from recorded history; `/latency` adds simulated delay in Studio.
 - Mobile: touch buttons come from ContextActionService (Attack, Dodge, Guard, slots 1-4); layout not tuned on devices.
