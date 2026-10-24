@@ -51,6 +51,18 @@ return {
 			Expect.equal("rbxassetid://" .. row.assetId, asset.id, `audio {key} id`)
 		end
 	end,
+	["every manifest texture has a file row and a matching id once uploaded"] = function()
+		local rows = rowsById()
+		for key, asset in Assets.Textures do
+			local row = rows["texture:" .. key]
+			Expect.truthy(row, `texture {key} has no register row`)
+			Expect.truthy(row.path, `texture {key} has no source file path`)
+			Expect.truthy(string.match(asset.fallback, "^rbxasset://textures/"), `texture {key} fallback`)
+			if asset.id or row.assetId then
+				Expect.equal("rbxassetid://" .. tostring(row.assetId), asset.id, `texture {key} id`)
+			end
+		end
+	end,
 	["every content, UI and world file is registered"] = function()
 		local registered = {}
 		for _, row in register.entries do

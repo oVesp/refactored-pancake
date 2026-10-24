@@ -6,6 +6,11 @@ export type AudioAsset = {
 	looped: boolean?,
 }
 
+export type TextureAsset = {
+	id: string?,
+	fallback: string,
+}
+
 --[=[
 	Asset manifest (game-design.md 7.3): the only place asset ids live. Every key has a row in
 	content/register.json (origin, license, review state). Audio comes from the Creator Store
@@ -24,6 +29,46 @@ local Audio: { [string]: AudioAsset } = {
 	FieldMusic = { id = "rbxassetid://1842008726", volume = 0.2, looped = true },
 }
 
+--[=[
+	VFX particle textures (Kenney Particle Pack, CC0; files in assets/third_party/kenney/particle_pack).
+	`fallback` is a texture that ships with the Roblox client, used for any entry without an
+	uploaded `id`.
+]=]
+local Textures: { [string]: TextureAsset } = {
+	SoftGlow = {
+		id = "rbxassetid://104558576172751",
+		fallback = "rbxasset://textures/particles/forcefield_glow_main.dds",
+	},
+	Glint = { id = "rbxassetid://108199243069548", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
+	StarBurst = { id = "rbxassetid://77321615861748", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
+	RingWave = {
+		id = "rbxassetid://113159252727053",
+		fallback = "rbxasset://textures/particles/explosion01_shockwave_main.dds",
+	},
+	Smoke = { id = "rbxassetid://78730101917571", fallback = "rbxasset://textures/particles/smoke_main.dds" },
+	Debris = {
+		id = "rbxassetid://97309985603857",
+		fallback = "rbxasset://textures/particles/explosion01_smoke_main.dds",
+	},
+	Fire = { id = "rbxassetid://127860432232507", fallback = "rbxasset://textures/particles/fire_main.dds" },
+	Flame = { id = "rbxassetid://123764979614478", fallback = "rbxasset://textures/particles/fire_main.dds" },
+	Scorch = {
+		id = "rbxassetid://102151043140406",
+		fallback = "rbxasset://textures/particles/explosion01_core_main.dds",
+	},
+	Crackle = { id = "rbxassetid://132250463411868", fallback = "rbxasset://textures/particles/fire_sparks_main.dds" },
+	Streak = { id = "rbxassetid://94519195680757", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
+	TrailStreak = {
+		id = "rbxassetid://134456680353111",
+		fallback = "rbxasset://textures/particles/forcefield_glow_main.dds",
+	},
+	Twirl = {
+		id = "rbxassetid://113979896413209",
+		fallback = "rbxasset://textures/particles/forcefield_vortex_main.dds",
+	},
+}
+
 return table.freeze({
 	Audio = table.freeze(Audio),
+	Textures = table.freeze(Textures),
 })

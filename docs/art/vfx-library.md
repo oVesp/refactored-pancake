@@ -17,3 +17,12 @@ Free particle, flipbook, noise and trail textures for VFX work (§7.5).
 3. **Copied textures go through Git LFS** (§5.11). `.gitattributes` tracks `assets/**/*` `.png`, `.jpg`, `.tga`, `.tif`, `.tiff` and `.exr`; add a pattern before committing any other format.
 4. **Each copied file gets an entry in `content/register.json`** with its origin (pack and source URL) and license. Uploaded asset ids go in the `Assets` manifest only.
 5. Uploads still pass Roblox moderation. Flipbooks must fit Roblox's flipbook layouts and size limits; resize or re-pack them before upload.
+
+## Spell visuals
+
+Code: client `Vfx/Particles.luau` (emitter, trail, light and ground-wave helpers) and `Vfx/SpellEffects.luau` (one recipe per skill id), dispatched by `VfxController`.
+
+- Every visible shape comes from a texture on a ParticleEmitter or Trail attached to an invisible anchor. No neon spheres, cylinders or blocks. Visuals do not have to match the server hit volume.
+- Recipes so far: Cleave, War Cry (Warrior); Firebolt, Frost Shard, Spark (Mage); Mend, Smite, Rebuke (Healer). Other skills keep the neon placeholders until they get a recipe.
+- Textures are keys in `Assets.Textures`, copied from Kenney Particle Pack 1.1 into `assets/third_party/kenney/particle_pack/` and uploaded (ids in the manifest and register). An entry without `id` uses `fallback`, a particle texture that ships with the Roblox client, so a new texture can be tried before its upload.
+- After uploading, set `id` in `Assets.Textures` and `assetId` in the register row; `Register.spec` checks they match.

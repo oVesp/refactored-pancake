@@ -1,0 +1,7 @@
+License: CC0 1.0 Universal (public domain dedication)
+License URL: https://creativecommons.org/publicdomain/zero/1.0/
+Source: https://kenney.nl/assets/particle-pack
+Verified on source page: 2026-10-24
+Attribution: not required
+
+Kenney (kenney.nl), v1.1. Asset page license: Creative Commons CC0. Bundled License.txt confirms CC0.

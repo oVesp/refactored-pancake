@@ -288,6 +288,7 @@ local function resolve(caster: Entity, skill: SkillDef, aim: Vector3)
 
 	local delivery = skill.delivery
 	local origin = caster.root.Position
+	local shownTarget: Model? = nil
 	if delivery == "Melee" or delivery == "Cone" then
 		for _, target in arcTargets(caster, aim, skill.range, skill.angle) do
 			hitEnemy(caster, target, skill, bonus)
@@ -313,6 +314,7 @@ local function resolve(caster: Entity, skill: SkillDef, aim: Vector3)
 		if not target or (target.root.Position - origin).Magnitude > skill.range + Tuning.Combat.RangeTolerance then
 			target = caster
 		end
+		shownTarget = (target :: Entity).model
 		supportAlly(caster, target :: Entity, skill)
 	elseif delivery == "Self" then
 		if skill.shield then
@@ -342,6 +344,16 @@ local function resolve(caster: Entity, skill: SkillDef, aim: Vector3)
 		end
 	elseif delivery == "Object" then
 		useObject(caster, skill, aim)
+	end
+	if delivery ~= "Projectile" then
+		broadcast({
+			kind = "Resolve",
+			caster = caster.model,
+			skillId = skill.id,
+			origin = origin,
+			aim = aim,
+			target = shownTarget,
+		})
 	end
 
 	for _, effect in (skill.selfEffects or {}) :: { any } do

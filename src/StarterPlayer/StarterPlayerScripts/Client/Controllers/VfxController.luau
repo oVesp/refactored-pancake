@@ -9,6 +9,9 @@ local TweenService = game:GetService("TweenService")
 local NetClient = require(ReplicatedStorage.Shared.Net.Client)
 local Skills = require(ReplicatedStorage.Content.Skills)
 
+local Particles = require(script.Parent.Parent.Vfx.Particles)
+local SpellEffects = require(script.Parent.Parent.Vfx.SpellEffects)
+
 local TYPE_COLORS: { [string]: Color3 } = {
 	physical = Color3.fromRGB(230, 230, 230),
 	fire = Color3.fromRGB(255, 120, 40),
@@ -32,7 +35,8 @@ local DAMAGE_COLORS: { [string]: Color3 } = {
 local TELEGRAPH_COLOR = Color3.fromRGB(255, 70, 50)
 
 --[=[
-	Placeholder visuals for casts, telegraphs, projectiles, impacts and floating damage numbers.
+	Visuals for casts, telegraphs, projectiles, impacts and floating damage numbers. Skills with a
+	recipe in `Vfx/SpellEffects` get textured particle effects; the rest keep neon placeholders.
 	Everything here is cosmetic and client-only; the server already decided the outcome.
 ]=]
 local VfxController = {}
@@ -41,7 +45,10 @@ local UIController: any
 local AudioController: any
 local CombatController: any
 
-local projectiles: { [number]: BasePart } = {}
+type Flight = { part: BasePart, recipe: SpellEffects.Recipe? }
+
+local projectiles: { [number]: Flight } = {}
+local charges: { [Instance]: Instance } = {}
 local effectsFolder: Folder
 
 local function neon(size: Vector3, cframe: CFrame, color: Color3, transparency: number?): Part
@@ -60,13 +67,7 @@ local function neon(size: Vector3, cframe: CFrame, color: Color3, transparency: 
 	return part
 end
 
-local function ground(position: Vector3): Vector3
-	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Exclude
-	params.FilterDescendantsInstances = { effectsFolder, Players.LocalPlayer.Character :: Instance }
-	local result = workspace:Raycast(position + Vector3.new(0, 6, 0), Vector3.new(0, -40, 0), params)
-	return if result then result.Position else position
-end
+local ground = Particles.Ground
 
 local function disc(center: Vector3, radius: number, color: Color3, duration: number)
 	local base = ground(center)
@@ -152,49 +153,119 @@ local function telegraph(info: { [string]: any })
 	end
 end
 
+local function isLocalCaster(caster: Instance?): boolean
+	return caster ~= nil and caster == Players.LocalPlayer.Character
+end
+
+local function endFlight(id: number)
+	local flight = projectiles[id]
+	if not flight then
+		return
+	end
+	projectiles[id] = nil
+	if flight.recipe then
+		Particles.Release(flight.part, 0.8)
+	else
+		flight.part:Destroy()
+	end
+end
+
+local function launch(info: { [string]: any }, skill: any)
+	local recipe: SpellEffects.Recipe? = SpellEffects[info.skillId]
+	local start = CFrame.lookAt(info.origin, info.origin + info.direction)
+	local part: BasePart
+	if recipe and recipe.projectile then
+		part = Particles.Anchor(start)
+		recipe.projectile(part)
+	else
+		part = neon(Vector3.new(0.8, 0.8, 2.4), start, skillColor(info.skillId), 0)
+		recipe = nil
+	end
+	local id = info.id
+	projectiles[id] = { part = part, recipe = recipe }
+	AudioController.PlayAt(soundFor(skill), info.origin)
+	local travelled = 0
+	local connection: RBXScriptConnection
+	connection = RunService.RenderStepped:Connect(function(dt)
+		if not part.Parent or not projectiles[id] then
+			connection:Disconnect()
+			return
+		end
+		travelled += info.speed * dt
+		if travelled >= info.range then
+			connection:Disconnect()
+			endFlight(id)
+			return
+		end
+		part.CFrame =
+			CFrame.lookAt(info.origin + info.direction * travelled, info.origin + info.direction * (travelled + 1))
+	end)
+	Debris:AddItem(part, info.range / info.speed + 1.5)
+end
+
+local function startCharge(info: { [string]: any }, skill: any)
+	local recipe = SpellEffects[info.skillId]
+	local caster = info.caster
+	local root = caster and (caster:FindFirstChild("HumanoidRootPart") or caster.PrimaryPart)
+	if recipe and recipe.cast and root and root:IsA("BasePart") then
+		local previous = charges[caster]
+		if previous then
+			previous:Destroy()
+		end
+		charges[caster] = recipe.cast(root, info.duration)
+	else
+		burst(info.origin + Vector3.new(0, 1, 0), 2, skillColor(skill.id))
+	end
+end
+
+local function cancelCharge(caster: Instance?)
+	local charge = caster and charges[caster]
+	if charge then
+		charges[caster :: Instance] = nil
+		charge:Destroy()
+	end
+end
+
+local function onResolve(info: { [string]: any }, skill: any)
+	if info.caster then
+		charges[info.caster] = nil
+	end
+	local recipe = SpellEffects[info.skillId]
+	if not recipe then
+		return
+	end
+	if recipe.resolve then
+		recipe.resolve(info :: any)
+	elseif recipe.swing and not isLocalCaster(info.caster) then
+		recipe.swing(info.origin, info.aim, skill.range or 6, skill.angle or 90)
+	end
+end
+
 local function onCast(info: { [string]: any })
 	local skill = Skills.ById[info.skillId or ""]
-	if info.kind == "Projectile" and skill then
-		local bolt = neon(
-			Vector3.new(0.8, 0.8, 2.4),
-			CFrame.lookAt(info.origin, info.origin + info.direction),
-			skillColor(info.skillId),
-			0
-		)
-		projectiles[info.id] = bolt
-		AudioController.PlayAt(soundFor(skill), info.origin)
-		local travelled = 0
-		local connection: RBXScriptConnection
-		connection = RunService.RenderStepped:Connect(function(dt)
-			if not bolt.Parent then
-				connection:Disconnect()
-				return
-			end
-			travelled += info.speed * dt
-			if travelled >= info.range then
-				connection:Disconnect()
-				bolt:Destroy()
-				projectiles[info.id] = nil
-				return
-			end
-			bolt.CFrame =
-				CFrame.lookAt(info.origin + info.direction * travelled, info.origin + info.direction * (travelled + 1))
-		end)
-		Debris:AddItem(bolt, info.range / info.speed + 0.5)
+	if not skill then
+		return
+	end
+	if info.kind == "Projectile" then
+		launch(info, skill)
 	elseif info.kind == "Telegraph" then
 		telegraph(info)
-	elseif info.kind == "Cast" and skill then
-		burst(info.origin + Vector3.new(0, 1, 0), 2, skillColor(info.skillId))
+	elseif info.kind == "Cast" then
+		startCharge(info, skill)
+	elseif info.kind == "Interrupted" then
+		cancelCharge(info.caster)
+	elseif info.kind == "Resolve" then
+		onResolve(info, skill)
 	end
 end
 
 local function onImpact(id: number, position: Vector3, kind: string)
-	local bolt = projectiles[id]
-	if bolt then
-		projectiles[id] = nil
-		bolt:Destroy()
-	end
-	if kind == "hit" then
+	local flight = projectiles[id]
+	endFlight(id)
+	if kind == "hit" and flight and flight.recipe and flight.recipe.impact then
+		flight.recipe.impact(position)
+		AudioController.PlayAt("Hit", position)
+	elseif kind == "hit" then
 		burst(position, 2.5, Color3.fromRGB(255, 220, 160))
 		AudioController.PlayAt("Hit", position)
 	elseif kind == "interrupt" then
@@ -239,6 +310,7 @@ function VfxController.Start()
 	effectsFolder = Instance.new("Folder")
 	effectsFolder.Name = "ClientEffects"
 	effectsFolder.Parent = workspace
+	Particles.Init(effectsFolder)
 
 	NetClient.Connect("ShowCast", onCast)
 	NetClient.Connect("ShowImpact", onImpact)
@@ -260,7 +332,12 @@ end
 function VfxController.PredictSwing(skillId: string, origin: Vector3, aim: Vector3)
 	local skill = Skills.ById[skillId]
 	if skill and (skill.delivery == "Melee" or skill.delivery == "Cone") and not skill.windup then
-		arc(origin, aim, skill.range or 6, skillColor(skillId))
+		local recipe = SpellEffects[skillId]
+		if recipe and recipe.swing then
+			recipe.swing(origin, aim, skill.range or 6, skill.angle or 90)
+		else
+			arc(origin, aim, skill.range or 6, skillColor(skillId))
+		end
 		AudioController.Play(soundFor(skill))
 	end
 end
