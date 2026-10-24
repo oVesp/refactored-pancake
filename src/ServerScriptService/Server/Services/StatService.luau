@@ -144,6 +144,9 @@ function StatService.Recompute(entity: Entity)
 	for _, name in Formulas.StatNames do
 		entity.model:SetAttribute("Stat_" .. name, stats[name])
 	end
+	for _, name in Formulas.ExtraNames do
+		entity.model:SetAttribute("Extra_" .. name, if extras[name] ~= 0 then extras[name] else nil)
+	end
 	entity.model:SetAttribute(
 		Attributes.MaxFocus,
 		Formulas.DisciplineCapacity(entity.level, Tuning.Disciplines.CapacityBase, Tuning.Disciplines.CapacityPerLevels)
@@ -265,6 +268,8 @@ local function setUpCharacter(player: Player, character: Model)
 		level = StatService.LevelFromProfile(profile),
 		tags = {},
 	})
+	-- A new character starts a new movement baseline; without this every respawn counts as a violation.
+	EntityService.NoteTeleport(player)
 	StatService.Recompute(entity)
 	StatService.Refill(entity)
 

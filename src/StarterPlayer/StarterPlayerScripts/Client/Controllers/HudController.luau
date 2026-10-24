@@ -185,6 +185,8 @@ local function renderHotbar(slots: { any })
 	for index, slot in slots do
 		local frame = UIController.Clone("HotbarSlot") :: Frame
 		frame.LayoutOrder = index
+		-- Active makes the slot sink clicks so tapping it does not also fire the light attack.
+		frame.Active = true
 		local parts = UIController.Bind(frame, { "Bind_Name", "Bind_Key", "Bind_Cost", "Bind_Cooldown" })
 		local name, cost = slot.id, ""
 		if slot.kind == "Skill" then

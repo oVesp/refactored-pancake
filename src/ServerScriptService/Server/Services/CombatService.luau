@@ -16,6 +16,7 @@ type Effect = { status: string, duration: number?, magnitude: number?, chance: n
 local SHOW_RADIUS = 90
 local PARRY_STAGGER = 0.6
 local SHIELD_SECONDS = 15
+local KNOCKBACK_SECONDS = 0.25
 
 local EntityService: any
 local StatService: any
@@ -254,7 +255,20 @@ function CombatService.Knockback(target: Entity, origin: Vector3, force: number)
 	local flat = target.root.Position - origin
 	flat = Vector3.new(flat.X, 0, flat.Z)
 	local direction = if flat.Magnitude > 1e-3 then flat.Unit else Vector3.new(0, 0, 1)
-	target.root.AssemblyLinearVelocity = direction * force + Vector3.new(0, force * 0.4, 0)
+	-- A Humanoid overrides a raw velocity write on the next step, so drive it with a short constraint.
+	local attachment = Instance.new("Attachment")
+	attachment.Name = "KnockbackAttachment"
+	local velocity = Instance.new("LinearVelocity")
+	velocity.Name = "Knockback"
+	velocity.Attachment0 = attachment
+	velocity.MaxForce = 1e6
+	velocity.VectorVelocity = direction * force + Vector3.new(0, force * 0.25, 0)
+	attachment.Parent = target.root
+	velocity.Parent = target.root
+	task.delay(KNOCKBACK_SECONDS, function()
+		velocity:Destroy()
+		attachment:Destroy()
+	end)
 	StatusService.Interrupted:Fire(target, "knockback")
 end
 
