@@ -1,6 +1,6 @@
 # Scope 01 — Midgard Testing Grounds
 
-Status: **approved scope, revision 2.** Milestone **M0.5** in [game-design.md](../game-design.md) §7.4 and §10. Where this file and `game-design.md` disagree, `game-design.md` wins.
+Status: **approved scope, revision 2; built 2026-10-24 (see §10).** Milestone **M0.5** in [game-design.md](../game-design.md) §7.4 and §10. Where this file and `game-design.md` disagree, `game-design.md` wins.
 
 | Field | Value |
 |---|---|
@@ -154,7 +154,7 @@ Loose raiding bands, no casters.
 |---|---|---|---|---|---|
 | Goblin Raider | 1–3 | Melee grunt, packs of 2–3 | Physical | — | Aggro, chase, leash |
 | Goblin Slinger | 2–4 | Ranged, kites | Physical | — | Projectile dodge, kiting AI |
-| Goblin Trapper | 3–4 | Lays poison snares, throws darts | Poison | — | Ground hazards, cleanse |
+| Goblin Trapper | 3–4 | Throws poison snares and darts, keeps distance | Poison | — | Ground hazards, cleanse |
 | Goblin Brute | 4–5 | Heavy, slow wind-up slam | Physical | Resist: physical | Telegraph + dodge, mitigation |
 | Goblin Chieftain (optional elite) | 6 | 2 phases, calls a Raider pair at 50% HP | Physical | Immune: fear | Scripted timeline (§5.6), level-gap curve vs Lv 5 |
 | Training Dummy | any | Static, configurable | — | Configurable | Damage numbers, resist math |
@@ -192,10 +192,11 @@ Server-gated: allowed only when `RunService:IsStudio()` or the UserId is on a de
 | Tool | Form |
 |---|---|
 | `/level n`, `/class add/remove X`, `/xp n` | `TextChatCommand` |
-| `/spawn enemy lv`, `/clear`, `/god` | `TextChatCommand` |
+| `/spawn enemy [lv] [count]`, `/clear`, `/god`, `/heal`, `/kill`, `/damage n`, `/give item [n]` | `TextChatCommand` |
 | `/latency ms` (simulated) | `TextChatCommand`, Studio only |
 | Damage log, aggro/state overlay | Studio-authored debug `ScreenGui` + controller (no code-built UI, §6.1) |
-| Training dummies | Dev Yard, configurable via attributes |
+| Training dummies | Dev Yard, configurable via attributes (`Level`, `Resist`, `Vulnerable`, `Immune`, lane movement) |
+| Studio test hook | `ServerStorage.RunDevCommand` BindableFunction (Studio only) runs the same commands for automation |
 
 ---
 
@@ -232,3 +233,30 @@ Toolbox audio needed: footsteps (grass, wood), melee swing/hit, spell cast/impac
 6. Dev commands refused for non-allowlisted users in a published test.
 7. Every asset in the place has a register row. No hard-coded asset ids.
 8. Format, lint, typecheck, tests and `rojo build` pass.
+
+---
+
+## 10. Build status (2026-10-24)
+
+Verified by Studio playtest (single client, Studio) and Lune unit tests.
+
+| Exit criterion | Result |
+|---|---|
+| 1. Class pick at trainer, kill goblins, reach level 5 | Pass on desktop: trainer prompts train classes, kills grant XP, `/level` covers the climb. **Phone emulator not tested.** |
+| 2. Skills, passives, spells resolve server-side; rejects roll back | Pass: melee, cone, projectile, ground, ally, self, dash and blink paths exercised; passives show in stats; cooldown and malformed calls rejected; the client clears its predicted cooldown on reject. |
+| 3. Circle 2 refused at line level 5 | Pass in unit tests (`Formulas.spec`); no Circle 2 content exists to try in play. |
+| 4. Rabble AI states, leash, respawn; Hexer interrupt | Pass: idle, patrol, aggro, attack, return observed; leash resets HP; Charge interrupts the Hexer's cast; Chieftain phase 2 summons two Raiders. |
+| 5. Multiclass with each template | Pass in unit tests for all four templates; 2+2+1 and 3+1+1 also exercised in play. |
+| 6. Dev commands refused for non-allowlisted users | **Not verified**: needs a published test; Studio always allows dev commands. |
+| 7. Every asset registered, no hard-coded ids | Pass: `Register.spec` validates `content/register.json`, the manifest and all content, UI and world files. |
+| 8. Format, lint, typecheck, tests, build | Pass (`tools/gate.sh`). |
+
+Also verified: guard (parry window, then 40% damage and stamina cost), dodge i-frames, Disciplines with Focus capacity, XP debt on death repaid by later XP, Weakened after respawn, loot to inventory, equip/unequip changing stats, potions.
+
+Deviations and open items:
+- The greybox world is generated Parts with Roblox materials; Kenney meshes and textures wait for uploads.
+- Audio ids are Creator Store picks (mostly Roblox-licensed Pro Sound Effects and APM); status `draft` in the register until a reviewer signs off.
+- Player-facing text lives in `Content/Strings`; LocalizationTable is deferred to M1.
+- No animations: attacks show placeholder neon arcs, telegraph discs and projectiles.
+- Lag compensation rewinds target positions up to 250 ms from recorded history; `/latency` adds simulated delay in Studio.
+- Mobile: touch buttons come from ContextActionService (Attack, Dodge, Guard, slots 1-4); layout not tuned on devices.

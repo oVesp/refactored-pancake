@@ -108,7 +108,7 @@ Starter set (≈12 for the vertical slice, original names TBD): strike power, bo
 ### 3.5 Combat (action)
 - **Client** sends intent (skill id, aim vector, timestamp). **Server** validates and resolves. See §6.4.
 - Controls: tap/click light attack chain, hold for heavy, skill hotbar (6 slots mobile, 8–10 desktop), dodge, block/parry window, lock-on (soft) for mobile/controller.
-- **Damage model**: `base × stat scaling × type multiplier − mitigation`, with damage types (physical, fire, cold, lightning, acid, holy, negative energy, poison, mental) and resist/immune/vulnerable tags.
+- **Damage model**: `(base + stat × ratio) × (1 + bonus) × type multiplier × crit × level gap × 100 / (100 + defense)` (`Shared/Formulas.ResolveDamage`), with damage types (physical, fire, cold, lightning, acid, holy, negative energy, poison, mental) and resist/immune/vulnerable tags.
 - **Level gap curve**: strong smoothing instead of a hard wall: ≥10 levels above → large reductions, ≥30 → near-zero without penetration items/skills. The wall is faithful; the smoothness avoids hard-lock frustration.
 - **Status effects**: stun, slow, root, silence, fear, charm, burn, poison, bleed. Boss immunity pattern is explicit in data (e.g. "immune: mental").
 - **Targeting rule**: party and guild members never take friendly fire.
@@ -166,7 +166,7 @@ From [low-level-human-design.md](low-level-human-design.md), adapted to this doc
 | Concern | Decision | Reason / alternative considered |
 |---|---|---|
 | Code source of truth | **Rojo 7** project + Git | Reviewable diffs, linting, CI. *Script Sync* is the official alternative but offers less project-file control. Do not run both on the same scripts. |
-| UI/instance authoring | **Roblox Studio** (visual), saved as `.rbxmx` into the repo | Visual layouts must be authored visually (§7). |
+| UI/instance authoring | Layout objects + templates as declarative Rojo files (`.model.json` for UI, `.rbxmx` for models); re-saved from Studio when a designer restyles them | Never built at runtime (§6). Declarative files diff cleanly and round-trip through Studio. |
 | Studio automation | **Studio MCP** for inspection, UI edits, playtesting, Luau probes | Complements Rojo; does not replace it. |
 | Toolchain | **Rokit** (`rokit.toml`) pins rojo, stylua, selene, luau-lsp, lune, wally | One `rokit install` reproduces every tool version. |
 | Typing & lint | `--!strict` Luau everywhere, `luau-lsp`, `selene`, `stylua` | Catches bugs at edit time. |
@@ -184,7 +184,8 @@ src/
   ReplicatedFirst/            Loading screen only
   ReplicatedStorage/
     Shared/                   Types, Constants, Util, Net (remote definitions), Signal
-    Content/                  Data modules: Classes, Spells, Disciplines, Items, Enemies, Zones, Quests (plain tables)
+    Content/                  Data modules: Classes, Skills, Statuses, Disciplines, Items, Enemies, Zones, Tuning, Strings, Assets (plain tables)
+    UiTemplates/              Row/slot/nameplate templates cloned by controllers
     Packages/                 Wally output
   ServerScriptService/
     Server/
@@ -192,14 +193,16 @@ src/
       Services/               DataService, StatService, CombatService, SkillService, AIService, SpawnService, ...
   ServerStorage/
     Templates/                Enemy models, hold interiors
-    ContentServerOnly/        Drop tables, formulas players must not see
+    ContentServerOnly/        Drop tables, dev allowlist, formulas players must not see
+  Workspace/Map.rbxmx         Generated greybox world (tools/world/build.luau)
   StarterPlayer/StarterPlayerScripts/
     Client/
       Bootstrap.client.luau
       Controllers/            InputController, CombatController, UIController, CameraController, ...
-  StarterGui/                 Authored ScreenGuis (from .rbxmx)
+  StarterGui/                 Authored ScreenGuis (.model.json)
 assets/                       Source art (Blender, PSD, SVG), not synced into the place
-tools/                        gate.sh (quality gate), scan.sh, Python/Node/Lune/Blender scripts
+tools/                        gate.sh (quality gate), scan.sh, world/build.luau (greybox + templates), Python/Node/Lune/Blender scripts
+content/register.json         Content register (§7.1), validated by tests/specs/Register.spec.luau
 docs/
 tests/                        Lune runner + specs/*.spec.luau
 .githooks/                    pre-commit (gate), commit-msg, Git LFS hooks
@@ -362,7 +365,7 @@ HUD (HP/MP/Focus/XP/hotbar/buffs/minimap), character sheet (classes path), skill
 ### 7.1 Principles
 - **Curated, not generated in bulk.** Every asset and data row has a purpose in the progression plan; quantity is a budget.
 - **Data-driven**: content lives in `Content/` tables or JSON/TOML compiled to modules by a tool. Balance edits don't require touching code.
-- **Single content register** (a spreadsheet or JSON): id, type, owner, origin, license, status (`draft → reviewed → approved → shipped`), notes. Tools fail the build if an `approved` check is missing for referenced content.
+- **Single content register** (`content/register.json`): id, type, owner, origin, license, status (`draft → reviewed → approved → shipped`), notes. Tools fail the build if an `approved` check is missing for referenced content.
 
 ### 7.2 Content intake checklist
 1. Written spec: role in game, level band, readable fantasy, budget (triangles/texture size/audio length).
@@ -468,7 +471,7 @@ Define target concurrency per place, server count per realm, and what happens wh
 | Milestone | Deliverable | Exit criteria |
 |---|---|---|
 | **M0 Foundations** (done 2026-10-23) | Rojo project, bootstrap, Net layer, Data stub, UI shell, CI | A player joins, a profile loads in memory, HUD shows replicated HP, tests and lint pass, Git initialized with hooks and the auto-commit gate working |
-| **M0.5 Testing Grounds** | One dev place in Midgard: Farming Village, fields, goblin camp; Warrior/Mage/Healer to level 5; dev commands ([scope 01](scope/01-midgard-testing-grounds.md)) | Every skill, passive and spell resolves server-side; Circle 2 refused at line level 5; Rabble AI states and leash work; dev commands gated; all assets registered |
+| **M0.5 Testing Grounds** (built 2026-10-24; open items in scope 01 §10) | One dev place in Midgard: Farming Village, fields, goblin camp; Warrior/Mage/Healer to level 5; dev commands ([scope 01](scope/01-midgard-testing-grounds.md)) | Every skill, passive and spell resolves server-side; Circle 2 refused at line level 5; Rabble AI states and leash work; dev commands gated; all assets registered |
 | **M1 Vertical slice** | Levels 1–5, 3 classes, 12 Disciplines, ~20 spells, 6 enemies + boss, tutorial zone | 30-minute loop playable on phone and desktop; combat feel signed off; no exploit found in rate-limit/validation tests |
 | **M2 Alpha** | Hub + 3 zones, 8 classes, crafting v1, parties, trading v1, cap 20 | Soak test with bots at target concurrency; telemetry live |
 | **M3 Beta** | Guild Holds v1, tournaments v1, Ironbound realm, cap 40 | Economy balance sheet reviewed; moderation tooling in place |
@@ -498,6 +501,11 @@ Define target concurrency per place, server count per realm, and what happens wh
 | Public-domain names | Old §2 asked for Norse-neutral realm labels | Myth/folklore names allowed (Midgard first); source pairings and coinages still forbidden | Owner decision; myth predates the series |
 | Unit tests | §5.1 named TestEZ or Jest-Lua | Lune unit tests for pure modules; Studio playtests for integration | Runs in CI and pre-commit without Studio |
 | Toolchain manager | Not specified | Rokit pins every tool, including luau-lsp; Roblox type definitions pinned to the same luau-lsp tag | Reproducible gate on every machine |
+| Damage formula | §3.5 wrote `... − mitigation` | Multiplicative mitigation `100 / (100 + defense)` with a 1-damage floor | Subtraction zeroes low-level hits; the level-gap curve already provides the wall |
+| UI file format | §5.1 said `.rbxmx` saved from Studio | Hand-authored Rojo `.model.json` with layout objects and templates; no runtime-built UI | Agent cannot save from Studio; declarative JSON diffs cleanly and Studio can re-save over it |
+| Greybox world | Kenney meshes listed for the village (§7.5) | Generated Part greybox (`tools/world/build.luau`), Roblox materials only | Mesh uploads not available yet; generator is deterministic and re-runnable |
+| Test automation hook | Dev commands are chat-only | Studio-only `ServerStorage.RunDevCommand` BindableFunction runs the same handlers | Studio MCP cannot send chat from plugin context; the hook is server-side and absent outside Studio |
+| Player-facing text | §6.3: all strings through LocalizationTable | M0.5 keeps strings in `Content/Strings` and content names; LocalizationTable deferred to M1 | Single source table makes the later move mechanical |
 
 ---
 
