@@ -26,11 +26,6 @@ local ROOT_NAME = "Nature"
 local TILE_COLUMNS = 64
 local CHUNK_STUDS = 256
 local VOXEL = 4
--- Trees render as SLIM imposters past the streaming radius so far forests keep their outline
--- (docs/systems/atmosphere.md); small layers simply stream out under the haze.
-local LEVEL_OF_DETAIL: { [string]: Enum.ModelLevelOfDetail } = {
-	Trees = Enum.ModelLevelOfDetail.SLIM,
-}
 
 type Asset = {
 	name: string,
@@ -279,7 +274,8 @@ local function prepareTemplate(source: Model, asset: Asset): Model
 		end
 	end
 	template:SetAttribute("Height", boxSize.Y)
-	template.LevelOfDetail = LEVEL_OF_DETAIL[asset.layer] or Enum.ModelLevelOfDetail.Disabled
+	-- SLIM imposters stalled play at about 5 fps while Roblox generated them (docs/systems/atmosphere.md).
+	template.LevelOfDetail = Enum.ModelLevelOfDetail.Disabled
 	return template
 end
 
@@ -308,6 +304,22 @@ local function protectedBoxes(root: Instance): { Box }
 		add(tagged)
 	end
 	return boxes
+end
+
+-- Single-part props go in the chunk as a bare part: one instance less each, which matters at
+-- this prop count for streaming and memory.
+local function placeProp(model: Model, chunk: Instance)
+	local children = model:GetChildren()
+	if #children == 1 and children[1]:IsA("BasePart") then
+		children[1].Parent = chunk
+		model:Destroy()
+	else
+		model.Parent = chunk
+	end
+end
+
+local function isGenerated(instance: Instance): boolean
+	return (instance:IsA("Model") or instance:IsA("BasePart")) and instance:GetAttribute("Locked") ~= true
 end
 
 local function parseLines(text: string): { { number } }
@@ -372,9 +384,11 @@ function WorldGen.ApplyScatter(layerNames: { string }?)
 		if layerNames == nil or table.find(layerNames, layer.name) then
 			local layerFolder = root:FindFirstChild(layer.name)
 			if layerFolder then
-				for _, d in layerFolder:GetDescendants() do
-					if d:IsA("Model") and d:GetAttribute("Locked") ~= true then
-						d:Destroy()
+				for _, chunk in layerFolder:GetChildren() do
+					for _, prop in chunk:GetChildren() do
+						if isGenerated(prop) then
+							prop:Destroy()
+						end
 					end
 				end
 			else
@@ -440,7 +454,7 @@ function WorldGen.ApplyScatter(layerNames: { string }?)
 						model:PivotTo(
 							CFrame.new(x, y, z) * tilt * CFrame.new(0, -sink, 0) * CFrame.Angles(0, math.rad(row[5]), 0)
 						)
-						model.Parent = chunk
+						placeProp(model, chunk)
 						placed += 1
 					else
 						skipped += 1
@@ -494,8 +508,9 @@ function WorldGen.Apply()
 end
 
 --[=[
-	Re-applies the per-layer `LevelOfDetail` to props already placed under `Workspace.Nature`,
-	without re-running the scatter. Returns how many models changed.
+	Brings props already placed under `Workspace.Nature` up to the current streaming setup without
+	re-running the scatter: `LevelOfDetail` disabled and single-part props unwrapped from their
+	Model. Returns how many props changed.
 ]=]
 function WorldGen.ApplyStreaming(): number
 	assertEditMode()
@@ -505,18 +520,24 @@ function WorldGen.ApplyStreaming(): number
 	end
 	local changed = 0
 	for _, layerFolder in root:GetChildren() do
-		local level = LEVEL_OF_DETAIL[layerFolder.Name] or Enum.ModelLevelOfDetail.Disabled
 		for _, chunk in layerFolder:GetChildren() do
 			for _, prop in chunk:GetChildren() do
-				if prop:IsA("Model") and prop.LevelOfDetail ~= level then
-					prop.LevelOfDetail = level
-					changed += 1
+				if prop:IsA("Model") and prop:GetAttribute("Locked") ~= true then
+					local before = prop.LevelOfDetail
+					prop.LevelOfDetail = Enum.ModelLevelOfDetail.Disabled
+					local children = prop:GetChildren()
+					if #children == 1 and children[1]:IsA("BasePart") then
+						placeProp(prop, chunk)
+						changed += 1
+					elseif before ~= Enum.ModelLevelOfDetail.Disabled then
+						changed += 1
+					end
 				end
 			end
 			task.wait()
 		end
 	end
-	log:Info("streaming detail set on %d props", changed)
+	log:Info("streaming setup applied to %d props", changed)
 	return changed
 end
 
@@ -535,9 +556,13 @@ function WorldGen.Clear()
 	end
 	local root = workspace:FindFirstChild(ROOT_NAME)
 	if root then
-		for _, d in root:GetDescendants() do
-			if d:IsA("Model") and d:GetAttribute("Locked") ~= true then
-				d:Destroy()
+		for _, layerFolder in root:GetChildren() do
+			for _, chunk in layerFolder:GetChildren() do
+				for _, prop in chunk:GetChildren() do
+					if isGenerated(prop) then
+						prop:Destroy()
+					end
+				end
 			end
 		end
 	end

@@ -45,7 +45,7 @@ The whole world at start-valley density would be several hundred thousand props.
 
 - Terrain written with `WriteVoxelChannels` in blocks of 64 × 64 voxel columns (256 studs), yielding between blocks. The 8-stud data is upsampled to 4-stud voxels: heights and water bilinear, materials by a hashed pick among the four neighbouring cells. Each block fills from 24 studs below its lowest column (never below `floorY`) to keep mountain writes small. `MaterialColors` set to the palette.
 - Props cloned from the Nature MEGAPACK in `ServerStorage`, re-pivoted to their bounding-box bottom centre, anchored, scripts stripped; collision on trunks only for trees, off for cover.
-- Trees get `LevelOfDetail = SLIM` (imposters past the streaming radius); other layers `Disabled`. `ApplyStreaming()` re-applies this to placed props. See [atmosphere.md](atmosphere.md).
+- `LevelOfDetail` is `Disabled` on every prop, and single-part props sit in their chunk as a bare part without a Model. `ApplyStreaming()` brings placed props up to this. See [atmosphere.md](atmosphere.md).
 - Placed under `Workspace.Nature/<Layer>/<256-stud chunk>`. Anything marked `Locked` or tagged `ScatterExclude` survives a re-apply.
 
 ## Data format

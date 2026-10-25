@@ -1575,6 +1575,16 @@
 			"owner": "dev",
 			"status": "draft",
 			"notes": "Lighting effect authored for Rojo; the client atmosphere controller drives its values at runtime."
+		},
+		{
+			"id": "content:PropDetail",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/PropDetail.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Client hide and thinning distances for the generated props."
 		}
 	]
 }
