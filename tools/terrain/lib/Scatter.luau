@@ -194,6 +194,13 @@ function Scatter.run(cfg: any, layout: any, maps: any, water: any, surface: any,
 			scale = scale,
 		})
 	end
+	-- Ground detail (cover, pebbles, most understory) fades out away from the start valley; the
+	-- whole world at start-valley density would be several hundred thousand props.
+	local world = cfg.world
+	local function detailAt(x: number, z: number): number
+		local d = math.sqrt((x - world.startX) ^ 2 + (z - world.startZ) ^ 2)
+		return Noise.smoothstep(world.detailFar, world.detailNear, d)
+	end
 	local function scaleOf(asset: any, roll: number): number
 		return asset.scale[1] + (asset.scale[2] - asset.scale[1]) * roll
 	end
@@ -243,7 +250,10 @@ function Scatter.run(cfg: any, layout: any, maps: any, water: any, surface: any,
 			local def = biomes[b]
 			local i, j = cellOf(x, z)
 			local edge = Noise.smoothstep(sc.padMargin, sc.padMargin + 40, Grid.get(maps.padDistance, i, j))
-			local density = def.trees / 1000 * areaPer * math.clamp(1 + clump(x, z) * 0.9, 0.15, 1.9) * edge
+			local c = def.clump or 0.9
+			local grove = math.clamp(1 + clump(x, z) * c, if c > 1 then 0 else 0.15, 1 + c)
+			local far = Noise.lerp(world.outerTrees, 1, detailAt(x, z))
+			local density = def.trees / 1000 * areaPer * grove * edge * far
 			if Noise.hash01(treeSeed, s, 1) < density then
 				local group = pickWeighted(def.treeWeights, Noise.hash01(treeSeed, s, 2))
 				local asset = assetOf(group, Noise.hash01(treeSeed, s, 3))
@@ -273,7 +283,8 @@ function Scatter.run(cfg: any, layout: any, maps: any, water: any, surface: any,
 			if Grid.get(maps.creekDistance, i, j) < cfg.water.creekBank + 12 then
 				boost *= 4
 			end
-			local density = biomes[b].rocks / 1000 * rockArea * boost
+			local far = Noise.lerp(world.outerRocks, 1, detailAt(x, z))
+			local density = biomes[b].rocks / 1000 * rockArea * boost * far
 			if Noise.hash01(rockSeed, s, 1) < density then
 				local asset = assetOf("Rock", Noise.hash01(rockSeed, s, 2))
 				local scale = scaleOf(asset, Noise.hash01(rockSeed, s, 3))
@@ -294,7 +305,7 @@ function Scatter.run(cfg: any, layout: any, maps: any, water: any, surface: any,
 									solid.add({ x = cx, z = cz, r = small.radius * ss })
 									place("Rock", small, cx, cz, Noise.hash01(rockSeed, s, 50 + c) * 360, ss)
 								end
-							else
+							elseif Noise.hash01(rockSeed, s, 70 + c) < detailAt(cx, cz) then
 								local peb = assetOf("Pebble", Noise.hash01(rockSeed, s, 30 + c))
 								place(
 									"Pebble",
@@ -318,6 +329,7 @@ function Scatter.run(cfg: any, layout: any, maps: any, water: any, surface: any,
 		local def = biomes[tree.b]
 		local lo, hi = def.understory[1], def.understory[2]
 		local count = lo + math.floor(Noise.hash01(underSeed, t, 1) * (hi - lo + 1))
+		count = math.floor(count * (0.25 + 0.75 * detailAt(tree.x, tree.z)) + Noise.hash01(underSeed, t, 2))
 		for c = 1, count do
 			local a = Noise.hash01(underSeed, t, 10 + c) * math.pi * 2
 			local d = tree.r * (0.6 + 0.9 * Noise.hash01(underSeed, t, 20 + c))
@@ -348,12 +360,13 @@ function Scatter.run(cfg: any, layout: any, maps: any, water: any, surface: any,
 		for ci = 0, cells - 1 do
 			local x = cfg.originX + (ci + Noise.hash01(coverSeed, ci, cj, 1)) * sc.coverCell
 			local z = cfg.originZ + (cj + Noise.hash01(coverSeed, ci, cj, 2)) * sc.coverCell
-			local b = biomeAt(x, z)
+			local detail = detailAt(x, z)
+			local b = if detail > 0 then biomeAt(x, z) else 0
 			if b > 0 and inside(x, z) and dry(x, z) then
 				local patch = patches(x, z)
 				local strength = Noise.smoothstep(0.05, 0.45, patch)
 				local def = biomes[b]
-				if strength > 0 and Noise.hash01(coverSeed, ci, cj, 3) < def.cover * strength * 4 then
+				if strength > 0 and Noise.hash01(coverSeed, ci, cj, 3) < def.cover * strength * 4 * detail then
 					local weights = def.coverWeights
 					local group = pickWeighted(weights, Noise.hash01(coverSeed, ci, cj, 4))
 					if group == "Flower" and patch < 0.35 then
@@ -397,10 +410,15 @@ function Scatter.run(cfg: any, layout: any, maps: any, water: any, surface: any,
 		for i = 0, n - 1 do
 			local dc = Grid.get(maps.creekDistance, i, j)
 			local w = cfg.water.creekWidth
-			if dc > w - 1 and dc < w + 6 and Noise.hash01(pebSeed, i, j) < 0.12 then
+			if dc > w - 1 and dc < w + 6 and Noise.hash01(pebSeed, i, j) < 0.12 * cell / 4 then
 				local x = cfg.originX + (i + Noise.hash01(pebSeed, i, j, 1)) * cell
 				local z = cfg.originZ + (j + Noise.hash01(pebSeed, i, j, 2)) * cell
-				if dry(x, z) and biomeAt(x, z) > 0 and inside(x, z) then
+				if
+					dry(x, z)
+					and biomeAt(x, z) > 0
+					and inside(x, z)
+					and Noise.hash01(pebSeed, i, j, 6) < detailAt(x, z)
+				then
 					local asset = assetOf("Pebble", Noise.hash01(pebSeed, i, j, 3))
 					place(
 						"Pebble",

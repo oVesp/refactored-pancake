@@ -1,7 +1,7 @@
 --!strict
 
--- Water (phase F5): the authored creek is carved along its spline with a water surface that only
--- falls downstream; the lake fills its basin to the water level. Flow accumulation comes from a
+-- Water (phase F5): each authored river is carved along its spline with a water surface that only
+-- falls downstream; the lake, the sea and swamp pools fill to the water level. Flow accumulation comes from a
 -- Priority-Flood (Barnes et al. 2014) whose pop order doubles as the drainage order.
 local Grid = require("./Grid")
 local Noise = require("./Noise")
@@ -11,24 +11,27 @@ local Water = {}
 export type WaterMaps = {
 	surface: Grid.Grid, -- water surface height per column, or NONE
 	flow: Grid.Grid, -- share of all cells that drain through each column (0..1)
-	creekSurface: (t: number) -> number,
 }
 
 Water.NONE = -1e6
 
 --[=[ Water surface along the creek at arc length `t`, monotonic from source to lake. ]=]
-local function creekProfile(cfg: any, maps: any, layout: any): (number) -> number
+--[=[
+	Water surface along one river: never rises downstream (running minimum of the ground 1.5 studs
+	down), never below sea level, and eases into sea level over the last 30 samples.
+]=]
+local function riverProfile(cfg: any, maps: any, river: any): (number) -> number
 	local step = cfg.cell
 	local samples: { number } = {}
-	local creek = layout.creek
+	local pts = river.points
 	local t = 0
 	local k = 1
 	local running = math.huge
-	local count = math.floor(layout.creekLength / step) + 1
+	local count = math.floor(river.length / step) + 1
 	for s = 0, count - 1 do
 		local target = s * step
-		while k < #creek - 1 do
-			local a, b = creek[k], creek[k + 1]
+		while k < #pts - 1 do
+			local a, b = pts[k], pts[k + 1]
 			local len = math.sqrt((b.x - a.x) ^ 2 + (b.z - a.z) ^ 2)
 			if target <= t + len then
 				break
@@ -36,7 +39,7 @@ local function creekProfile(cfg: any, maps: any, layout: any): (number) -> numbe
 			t += len
 			k += 1
 		end
-		local a, b = creek[k], creek[k + 1]
+		local a, b = pts[k], pts[k + 1]
 		local len = math.sqrt((b.x - a.x) ^ 2 + (b.z - a.z) ^ 2)
 		local f = math.clamp((target - t) / len, 0, 1)
 		local x, z = a.x + (b.x - a.x) * f, a.z + (b.z - a.z) * f
@@ -46,7 +49,6 @@ local function creekProfile(cfg: any, maps: any, layout: any): (number) -> numbe
 		running = math.min(running, ground - 1.5)
 		samples[s + 1] = math.max(running, cfg.waterLevel)
 	end
-	-- The last stretch eases into the lake surface.
 	local tail = math.min(#samples, 30)
 	for s = #samples - tail + 1, #samples do
 		local w = (s - (#samples - tail)) / tail
@@ -60,41 +62,49 @@ local function creekProfile(cfg: any, maps: any, layout: any): (number) -> numbe
 	end
 end
 
+--[=[
+	Carves the river channels and fills the lake, the sea and swamp pools up to sea level. Ground
+	below sea level stays dry elsewhere, so the start valley gets no stray puddles.
+]=]
 function Water.carve(cfg: any, maps: any, layout: any): WaterMaps
 	local n = cfg.n
-	local w = cfg.water
 	local surface = Grid.new(n, Water.NONE)
-	local profile = creekProfile(cfg, maps, layout)
+	local profiles: { (number) -> number } = {}
+	for r, river in layout.rivers do
+		profiles[r] = riverProfile(cfg, maps, river)
+	end
+	local shift = cfg.water.creekWidth
 	for j = 0, n - 1 do
 		for i = 0, n - 1 do
 			local h = Grid.get(maps.height, i, j)
-			local dc = Grid.get(maps.creekDistance, i, j)
-			if dc < w.creekBank then
-				local ws = profile(Grid.get(maps.creekT, i, j))
-				if dc < w.creekWidth then
-					local r = dc / w.creekWidth
-					h = math.min(h, ws - w.creekDepth * (1 - r * r) - 0.5)
+			local r = Grid.get(maps.creekRiver, i, j)
+			local river = layout.rivers[r]
+			local dc = Grid.get(maps.creekDistance, i, j) + (river.width - shift)
+			if dc < river.bank then
+				local ws = profiles[r](Grid.get(maps.creekT, i, j))
+				if dc < river.width then
+					local q = dc / river.width
+					h = math.min(h, ws - river.depth * (1 - q * q) - 0.5)
 					Grid.set(surface, i, j, ws)
 				else
-					local s = Noise.smoothstep(w.creekWidth, w.creekBank, dc)
+					local s = Noise.smoothstep(river.width, river.bank, dc)
 					h = math.min(h, Noise.lerp(ws + 0.6, h, s))
 				end
 			end
-			local dl = Grid.get(maps.lakeDistance, i, j)
-			if dl < 20 and h < cfg.waterLevel then
-				Grid.set(surface, i, j, math.max(Grid.get(surface, i, j), cfg.waterLevel))
+			if h < cfg.waterLevel then
+				local open = Grid.get(maps.lakeDistance, i, j) < 20
+					or Grid.get(maps.coast, i, j) > 0.3
+					or Grid.get(maps.swamp, i, j) > 0.3
+				if open then
+					Grid.set(surface, i, j, math.max(Grid.get(surface, i, j), cfg.waterLevel))
+				end
 			end
 			Grid.set(maps.height, i, j, h)
 		end
 	end
-	return { surface = surface, flow = Water.flow(maps.height), creekSurface = profile }
+	return { surface = surface, flow = Water.flow(maps.height) }
 end
 
---[=[
-	Flow accumulation. Priority-Flood from the tile border fills depressions with a tiny epsilon
-	gradient; every cell drains to the neighbour that flooded it, so reversing the pop order
-	accumulates flow without a sort.
-]=]
 function Water.flow(height: Grid.Grid): Grid.Grid
 	local n = height.n
 	local total = n * n

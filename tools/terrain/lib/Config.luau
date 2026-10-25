@@ -29,6 +29,7 @@ export type BiomeDef = {
 	rocks: number, -- rock clusters per 1,000 studs²
 	cover: number, -- ground-cover probability per cover cell
 	coverWeights: { [string]: number },
+	clump: number?, -- tree clumping strength (default 0.9); above 1 trees gather in groves
 }
 
 local function assets(
@@ -215,7 +216,7 @@ local GROUPS: { [string]: GroupDef } = {
 	},
 }
 
--- Biome ids 1..7; 0 means no scatter (gameplay pads, water, paths).
+-- Biome ids 1..12; 0 means no scatter (gameplay pads, water, paths).
 local BIOMES: { BiomeDef } = {
 	{
 		id = 1,
@@ -294,10 +295,80 @@ local BIOMES: { BiomeDef } = {
 		cover = 0.02,
 		coverWeights = { Grass = 1 },
 	},
+	{
+		id = 8,
+		name = "Plains",
+		trees = 0.5,
+		treeWeights = { HeroTree = 0.3, CommonTree = 0.5, TwistedTree = 0.2 },
+		understory = { 0, 2 },
+		understoryWeights = { Bush = 1 },
+		rocks = 0.1,
+		cover = 0.1,
+		coverWeights = { Grass = 0.6, Flower = 0.4 },
+		clump = 3.5,
+	},
+	{
+		id = 9,
+		name = "Swamp",
+		trees = 1.1,
+		treeWeights = { TwistedTree = 0.45, DeadTree = 0.35, Pine = 0.2 },
+		understory = { 1, 3 },
+		understoryWeights = { Shade = 0.85, Bush = 0.15 },
+		rocks = 0.04,
+		cover = 0.12,
+		coverWeights = { Foliage = 0.5, Grass = 0.5 },
+		clump = 1.6,
+	},
+	{
+		id = 10,
+		name = "Heath",
+		trees = 0.3,
+		treeWeights = { TwistedTree = 0.45, Pine = 0.45, DeadTree = 0.1 },
+		understory = { 0, 2 },
+		understoryWeights = { Bush = 0.7, Shade = 0.3 },
+		rocks = 0.8,
+		cover = 0.05,
+		coverWeights = { Grass = 0.8, Flower = 0.2 },
+		clump = 2.5,
+	},
+	{
+		id = 11,
+		name = "Alpine",
+		trees = 0.12,
+		treeWeights = { Pine = 0.7, DeadTree = 0.3 },
+		understory = { 0, 0 },
+		understoryWeights = { Bush = 1 },
+		rocks = 0.6,
+		cover = 0,
+		coverWeights = { Grass = 1 },
+	},
+	{
+		id = 12,
+		name = "Beach",
+		trees = 0.04,
+		treeWeights = { TwistedTree = 0.7, DeadTree = 0.3 },
+		understory = { 0, 1 },
+		understoryWeights = { Bush = 1 },
+		rocks = 0.15,
+		cover = 0.02,
+		coverWeights = { Grass = 1 },
+	},
 }
 
 -- Terrain material palette. Index is the byte stored per column; names are Enum.Material names.
-local MATERIALS = { "Grass", "LeafyGrass", "Ground", "Mud", "Sand", "Rock", "Slate", "Pavement" }
+local MATERIALS = {
+	"Grass",
+	"LeafyGrass",
+	"Ground",
+	"Mud",
+	"Sand",
+	"Rock",
+	"Slate",
+	"Pavement",
+	"Snow",
+	"Glacier",
+	"Sandstone",
+}
 
 -- Nordic tints applied with Terrain:SetMaterialColor (muted greens, cold greys).
 local MATERIAL_COLORS: { [string]: { number } } = {
@@ -309,15 +380,19 @@ local MATERIAL_COLORS: { [string]: { number } } = {
 	Rock = { 118, 120, 116 },
 	Slate = { 92, 96, 98 },
 	Pavement = { 132, 126, 116 },
+	Snow = { 228, 232, 236 },
+	Glacier = { 170, 200, 220 },
+	Sandstone = { 150, 128, 100 },
 }
 
 return table.freeze({
 	seed = 20261024,
-	-- Tile placement: 512 x 512 columns of 4 studs (2,048 studs), covering the M0.5 greybox.
-	n = 512,
-	cell = 4,
-	originX = -1024,
-	originZ = -1360,
+	-- World: 1,280 x 1,280 columns of 8 studs (10,240 studs, a 5 x 5 grid of 2,048-stud tiles).
+	-- The centre tile holds the M0.5 gameplay areas. The applier upsamples to 4-stud voxels.
+	n = 1280,
+	cell = 8,
+	originX = -5120,
+	originZ = -5456,
 	floorY = -80, -- terrain is filled down to here (streaming drops features thinner than 64 studs)
 	waterLevel = -3, -- lake surface
 	padHeight = 0.2, -- ground level of the Map zones (tools/world/build.luau G)
@@ -334,6 +409,26 @@ return table.freeze({
 		{ 0, -80, 0, -770, 8 },
 	},
 
+	-- Regions around the start valley. Each blends in between `from` and `to` (studs, after a
+	-- noise warp of the coordinates), so borders wander instead of running straight.
+	world = {
+		startX = 0, -- centre of the gameplay areas
+		startZ = -330,
+		detailNear = 1200, -- full ground cover and pebbles within this distance of the start
+		detailFar = 2200, -- none beyond this (terrain grass decoration carries the rest)
+		outerTrees = 0.6, -- tree density multiplier far from the start
+		outerRocks = 0.35, -- rock density multiplier far from the start
+		warpWavelength = 1600,
+		warpStrength = 450,
+		mountains = { fromZ = -2400, toZ = -3700, height = 430, wavelength = 1100 },
+		highlands = { fromZ = -1400, toZ = -2300, ampScale = 1.5 },
+		swamp = { fromX = -2000, toX = -3000, height = -2.5, ampScale = 0.04, roll = 8 },
+		plains = { fromX = 2100, toX = 3100, height = 12, ampScale = 0.25 },
+		coast = { fromZ = 2300, toZ = 3400, seaFloor = -42 },
+		snowLine = 360,
+		glacierLine = 460,
+	},
+
 	heightfield = {
 		valleyNear = 40, -- distance from pads where hills start rising
 		valleyFar = 520, -- distance where hills reach full amplitude
@@ -347,8 +442,9 @@ return table.freeze({
 		ridgeStartZ = -900, -- north barrier ridge behind the goblin camp
 		ridgeFullZ = -1250,
 		ridgeHeight = 190,
-		borderWidth = 260, -- hills rise toward the tile edge so the world reads enclosed
-		borderHeight = 80,
+		ridgeHalfWidth = 1300, -- the ridge fades out past this |x|, leaving passes to the highlands
+		borderWidth = 700, -- hills rise toward the north, east and west world edges
+		borderHeight = 140,
 		padFeather = 36,
 	},
 
@@ -370,11 +466,49 @@ return table.freeze({
 	},
 
 	water = {
-		creekWidth = 10, -- half-width of the wet channel
-		creekDepth = 5,
-		creekBank = 22, -- half-width of the carved valley around the channel
+		creekWidth = 10, -- reference channel half-width (river distances are shifted to match)
+		creekBank = 22, -- reference bank half-width in the same shifted distance
 		lakeDepth = 22,
-		riverThreshold = 0.004, -- share of cells draining through a column to count as wet
+		riverThreshold = 0.00064, -- share of all cells draining through a column (about 16k studs²)
+		lake = { cx = 260, cz = 330, radius = 150 },
+		-- Rivers: control points x, z (source first), half-widths and depth in studs.
+		rivers = {
+			{
+				name = "Creek",
+				width = 10,
+				depth = 5,
+				bank = 22,
+				meander = 45,
+				points = {
+					{ -820, -1150 },
+					{ -600, -820 },
+					{ -420, -480 },
+					{ -340, -150 },
+					{ -320, 120 },
+					{ -200, 260 },
+					{ 0, 300 },
+					{ 125, 320 },
+				},
+			},
+			{
+				name = "Eastwater",
+				width = 20,
+				depth = 8,
+				bank = 48,
+				meander = 90,
+				points = {
+					{ 1900, -4500 },
+					{ 2100, -3300 },
+					{ 2500, -2300 },
+					{ 2250, -1300 },
+					{ 2650, -250 },
+					{ 2450, 900 },
+					{ 2850, 2000 },
+					{ 2650, 3100 },
+					{ 2800, 4700 },
+				},
+			},
+		},
 	},
 
 	paths = {
@@ -386,6 +520,8 @@ return table.freeze({
 		tileSpacing = 7,
 		poiRadius = 20,
 		poiMinSpacing = 400,
+		siteRadius = 48, -- flat sites in each region for later towns and dungeons
+		roadHalfWidth = 7, -- regional roads from the start valley to the sites
 	},
 
 	scatter = {
@@ -395,7 +531,7 @@ return table.freeze({
 		trunkClearance = 0.3, -- understory and cover keep this share of a tree or rock footprint clear
 		coverCell = 6,
 		padMargin = 6, -- keep props this far from gameplay pads and greybox parts
-		maxCover = 9000,
+		maxCover = 12000,
 	},
 
 	materials = MATERIALS,

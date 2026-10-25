@@ -32,8 +32,11 @@ function Erosion.hydraulic(cfg: any, height: Grid.Grid, mask: Grid.Grid): Result
 	local scale = e.heightScale
 	local map = buffer.create(n * n * 4)
 	local original = Grid.copy(height)
+	-- Droplets never dig below zero, so heights are shifted to start at zero (the sea floor and
+	-- lake beds are negative).
+	local lo = Grid.range(height)
 	for k = 0, n * n - 1 do
-		buffer.writef32(map, k * 4, buffer.readf32(height.data, k * 4) / scale)
+		buffer.writef32(map, k * 4, (buffer.readf32(height.data, k * 4) - lo) / scale)
 	end
 
 	local brush: { { number } } = {}
@@ -114,7 +117,7 @@ function Erosion.hydraulic(cfg: any, height: Grid.Grid, mask: Grid.Grid): Result
 	local deposit = Grid.new(n)
 	for k = 0, n * n - 1 do
 		local before = buffer.readf32(original.data, k * 4)
-		local after = buffer.readf32(map, k * 4) * scale
+		local after = buffer.readf32(map, k * 4) * scale + lo
 		if before > e.baseLevel then
 			after = math.max(after, e.baseLevel)
 		end

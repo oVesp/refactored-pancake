@@ -1,7 +1,7 @@
 --!strict
 
 --[=[
-	Studio applier for the generated Midgard tile (docs/systems/world-generation.md). Reads the
+	Studio applier for the generated Midgard world (docs/systems/world-generation.md). Reads the
 	modules in `Data` written by `lune run tools/terrain/build` and writes terrain voxels and the
 	prop scatter. Edit mode only; run from the command bar or Studio MCP:
 
@@ -48,7 +48,7 @@ type Meta = {
 	materials: { string },
 	materialColors: { [string]: { number } },
 	assets: { Asset },
-	layers: { { name: string, module: string, count: number } },
+	layers: { { name: string, modules: { string }, count: number } },
 	pois: { { name: string, x: number, y: number, z: number } },
 }
 
@@ -95,7 +95,19 @@ local function decodeHeight(v: number): number
 	return v / 16 - 128
 end
 
---[=[ Writes the generated terrain into the tile region, 64 x 64 columns per call. ]=]
+local function hash01(a: number, b: number): number
+	local h = bit32.bxor((a * 73856093) % 4294967296, (b * 19349663) % 4294967296)
+	h = bit32.bxor(h, bit32.rshift(h, 13))
+	h = (h * 1274126177) % 4294967296
+	return bit32.bxor(h, bit32.rshift(h, 16)) % 65536 / 65536
+end
+
+--[=[
+	Writes the generated terrain, 64 x 64 voxel columns per call. The data grid (`cell` studs) is
+	upsampled to 4-stud voxels: heights and water bilinearly, materials by a hashed pick among the
+	four neighbouring cells so borders dither instead of stepping. Each block is filled from a
+	little below its lowest column, not from `floorY`, to keep mountain writes small.
+]=]
 function WorldGen.ApplyTerrain()
 	assertEditMode()
 	local m = meta()
@@ -117,28 +129,76 @@ function WorldGen.ApplyTerrain()
 		palette[k] = (Enum.Material :: any)[name]
 	end
 	local air, ground, rock = Enum.Material.Air, Enum.Material.Ground, Enum.Material.Rock
+	local keepDeep = {
+		[Enum.Material.Rock] = true,
+		[Enum.Material.Slate] = true,
+		[Enum.Material.Sandstone] = true,
+		[Enum.Material.Glacier] = true,
+	}
 
-	local tiles = n // TILE_COLUMNS
+	local function cellIndex(i: number, j: number): number
+		return (math.clamp(i, 0, n - 1) + math.clamp(j, 0, n - 1) * n) * 5
+	end
+	local voxels = n * m.cell // VOXEL
+	local perCell = m.cell / VOXEL
+	local tiles = voxels // TILE_COLUMNS
+	local hs = table.create(TILE_COLUMNS * TILE_COLUMNS)
+	local ws = table.create(TILE_COLUMNS * TILE_COLUMNS)
+	local ms = table.create(TILE_COLUMNS * TILE_COLUMNS)
 	local started = os.clock()
 	for tj = 0, tiles - 1 do
 		for ti = 0, tiles - 1 do
-			local top = m.floorY
-			for j = tj * TILE_COLUMNS, (tj + 1) * TILE_COLUMNS - 1 do
-				for i = ti * TILE_COLUMNS, (ti + 1) * TILE_COLUMNS - 1 do
-					local o = (i + j * n) * 5
-					top = math.max(top, decodeHeight(buffer.readu16(columns, o)))
-					local w = buffer.readu16(columns, o + 3)
-					if w > 0 then
-						top = math.max(top, decodeHeight(w))
+			local top, low = -math.huge, math.huge
+			for iz = 1, TILE_COLUMNS do
+				local vz = tj * TILE_COLUMNS + iz - 1
+				local fj = (vz + 0.5) / perCell - 0.5
+				local j0 = math.floor(fj)
+				local tz = fj - j0
+				for ix = 1, TILE_COLUMNS do
+					local vx = ti * TILE_COLUMNS + ix - 1
+					local fi = (vx + 0.5) / perCell - 0.5
+					local i0 = math.floor(fi)
+					local tx = fi - i0
+					local o00, o10 = cellIndex(i0, j0), cellIndex(i0 + 1, j0)
+					local o01, o11 = cellIndex(i0, j0 + 1), cellIndex(i0 + 1, j0 + 1)
+					local w00, w10 = (1 - tx) * (1 - tz), tx * (1 - tz)
+					local w01, w11 = (1 - tx) * tz, tx * tz
+					local h = decodeHeight(buffer.readu16(columns, o00)) * w00
+						+ decodeHeight(buffer.readu16(columns, o10)) * w10
+						+ decodeHeight(buffer.readu16(columns, o01)) * w01
+						+ decodeHeight(buffer.readu16(columns, o11)) * w11
+					-- Water: bilinear where all four cells are wet, else the highest wet neighbour
+					-- (shore columns sit above it anyway).
+					local r00, r10 = buffer.readu16(columns, o00 + 3), buffer.readu16(columns, o10 + 3)
+					local r01, r11 = buffer.readu16(columns, o01 + 3), buffer.readu16(columns, o11 + 3)
+					local w = -math.huge
+					if r00 > 0 and r10 > 0 and r01 > 0 and r11 > 0 then
+						w = decodeHeight(r00) * w00
+							+ decodeHeight(r10) * w10
+							+ decodeHeight(r01) * w01
+							+ decodeHeight(r11) * w11
+					elseif r00 > 0 or r10 > 0 or r01 > 0 or r11 > 0 then
+						w = decodeHeight(math.max(r00, r10, r01, r11))
 					end
+					local roll = hash01(vx, vz)
+					local pick = if roll < w00
+						then o00
+						elseif roll < w00 + w10 then o10
+						elseif roll < w00 + w10 + w01 then o01
+						else o11
+					local k = ix + (iz - 1) * TILE_COLUMNS
+					hs[k], ws[k], ms[k] = h, w, palette[buffer.readu8(columns, pick + 2)]
+					top = math.max(top, h, w)
+					low = math.min(low, h)
 				end
 			end
-			local layers = math.ceil((top - m.floorY) / VOXEL) + 1
-			local x0 = m.originX + ti * TILE_COLUMNS * m.cell
-			local z0 = m.originZ + tj * TILE_COLUMNS * m.cell
+			local floorY = m.floorY + math.max(0, math.floor((low - 24 - m.floorY) / VOXEL)) * VOXEL
+			local layers = math.ceil((top - floorY) / VOXEL) + 1
+			local x0 = m.originX + ti * TILE_COLUMNS * VOXEL
+			local z0 = m.originZ + tj * TILE_COLUMNS * VOXEL
 			local region = Region3.new(
-				Vector3.new(x0, m.floorY, z0),
-				Vector3.new(x0 + TILE_COLUMNS * m.cell, m.floorY + layers * VOXEL, z0 + TILE_COLUMNS * m.cell)
+				Vector3.new(x0, floorY, z0),
+				Vector3.new(x0 + TILE_COLUMNS * VOXEL, floorY + layers * VOXEL, z0 + TILE_COLUMNS * VOXEL)
 			)
 			local materials = table.create(TILE_COLUMNS)
 			local solids = table.create(TILE_COLUMNS)
@@ -153,17 +213,12 @@ function WorldGen.ApplyTerrain()
 				materials[ix], solids[ix], liquids[ix] = matX, solidX, liquidX
 			end
 			for iz = 1, TILE_COLUMNS do
-				local j = tj * TILE_COLUMNS + iz - 1
 				for ix = 1, TILE_COLUMNS do
-					local i = ti * TILE_COLUMNS + ix - 1
-					local o = (i + j * n) * 5
-					local h = decodeHeight(buffer.readu16(columns, o))
-					local surface = palette[buffer.readu8(columns, o + 2)]
-					local wRaw = buffer.readu16(columns, o + 3)
-					local w = if wRaw > 0 then decodeHeight(wRaw) else -math.huge
-					local deepMaterial = if surface == rock or surface == Enum.Material.Slate then surface else ground
+					local k = ix + (iz - 1) * TILE_COLUMNS
+					local h, w, surface = hs[k], ws[k], ms[k]
+					local deepMaterial = if keepDeep[surface] then surface else ground
 					for iy = 1, layers do
-						local bottom = m.floorY + (iy - 1) * VOXEL
+						local bottom = floorY + (iy - 1) * VOXEL
 						local solid = math.clamp((h - bottom) / VOXEL, 0, 1)
 						local depth = h - (bottom + VOXEL / 2)
 						local material = air
@@ -325,14 +380,16 @@ function WorldGen.ApplyScatter(layerNames: { string }?)
 			assert(layerFolder, "WorldGen layer folder missing")
 
 			local byChunk: { [string]: { { number } } } = {}
-			for _, row in parseLines(require(Data:WaitForChild(layer.module)) :: any) do
-				local key = string.format("%d_%d", row[2] // CHUNK_STUDS, row[4] // CHUNK_STUDS)
-				local list = byChunk[key]
-				if not list then
-					list = {}
-					byChunk[key] = list
+			for _, module in layer.modules do
+				for _, row in parseLines(require(Data:WaitForChild(module)) :: any) do
+					local key = string.format("%d_%d", row[2] // CHUNK_STUDS, row[4] // CHUNK_STUDS)
+					local list = byChunk[key]
+					if not list then
+						list = {}
+						byChunk[key] = list
+					end
+					table.insert(list, row)
 				end
-				table.insert(list, row)
 			end
 			local keys = {}
 			for key in byChunk do
@@ -434,7 +491,7 @@ end
 function WorldGen.Clear()
 	assertEditMode()
 	local m = meta()
-	local step = TILE_COLUMNS * m.cell
+	local step = TILE_COLUMNS * VOXEL
 	for z0 = m.originZ, m.originZ + m.n * m.cell - step, step do
 		for x0 = m.originX, m.originX + m.n * m.cell - step, step do
 			local region =

@@ -23,22 +23,47 @@ local function isWet(maps: any, water: any, i: number, j: number): boolean
 end
 
 --[=[ Picks the flattest high site on each side of the valley and levels it. ]=]
-function Paths.pickPois(cfg: any, maps: any, water: any): { Poi }
+--[=[ Flattens a disc to the median height under it (feathered, dry cells only). ]=]
+local function flattenSite(cfg: any, maps: any, water: any, ci: number, cj: number, radius: number): number
+	local r = math.ceil(radius / cfg.cell)
+	local heights = {}
+	for dj = -r, r do
+		for di = -r, r do
+			table.insert(heights, Grid.get(maps.height, ci + di, cj + dj))
+		end
+	end
+	table.sort(heights)
+	local y = heights[#heights // 2 + 1]
+	local outer = r + math.ceil(16 / cfg.cell) + 1
+	for dj = -outer, outer do
+		for di = -outer, outer do
+			local d = math.sqrt(di * di + dj * dj) * cfg.cell
+			local w = Noise.smoothstep(radius + 16, radius, d)
+			if w > 0 and not isWet(maps, water, ci + di, cj + dj) then
+				local h = Grid.get(maps.height, ci + di, cj + dj)
+				Grid.set(maps.height, ci + di, cj + dj, Noise.lerp(h, y, w))
+			end
+		end
+	end
+	return y
+end
+
+--[=[
+	Flattest dry spot (smallest height range over `radius`) among cells passing `accept`, scanned
+	every 4 cells. Returns the cell or nil.
+]=]
+local function flattestSpot(
+	cfg: any,
+	maps: any,
+	radius: number,
+	accept: (number, number) -> boolean
+): (number?, number?)
 	local n = cfg.n
-	local r = math.ceil(cfg.paths.poiRadius / cfg.cell)
-	local best: { [string]: { score: number, i: number, j: number } } = {}
+	local r = math.ceil(radius / cfg.cell)
+	local bestScore, bi, bj = -math.huge, nil, nil
 	for j = r + 2, n - r - 3, 4 do
 		for i = r + 2, n - r - 3, 4 do
-			local x, z = toWorld(cfg, i, j)
-			local h = Grid.get(maps.height, i, j)
-			local ok = Grid.get(maps.padDistance, i, j) > 250
-				and Grid.get(maps.lakeDistance, i, j) > 60
-				and Grid.get(maps.creekDistance, i, j) > 60
-				and h > 25
-				and h < 170
-				and z > -1000
-				and math.min(i, j, n - 1 - i, n - 1 - j) * cfg.cell > 280
-			if ok then
+			if accept(i, j) then
 				local lo, hi = math.huge, -math.huge
 				for dj = -r, r, 2 do
 					for di = -r, r, 2 do
@@ -47,46 +72,106 @@ function Paths.pickPois(cfg: any, maps: any, water: any): { Poi }
 						hi = math.max(hi, v)
 					end
 				end
-				local score = -(hi - lo) * 2 + h * 0.08
-				local side = if x < -300 then "West" elseif x > 300 then "East" else nil
-				if side and (best[side] == nil or score > best[side].score) then
-					best[side] = { score = score, i = i, j = j }
+				local score = -(hi - lo) * 2 + Grid.get(maps.height, i, j) * 0.08
+				if score > bestScore then
+					bestScore, bi, bj = score, i, j
 				end
 			end
 		end
 	end
+	return bi, bj
+end
 
+--[=[ Two lookouts on the hills either side of the start valley. ]=]
+function Paths.pickPois(cfg: any, maps: any, water: any): { Poi }
+	local n = cfg.n
+	local w = cfg.world
 	local pois: { Poi } = {}
 	for _, side in { "West", "East" } do
-		local b = best[side]
-		if b then
-			local x, z = toWorld(cfg, b.i, b.j)
-			local heights = {}
-			for dj = -r, r do
-				for di = -r, r do
-					table.insert(heights, Grid.get(maps.height, b.i + di, b.j + dj))
-				end
-			end
-			table.sort(heights)
-			local y = heights[#heights // 2 + 1]
-			local outer = r + 4
-			for dj = -outer, outer do
-				for di = -outer, outer do
-					local d = math.sqrt(di * di + dj * dj) * cfg.cell
-					local w = Noise.smoothstep(cfg.paths.poiRadius + 16, cfg.paths.poiRadius, d)
-					if w > 0 and not isWet(maps, water, b.i + di, b.j + dj) then
-						local h = Grid.get(maps.height, b.i + di, b.j + dj)
-						Grid.set(maps.height, b.i + di, b.j + dj, Noise.lerp(h, y, w))
-					end
-				end
-			end
+		local i, j = flattestSpot(cfg, maps, cfg.paths.poiRadius, function(i: number, j: number): boolean
+			local x, z = toWorld(cfg, i, j)
+			local h = Grid.get(maps.height, i, j)
+			local near = math.sqrt((x - w.startX) ^ 2 + (z - w.startZ) ^ 2) < 1300
+			local onSide = if side == "West" then x < w.startX - 300 else x > w.startX + 300
+			return near
+				and onSide
+				and Grid.get(maps.padDistance, i, j) > 250
+				and Grid.get(maps.lakeDistance, i, j) > 60
+				and Grid.get(maps.creekDistance, i, j) > 60
+				and h > 25
+				and h < 170
+				and z > -1000
+				and math.min(i, j, n - 1 - i, n - 1 - j) * cfg.cell > 280
+		end)
+		if i and j then
+			local x, z = toWorld(cfg, i, j)
+			local y = flattenSite(cfg, maps, water, i, j, cfg.paths.poiRadius)
 			table.insert(pois, { name = `Lookout{side}`, x = x, z = z, y = y })
 		end
 	end
 	return pois
 end
 
---[=[ A* over columns. Steep steps cost more and steps above the grade limit are near-forbidden. ]=]
+--[=[
+	One flat site in the heart of each outer region, for later towns, camps and dungeons. Sites stay
+	off rivers, shores and the world edge, and below the snow line.
+]=]
+function Paths.pickSites(cfg: any, maps: any, water: any): { Poi }
+	local n = cfg.n
+	local radius = cfg.paths.siteRadius
+	local regions: { { name: string, accept: (number, number, number) -> boolean } } = {
+		{
+			name = "SiteHighlands",
+			accept = function(i: number, j: number, h: number): boolean
+				return Grid.get(maps.highland, i, j) > 0.85 and h > 80 and h < 260
+			end,
+		},
+		{
+			name = "SiteMountains",
+			accept = function(i: number, j: number, h: number): boolean
+				return Grid.get(maps.mountain, i, j) > 0.75 and h > 180 and h < cfg.world.snowLine - 30
+			end,
+		},
+		{
+			name = "SiteSwamp",
+			accept = function(i: number, j: number, h: number): boolean
+				return Grid.get(maps.swamp, i, j) > 0.85 and h > 1
+			end,
+		},
+		{
+			name = "SitePlains",
+			accept = function(i: number, j: number, h: number): boolean
+				return Grid.get(maps.plains, i, j) > 0.85 and h > 4
+			end,
+		},
+		{
+			name = "SiteCoast",
+			accept = function(i: number, j: number, h: number): boolean
+				local c = Grid.get(maps.coast, i, j)
+				return c > 0.15 and c < 0.55 and h > 4 and h < 40
+			end,
+		},
+	}
+	local sites: { Poi } = {}
+	for _, region in regions do
+		local i, j = flattestSpot(cfg, maps, radius, function(i: number, j: number): boolean
+			local h = Grid.get(maps.height, i, j)
+			return region.accept(i, j, h)
+				and not isWet(maps, water, i, j)
+				and Grid.get(maps.creekDistance, i, j) > 90
+				and Grid.get(maps.lakeDistance, i, j) > 90
+				and Grid.get(maps.padDistance, i, j) > 600
+				and math.min(i, j, n - 1 - i, n - 1 - j) * cfg.cell > 700
+		end)
+		if i and j then
+			local x, z = toWorld(cfg, i, j)
+			local y = flattenSite(cfg, maps, water, i, j, radius)
+			table.insert(sites, { name = region.name, x = x, z = z, y = y })
+		end
+	end
+	return sites
+end
+
 function Paths.findPath(
 	cfg: any,
 	maps: any,
@@ -223,7 +308,14 @@ function Paths.findPath(
 end
 
 --[=[ Cuts a trail into the terrain along smoothed heights and marks its cells in `mask`. ]=]
-function Paths.carve(cfg: any, maps: any, water: any, pts: { { number } }, mask: Grid.Grid): { { number } }
+function Paths.carve(
+	cfg: any,
+	maps: any,
+	water: any,
+	pts: { { number } },
+	mask: Grid.Grid,
+	halfWidth: number
+): { { number } }
 	local n = cfg.n
 	local p = cfg.paths
 	local raw: { number } = {}
@@ -243,7 +335,7 @@ function Paths.carve(cfg: any, maps: any, water: any, pts: { { number } }, mask:
 		trail[idx] = { pt[1], pt[2], sum / count }
 	end
 
-	local reach = p.halfWidth + p.feather
+	local reach = halfWidth + p.feather
 	local best = Grid.new(n, math.huge)
 	local target = Grid.new(n)
 	for idx = 1, #trail - 1 do
@@ -268,10 +360,10 @@ function Paths.carve(cfg: any, maps: any, water: any, pts: { { number } }, mask:
 		for i = 0, n - 1 do
 			local d = Grid.get(best, i, j)
 			if d < reach and not isWet(maps, water, i, j) and Grid.get(maps.padDistance, i, j) > 2 then
-				local w = Noise.smoothstep(reach, p.halfWidth, d)
+				local w = Noise.smoothstep(reach, halfWidth, d)
 				Grid.set(maps.height, i, j, Noise.lerp(Grid.get(maps.height, i, j), Grid.get(target, i, j), w))
 			end
-			if d < p.halfWidth + 1 then
+			if d < halfWidth + 1 then
 				Grid.set(mask, i, j, 1)
 			end
 		end

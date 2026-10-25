@@ -25,7 +25,7 @@ local function smallConfig(): any
 end
 
 local function smallLayout(cfg: any): any
-	return Layout.build(cfg.seed, nil, { { name = "Pad", cx = 0, cz = 0, hx = 20, hz = 20 } })
+	return Layout.build(cfg, nil, { { name = "Pad", cx = 0, cz = 0, hx = 20, hz = 20 } })
 end
 
 local function loadMeta(): any
@@ -88,6 +88,23 @@ return {
 			end
 		end
 	end,
+	["regions put mountains north, sea south, swamp west and plains east"] = function()
+		local layout = Layout.build(Config, nil, {})
+		local start = layout.regions(Config.world.startX, Config.world.startZ)
+		Expect.truthy(start.mountain + start.coast + start.swamp + start.plains < 0.01, "start valley is open")
+		Expect.truthy(layout.regions(0, -4800).mountain > 0.9, "mountains north")
+		Expect.truthy(layout.regions(0, 4500).coast > 0.9, "sea south")
+		Expect.truthy(layout.regions(-4200, 500).swamp > 0.9, "swamp west")
+		Expect.truthy(layout.regions(4200, 500).plains > 0.9, "plains east")
+	end,
+	["river distance finds the nearest channel"] = function()
+		local layout = Layout.build(Config, nil, {})
+		local creek = layout.rivers[1].points[20]
+		local d, _, r = layout.riverDistance(creek.x + 3, creek.z)
+		Expect.truthy(d <= 3 + 1e-6 and r == 1, `creek distance {d} river {r}`)
+		local far = layout.riverDistance(-4500, -4500)
+		Expect.truthy(far > 500, `far from rivers {far}`)
+	end,
 	["flow drains every cell to the border"] = function()
 		local g = Grid.new(32)
 		for j = 0, 31 do
@@ -135,16 +152,21 @@ return {
 		end
 		local names = meta.assets
 		local size = Config.n * Config.cell
-		for _, layer in { "Paths", "Trees", "Rocks", "Understory", "Cover", "Pebbles" } do
-			local text = readModuleString(`{DATA}/Scatter{layer}.luau`)
-			for line in string.gmatch(text, "[^\n]+") do
-				local a, x, _, z = string.match(line, "^(%d+) (%S+) (%S+) (%S+)")
-				local idx, px, pz = tonumber(a), tonumber(x), tonumber(z)
-				assert(idx and px and pz, `bad line in {layer}: {line}`)
-				Expect.truthy(idx >= 1 and idx <= #names, `{layer} asset index {idx}`)
-				Expect.truthy(px > Config.originX and px < Config.originX + size, `{layer} x {px}`)
-				Expect.truthy(pz > Config.originZ and pz < Config.originZ + size, `{layer} z {pz}`)
+		for _, layer in meta.layers do
+			local count = 0
+			for _, module in layer.modules do
+				local text = readModuleString(`{DATA}/{module}.luau`)
+				for line in string.gmatch(text, "[^\n]+") do
+					local a, x, _, z = string.match(line, "^(%d+) (%S+) (%S+) (%S+)")
+					local idx, px, pz = tonumber(a), tonumber(x), tonumber(z)
+					assert(idx and px and pz, `bad line in {module}: {line}`)
+					Expect.truthy(idx >= 1 and idx <= #names, `{module} asset index {idx}`)
+					Expect.truthy(px > Config.originX and px < Config.originX + size, `{module} x {px}`)
+					Expect.truthy(pz > Config.originZ and pz < Config.originZ + size, `{module} z {pz}`)
+					count += 1
+				end
 			end
+			Expect.equal(count, layer.count, `{layer.name} count`)
 		end
 	end,
 }
