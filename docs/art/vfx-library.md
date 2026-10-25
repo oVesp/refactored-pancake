@@ -20,7 +20,7 @@ Free particle, flipbook, noise and trail textures for VFX work (§7.5).
 
 ## Original textures
 
-`tools/vfxgen/vfxgen.py` (Python, numpy, Pillow) generates project-owned textures into `assets/original/vfx/`: `slash_arc_4x4` (crescent flipbook), `impact_star`, `spark_streak`, `ring_thin`, `energy_strands_4x4` and `ink_burst_4x4`. They are white on alpha, so particles tint them; flipbooks are Grid4x4 at 256 px per frame. Register rows use origin `original (tools/vfxgen/vfxgen.py)` and license `project`. Prefer adding a generator here over hunting for a pack when the shape is procedural (rings, bursts, streaks, crescents, filaments).
+`tools/vfxgen/vfxgen.py` (Python, numpy, Pillow) generates project-owned textures into `assets/original/vfx/`: `slash_arc_4x4` (crescent flipbook), `impact_star`, `spark_streak`, `ring_thin`, `energy_strands_4x4`, `ink_burst_4x4`, `ground_crack`, `shock_ring_4x4`, `dust_puff_4x4`, `speed_lines_4x4` and `flame_tongue_4x4`. Later textures draw from their own seed, so adding one never changes earlier outputs. They are white on alpha, so particles tint them; flipbooks are Grid4x4 at 256 px per frame. Register rows use origin `original (tools/vfxgen/vfxgen.py)` and license `project`. Prefer adding a generator here over hunting for a pack when the shape is procedural (rings, bursts, streaks, crescents, filaments).
 
 ## Spell visuals
 
@@ -31,5 +31,5 @@ Code: authored templates played by `Vfx/Effects.luau` (see [../systems/vfx.md](.
 - Vary the delivery shape: projectiles, ground eruptions (Ice Patch, Poison Snare), falling strikes (Lay on Hands, Archer Volley), auras (Arcane Shield, Renew), beams and chains (Shelter, Overcharge), novas (Brute Slam), dashes (Charge, Blink) and cones (Flame Fan).
 - Particles with `VelocityParallel` stretch the texture's horizontal axis along the velocity, so vertical streak textures need `rotation = 90`. Beams run the texture's vertical axis along their length: use vertical textures (`Arc`, `Streak`) or the radial `SoftGlow` for a soft column.
 - Scenes are bright daylight. White additive (`emission = 1`) shapes vanish on pale ground and sky; give the shape that carries the read a saturated tint and `emission` of 0 to 0.4, and keep additive for glows on top.
-- Textures are keys in `Assets.Textures`: 19 copied from Kenney Particle Pack 1.1 into `assets/third_party/kenney/particle_pack/` and 6 generated originals, all uploaded (ids in the manifest and register). An entry without `id` uses `fallback`, a particle texture that ships with the Roblox client, so a new texture can be tried before its upload.
+- Textures are keys in `Assets.Textures`: 19 copied from Kenney Particle Pack 1.1 into `assets/third_party/kenney/particle_pack/` and 11 generated originals, all uploaded (ids in the manifest and register). An entry without `id` uses `fallback`, a particle texture that ships with the Roblox client, so a new texture can be tried before its upload.
 - After uploading, set `id` in `Assets.Textures` and `assetId` in the register row; `Register.spec` checks they match.

@@ -1,5 +1,6 @@
 --!strict
 
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Skills = require(ReplicatedStorage.Content.Skills)
@@ -36,9 +37,18 @@ local function rgb(r: number, g: number, b: number): Color3
 	return Color3.fromRGB(r, g, b)
 end
 
+local function isLocal(model: Model?): boolean
+	return model ~= nil and model == Players.LocalPlayer.Character
+end
+
 local function rootOf(model: Model?): BasePart?
 	local root = model and (model:FindFirstChild("HumanoidRootPart") or model.PrimaryPart)
 	return if root and root:IsA("BasePart") then root else nil
+end
+
+local function flatLook(origin: Vector3, aim: Vector3): Vector3?
+	local look = Vector3.new(aim.X - origin.X, 0, aim.Z - origin.Z)
+	return if look.Magnitude > 1e-3 then look.Unit else nil
 end
 
 -- Particles that spawn on a shell around the hand and pull inward while a spell charges.
@@ -71,7 +81,6 @@ local FROST = C(rgb(240, 252, 255), rgb(150, 220, 255), rgb(70, 140, 230))
 local STORM = C(rgb(255, 255, 235), rgb(255, 235, 110), rgb(180, 150, 255))
 local HOLY = C(rgb(255, 255, 240), rgb(255, 225, 140), rgb(255, 170, 70))
 local LIFE = C(rgb(235, 255, 220), rgb(140, 255, 150), rgb(255, 245, 170))
-local STEEL = C(rgb(255, 255, 255), rgb(205, 220, 240), rgb(150, 170, 200))
 local RAGE = C(rgb(255, 220, 160), rgb(255, 100, 40), rgb(150, 20, 10))
 local DUST = C(rgb(170, 150, 125), rgb(120, 105, 90))
 -- Darker, normal-blended tints for shapes that must read on bright daylight ground.
@@ -396,80 +405,29 @@ SpellEffects.smite = {
 	end,
 }
 
-local function cleaveSwing(origin: Vector3, aim: Vector3, range: number, angle: number)
-	local center = origin + Vector3.new(0, 0.5, 0)
-	Particles.Sweep(center, aim - origin, 1.5, range * 0.75, angle, 0.16, {
-		color = STEEL,
-		transparency = N(0.05, 0.5, 1),
-		lifetime = 0.22,
-		texture = "TrailStreak",
-	})
-	local feet = Particles.Ground(origin)
-	Particles.Burst(CFrame.new(feet + Vector3.new(0, 0.3, 0)), {
-		{
-			texture = "Smoke",
-			color = DUST,
-			size = N(1.5, 3.5),
-			transparency = N(0.55, 1),
-			lifetime = R(0.5, 0.8),
-			speed = R(6, 10),
-			spread = Vector2.new(80, 80),
-			drag = 5,
-			emission = 0,
-			count = 6,
-		},
-	})
+-- Wide sweep: two level blades fanned around the front of the warrior at waist height.
+local function cleaveSwing(origin: Vector3, aim: Vector3)
+	local look = flatLook(origin, aim)
+	if not look then
+		return
+	end
+	local at = origin + look * 1.2 + Vector3.new(0, 0.2, 0)
+	Effects.Play("CleaveSwipe", CFrame.lookAt(at, at + look))
 end
 
 SpellEffects.cleave = {
 	swing = cleaveSwing,
 }
 
+-- Rage rings race out across the ground, embers lift, and the caster's screen flushes red.
 SpellEffects.war_cry = {
 	resolve = function(info)
 		local feet = Particles.Ground(info.origin)
-		Particles.GroundWave(feet, RAGE, N(1, 22), 0.5)
-		Particles.GroundWave(feet, RAGE, N(1, 14), 0.75)
-		Particles.Burst(CFrame.new(feet + Vector3.new(0, 0.5, 0)), {
-			{
-				texture = "Twirl",
-				color = RAGE,
-				size = N(2, 5),
-				transparency = N(0.2, 1),
-				lifetime = R(0.5, 0.8),
-				speed = R(4, 8),
-				spread = Vector2.new(25, 25),
-				rotSpeed = R(200, 320),
-				count = 10,
-			},
-			{
-				texture = "Smoke",
-				color = DUST,
-				size = N(2, 5),
-				transparency = N(0.4, 1),
-				lifetime = R(0.8, 1.2),
-				speed = R(10, 16),
-				spread = Vector2.new(85, 85),
-				drag = 4,
-				acceleration = Vector3.new(0, -2, 0),
-				emission = 0,
-				count = 14,
-			},
-			{
-				texture = "Debris",
-				color = DUST,
-				size = N(1.2, 0.8),
-				transparency = N(0, 0, 1),
-				lifetime = R(0.6, 0.9),
-				speed = R(12, 20),
-				spread = Vector2.new(60, 60),
-				acceleration = Vector3.new(0, -50, 0),
-				rotSpeed = R(-180, 180),
-				emission = 0,
-				count = 10,
-			},
-		}, Vector3.new(3, 0.2, 3))
-		Particles.Flash(feet + Vector3.new(0, 3, 0), rgb(255, 90, 40), 20, 0.5)
+		Effects.Play("WarCryWave", CFrame.new(feet + Vector3.new(0, 0.6, 0)))
+		Effects.Play("HitShake", CFrame.new(feet))
+		if isLocal(info.caster) then
+			Effects.Screen("RageTint")
+		end
 	end,
 }
 
@@ -577,11 +535,6 @@ local function groundTarget(info: ResolveInfo): Vector3
 	local range = skill and skill.range or offset.Magnitude
 	local center = if offset.Magnitude > range then info.origin + offset.Unit * range else info.aim
 	return Particles.Ground(center)
-end
-
-local function flatLook(origin: Vector3, aim: Vector3): Vector3?
-	local look = Vector3.new(aim.X - origin.X, 0, aim.Z - origin.Z)
-	return if look.Magnitude > 1e-3 then look.Unit else nil
 end
 
 -- Light attack: a flat, level crescent swept around the front of the attacker at chest height.
@@ -719,7 +672,7 @@ SpellEffects.flame_fan = {
 	end,
 }
 
--- Overhead blow that cracks the ground in front of the warrior.
+-- Overhead blow: a tall crescent arcs down, then the ground cracks and a shock ring tears outward.
 SpellEffects.heavy_strike = {
 	swing = function(origin, aim, range)
 		local look = flatLook(origin, aim)
@@ -727,70 +680,13 @@ SpellEffects.heavy_strike = {
 			return
 		end
 		local spot = Particles.Ground(origin + look * range * 0.6)
-		Particles.Burst(CFrame.new(spot + Vector3.new(0, 2.5, 0)), {
-			{
-				texture = "Slash",
-				color = C(rgb(170, 195, 240), rgb(70, 95, 150)),
-				size = N(7, 9),
-				transparency = N(0, 0.1, 1),
-				lifetime = R(0.25),
-				rotation = R(160, 200),
-				emission = 0,
-				count = 1,
-			},
-			{
-				texture = "Slash",
-				color = STEEL,
-				size = N(7.5, 9.5),
-				transparency = N(0.3, 1),
-				lifetime = R(0.2),
-				rotation = R(170, 190),
-				zOffset = 0.5,
-				count = 1,
-			},
-		})
-		Particles.GroundWave(spot, DUST, N(1, 10), 0.4)
-		Particles.Burst(CFrame.new(spot + Vector3.new(0, 0.3, 0)), {
-			{
-				texture = "Rubble",
-				color = DUST,
-				size = N(1.4, 1),
-				transparency = N(0, 0, 1),
-				lifetime = R(0.6, 0.9),
-				speed = R(10, 18),
-				spread = Vector2.new(40, 40),
-				acceleration = Vector3.new(0, -50, 0),
-				rotSpeed = R(-200, 200),
-				emission = 0,
-				count = 8,
-			},
-			{
-				texture = "Smoke",
-				color = DUST,
-				size = N(2, 4.5),
-				transparency = N(0.45, 1),
-				lifetime = R(0.7, 1),
-				speed = R(5, 9),
-				spread = Vector2.new(85, 85),
-				drag = 4,
-				emission = 0,
-				count = 8,
-			},
-			{
-				texture = "Streak",
-				color = STEEL,
-				size = N(0.5, 0),
-				lifetime = R(0.2, 0.35),
-				speed = R(20, 30),
-				spread = Vector2.new(60, 60),
-				drag = 4,
-				acceleration = Vector3.new(0, -30, 0),
-				orientation = Enum.ParticleOrientation.VelocityParallel,
-				rotation = R(90),
-				count = 8,
-			},
-		}, Vector3.new(2, 0.2, 2))
-		Particles.Flash(spot + Vector3.new(0, 2, 0), rgb(255, 235, 200), 12, 0.25)
+		Effects.Play("HeavySwipe", CFrame.new(spot + Vector3.new(0, 3, 0)))
+		task.delay(0.07, function()
+			local yaw = CFrame.Angles(0, math.random() * math.pi * 2, 0)
+			-- Lifted clear of tall grass so the crack and ring stay visible.
+			Effects.Play("GroundSlam", CFrame.new(spot + Vector3.new(0, 0.6, 0)) * yaw)
+			Effects.Play("HitShake", CFrame.new(spot))
+		end)
 	end,
 }
 
@@ -821,58 +717,31 @@ local function dashStreak(from: Vector3, to: Vector3, color: ColorSequence, widt
 	Particles.Travel(anchor, from, to, 0.14, 0.8)
 end
 
-local function chargeResolve(color: ColorSequence): (ResolveInfo) -> ()
+-- Dash: dust kicked back at take-off, a streak along the path and a crunch on arrival (the
+-- `burst` template). `speedLines` adds the screen rush for the caster.
+local function chargeResolve(color: ColorSequence, burst: string, speedLines: boolean): (ResolveInfo) -> ()
 	return function(info)
 		local root = rootOf(info.caster)
 		if not root or (root.Position - info.origin).Magnitude < 2 then
 			return
 		end
-		dashStreak(info.origin, root.Position, color, 3)
 		local feet = Particles.Ground(info.origin)
-		Particles.Burst(CFrame.new(feet + Vector3.new(0, 0.3, 0)), {
-			{
-				texture = "Smoke",
-				color = DUST,
-				size = N(2, 5),
-				transparency = N(0.25, 1),
-				lifetime = R(0.6, 0.9),
-				speed = R(6, 10),
-				spread = Vector2.new(80, 80),
-				drag = 5,
-				emission = 0,
-				count = 8,
-			},
-		})
+		local takeoff = feet + Vector3.new(0, 0.5, 0)
+		Effects.Play("ChargeDust", CFrame.lookAt(takeoff, takeoff + root.CFrame.LookVector))
+		dashStreak(info.origin, root.Position, color, 3)
+		if speedLines and isLocal(info.caster) then
+			Effects.Screen("SpeedLines")
+		end
 		task.delay(0.12, function()
-			local hit = root.Position + root.CFrame.LookVector * 2.5
-			Particles.Burst(CFrame.new(hit), {
-				{
-					texture = "StarBurst",
-					color = color,
-					size = N(5, 1.5),
-					lifetime = R(0.18),
-					count = 1,
-				},
-				{
-					texture = "Streak",
-					color = color,
-					size = N(0.6, 0),
-					lifetime = R(0.2, 0.3),
-					speed = R(18, 28),
-					spread = Vector2.new(180, 180),
-					drag = 4,
-					orientation = Enum.ParticleOrientation.VelocityParallel,
-					rotation = R(90),
-					count = 10,
-				},
-			})
-			Particles.Flash(hit, rgb(255, 230, 190), 12, 0.2)
+			local hit = Particles.Ground(root.Position + root.CFrame.LookVector * 2.5)
+			Effects.Play(burst, CFrame.new(hit + Vector3.new(0, 0.6, 0)))
+			Effects.Play("HitShake", CFrame.new(hit))
 		end)
 	end
 end
 
-SpellEffects.charge = { resolve = chargeResolve(C(rgb(235, 240, 255), rgb(130, 150, 190))) }
-SpellEffects.wolf_charge = { resolve = chargeResolve(DUST) }
+SpellEffects.charge = { resolve = chargeResolve(C(rgb(235, 240, 255), rgb(130, 150, 190)), "ChargeBurst", true) }
+SpellEffects.wolf_charge = { resolve = chargeResolve(DUST, "ChargeHit", false) }
 
 -- Blink: the mage folds into a swirl of arcane light and unfolds at the destination.
 local function blinkPuff(position: Vector3, closing: boolean)

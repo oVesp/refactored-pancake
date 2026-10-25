@@ -103,93 +103,6 @@
 			}
 		},
 		{
-			"name": "InkStar",
-			"className": "ParticleEmitter",
-			"properties": {
-				"Enabled": false,
-				"Rate": 0,
-				"LightInfluence": 0,
-				"Rotation": {
-					"NumberRange": [
-						0,
-						360
-					]
-				},
-				"Speed": {
-					"NumberRange": [
-						0,
-						0
-					]
-				},
-				"Size": {
-					"NumberSequence": {
-						"keypoints": [
-							{
-								"time": 0.0,
-								"value": 7,
-								"envelope": 0
-							},
-							{
-								"time": 1.0,
-								"value": 8.5,
-								"envelope": 0
-							}
-						]
-					}
-				},
-				"Lifetime": {
-					"NumberRange": [
-						0.13,
-						0.13
-					]
-				},
-				"Transparency": {
-					"NumberSequence": {
-						"keypoints": [
-							{
-								"time": 0.0,
-								"value": 0.35,
-								"envelope": 0
-							},
-							{
-								"time": 1.0,
-								"value": 1,
-								"envelope": 0
-							}
-						]
-					}
-				},
-				"Color": {
-					"ColorSequence": {
-						"keypoints": [
-							{
-								"time": 0.0,
-								"color": [
-									0.06274509803921569,
-									0.07058823529411765,
-									0.10980392156862745
-								]
-							},
-							{
-								"time": 1.0,
-								"color": [
-									0.06274509803921569,
-									0.07058823529411765,
-									0.10980392156862745
-								]
-							}
-						]
-					}
-				},
-				"LightEmission": 0,
-				"ZOffset": 1.5
-			},
-			"attributes": {
-				"TextureKey": "ImpactStar",
-				"EmitCount": 1
-			}
-		},
-		{
 			"name": "Ring",
 			"className": "ParticleEmitter",
 			"properties": {
@@ -252,17 +165,17 @@
 							{
 								"time": 0.0,
 								"color": [
-									0.803921568627451,
-									0.8627450980392157,
-									0.9803921568627451
+									0.8039,
+									0.8627,
+									0.9804
 								]
 							},
 							{
 								"time": 1.0,
 								"color": [
-									0.803921568627451,
-									0.8627450980392157,
-									0.9803921568627451
+									0.8039,
+									0.8627,
+									0.9804
 								]
 							}
 						]
@@ -343,9 +256,9 @@
 							{
 								"time": 1.0,
 								"color": [
-									0.4117647058823529,
-									0.5294117647058824,
-									0.803921568627451
+									0.4118,
+									0.5294,
+									0.8039
 								]
 							}
 						]
@@ -358,95 +271,6 @@
 			"attributes": {
 				"TextureKey": "SparkStreak",
 				"EmitCount": 14
-			}
-		},
-		{
-			"name": "Ink",
-			"className": "ParticleEmitter",
-			"properties": {
-				"Enabled": false,
-				"Rate": 0,
-				"LightInfluence": 0,
-				"Rotation": {
-					"NumberRange": [
-						0,
-						360
-					]
-				},
-				"Speed": {
-					"NumberRange": [
-						0,
-						0
-					]
-				},
-				"Size": {
-					"NumberSequence": {
-						"keypoints": [
-							{
-								"time": 0.0,
-								"value": 5,
-								"envelope": 0
-							},
-							{
-								"time": 1.0,
-								"value": 7.5,
-								"envelope": 0
-							}
-						]
-					}
-				},
-				"Lifetime": {
-					"NumberRange": [
-						0.4,
-						0.4
-					]
-				},
-				"Color": {
-					"ColorSequence": {
-						"keypoints": [
-							{
-								"time": 0.0,
-								"color": [
-									0.06274509803921569,
-									0.07058823529411765,
-									0.10980392156862745
-								]
-							},
-							{
-								"time": 1.0,
-								"color": [
-									0.06274509803921569,
-									0.07058823529411765,
-									0.10980392156862745
-								]
-							}
-						]
-					}
-				},
-				"LightEmission": 0,
-				"Transparency": {
-					"NumberSequence": {
-						"keypoints": [
-							{
-								"time": 0,
-								"value": 0.35,
-								"envelope": 0
-							},
-							{
-								"time": 1,
-								"value": 0.35,
-								"envelope": 0
-							}
-						]
-					}
-				},
-				"ZOffset": 1,
-				"FlipbookLayout": "Grid4x4",
-				"FlipbookMode": "OneShot"
-			},
-			"attributes": {
-				"TextureKey": "InkBurst",
-				"EmitCount": 1
 			}
 		},
 		{
@@ -504,9 +328,9 @@
 							{
 								"time": 1.0,
 								"color": [
-									0.803921568627451,
-									0.8627450980392157,
-									0.9803921568627451
+									0.8039,
+									0.8627,
+									0.9804
 								]
 							}
 						]
@@ -575,17 +399,17 @@
 							{
 								"time": 0.0,
 								"color": [
-									0.8235294117647058,
-									0.8235294117647058,
-									0.8431372549019608
+									0.8235,
+									0.8235,
+									0.8431
 								]
 							},
 							{
 								"time": 1.0,
 								"color": [
-									0.5882352941176471,
-									0.5882352941176471,
-									0.6274509803921569
+									0.5882,
+									0.5882,
+									0.6275
 								]
 							}
 						]

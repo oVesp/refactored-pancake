@@ -95,6 +95,11 @@ local Textures: { [string]: TextureAsset } = {
 	},
 	EnergyStrands = { id = "rbxassetid://89928226222518", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
 	InkBurst = { id = "rbxassetid://90518512807591", fallback = "rbxasset://textures/particles/smoke_main.dds" },
+	GroundCrack = { id = "rbxassetid://75713007123814", fallback = "rbxasset://textures/particles/smoke_main.dds" },
+	ShockRing = { id = "rbxassetid://132026832278771", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
+	DustPuff = { id = "rbxassetid://76251788405610", fallback = "rbxasset://textures/particles/smoke_main.dds" },
+	SpeedLines = { id = "rbxassetid://103099966804930", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
+	FlameTongue = { id = "rbxassetid://76703182113876", fallback = "rbxasset://textures/particles/fire_main.dds" },
 }
 
 --[=[

@@ -1,0 +1,43 @@
+{
+	"className": "ScreenGui",
+	"properties": {
+		"IgnoreGuiInset": true,
+		"ResetOnSpawn": false,
+		"DisplayOrder": -1
+	},
+	"attributes": {
+		"FlipbookGrid": 4,
+		"FramePixels": 256,
+		"Lifetime": 0.35,
+		"Fade": 0.4
+	},
+	"children": [
+		{
+			"name": "Lines",
+			"className": "ImageLabel",
+			"properties": {
+				"BackgroundTransparency": 1,
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							0
+						],
+						[
+							1,
+							0
+						]
+					]
+				},
+				"ImageRectSize": [
+					256,
+					256
+				],
+				"ImageTransparency": 0.35
+			},
+			"attributes": {
+				"TextureKey": "SpeedLines"
+			}
+		}
+	]
+}
