@@ -110,6 +110,10 @@ local Textures: { [string]: TextureAsset } = {
 	},
 	ArcaneSwirl = { id = "rbxassetid://140176562451370", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
 	WardHex = { id = "rbxassetid://110435102968497", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
+	HolyRays = { id = "rbxassetid://108718265333372", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
+	LightColumn = { id = "rbxassetid://135891248678516", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
+	RuneCircle = { id = "rbxassetid://138815498372303", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
+	LifeWisp = { id = "rbxassetid://116146118060797", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
 }
 
 --[=[

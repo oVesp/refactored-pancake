@@ -1,0 +1,332 @@
+{
+	"className": "Part",
+	"properties": {
+		"Anchored": true,
+		"CanCollide": false,
+		"CanQuery": false,
+		"CanTouch": false,
+		"CastShadow": false,
+		"Transparency": 1,
+		"Size": [
+			7,
+			0.05,
+			7
+		]
+	},
+	"children": [
+		{
+			"name": "Seal",
+			"className": "SurfaceGui",
+			"properties": {
+				"Face": "Top",
+				"SizingMode": "FixedSize",
+				"CanvasSize": [
+					256,
+					256
+				],
+				"LightInfluence": 0,
+				"Brightness": 3,
+				"ClipsDescendants": false,
+				"ZOffset": 0
+			},
+			"attributes": {
+				"FlipbookGrid": 1,
+				"Lifetime": 1.3,
+				"Fade": 0.4,
+				"Grow": 1.05,
+				"Spin": 40
+			},
+			"children": [
+				{
+					"name": "Seal",
+					"className": "ImageLabel",
+					"properties": {
+						"BackgroundTransparency": 1,
+						"AnchorPoint": [
+							0.5,
+							0.5
+						],
+						"Position": {
+							"UDim2": [
+								[
+									0.5,
+									0
+								],
+								[
+									0.5,
+									0
+								]
+							]
+						},
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									1,
+									0
+								]
+							]
+						},
+						"Rotation": 0,
+						"ImageRectSize": [
+							0,
+							0
+						],
+						"ImageColor3": {
+							"Color3": [
+								0.5098,
+								0.9412,
+								0.549
+							]
+						},
+						"ImageTransparency": 0,
+						"ZIndex": 1
+					},
+					"attributes": {
+						"TextureKey": "RuneCircle"
+					}
+				}
+			]
+		},
+		{
+			"name": "Leaves",
+			"className": "ParticleEmitter",
+			"properties": {
+				"Enabled": false,
+				"Rate": 0,
+				"LightInfluence": 0,
+				"Rotation": {
+					"NumberRange": [
+						0,
+						360
+					]
+				},
+				"Speed": {
+					"NumberRange": [
+						3,
+						6
+					]
+				},
+				"SpreadAngle": [
+					25,
+					25
+				],
+				"Acceleration": [
+					0,
+					3,
+					0
+				],
+				"Drag": 1.5,
+				"Lifetime": {
+					"NumberRange": [
+						0.9,
+						1.4
+					]
+				},
+				"Size": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 1.4,
+								"envelope": 0
+							},
+							{
+								"time": 0.5,
+								"value": 1.1199999999999999,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 0,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									0.9216,
+									1.0,
+									0.8627
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.5098,
+									0.9412,
+									0.549
+								]
+							}
+						]
+					}
+				},
+				"LightEmission": 1,
+				"RotSpeed": {
+					"NumberRange": [
+						-180,
+						180
+					]
+				},
+				"FlipbookLayout": "Grid4x4",
+				"FlipbookMode": "OneShot"
+			},
+			"attributes": {
+				"TextureKey": "LifeWisp",
+				"EmitCount": 14
+			}
+		},
+		{
+			"name": "Glints",
+			"className": "ParticleEmitter",
+			"properties": {
+				"Enabled": false,
+				"Rate": 0,
+				"LightInfluence": 0,
+				"Rotation": {
+					"NumberRange": [
+						0,
+						360
+					]
+				},
+				"Speed": {
+					"NumberRange": [
+						4,
+						7
+					]
+				},
+				"SpreadAngle": [
+					25,
+					25
+				],
+				"Acceleration": [
+					0,
+					3,
+					0
+				],
+				"Drag": 1.5,
+				"Lifetime": {
+					"NumberRange": [
+						0.9,
+						1.4
+					]
+				},
+				"Size": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 0.7,
+								"envelope": 0
+							},
+							{
+								"time": 0.5,
+								"value": 0.5599999999999999,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 0,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									0.9216,
+									1.0,
+									0.8627
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.5098,
+									0.9412,
+									0.549
+								]
+							}
+						]
+					}
+				},
+				"LightEmission": 1,
+				"RotSpeed": {
+					"NumberRange": [
+						-180,
+						180
+					]
+				}
+			},
+			"attributes": {
+				"TextureKey": "Glint",
+				"EmitCount": 12
+			}
+		},
+		{
+			"name": "Burst",
+			"className": "Attachment",
+			"properties": {
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							0.5,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				}
+			},
+			"children": [
+				{
+					"name": "Light",
+					"className": "PointLight",
+					"properties": {
+						"Color": {
+							"Color3": [
+								0.5098,
+								0.9412,
+								0.549
+							]
+						},
+						"Brightness": 4,
+						"Range": 14,
+						"Shadows": false
+					},
+					"attributes": {
+						"FlashTime": 0.6
+					}
+				}
+			]
+		}
+	]
+}

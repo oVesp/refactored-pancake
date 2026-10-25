@@ -1,0 +1,132 @@
+{
+	"className": "Part",
+	"properties": {
+		"Anchored": true,
+		"CanCollide": false,
+		"CanQuery": false,
+		"CanTouch": false,
+		"CastShadow": false,
+		"Transparency": 1,
+		"Size": [
+			1,
+			1,
+			1
+		]
+	},
+	"children": [
+		{
+			"name": "Glow",
+			"className": "Beam",
+			"properties": {
+				"Width0": 5.4,
+				"Width1": 5.4,
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									1.0,
+									0.7843,
+									0.3529
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									1.0,
+									0.7843,
+									0.3529
+								]
+							}
+						]
+					}
+				},
+				"Transparency": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 0.35,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 0.6,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"LightEmission": 1,
+				"LightInfluence": 0,
+				"FaceCamera": true,
+				"Segments": 1,
+				"TextureMode": "Wrap",
+				"Brightness": 1,
+				"TextureSpeed": -20.0,
+				"TextureLength": 10
+			},
+			"attributes": {
+				"TextureKey": "LightColumn"
+			}
+		},
+		{
+			"name": "Column",
+			"className": "Beam",
+			"properties": {
+				"Width0": 3,
+				"Width1": 3,
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									1.0,
+									0.9608,
+									0.7843
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									1.0,
+									0.8235,
+									0.4314
+								]
+							}
+						]
+					}
+				},
+				"Transparency": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 0,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 0.1,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"LightEmission": 1,
+				"LightInfluence": 0,
+				"FaceCamera": true,
+				"Segments": 1,
+				"TextureMode": "Wrap",
+				"Brightness": 1.5,
+				"TextureSpeed": -40,
+				"TextureLength": 10
+			},
+			"attributes": {
+				"TextureKey": "LightColumn"
+			}
+		}
+	]
+}

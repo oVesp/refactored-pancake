@@ -482,6 +482,127 @@ def ward_hex(rng, size=512):
     return rgba(np.clip(0.6 + 0.4 * (rim + cells * 0.5), 0, 1), alpha)
 
 
+def holy_rays(rng, size=512):
+    """Shafts of light bursting from a bright point: uneven rays, soft along their length, never a regular star."""
+    r, theta = polar(size)
+    shafts = np.zeros_like(r)
+    for _ in range(30):
+        angle = rng.uniform(-math.pi, math.pi)
+        width = rng.uniform(0.02, 0.12)
+        reach = rng.uniform(0.22, 0.48)
+        delta = np.abs((theta - angle + math.pi) % (2 * math.pi) - math.pi)
+        across = np.clip(1 - delta / width, 0, 1) ** 1.5
+        along = smoothstep(reach, reach * 0.35, r)
+        shafts = np.maximum(shafts, across * along * rng.uniform(0.5, 1.0))
+    haze = fbm(size, rng, octaves=4, base=6)
+    streaks = shafts * (0.6 + 0.4 * haze)
+    core = np.exp(-((r / 0.06) ** 2))
+    bloom = np.exp(-((r / 0.2) ** 2)) * 0.35
+    alpha = np.clip(streaks + core + bloom, 0, 1) * smoothstep(0.5, 0.42, r)
+    intensity = np.clip(0.55 + 0.45 * (core + streaks * smoothstep(0.35, 0.0, r)), 0, 1)
+    return rgba(intensity, alpha)
+
+
+def light_column(rng, width=512, height=128):
+    """Beam strip for a column of light: soft-edged across, streaks of brighter light running along.
+    Tiles left to right, so a beam can scroll it (TextureSpeed)."""
+    ys, xs = np.mgrid[0:height, 0:width].astype(np.float32)
+    u = xs / width
+    v = (ys + 0.5) / height - 0.5
+    streaks = np.zeros((height, width), np.float32)
+    for _ in range(14):
+        lane = rng.uniform(-0.32, 0.32)
+        thick = rng.uniform(0.02, 0.07)
+        cycles = int(rng.integers(1, 4))
+        phase = rng.uniform(0, 2 * math.pi)
+        pulse = (0.5 + 0.5 * np.sin(2 * math.pi * cycles * u + phase)) ** 2
+        streaks += np.exp(-(((v - lane) / thick) ** 2)) * pulse * rng.uniform(0.3, 0.7)
+    profile = np.exp(-((v / 0.22) ** 2))
+    core = np.exp(-((v / 0.06) ** 2))
+    # Fully clear at both long edges, so the beam never shows a hard border.
+    edge = smoothstep(0.5, 0.3, np.abs(v))
+    alpha = np.clip(profile * 0.45 + streaks * profile * 0.8 + core * 0.5, 0, 1) * edge
+    intensity = np.clip(0.6 + 0.4 * (core + streaks * 0.5), 0, 1)
+    return rgba(intensity, alpha)
+
+
+def rune_glyph(draw, rng, cx, cy, height, angle, stroke):
+    """One made-up runic letter: an upright staff with a few straight twigs off it. Not a real alphabet;
+    twigs never mirror each other, so no glyph reads as a known symbol."""
+    up = np.array([math.cos(angle), math.sin(angle)])
+    side = np.array([-up[1], up[0]])
+    base = np.array([cx, cy]) - up * height / 2
+    top = base + up * height
+    draw.line([tuple(base), tuple(top)], fill=255, width=stroke)
+    lean = rng.choice([-1, 1])
+    heights = rng.choice([1.0, 0.75, 0.5, 0.3], size=int(rng.integers(1, 3)), replace=False)
+    for at_height in heights:
+        at = base + up * height * at_height
+        drop = rng.choice([-0.4, 0.0, 0.3])
+        tip = at + (side * lean * 0.36 + up * drop) * height
+        draw.line([tuple(at), tuple(tip)], fill=255, width=stroke)
+        if rng.random() < 0.3:
+            draw.line([tuple(tip), tuple(tip - up * height * 0.25)], fill=255, width=stroke)
+
+
+def rune_circle(rng, size=512):
+    """Ward circle drawn on the ground: two hand-cut rings with made-up runes between them. Lay it flat."""
+    big = size * 2
+    lines = Image.new("L", (big, big), 0)
+    draw = ImageDraw.Draw(lines)
+    c = big / 2
+    for radius, stroke in ((0.46, 7), (0.33, 5), (0.3, 3)):
+        points = []
+        for i in range(181):
+            a = 2 * math.pi * i / 180
+            wobble = 1 + 0.006 * math.sin(a * 7 + radius * 40)
+            points.append((c + math.cos(a) * radius * big * wobble, c + math.sin(a) * radius * big * wobble))
+        draw.line(points, fill=255, width=stroke, joint="curve")
+    count = 16
+    for i in range(count):
+        a = 2 * math.pi * (i + 0.5) / count
+        mid = 0.395 * big
+        rune_glyph(draw, rng, c + math.cos(a) * mid, c + math.sin(a) * mid, 0.085 * big, a, 6)
+    image = glow_lines(lines, blur=10, glow_gain=1.3)
+    r, _ = polar(size)
+    wear = 0.75 + 0.25 * fbm(size, rng, octaves=3, base=8)
+    pixels = np.asarray(image, np.float32) / 255
+    # A faint wash fills the inner ring so the circle reads as one glowing seal.
+    wash = 0.14 * smoothstep(0.3, 0.1, r) * wear
+    alpha = np.clip(pixels[..., 3] * wear + wash, 0, 1) * smoothstep(0.5, 0.47, r)
+    return rgba(pixels[..., 0], alpha)
+
+
+def life_wisp(rng):
+    """A glowing leaf that tumbles end over end, shedding a faint sparkle as it turns."""
+    ys, xs = np.mgrid[0:FRAME, 0:FRAME].astype(np.float32)
+    x0 = (xs + 0.5) / FRAME - 0.5
+    y0 = (ys + 0.5) / FRAME - 0.5
+    vein = fbm(FRAME, rng, octaves=3, base=10)
+    frames = []
+    for f in range(GRID * GRID):
+        t = f / (GRID * GRID)
+        spin = 0.6 + 2 * math.pi * t * 0.25
+        x = x0 * math.cos(spin) + y0 * math.sin(spin)
+        y = -x0 * math.sin(spin) + y0 * math.cos(spin)
+        # The leaf turns about its long axis: its width breathes with the turn, never quite flat.
+        flip = 0.25 + 0.75 * abs(math.cos(2 * math.pi * t))
+        along = y / 0.34
+        bend = 0.05 * (1 - along**2) * math.cos(2 * math.pi * t)
+        serration = 1 + (0.05 * np.sin(along * 17) + 0.03 * np.sin(along * 31 + 1)) * (np.abs(along) < 0.85)
+        half = 0.12 * flip * np.clip(1 - along**2, 0, 1) ** 0.7 * (1 + 0.3 * along) * serration
+        x = x - bend
+        d = np.abs(x) - half
+        body = smoothstep(0.012, -0.012, d) * (np.abs(along) < 1)
+        rib = np.exp(-((x / (0.012 + 0.01 * flip)) ** 2)) * (np.abs(along) < 0.9)
+        r = np.hypot(x0, y0)
+        halo = np.exp(-((r / 0.28) ** 2)) * 0.35
+        alpha = np.clip(body * (0.6 + 0.3 * vein) + rib * 0.5 + halo, 0, 1)
+        intensity = np.clip(0.55 + 0.35 * rib + 0.25 * body * (1 - abs(along)), 0, 1)
+        frames.append(rgba(intensity, alpha))
+    return sheet(frames)
+
+
 def main():
     out = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[2] / "assets/original/vfx"
     out.mkdir(parents=True, exist_ok=True)
@@ -508,6 +629,10 @@ def main():
         "lightning_bolt.png": lightning_bolt(np.random.default_rng(SEED + 10)),
         "arcane_swirl_4x4.png": arcane_swirl(np.random.default_rng(SEED + 11)),
         "ward_hex.png": ward_hex(np.random.default_rng(SEED + 12)),
+        "holy_rays.png": holy_rays(np.random.default_rng(SEED + 13)),
+        "light_column.png": light_column(np.random.default_rng(SEED + 14)),
+        "rune_circle.png": rune_circle(np.random.default_rng(SEED + 15)),
+        "life_wisp_4x4.png": life_wisp(np.random.default_rng(SEED + 16)),
     }
     for name, image in textures.items():
         image.save(out / name, optimize=True)

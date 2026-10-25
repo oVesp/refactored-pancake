@@ -76,13 +76,9 @@ local function inward(texture: string, color: ColorSequence, size: NumberSequenc
 	}
 end
 
-local HOLY = C(rgb(255, 255, 240), rgb(255, 225, 140), rgb(255, 170, 70))
-local LIFE = C(rgb(235, 255, 220), rgb(140, 255, 150), rgb(255, 245, 170))
 local RAGE = C(rgb(255, 220, 160), rgb(255, 100, 40), rgb(150, 20, 10))
 local DUST = C(rgb(170, 150, 125), rgb(120, 105, 90))
 -- Darker, normal-blended tints for shapes that must read on bright daylight ground.
-local WARD = C(rgb(240, 250, 255), rgb(150, 200, 255), rgb(90, 130, 255))
-local GROWTH = C(rgb(200, 255, 160), rgb(80, 210, 90), rgb(30, 130, 60))
 local VENOM = C(rgb(220, 255, 170), rgb(120, 210, 60), rgb(40, 90, 30))
 local TOXIC = C(rgb(170, 235, 90), rgb(90, 160, 40), rgb(45, 90, 25))
 local HEX = C(rgb(230, 190, 255), rgb(130, 60, 190), rgb(40, 15, 60))
@@ -102,6 +98,12 @@ local function groundMark(name: string, position: Vector3, reach: number)
 		-- Lifted clear of tall grass, like the other ground layers.
 		Effects.Play(name, CFrame.new(ground + Vector3.new(0, 0.6, 0)) * yaw)
 	end
+end
+
+-- Plays a flat ground template on the ground under a point.
+local function onGround(name: string, position: Vector3)
+	-- Lifted clear of tall grass, like the other ground layers.
+	Effects.Play(name, CFrame.new(Particles.Ground(position) + Vector3.new(0, 0.6, 0)))
 end
 
 SpellEffects.firebolt = {
@@ -136,61 +138,19 @@ SpellEffects.spark = {
 	end,
 }
 
+-- Holy bolt: a knot of light rays in flight; on the hit a shaft of light drops onto the target and
+-- bursts over an ink star, with a gold ring on the ground below.
 SpellEffects.smite = {
+	cast = function(root, duration)
+		return Effects.Charge("HolyCharge", root, duration)
+	end,
 	projectile = function(body)
-		Particles.Attach(body, {
-			{
-				texture = "StarBurst",
-				color = HOLY,
-				size = N(2.2),
-				transparency = N(0, 1),
-				lifetime = R(0.15),
-				rate = 25,
-				locked = true,
-			},
-			{
-				texture = "Glint",
-				color = HOLY,
-				size = N(0.5, 0),
-				lifetime = R(0.4, 0.7),
-				speed = R(0.5, 1.5),
-				spread = Vector2.new(180, 180),
-				rate = 30,
-			},
-		})
-		Particles.Trail(body, { color = HOLY, width = 0.6, lifetime = 0.25, texture = "TrailStreak" })
-		Particles.Light(body, rgb(255, 225, 150), 12, 2)
+		Effects.Attach("SmiteBody", body)
 	end,
 	impact = function(position)
-		Particles.Burst(CFrame.new(position), {
-			{
-				texture = "RingWave",
-				color = HOLY,
-				size = N(0.5, 6),
-				transparency = N(0, 1),
-				lifetime = R(0.35),
-				count = 1,
-			},
-			{
-				texture = "StarBurst",
-				color = HOLY,
-				size = N(5, 2),
-				lifetime = R(0.2),
-				count = 1,
-			},
-			{
-				texture = "Glint",
-				color = HOLY,
-				size = N(0.8, 0),
-				lifetime = R(0.6, 1),
-				speed = R(2, 6),
-				spread = Vector2.new(180, 180),
-				acceleration = Vector3.new(0, 6, 0),
-				drag = 2,
-				count = 14,
-			},
-		})
-		Particles.Flash(position, rgb(255, 225, 150), 14, 0.3)
+		Effects.Link("SmiteColumn", position + Vector3.new(0, 30, 0), position, 0.3)
+		Effects.Play("SmiteBurst", CFrame.new(position))
+		groundMark("HolyRing", position, 6)
 	end,
 }
 
@@ -220,100 +180,26 @@ SpellEffects.war_cry = {
 	end,
 }
 
+-- Holy burst: rays blow out of the cleric and a gold shock ring runs to the edge of the knockback.
 SpellEffects.rebuke = {
 	resolve = function(info)
-		local feet = Particles.Ground(info.origin)
-		Particles.GroundWave(feet, HOLY, N(1, 20), 0.4)
-		Particles.GroundWave(feet, HOLY, N(1, 12), 0.6)
-		Particles.Burst(CFrame.new(info.origin + Vector3.new(0, 1, 0)), {
-			{
-				texture = "StarBurst",
-				color = HOLY,
-				size = N(8, 3),
-				lifetime = R(0.25),
-				count = 1,
-			},
-			{
-				texture = "Glint",
-				color = HOLY,
-				size = N(0.9, 0),
-				lifetime = R(0.5, 0.9),
-				speed = R(10, 18),
-				spread = Vector2.new(180, 180),
-				drag = 5,
-				count = 24,
-			},
-		})
-		Particles.Burst(CFrame.new(feet + Vector3.new(0, 0.3, 0)), {
-			{
-				texture = "Streak",
-				color = HOLY,
-				size = N(1.6, 0.4),
-				lifetime = R(0.4, 0.6),
-				speed = R(8, 14),
-				orientation = Enum.ParticleOrientation.VelocityParallel,
-				rotation = R(90),
-				count = 12,
-			},
-		}, Vector3.new(10, 0.2, 10))
-		Particles.Flash(info.origin + Vector3.new(0, 3, 0), rgb(255, 225, 150), 20, 0.4)
+		Effects.Play("RebukeBurst", CFrame.new(info.origin + Vector3.new(0, 1, 0)))
+		onGround("RebukeWave", info.origin)
 	end,
 }
 
+-- Heal: a green rune seal turns under the ally while leaves of light lift off it.
 SpellEffects.mend = {
 	cast = function(root, duration)
-		return charge(root, duration, {
-			inward("Glint", LIFE, N(0.5, 0.9), 30),
-			{
-				texture = "SoftGlow",
-				color = LIFE,
-				size = N(1.2, 1.8, 1.2),
-				transparency = N(0.4),
-				lifetime = R(0.2),
-				rate = 10,
-				locked = true,
-			},
-		}, rgb(140, 255, 150))
+		return Effects.Charge("LifeCharge", root, duration)
 	end,
 	resolve = function(info)
 		local root = rootOf(info.target) or rootOf(info.caster)
 		if not root then
 			return
 		end
-		local feet = Particles.Ground(root.Position)
-		Particles.GroundWave(feet, LIFE, N(1, 8), 0.5)
-		local motes = Particles.Anchor(CFrame.new(feet + Vector3.new(0, 0.3, 0)), Vector3.new(4, 0.2, 4))
-		Particles.Attach(motes, {
-			{
-				texture = "SoftGlow",
-				color = LIFE,
-				size = N(0.6, 0),
-				transparency = N(0.2, 1),
-				lifetime = R(0.8, 1.2),
-				speed = R(3, 6),
-				count = 18,
-				rate = 25,
-			},
-			{
-				texture = "Glint",
-				color = LIFE,
-				size = N(0.7, 0),
-				lifetime = R(0.6, 1),
-				speed = R(4, 7),
-				count = 10,
-			},
-		})
-		Particles.Follow(motes, root, CFrame.new(0, feet.Y - root.Position.Y + 0.3, 0), 0.6, 1.3)
-		Particles.Burst(root.CFrame, {
-			{
-				texture = "StarBurst",
-				color = LIFE,
-				size = N(4, 1),
-				lifetime = R(0.3),
-				count = 1,
-			},
-		})
-		Particles.Flash(root.Position, rgb(140, 255, 150), 14, 0.5)
+		onGround("MendSeal", root.Position)
+		Effects.Play("MendBloom", root.CFrame)
 	end,
 }
 
@@ -476,12 +362,6 @@ end
 SpellEffects.charge = { resolve = chargeResolve(C(rgb(235, 240, 255), rgb(130, 150, 190)), "ChargeBurst", true) }
 SpellEffects.wolf_charge = { resolve = chargeResolve(DUST, "ChargeHit", false) }
 
--- Plays a flat ground template on the ground under a point.
-local function onGround(name: string, position: Vector3)
-	-- Lifted clear of tall grass, like the other ground layers.
-	Effects.Play(name, CFrame.new(Particles.Ground(position) + Vector3.new(0, 0.6, 0)))
-end
-
 -- Teleport: a vortex swallows the mage, a streak and a thin bolt mark the jump, a vortex unwinds
 -- at the arrival with a ring across the ground and a violet flash for the caster.
 SpellEffects.blink = {
@@ -503,7 +383,8 @@ SpellEffects.blink = {
 	end,
 }
 
--- Falling strike: a column of light drops onto the ally and splashes across the ground.
+-- Falling strike (high tier): a wide shaft of light drops onto the ally and bursts at their feet over
+-- a turning gold seal; the caster's screen flashes gold with speed lines.
 SpellEffects.lay_on_hands = {
 	resolve = function(info)
 		local root = rootOf(info.target) or rootOf(info.caster)
@@ -511,51 +392,15 @@ SpellEffects.lay_on_hands = {
 			return
 		end
 		local feet = Particles.Ground(root.Position)
-		local sky = feet + Vector3.new(0, 40, 0)
-		-- The glow tapers at both ends, so the lower end sinks below ground to keep the column on the ally.
-		Particles.Beam(
-			sky,
-			feet - Vector3.new(0, 14, 0),
-			{ texture = "SoftGlow", color = HOLY, width = 7, lifetime = 0.8 }
-		)
-		Particles.Burst(CFrame.new(sky), {
-			{
-				texture = "Ray",
-				color = HOLY,
-				size = N(4, 3),
-				transparency = N(0.2, 0.6),
-				lifetime = R(0.4),
-				speed = R(100),
-				orientation = Enum.ParticleOrientation.VelocityParallel,
-				rotation = R(90),
-				direction = Enum.NormalId.Bottom,
-				count = 6,
-			},
-		}, Vector3.new(3, 0.5, 3))
-		task.delay(0.15, function()
-			Particles.GroundWave(feet, HOLY, N(2, 20), 0.6)
-			Particles.Burst(CFrame.new(feet + Vector3.new(0, 1, 0)), {
-				{
-					texture = "StarBurst",
-					color = HOLY,
-					size = N(9, 3),
-					lifetime = R(0.3),
-					count = 1,
-				},
-				{
-					texture = "Glint",
-					color = HOLY,
-					size = N(0.9, 0),
-					lifetime = R(0.9, 1.4),
-					speed = R(3, 7),
-					spread = Vector2.new(40, 40),
-					acceleration = Vector3.new(0, 4, 0),
-					drag = 1.5,
-					count = 24,
-				},
-			}, Vector3.new(4, 0.3, 4))
-			Particles.Flash(feet + Vector3.new(0, 3, 0), rgb(255, 225, 150), 24, 0.7)
+		-- The column sinks below ground so its tapered end does not float over the ally.
+		Effects.Link("LayOnHandsColumn", feet + Vector3.new(0, 40, 0), feet - Vector3.new(0, 4, 0), 0.8)
+		task.delay(0.12, function()
+			onGround("LayOnHandsImpact", feet)
 		end)
+		if isLocal(info.caster) then
+			Effects.Screen("HolyFlash")
+			Effects.Screen("SpeedLines")
+		end
 	end,
 }
 
@@ -574,7 +419,7 @@ SpellEffects.arcane_shield = {
 	end,
 }
 
--- Lingering aura: green motes spiral up from the ally's feet while the regen settles in.
+-- Heal over time: a faint seal holds under the ally while leaves spiral up around them.
 SpellEffects.renew = {
 	resolve = function(info)
 		local root = rootOf(info.target) or rootOf(info.caster)
@@ -582,48 +427,15 @@ SpellEffects.renew = {
 			return
 		end
 		local feet = Particles.Ground(root.Position)
-		local offset = CFrame.new(0, feet.Y - root.Position.Y + 0.2, 0)
-		local motes = Particles.Anchor(root.CFrame * offset, Vector3.new(3.5, 0.2, 3.5))
-		Particles.Attach(motes, {
-			{
-				texture = "SoftGlow",
-				color = GROWTH,
-				size = N(0.9, 1.2, 0),
-				transparency = N(0.1, 1),
-				lifetime = R(1.2, 1.8),
-				speed = R(2, 4),
-				acceleration = Vector3.new(0, 1.5, 0),
-				emission = 0.5,
-				rate = 30,
-			},
-			{
-				texture = "Twirl",
-				color = GROWTH,
-				size = N(4, 5),
-				transparency = N(1, 0.2, 1),
-				emission = 0.4,
-				lifetime = R(0.8),
-				speed = R(0.01),
-				rotSpeed = R(150, 200),
-				orientation = Enum.ParticleOrientation.VelocityPerpendicular,
-				locked = true,
-				rate = 2,
-			},
-			{
-				texture = "Glint",
-				color = LIFE,
-				size = N(1, 0),
-				lifetime = R(0.8, 1.2),
-				speed = R(3, 6),
-				rate = 8,
-			},
-		})
-		Particles.Follow(motes, root, offset, 3, 1.8)
-		Particles.Flash(root.Position, rgb(140, 255, 150), 12, 0.6)
+		onGround("RenewSeal", feet)
+		local offset = CFrame.new(0, feet.Y - root.Position.Y + 0.3, 0)
+		local aura = Particles.Anchor(root.CFrame * offset, Vector3.new(3.5, 0.2, 3.5))
+		Effects.Attach("RenewAura", aura)
+		Particles.Follow(aura, root, offset, 3, 1.5)
 	end,
 }
 
--- Beam: a ribbon of light links healer and ally, then a ward shimmers around the ally.
+-- Ward: a ribbon of light runs from the cleric to the ally, then a gold hex ward closes around them.
 SpellEffects.shelter = {
 	resolve = function(info)
 		local target = rootOf(info.target) or rootOf(info.caster)
@@ -632,38 +444,13 @@ SpellEffects.shelter = {
 		end
 		local caster = rootOf(info.caster)
 		if caster and caster ~= target then
-			Particles.Beam(caster.Position + Vector3.new(0, 0.5, 0), target, {
-				texture = "SoftGlow",
-				color = WARD,
-				width = 2.2,
-				lifetime = 0.5,
-				curve = 3,
-				speed = 4,
-				segments = 20,
-			})
+			Effects.Link("ShelterLink", caster.Position + Vector3.new(0, 0.5, 0), target, 0.4)
 		end
 		task.delay(0.1, function()
-			Particles.Burst(target.CFrame, {
-				{
-					texture = "Twirl",
-					color = WARD,
-					size = N(3, 7),
-					transparency = N(0.3, 1),
-					lifetime = R(0.5),
-					rotSpeed = R(250, 350),
-					count = 2,
-				},
-				{
-					texture = "Glint",
-					color = WARD,
-					size = N(0.7, 0),
-					lifetime = R(0.5, 0.8),
-					speed = R(2, 4),
-					spread = Vector2.new(180, 180),
-					count = 16,
-				},
-			}, Vector3.new(4, 5, 4))
-			Particles.Flash(target.Position, rgb(150, 200, 255), 12, 0.4)
+			local ward = Particles.Anchor(target.CFrame)
+			Effects.Attach("ShelterBubble", ward)
+			Particles.Follow(ward, target, CFrame.identity, 1.8, 0.6)
+			Effects.Play("ShelterBurst", target.CFrame)
 		end)
 	end,
 }

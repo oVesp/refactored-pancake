@@ -44,6 +44,14 @@ ARC_D = (95, 55, 210)
 WARD_HOT = (240, 250, 255)
 WARD = (150, 200, 255)
 WARD_D = (90, 130, 255)
+HOLY_HOT = (255, 252, 235)
+HOLY = (255, 215, 120)
+HOLY_D = (230, 150, 50)
+HOLY_GLOW = (255, 200, 90)
+HOLY_BEAM = ((255, 245, 200), (255, 210, 110))
+LIFE_HOT = (235, 255, 220)
+LIFE = (130, 240, 140)
+LIFE_D = (40, 160, 80)
 RANDOM = {"FlipbookLayout": "Grid4x4", "FlipbookMode": "Random"}
 
 FLIP = {"FlipbookLayout": "Grid4x4", "FlipbookMode": "OneShot"}
@@ -151,6 +159,10 @@ def attachment(name, children, position=(0, 0, 0)):
 
 def surface(name, labels, attrs, z_offset=0, brightness=2):
     """A sprite-sheet layer lying flat on the root's top face; Effects.Play animates it from its attributes."""
+    if attrs.get("FlipbookGrid") == 1:
+        # A single image shows whole: a zero rect is the full texture, not one 256 px frame of it.
+        for layer in labels:
+            layer["properties"]["ImageRectSize"] = [0, 0]
     return {
         "name": name,
         "className": "SurfaceGui",
@@ -1399,6 +1411,348 @@ overcharge_aura = anchor(
 
 storm_tint = tint((1, 0.97, 0.82), 0.06, 0.15, 0.15, 0.3)
 
+# Cleric. Holy light is gold over a white core; healing is green. Smite and Lay On Hands are the
+# high-tier (screen-effect) skills, so only they keep an ink layer.
+
+
+def column(width, colors, speed):
+    """A shaft of light (Effects.Link) whose streaks run along it, inside a wider, slower haze."""
+    flow = {"TextureMode": "Wrap", "TextureLength": 10}
+    return anchor(
+        [
+            beam("Glow", "LightColumn", width * 1.8, (HOLY_GLOW,), (0.35, 0.6), Brightness=1, TextureSpeed=speed / 2, **flow),
+            beam("Column", "LightColumn", width, colors, (0, 0.1), Brightness=1.5, TextureSpeed=speed, **flow),
+        ]
+    )
+
+
+def rays(name, size, lifetime, colors, count=1, **props):
+    return emitter(
+        name,
+        "HolyRays",
+        {"EmitCount": count},
+        Size=ns(*size),
+        Lifetime=nr(lifetime),
+        Transparency=ns(0, 1),
+        Color=cs(*colors),
+        LightEmission=1,
+        RotSpeed=nr(-40, 40),
+        **props,
+    )
+
+
+def rising(name, key, count, colors, size, speed, spread=25, **props):
+    """Motes that lift off the ground and drift up."""
+    return emitter(
+        name,
+        key,
+        {"EmitCount": count},
+        Speed=nr(*speed),
+        SpreadAngle=[spread, spread],
+        Acceleration=[0, 3, 0],
+        Drag=1.5,
+        Lifetime=nr(0.9, 1.4),
+        Size=ns(size, size * 0.8, 0),
+        Color=cs(*colors),
+        LightEmission=1,
+        RotSpeed=nr(-180, 180),
+        **props,
+    )
+
+
+def seal(tint, size, lifetime, spin, transparency=0, fade=0.4):
+    """A rune circle drawn on the ground that turns slowly and fades out."""
+    return surface(
+        "Seal",
+        [label("Seal", "RuneCircle", tint, transparency)],
+        {"FlipbookGrid": 1, "Lifetime": lifetime, "Fade": fade, "Grow": 1.05, "Spin": spin},
+        brightness=3,
+    )
+
+
+holy_charge = anchor(
+    [
+        inward("Gather", "Glint", 40, (0.8, 0.2), (HOLY_HOT, HOLY)),
+        inward("Rays", "HolyRays", 8, (1.6, 0.6), (HOLY_HOT, HOLY), (1, 0.4, 0)),
+        stream(
+            "Core",
+            "SoftGlow",
+            15,
+            LockedToPart=True,
+            Size=ns(1.6),
+            Lifetime=nr(0.1),
+            Color=cs(HOLY),
+            Transparency=ns(0.3),
+        ),
+        glow(HOLY, 1.5, 8),
+    ],
+    size=(3, 3, 3),
+    attrs=HAND,
+)
+
+life_charge = anchor(
+    [
+        inward("Gather", "Glint", 30, (0.7, 0.2), (LIFE_HOT, LIFE)),
+        inward("Leaves", "LifeWisp", 12, (0.9, 0.4), (LIFE_HOT, LIFE), **FLIP),
+        stream(
+            "Core",
+            "SoftGlow",
+            15,
+            LockedToPart=True,
+            Size=ns(1.5),
+            Lifetime=nr(0.1),
+            Color=cs(LIFE),
+            Transparency=ns(0.35),
+        ),
+        glow(LIFE, 1.5, 8),
+    ],
+    size=(3, 3, 3),
+    attrs=HAND,
+)
+
+# Smite in flight (Effects.Attach): a turning knot of light rays with a gold trail.
+smite_body = anchor(
+    [
+        stream(
+            "Rays",
+            "HolyRays",
+            18,
+            LockedToPart=True,
+            Size=ns(4),
+            Lifetime=nr(0.12),
+            Transparency=ns(0, 1),
+            Color=cs(HOLY_HOT, HOLY),
+            Brightness=2,
+            RotSpeed=nr(-200, 200),
+        ),
+        stream(
+            "Glow",
+            "SoftGlow",
+            15,
+            LockedToPart=True,
+            Size=ns(2.4),
+            Lifetime=nr(0.1),
+            Color=cs(HOLY),
+            Transparency=ns(0.5),
+        ),
+        stream(
+            "Glints",
+            "Glint",
+            30,
+            Speed=nr(0.5, 1.5),
+            SpreadAngle=[180, 180],
+            Lifetime=nr(0.4, 0.7),
+            Size=ns(0.5, 0),
+            Color=cs(HOLY_HOT, HOLY),
+        ),
+        *trail((HOLY_HOT, HOLY, HOLY_D), 0.25, 0.7),
+        glow(HOLY, 2, 12),
+    ]
+)
+
+# Smite landing: a shaft of light drops on the target (SmiteColumn) and bursts into rays over an ink star.
+smite_column = column(3, HOLY_BEAM, -40)
+smite_burst = anchor(
+    [
+        flash_star((8, 11), brightness=4, tint=HOLY_HOT, lifetime=0.1),
+        rays("Rays", (3, 11), 0.3, (HOLY_HOT, HOLY), 2, ZOffset=1),
+        emitter(
+            "InkStar",
+            "ImpactStar",
+            Size=ns(6, 8),
+            Lifetime=nr(0.12),
+            Transparency=ns(0.35, 1),
+            Color=cs(INK),
+            LightEmission=0,
+            ZOffset=0.5,
+        ),
+        sparks(10, 14, 24, 180, (HOLY_HOT, HOLY)),
+        rising("Glints", "Glint", 14, (HOLY_HOT, HOLY), 0.8, (3, 7), 180),
+        light((255, 225, 150), 5, 16, 0.35),
+    ]
+)
+holy_ring = ground_ring(HOLY_HOT, HOLY_D, size=10)
+
+# Rebuke: holy light bursts out of the cleric, a gold shock ring runs to the edge of its reach.
+rebuke_burst = anchor(
+    [
+        flash_star((9, 13), brightness=4, tint=HOLY_HOT, lifetime=0.12),
+        rays("Rays", (4, 18), 0.35, (HOLY_HOT, HOLY), 2, ZOffset=1),
+        emitter(
+            "Glints",
+            "Glint",
+            {"EmitCount": 24},
+            Speed=nr(10, 18),
+            SpreadAngle=[180, 180],
+            Drag=5,
+            Lifetime=nr(0.5, 0.9),
+            Size=ns(0.9, 0),
+            Color=cs(HOLY_HOT, HOLY),
+            LightEmission=1,
+        ),
+        light((255, 225, 150), 5, 22, 0.4),
+    ]
+)
+rebuke_wave = anchor(
+    [
+        surface(
+            "Ring",
+            [label("Ring", "ShockRing", HOLY_HOT, attrs=fade_to(HOLY_D))],
+            {**SHEET, "Lifetime": 0.4, "Grow": 1.15},
+        ),
+        surface(
+            "Echo",
+            [label("Echo", "ShockRing", HOLY, 0.3, attrs=fade_to(HOLY_D))],
+            {**SHEET, "Lifetime": 0.45, "Grow": 1.1, "Delay": 0.08},
+            1,
+        ),
+    ],
+    size=(20, 0.05, 20),
+)
+
+# Mend: a green rune seal under the ally, leaves of light lifting off all over it.
+mend_seal = anchor(
+    [
+        seal(LIFE, 7, 1.3, 40),
+        rising("Leaves", "LifeWisp", 14, (LIFE_HOT, LIFE), 1.4, (3, 6), **FLIP),
+        rising("Glints", "Glint", 12, (LIFE_HOT, LIFE), 0.7, (4, 7)),
+        attachment("Burst", [light(LIFE, 4, 14, 0.6)], (0, 0.5, 0)),
+    ],
+    size=(7, 0.05, 7),
+)
+mend_bloom = anchor(
+    [
+        flash_star((4, 6), brightness=2, tint=LIFE_HOT, lifetime=0.12),
+        emitter(
+            "Glow",
+            "SoftGlow",
+            Size=ns(3, 6),
+            Lifetime=nr(0.3),
+            Transparency=ns(0.4, 1),
+            Color=cs(LIFE),
+            LightEmission=1,
+        ),
+    ]
+)
+
+# Renew: a faint seal holds under the ally while leaves spiral up around them (Effects.Attach).
+renew_seal = anchor([seal(LIFE, 6, 3, 25, 0.35, 0.25)], size=(6, 0.05, 6))
+renew_aura = anchor(
+    [
+        stream(
+            "Leaves",
+            "LifeWisp",
+            8,
+            Shape="Cylinder",
+            ShapeStyle="Surface",
+            Speed=nr(2, 3),
+            Acceleration=[0, 1.5, 0],
+            Lifetime=nr(1.2, 1.6),
+            Size=ns(0.9, 0.8, 0),
+            Color=cs(LIFE_HOT, LIFE),
+            RotSpeed=nr(120, 200),
+            **FLIP,
+        ),
+        stream(
+            "Glints",
+            "Glint",
+            10,
+            Speed=nr(2, 4),
+            Acceleration=[0, 1, 0],
+            Lifetime=nr(0.8, 1.2),
+            Size=ns(0.6, 0),
+            Color=cs(LIFE_HOT, LIFE),
+        ),
+        glow(LIFE, 1, 10),
+    ],
+    size=(3.5, 0.2, 3.5),
+)
+
+# Shelter: a ribbon of light from the cleric to the ally (ShelterLink), then a gold hex ward on them.
+shelter_link = column(1.4, HOLY_BEAM, -25)
+shelter_bubble = anchor(
+    [
+        stream(
+            "Bubble",
+            "WardHex",
+            5,
+            LockedToPart=True,
+            Size=ns(7),
+            Lifetime=nr(0.6),
+            Transparency=ns(1, 0.4, 1),
+            Color=cs(HOLY_HOT, HOLY),
+            Brightness=1.5,
+            RotSpeed=nr(-20, 20),
+            ZOffset=2,
+        ),
+        stream(
+            "Glints",
+            "Glint",
+            15,
+            Speed=nr(1, 3),
+            SpreadAngle=[180, 180],
+            Lifetime=nr(0.5, 0.8),
+            Size=ns(0.6, 0),
+            Color=cs(HOLY_HOT, HOLY),
+        ),
+        glow(HOLY, 1.2, 10),
+    ]
+)
+shelter_burst = anchor(
+    [
+        flash_star((6, 8), brightness=3, tint=HOLY_HOT, lifetime=0.1),
+        emitter(
+            "Bubble",
+            "WardHex",
+            Size=ns(4.5, 7.5),
+            Lifetime=nr(0.25),
+            Transparency=ns(0, 1),
+            Color=cs(HOLY_HOT, HOLY),
+            LightEmission=1,
+            Brightness=2,
+            ZOffset=2,
+        ),
+        light(HOLY, 4, 12, 0.3),
+    ]
+)
+
+# Lay On Hands: a wide shaft of light falls on the ally (LayOnHandsColumn), rays and an ink star burst
+# at their feet over a turning gold seal and a shock ring; the caster's screen flashes gold.
+lay_on_hands_column = column(7, HOLY_BEAM, -60)
+lay_on_hands_impact = anchor(
+    [
+        seal(HOLY, 12, 1.4, 50),
+        surface(
+            "Ring",
+            [label("Ring", "ShockRing", HOLY_HOT, attrs=fade_to(HOLY_D))],
+            {**SHEET, "Lifetime": 0.5, "Grow": 1.2},
+            1,
+        ),
+        attachment(
+            "Burst",
+            [
+                flash_star((10, 14), brightness=4, tint=HOLY_HOT, lifetime=0.12),
+                rays("Rays", (5, 16), 0.4, (HOLY_HOT, HOLY), 2, ZOffset=1),
+                emitter(
+                    "InkStar",
+                    "ImpactStar",
+                    Size=ns(7, 10),
+                    Lifetime=nr(0.14),
+                    Transparency=ns(0.35, 1),
+                    Color=cs(INK),
+                    LightEmission=0,
+                    ZOffset=0.5,
+                ),
+                light((255, 225, 150), 6, 24, 0.7),
+            ],
+            (0, 1, 0),
+        ),
+        rising("Glints", "Glint", 24, (HOLY_HOT, HOLY), 0.9, (4, 9), 60),
+    ],
+    size=(12, 0.05, 12),
+)
+holy_flash = tint((1, 0.95, 0.82), 0.1, 0.1, 0.1, 0.3)
+
 # Screen effects (Effects.Screen), for the caster of a high-tier skill.
 speed_lines = {
     "className": "ScreenGui",
@@ -1463,6 +1817,24 @@ TEMPLATES = {
     "OverchargeStrike": overcharge_strike,
     "OverchargeAura": overcharge_aura,
     "StormTint": storm_tint,
+    "HolyCharge": holy_charge,
+    "LifeCharge": life_charge,
+    "SmiteBody": smite_body,
+    "SmiteColumn": smite_column,
+    "SmiteBurst": smite_burst,
+    "HolyRing": holy_ring,
+    "RebukeBurst": rebuke_burst,
+    "RebukeWave": rebuke_wave,
+    "MendSeal": mend_seal,
+    "MendBloom": mend_bloom,
+    "RenewSeal": renew_seal,
+    "RenewAura": renew_aura,
+    "ShelterLink": shelter_link,
+    "ShelterBubble": shelter_bubble,
+    "ShelterBurst": shelter_burst,
+    "LayOnHandsColumn": lay_on_hands_column,
+    "LayOnHandsImpact": lay_on_hands_impact,
+    "HolyFlash": holy_flash,
 }
 
 

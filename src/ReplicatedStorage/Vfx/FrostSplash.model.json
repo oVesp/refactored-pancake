@@ -71,8 +71,8 @@
 						},
 						"Rotation": 0,
 						"ImageRectSize": [
-							256,
-							256
+							0,
+							0
 						],
 						"ImageColor3": {
 							"Color3": [
