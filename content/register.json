@@ -377,6 +377,76 @@
 			"notes": "Floating ProximityPrompt card (Custom style), drawn beside the object by PromptController."
 		},
 		{
+			"id": "ui:WorldPanel",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiTemplates/WorldPanel.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "SurfaceGui that holds a menu Window in the world; UIController adorns it to a UiRigs Panel part."
+		},
+		{
+			"id": "ui:FloatingGain",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiTemplates/FloatingGain.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "XP and loot rising over the character (GainController)."
+		},
+		{
+			"id": "ui:Trainer",
+			"type": "ui",
+			"path": "src/StarterGui/Trainer.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Trainer panel shown in the world while talking to a trainer."
+		},
+		{
+			"id": "ui:RigInventory",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiRigs/Inventory.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "World-menu rig: where the Inventory panel stands relative to the character and how large it is."
+		},
+		{
+			"id": "ui:RigSpellbook",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiRigs/Spellbook.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "World-menu rig: where the Spellbook panel stands relative to the character and how large it is."
+		},
+		{
+			"id": "ui:RigCharacterSheet",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiRigs/CharacterSheet.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "World-menu rig: where the CharacterSheet panel stands relative to the character and how large it is."
+		},
+		{
+			"id": "ui:RigTrainer",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiRigs/Trainer.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "World-menu rig: where the Trainer panel stands relative to the character and how large it is."
+		},
+		{
 			"id": "ui:StatusChip",
 			"type": "ui",
 			"path": "src/ReplicatedStorage/UiTemplates/StatusChip.model.json",
