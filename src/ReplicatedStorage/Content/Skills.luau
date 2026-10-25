@@ -23,6 +23,7 @@ local list: { Types.SkillDef } = {
 		range = 7,
 		angle = 100,
 		damage = { type = "physical", base = 6, stat = "PhysAtk", ratio = 0.6 },
+		animation = "BasicStrike",
 		description = "Light attack.",
 	},
 	{
@@ -38,6 +39,7 @@ local list: { Types.SkillDef } = {
 		angle = 80,
 		cost = { resource = "Stamina", amount = 15 },
 		damage = { type = "physical", base = 12, stat = "PhysAtk", ratio = 1.1 },
+		animation = "BasicHeavyStrike",
 		description = "Slow heavy attack.",
 	},
 

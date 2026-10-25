@@ -1,13 +1,12 @@
 --!strict
 
 local CollectionService = game:GetService("CollectionService")
-local KeyframeSequenceProvider = game:GetService("KeyframeSequenceProvider")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local Assets = require(ReplicatedStorage.Content.Assets)
-local Logger = require(ReplicatedStorage.Shared.Logger)
 local Maid = require(ReplicatedStorage.Shared.Maid)
+
+local Clips = require(script.Parent.Parent.Animation.Clips)
 
 type Rig = {
 	model: Model,
@@ -34,61 +33,15 @@ local CLIPS: { [string]: ClipSpec } = {
 	Death = { priority = Enum.AnimationPriority.Action4, looped = false },
 }
 
-local log = Logger.new("EnemyAnimationController")
-
 local maids: { [Instance]: Maid.Maid } = {}
 local rigs: { [Model]: Rig } = {}
-local resolved: { [string]: string } = {}
 
 --[=[
 	Plays enemy animations locally (game-design.md 5.6 visuals are client-side). Locomotion follows
 	the replicated root velocity; one-shot clips follow the server's `AnimCue` attribute
-	("<clip>:<sequence>"). Clips resolve through `Assets.Animations`: the uploaded id, else the
-	KeyframeSequence registered at runtime, which only works in Studio.
+	("<clip>:<sequence>"). Clips resolve through `Animation/Clips`.
 ]=]
 local EnemyAnimationController = {}
-
-local function animationId(key: string): string?
-	if resolved[key] then
-		return resolved[key]
-	end
-	local asset = Assets.Animations[key]
-	if not asset then
-		return nil
-	end
-	local id = asset.id
-	if not id then
-		local folder = ReplicatedStorage:FindFirstChild("Animations")
-		local sequence = folder and folder:FindFirstChild(asset.keyframes, true)
-		if not sequence or not sequence:IsA("KeyframeSequence") then
-			log:Warn("Missing KeyframeSequence %s", asset.keyframes)
-			return nil
-		end
-		local ok, temp = pcall(function()
-			return KeyframeSequenceProvider:RegisterKeyframeSequence(sequence)
-		end)
-		if not ok then
-			log:Throttled("register", 60, "warn", "Animation %s has no uploaded id: %s", key, tostring(temp))
-			return nil
-		end
-		id = temp
-	end
-	resolved[key] = id :: string
-	return id
-end
-
-local function load(animator: Animator, key: string, priority: Enum.AnimationPriority, looped: boolean): AnimationTrack?
-	local id = animationId(key)
-	if not id then
-		return nil
-	end
-	local animation = Instance.new("Animation")
-	animation.AnimationId = id
-	local track = animator:LoadAnimation(animation)
-	track.Priority = priority
-	track.Looped = looped
-	return track
-end
 
 local function setLocomotion(rig: Rig, key: string, speed: number)
 	local track = rig.tracks[key]
@@ -145,7 +98,7 @@ local function attach(model: Instance)
 	maids[model] = maid
 	local rig: Rig = { model = model, root = root, tracks = {}, locomotion = nil, dead = false }
 	for clip, spec in CLIPS do
-		local track = load(animator, set .. clip, spec.priority, spec.looped)
+		local track = Clips.Load(animator, set .. clip, spec.priority, spec.looped)
 		if track then
 			rig.tracks[clip] = track
 		end

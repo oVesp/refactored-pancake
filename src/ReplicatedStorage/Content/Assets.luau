@@ -118,10 +118,13 @@ local Textures: { [string]: TextureAsset } = {
 }
 
 --[=[
-	Enemy animation clips, keyed `<AnimSet><Clip>` (game-design.md 7.3). Source is
-	assets/blender/goblin/goblin.blend, retargeted from the reference armature. `keyframes` names the
-	KeyframeSequence under ReplicatedStorage.Animations that stands in for any entry without an
-	uploaded `id`; runtime registration of a KeyframeSequence only works in Studio.
+	Animation clips. `keyframes` names the KeyframeSequence under ReplicatedStorage.Animations that
+	stands in for any entry without an uploaded `id`; runtime registration of a KeyframeSequence only
+	works in Studio and is not seen by other clients.
+	- Enemy clips, keyed `<AnimSet><Clip>` (game-design.md 7.3): assets/blender/goblin/goblin.blend,
+	  retargeted from the reference armature.
+	- Basic attack clips, named by `SkillDef.animation`: R15 placeholders from
+	  assets/blender/combat_r15/combat_r15.blend.
 ]=]
 local Animations: { [string]: AnimationAsset } = {
 	GoblinIdle = { keyframes = "GoblinIdle" },
@@ -131,6 +134,8 @@ local Animations: { [string]: AnimationAsset } = {
 	GoblinThrow = { keyframes = "GoblinThrow" },
 	GoblinHit = { keyframes = "GoblinHit" },
 	GoblinDeath = { keyframes = "GoblinDeath" },
+	BasicStrike = { keyframes = "BasicStrike" },
+	BasicHeavyStrike = { keyframes = "BasicHeavyStrike" },
 }
 
 --[=[

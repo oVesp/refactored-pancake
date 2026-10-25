@@ -81,6 +81,8 @@ export type SkillDef = {
 	knockback: number?,
 	objectTag: string?,
 	modifiers: StatBlock?,
+	--[=[ Key in `Assets.Animations` for the caster's clip; markers `Windup`/`Hit` are cosmetic cues. ]=]
+	animation: string?,
 	description: string,
 }
 

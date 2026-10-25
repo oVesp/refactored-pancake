@@ -68,9 +68,10 @@ return {
 		for key, asset in Assets.Animations do
 			local row = rows["animation:" .. key]
 			Expect.truthy(row, `animation {key} has no register row`)
-			Expect.equal(
-				`src/ReplicatedStorage/Animations/Goblin/{asset.keyframes}.rbxmx`,
-				row.path,
+			Expect.truthy(
+				row.path
+					and string.match(row.path, "^src/ReplicatedStorage/Animations/%w+/(%w+)%.rbxmx$")
+						== asset.keyframes,
 				`animation {key} path`
 			)
 			if asset.id or row.assetId then

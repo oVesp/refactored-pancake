@@ -9,6 +9,7 @@ local TweenService = game:GetService("TweenService")
 local NetClient = require(ReplicatedStorage.Shared.Net.Client)
 local Skills = require(ReplicatedStorage.Content.Skills)
 
+local Clips = require(script.Parent.Parent.Animation.Clips)
 local Effects = require(script.Parent.Parent.Vfx.Effects)
 local Particles = require(script.Parent.Parent.Vfx.Particles)
 local SpellEffects = require(script.Parent.Parent.Vfx.SpellEffects)
@@ -35,10 +36,15 @@ local DAMAGE_COLORS: { [string]: Color3 } = {
 
 local TELEGRAPH_COLOR = Color3.fromRGB(255, 70, 50)
 
+-- Fade times (seconds) for the local player's skill clips.
+local CLIP_FADE_IN = 0.05
+local CLIP_FADE_OUT = 0.15
+
 --[=[
-	Visuals for casts, telegraphs, projectiles, impacts and floating damage numbers. Skills with a
-	recipe in `Vfx/SpellEffects` get textured particle effects; the rest keep neon placeholders.
-	Everything here is cosmetic and client-only; the server already decided the outcome.
+	Visuals for casts, telegraphs, projectiles, impacts and floating damage numbers, plus the local
+	player's skill clips (`SkillDef.animation`, Action priority). Skills with a recipe in
+	`Vfx/SpellEffects` get textured particle effects; the rest keep neon placeholders. Everything
+	here is cosmetic and client-only; the server already decided the outcome.
 ]=]
 local VfxController = {}
 
@@ -49,6 +55,8 @@ local CombatController: any
 type Flight = { part: BasePart, recipe: SpellEffects.Recipe? }
 
 local projectiles: { [number]: Flight } = {}
+-- The local character's skill clips by skill id, loaded when the character spawns.
+local skillTracks: { [string]: AnimationTrack } = {}
 local charges: { [Instance]: Instance? } = {}
 local effectsFolder: Folder
 
@@ -268,6 +276,10 @@ local function onCast(info: { [string]: any })
 		startCharge(info, skill)
 	elseif info.kind == "Interrupted" then
 		cancelCharge(info.caster)
+		local track = skillTracks[info.skillId]
+		if track and isLocalCaster(info.caster) then
+			track:Stop(CLIP_FADE_OUT)
+		end
 	elseif info.kind == "Resolve" then
 		onResolve(info, skill)
 	end
@@ -341,6 +353,51 @@ local function onDamage(model: Model, amount: number, kind: string, crit: boolea
 	end
 end
 
+-- Preloads every skill clip on the new character's Animator so the first press plays at once.
+local function loadSkillTracks(character: Model)
+	for _, track in skillTracks do
+		track:Destroy()
+	end
+	table.clear(skillTracks)
+	local humanoid = character:WaitForChild("Humanoid", 10)
+	local animator = humanoid and humanoid:WaitForChild("Animator", 10)
+	if not animator or not animator:IsA("Animator") or character ~= Players.LocalPlayer.Character then
+		return
+	end
+	for id, skill in Skills.ById do
+		if skill.animation and skill.source ~= "Enemy" then
+			local track = Clips.Load(animator, skill.animation, Enum.AnimationPriority.Action, false)
+			if track then
+				skillTracks[id] = track
+			end
+		end
+	end
+end
+
+-- Plays the local player's clip for a used skill. An instant melee swing waits for the clip's
+-- `Hit` marker; without a clip it shows at once. Wound-up swings come from the server's Resolve.
+local function onUsed(skillId: string, aim: Vector3)
+	local track = skillTracks[skillId]
+	local skill = Skills.ById[skillId]
+	local swing = function()
+		local root = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+		if root and root:IsA("BasePart") then
+			VfxController.PredictSwing(skillId, root.Position, aim)
+		end
+	end
+	if not track then
+		swing()
+		return
+	end
+	track:Play(CLIP_FADE_IN)
+	if skill and not skill.windup then
+		local hit = track:GetMarkerReachedSignal("Hit"):Once(swing)
+		track.Stopped:Once(function()
+			hit:Disconnect()
+		end)
+	end
+end
+
 function VfxController.Init(deps: { [string]: any })
 	UIController = deps.UIController
 	AudioController = deps.AudioController
@@ -357,12 +414,17 @@ function VfxController.Start()
 	NetClient.Connect("ShowCast", onCast)
 	NetClient.Connect("ShowImpact", onImpact)
 	NetClient.Connect("ShowDamage", onDamage)
-	CombatController.Used:Connect(function(skillId: string, aim: Vector3)
-		local root = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-		if root and root:IsA("BasePart") then
-			VfxController.PredictSwing(skillId, root.Position, aim)
+	CombatController.Used:Connect(onUsed)
+	CombatController.Rejected:Connect(function(skillId: string)
+		local track = skillTracks[skillId]
+		if track and track.IsPlaying then
+			track:Stop(CLIP_FADE_OUT)
 		end
 	end)
+	Players.LocalPlayer.CharacterAdded:Connect(loadSkillTracks)
+	if Players.LocalPlayer.Character then
+		task.spawn(loadSkillTracks, Players.LocalPlayer.Character)
+	end
 	NetClient.Connect("Notify", function(key: string)
 		if key == "LevelUp" then
 			AudioController.Play("LevelUp")

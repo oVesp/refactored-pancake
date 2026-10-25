@@ -12,6 +12,7 @@ local Enemies = Loader.load(Content .. "Enemies").ById
 local Items = Loader.load(Content .. "Items")
 local Disciplines = Loader.load(Content .. "Disciplines").ById
 local Loot = Loader.load("src/ServerStorage/ContentServerOnly/Loot")
+local Animations = Loader.load(Content .. "Assets").Animations
 
 local function checkEffects(owner: string, effects: { any }?)
 	for _, effect in effects or {} do
@@ -90,6 +91,13 @@ return {
 				if skill.delivery == "Object" then
 					Expect.truthy(skill.objectTag, `{id} objectTag`)
 				end
+			end
+		end
+	end,
+	["skill animations resolve to manifest clips"] = function()
+		for id, skill in Skills do
+			if skill.animation then
+				Expect.truthy(Animations[skill.animation], `{id}: unknown animation {skill.animation}`)
 			end
 		end
 	end,

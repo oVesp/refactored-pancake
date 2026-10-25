@@ -867,6 +867,28 @@
 			"notes": "KeyframeSequence written by tools/blender/export_goblin.py; Studio-only until uploaded."
 		},
 		{
+			"id": "animation:BasicStrike",
+			"type": "animation",
+			"name": "BasicStrike",
+			"path": "src/ReplicatedStorage/Animations/Combat/BasicStrike.rbxmx",
+			"origin": "Agent-authored placeholder on the stock Studio R15 rig in assets/blender/combat_r15/combat_r15.blend (owner exception 2026-10-25)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Light attack (strike): 0.4 s, marker Hit at 0.133 s. Upper body only. Baked to .rbxanim by the Roblox Animations add-on 3.0.1, converted by tools/blender/rbxanim_to_keyframes.py; Studio-only until uploaded."
+		},
+		{
+			"id": "animation:BasicHeavyStrike",
+			"type": "animation",
+			"name": "BasicHeavyStrike",
+			"path": "src/ReplicatedStorage/Animations/Combat/BasicHeavyStrike.rbxmx",
+			"origin": "Agent-authored placeholder on the stock Studio R15 rig in assets/blender/combat_r15/combat_r15.blend (owner exception 2026-10-25)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Heavy attack (heavy_strike): 1.0 s, markers Windup at 0 s and Hit at 0.5 s. Upper body only. Baked to .rbxanim by the Roblox Animations add-on 3.0.1, converted by tools/blender/rbxanim_to_keyframes.py; Studio-only until uploaded."
+		},
+		{
 			"id": "worldgen:Apply",
 			"type": "tool",
 			"path": "src/ServerStorage/WorldGen/Apply.luau",
