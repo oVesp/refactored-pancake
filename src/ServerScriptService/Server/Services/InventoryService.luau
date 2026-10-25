@@ -39,7 +39,7 @@ function InventoryService.Grant(player: Player, itemId: string, count: number): 
 		leftover = Profile.AddItem(p, itemId, count, def.stack, Items.InventorySize)
 	end, "inventory")
 	if count - leftover > 0 then
-		notify(player, "Looted", def.name, count - leftover)
+		NetServer.Fire("ShowGain", player, "Item", def.name, count - leftover)
 	end
 	if leftover > 0 then
 		notify(player, "InventoryFull")

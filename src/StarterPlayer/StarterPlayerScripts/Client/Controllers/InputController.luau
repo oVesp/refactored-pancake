@@ -37,6 +37,11 @@ local function sink(): Enum.ContextActionResult
 end
 
 local function onAttack(_: string, state: Enum.UserInputState): Enum.ContextActionResult
+	if UIController.IsWorldOpen() then
+		-- Clicks belong to the floating menu while one holds the camera.
+		attackPressedAt = nil
+		return Enum.ContextActionResult.Pass
+	end
 	if state == Enum.UserInputState.Begin then
 		attackPressedAt = os.clock()
 	elseif state == Enum.UserInputState.End and attackPressedAt then

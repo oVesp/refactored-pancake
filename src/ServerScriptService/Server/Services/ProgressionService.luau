@@ -27,6 +27,9 @@ local SkillService: any
 local StatService: any
 local StatusService: any
 
+-- Studs a player may drift past the prompt's range while the trainer panel is open.
+local TRAINER_REACH_SLACK = 6
+
 local pendingSnapshot: { [Player]: boolean } = {}
 local weakenOnSpawn: { [Player]: boolean } = {}
 
@@ -125,6 +128,7 @@ function ProgressionService.GrantXp(player: Player, amount: number)
 	DataService.Update(player, function(p: any)
 		p.xp, p.xpDebt = Formulas.GainXp(p.xp, p.xpDebt, amount)
 	end, "xp")
+	NetServer.Fire("ShowGain", player, "Xp", "XP", amount)
 	local after = levelInfo(profile)
 	if after > before then
 		notify(player, "LevelUp", after)
@@ -244,9 +248,18 @@ local function setHotbarSlot(player: Player, index: number, kind: string, id: st
 	end, "hotbar")
 end
 
-local function onTrainerPrompt(prompt: ProximityPrompt, player: Player)
-	local body = prompt.Parent
-	if not body then
+-- Runs a trainer's service once the player confirms it on the trainer panel.
+local function requestTrain(player: Player, body: Instance)
+	if not body:IsA("BasePart") or not CollectionService:HasTag(body, "Trainer") then
+		return
+	end
+	local prompt = body:FindFirstChildOfClass("ProximityPrompt")
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if not prompt or not root or not root:IsA("BasePart") then
+		return
+	end
+	if (root.Position - body.Position).Magnitude > prompt.MaxActivationDistance + TRAINER_REACH_SLACK then
 		return
 	end
 	local kind = body:GetAttribute("TrainerType")
@@ -269,7 +282,7 @@ local function bindTrainer(instance: Instance)
 	local prompt = instance:FindFirstChildOfClass("ProximityPrompt")
 	if prompt then
 		prompt.Triggered:Connect(function(player)
-			onTrainerPrompt(prompt, player)
+			NetServer.Fire("OpenTrainer", player, instance)
 		end)
 	end
 end
@@ -318,6 +331,7 @@ function ProgressionService.Init(deps: { [string]: any })
 
 	NetServer.Connect("RequestProfile", pushSnapshot)
 	NetServer.Connect("LearnSpell", learnSpell)
+	NetServer.Connect("RequestTrain", requestTrain)
 	NetServer.Connect("SetHotbarSlot", setHotbarSlot)
 end
 

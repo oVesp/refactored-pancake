@@ -1,0 +1,20 @@
+{
+	"className": "SurfaceGui",
+	"properties": {
+		"Face": {
+			"Enum": 5
+		},
+		"SizingMode": {
+			"Enum": 1
+		},
+		"PixelsPerStud": 150,
+		"AlwaysOnTop": true,
+		"LightInfluence": 0,
+		"ResetOnSpawn": false,
+		"ZIndexBehavior": {
+			"Enum": 1
+		},
+		"ClipsDescendants": true,
+		"Active": true
+	}
+}

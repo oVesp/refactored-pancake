@@ -121,6 +121,13 @@ function PromptController.Start()
 	workspace.DescendantAdded:Connect(adopt)
 	ProximityPromptService.PromptShown:Connect(show)
 	ProximityPromptService.PromptHidden:Connect(hide)
+	ProximityPromptService:GetPropertyChangedSignal("Enabled"):Connect(function()
+		if not ProximityPromptService.Enabled then
+			for prompt in shown do
+				hide(prompt)
+			end
+		end
+	end)
 end
 
 return PromptController

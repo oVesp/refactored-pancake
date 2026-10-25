@@ -18,4 +18,5 @@ return table.freeze({
 	Mp = Color3.fromHex("4C91C6"),
 	Green = Color3.fromHex("7EAF8A"),
 	GreenDeep = Color3.fromHex("2F4A3A"),
+	Xp = Color3.fromHex("5E9FD0"),
 })

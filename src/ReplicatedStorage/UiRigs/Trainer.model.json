@@ -1,0 +1,100 @@
+{
+	"className": "Model",
+	"children": [
+		{
+			"name": "Root",
+			"className": "Part",
+			"properties": {
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							0,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				},
+				"Size": {
+					"Vector3": [
+						1,
+						1,
+						1
+					]
+				},
+				"Anchored": true,
+				"CanCollide": false,
+				"CanQuery": false,
+				"CanTouch": false,
+				"CastShadow": false,
+				"Transparency": 1.0,
+				"Locked": false
+			}
+		},
+		{
+			"name": "Panel",
+			"className": "Part",
+			"properties": {
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							2.2,
+							-0.2,
+							-4
+						],
+						"orientation": [
+							[
+								-0.87622,
+								0.02109,
+								0.48146
+							],
+							[
+								0.0,
+								0.99904,
+								-0.04377
+							],
+							[
+								-0.48192,
+								-0.03835,
+								-0.87538
+							]
+						]
+					}
+				},
+				"Size": {
+					"Vector3": [
+						3.6,
+						2.6,
+						0.05
+					]
+				},
+				"Anchored": true,
+				"CanCollide": false,
+				"CanQuery": true,
+				"CanTouch": false,
+				"CastShadow": false,
+				"Transparency": 1.0,
+				"Locked": false
+			},
+			"attributes": {
+				"ScreenFill": 0.5
+			}
+		}
+	]
+}

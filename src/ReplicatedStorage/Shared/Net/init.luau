@@ -117,6 +117,13 @@ local Remotes: { [string]: RemoteSpec } = {
 			return arity(1, ...) and isId((...))
 		end,
 	},
+	RequestTrain = {
+		direction = "ClientToServer",
+		rateLimit = { capacity = 3, perSecond = 1 },
+		validate = function(...)
+			return arity(1, ...) and typeof((...)) == "Instance"
+		end,
+	},
 	UseItem = {
 		direction = "ClientToServer",
 		rateLimit = { capacity = 6, perSecond = 3 },
@@ -133,6 +140,8 @@ local Remotes: { [string]: RemoteSpec } = {
 	Notify = { direction = "ServerToClient" },
 	SendDeathState = { direction = "ServerToClient" },
 	SendDevLog = { direction = "ServerToClient" },
+	OpenTrainer = { direction = "ServerToClient" },
+	ShowGain = { direction = "ServerToClient" },
 }
 
 for name, spec in Remotes do

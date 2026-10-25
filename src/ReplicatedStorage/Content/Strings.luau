@@ -20,7 +20,6 @@ return table.freeze({
 	LearnedDiscipline = "Learned the Discipline %s.",
 	DisciplinesKnown = "You already know every Discipline taught here.",
 	NoFocus = "Not enough Focus capacity.",
-	Looted = "Looted %s x%d.",
 	InventoryFull = "Inventory full.",
 	Died = "You were defeated. XP debt: %d.",
 	VendorClosed = "The vendor is closed in this build.",

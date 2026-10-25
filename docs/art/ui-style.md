@@ -46,7 +46,12 @@ The owner wants UI to float in the world where it can: interacting with an objec
 
 - World prompts: every `ProximityPrompt` is switched to `Custom` on the client by `PromptController` and drawn with the `InteractPrompt` BillboardGui, offset to the right of the object. It shows the key (keyboard key, gamepad button, or a lozenge on touch), action and object text, and a hold-progress fill; tapping or clicking the card holds the prompt.
 - Nameplates, the target marker and damage numbers are BillboardGuis over their owner.
-- Personal menus (inventory, spellbook, character sheet) stay as centred screen windows so they stay readable when the camera turns.
+- Menus open in the world (owner's choice, 2026-10-25, after VR games): inventory, spellbook, character sheet and trainer appear as a panel standing in front of the character, fixed in place while open. The camera goes first person at the character's head (the character is hidden), movement and world prompts are held, and closing (the window's X or the menu's key) gives the camera back.
+  - Readable text on every screen: the panel is placed at the distance where it fills a set share of the view (`ScreenFill`, 0.8 for menus), so its text appears at the same size on a phone, a monitor or an ultrawide. The trainer panel fills 0.5 and sits to the right so the trainer stays visible.
+  - Screens stay authored as ScreenGuis with one root `Window` frame; `UIController` moves that frame into the `WorldPanel` SurfaceGui while it is open.
+  - Each world screen has a rig in `ReplicatedStorage/UiRigs/<Screen>.model.json`: `Root` stands for the character's head looking ahead (for the trainer, looking at the NPC) and `Panel` gives the panel's direction from the head and its size in studs. Attributes on `Panel`: `ScreenFill` (share of the view, default 0.8) and `PixelsPerStud` (canvas density, default 150). Move or resize `Panel` in Studio to re-author a menu.
+- XP and looted items float up over the character (`FloatingGain` BillboardGui, `GainController`) instead of screen toasts.
+- The HUD (bars, hotbar, target frame, cast bar, toasts, Notices) stays on the screen.
 
 ## HUD layout
 

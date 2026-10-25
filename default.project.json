@@ -12,6 +12,9 @@
 			"UiTemplates": {
 				"$path": "src/ReplicatedStorage/UiTemplates"
 			},
+			"UiRigs": {
+				"$path": "src/ReplicatedStorage/UiRigs"
+			},
 			"Animations": {
 				"$path": "src/ReplicatedStorage/Animations"
 			}

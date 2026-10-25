@@ -1,0 +1,1025 @@
+{
+	"className": "ScreenGui",
+	"properties": {
+		"ResetOnSpawn": false,
+		"ZIndexBehavior": "Sibling",
+		"ScreenInsets": "CoreUISafeInsets",
+		"IgnoreGuiInset": false,
+		"Enabled": false,
+		"DisplayOrder": 5
+	},
+	"children": [
+		{
+			"name": "Window",
+			"className": "Frame",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							0.42,
+							0
+						],
+						[
+							0.42,
+							0
+						]
+					]
+				},
+				"Position": {
+					"UDim2": [
+						[
+							0.5,
+							0
+						],
+						[
+							0.5,
+							0
+						]
+					]
+				},
+				"AnchorPoint": [
+					0.5,
+					0.5
+				],
+				"BackgroundColor3": [
+					1,
+					1,
+					1
+				],
+				"BackgroundTransparency": 0.04,
+				"BorderSizePixel": 0
+			},
+			"children": [
+				{
+					"name": "UICorner",
+					"className": "UICorner",
+					"properties": {
+						"CornerRadius": {
+							"UDim": [
+								0,
+								4
+							]
+						}
+					}
+				},
+				{
+					"name": "UIStroke",
+					"className": "UIStroke",
+					"properties": {
+						"Color": [
+							0.824,
+							0.718,
+							0.514
+						],
+						"Thickness": 2,
+						"Transparency": 0.05,
+						"ApplyStrokeMode": "Border"
+					}
+				},
+				{
+					"name": "UIGradient",
+					"className": "UIGradient",
+					"properties": {
+						"Color": {
+							"ColorSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"color": [
+											0.145,
+											0.176,
+											0.227
+										]
+									},
+									{
+										"time": 1.0,
+										"color": [
+											0.082,
+											0.098,
+											0.133
+										]
+									}
+								]
+							}
+						},
+						"Rotation": 90
+					}
+				},
+				{
+					"name": "UISizeConstraint",
+					"className": "UISizeConstraint",
+					"properties": {
+						"MinSize": [
+							340,
+							300
+						],
+						"MaxSize": [
+							780,
+							640
+						]
+					}
+				},
+				{
+					"name": "InnerBorder",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									-10
+								],
+								[
+									1,
+									-10
+								]
+							]
+						},
+						"Position": {
+							"UDim2": [
+								[
+									0,
+									5
+								],
+								[
+									0,
+									5
+								]
+							]
+						},
+						"BackgroundTransparency": 1
+					},
+					"children": [
+						{
+							"name": "UICorner",
+							"className": "UICorner",
+							"properties": {
+								"CornerRadius": {
+									"UDim": [
+										0,
+										2
+									]
+								}
+							}
+						},
+						{
+							"name": "UIStroke",
+							"className": "UIStroke",
+							"properties": {
+								"Color": [
+									0.824,
+									0.718,
+									0.514
+								],
+								"Thickness": 1,
+								"Transparency": 0.65,
+								"ApplyStrokeMode": "Border"
+							}
+						}
+					]
+				},
+				{
+					"name": "CornerTL",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									0,
+									12
+								],
+								[
+									0,
+									12
+								]
+							]
+						},
+						"Position": {
+							"UDim2": [
+								[
+									0,
+									0
+								],
+								[
+									0,
+									0
+								]
+							]
+						},
+						"AnchorPoint": [
+							0.5,
+							0.5
+						],
+						"Rotation": 45,
+						"BackgroundColor3": [
+							0.824,
+							0.718,
+							0.514
+						],
+						"BorderSizePixel": 0
+					},
+					"children": [
+						{
+							"name": "Core",
+							"className": "Frame",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											0,
+											5
+										],
+										[
+											0,
+											5
+										]
+									]
+								},
+								"Position": {
+									"UDim2": [
+										[
+											0.5,
+											0
+										],
+										[
+											0.5,
+											0
+										]
+									]
+								},
+								"AnchorPoint": [
+									0.5,
+									0.5
+								],
+								"BackgroundColor3": [
+									0.082,
+									0.098,
+									0.133
+								],
+								"BorderSizePixel": 0
+							}
+						}
+					]
+				},
+				{
+					"name": "CornerTR",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									0,
+									12
+								],
+								[
+									0,
+									12
+								]
+							]
+						},
+						"Position": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									0,
+									0
+								]
+							]
+						},
+						"AnchorPoint": [
+							0.5,
+							0.5
+						],
+						"Rotation": 45,
+						"BackgroundColor3": [
+							0.824,
+							0.718,
+							0.514
+						],
+						"BorderSizePixel": 0
+					},
+					"children": [
+						{
+							"name": "Core",
+							"className": "Frame",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											0,
+											5
+										],
+										[
+											0,
+											5
+										]
+									]
+								},
+								"Position": {
+									"UDim2": [
+										[
+											0.5,
+											0
+										],
+										[
+											0.5,
+											0
+										]
+									]
+								},
+								"AnchorPoint": [
+									0.5,
+									0.5
+								],
+								"BackgroundColor3": [
+									0.082,
+									0.098,
+									0.133
+								],
+								"BorderSizePixel": 0
+							}
+						}
+					]
+				},
+				{
+					"name": "CornerBL",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									0,
+									12
+								],
+								[
+									0,
+									12
+								]
+							]
+						},
+						"Position": {
+							"UDim2": [
+								[
+									0,
+									0
+								],
+								[
+									1,
+									0
+								]
+							]
+						},
+						"AnchorPoint": [
+							0.5,
+							0.5
+						],
+						"Rotation": 45,
+						"BackgroundColor3": [
+							0.824,
+							0.718,
+							0.514
+						],
+						"BorderSizePixel": 0
+					},
+					"children": [
+						{
+							"name": "Core",
+							"className": "Frame",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											0,
+											5
+										],
+										[
+											0,
+											5
+										]
+									]
+								},
+								"Position": {
+									"UDim2": [
+										[
+											0.5,
+											0
+										],
+										[
+											0.5,
+											0
+										]
+									]
+								},
+								"AnchorPoint": [
+									0.5,
+									0.5
+								],
+								"BackgroundColor3": [
+									0.082,
+									0.098,
+									0.133
+								],
+								"BorderSizePixel": 0
+							}
+						}
+					]
+				},
+				{
+					"name": "CornerBR",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									0,
+									12
+								],
+								[
+									0,
+									12
+								]
+							]
+						},
+						"Position": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									1,
+									0
+								]
+							]
+						},
+						"AnchorPoint": [
+							0.5,
+							0.5
+						],
+						"Rotation": 45,
+						"BackgroundColor3": [
+							0.824,
+							0.718,
+							0.514
+						],
+						"BorderSizePixel": 0
+					},
+					"children": [
+						{
+							"name": "Core",
+							"className": "Frame",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											0,
+											5
+										],
+										[
+											0,
+											5
+										]
+									]
+								},
+								"Position": {
+									"UDim2": [
+										[
+											0.5,
+											0
+										],
+										[
+											0.5,
+											0
+										]
+									]
+								},
+								"AnchorPoint": [
+									0.5,
+									0.5
+								],
+								"BackgroundColor3": [
+									0.082,
+									0.098,
+									0.133
+								],
+								"BorderSizePixel": 0
+							}
+						}
+					]
+				},
+				{
+					"name": "Header",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									-10
+								],
+								[
+									0,
+									41
+								]
+							]
+						},
+						"Position": {
+							"UDim2": [
+								[
+									0,
+									5
+								],
+								[
+									0,
+									5
+								]
+							]
+						},
+						"BackgroundColor3": [
+							0.145,
+							0.176,
+							0.227
+						],
+						"BackgroundTransparency": 0.35,
+						"BorderSizePixel": 0
+					},
+					"children": [
+						{
+							"name": "UICorner",
+							"className": "UICorner",
+							"properties": {
+								"CornerRadius": {
+									"UDim": [
+										0,
+										2
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Bind_Title",
+					"className": "TextLabel",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									-80
+								],
+								[
+									0,
+									40
+								]
+							]
+						},
+						"BackgroundTransparency": 1,
+						"Text": "TRAINER",
+						"TextColor3": [
+							0.824,
+							0.718,
+							0.514
+						],
+						"FontFace": {
+							"Font": {
+								"family": "rbxasset://fonts/families/AccanthisADFStd.json",
+								"weight": "Bold",
+								"style": "Normal"
+							}
+						},
+						"TextSize": 22,
+						"TextXAlignment": "Left",
+						"TextYAlignment": "Center",
+						"TextWrapped": true,
+						"Position": {
+							"UDim2": [
+								[
+									0,
+									22
+								],
+								[
+									0,
+									4
+								]
+							]
+						},
+						"ZIndex": 2
+					}
+				},
+				{
+					"name": "TitleRule",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									-24
+								],
+								[
+									0,
+									1
+								]
+							]
+						},
+						"Position": {
+							"UDim2": [
+								[
+									0.5,
+									0
+								],
+								[
+									0,
+									46
+								]
+							]
+						},
+						"AnchorPoint": [
+							0.5,
+							0
+						],
+						"BackgroundColor3": [
+							1,
+							1,
+							1
+						],
+						"BorderSizePixel": 0
+					},
+					"children": [
+						{
+							"name": "UIGradient",
+							"className": "UIGradient",
+							"properties": {
+								"Color": {
+									"ColorSequence": {
+										"keypoints": [
+											{
+												"time": 0.0,
+												"color": [
+													0.824,
+													0.718,
+													0.514
+												]
+											},
+											{
+												"time": 1.0,
+												"color": [
+													0.824,
+													0.718,
+													0.514
+												]
+											}
+										]
+									}
+								},
+								"Rotation": 0,
+								"Transparency": {
+									"NumberSequence": {
+										"keypoints": [
+											{
+												"time": 0,
+												"value": 1,
+												"envelope": 0
+											},
+											{
+												"time": 0.2,
+												"value": 0.2,
+												"envelope": 0
+											},
+											{
+												"time": 0.5,
+												"value": 0,
+												"envelope": 0
+											},
+											{
+												"time": 0.8,
+												"value": 0.2,
+												"envelope": 0
+											},
+											{
+												"time": 1,
+												"value": 1,
+												"envelope": 0
+											}
+										]
+									}
+								}
+							}
+						},
+						{
+							"name": "Gem",
+							"className": "Frame",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											0,
+											7
+										],
+										[
+											0,
+											7
+										]
+									]
+								},
+								"Position": {
+									"UDim2": [
+										[
+											0.5,
+											0
+										],
+										[
+											0.5,
+											0
+										]
+									]
+								},
+								"AnchorPoint": [
+									0.5,
+									0.5
+								],
+								"Rotation": 45,
+								"BackgroundColor3": [
+									0.824,
+									0.718,
+									0.514
+								],
+								"BorderSizePixel": 0
+							}
+						}
+					]
+				},
+				{
+					"name": "Bind_Close",
+					"className": "TextButton",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									0,
+									28
+								],
+								[
+									0,
+									28
+								]
+							]
+						},
+						"BackgroundColor3": [
+							0.145,
+							0.176,
+							0.227
+						],
+						"BorderSizePixel": 0,
+						"Text": "X",
+						"TextColor3": [
+							0.941,
+							0.867,
+							0.69
+						],
+						"FontFace": {
+							"Font": {
+								"family": "rbxasset://fonts/families/AccanthisADFStd.json",
+								"weight": "Bold",
+								"style": "Normal"
+							}
+						},
+						"TextSize": 14,
+						"AutoButtonColor": true,
+						"Position": {
+							"UDim2": [
+								[
+									1,
+									-10
+								],
+								[
+									0,
+									10
+								]
+							]
+						},
+						"AnchorPoint": [
+							1,
+							0
+						],
+						"ZIndex": 3
+					},
+					"children": [
+						{
+							"name": "UICorner",
+							"className": "UICorner",
+							"properties": {
+								"CornerRadius": {
+									"UDim": [
+										0,
+										3
+									]
+								}
+							}
+						},
+						{
+							"name": "UIStroke",
+							"className": "UIStroke",
+							"properties": {
+								"Color": [
+									0.824,
+									0.718,
+									0.514
+								],
+								"Thickness": 1,
+								"Transparency": 0.15,
+								"ApplyStrokeMode": "Border"
+							}
+						}
+					]
+				},
+				{
+					"name": "Body",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									-36
+								],
+								[
+									1,
+									-74
+								]
+							]
+						},
+						"Position": {
+							"UDim2": [
+								[
+									0,
+									18
+								],
+								[
+									0,
+									58
+								]
+							]
+						},
+						"BackgroundTransparency": 1
+					},
+					"children": [
+						{
+							"name": "Bind_Info",
+							"className": "TextLabel",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											1,
+											0
+										],
+										[
+											1,
+											-48
+										]
+									]
+								},
+								"BackgroundTransparency": 1,
+								"Text": "",
+								"TextColor3": [
+									0.682,
+									0.706,
+									0.749
+								],
+								"FontFace": {
+									"Font": {
+										"family": "rbxasset://fonts/families/BuilderSans.json",
+										"weight": "Medium",
+										"style": "Normal"
+									}
+								},
+								"TextSize": 16,
+								"TextXAlignment": "Left",
+								"TextYAlignment": "Top",
+								"TextWrapped": true,
+								"LayoutOrder": 2
+							}
+						},
+						{
+							"name": "Bind_Primary",
+							"className": "TextButton",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											0.5,
+											0
+										],
+										[
+											0,
+											38
+										]
+									]
+								},
+								"BackgroundColor3": [
+									0.824,
+									0.718,
+									0.514
+								],
+								"BorderSizePixel": 0,
+								"Text": "Train",
+								"TextColor3": [
+									0.106,
+									0.086,
+									0.063
+								],
+								"FontFace": {
+									"Font": {
+										"family": "rbxasset://fonts/families/AccanthisADFStd.json",
+										"weight": "Bold",
+										"style": "Normal"
+									}
+								},
+								"TextSize": 15,
+								"AutoButtonColor": true,
+								"AnchorPoint": [
+									0.5,
+									1
+								],
+								"Position": {
+									"UDim2": [
+										[
+											0.5,
+											0
+										],
+										[
+											1,
+											0
+										]
+									]
+								}
+							},
+							"children": [
+								{
+									"name": "UICorner",
+									"className": "UICorner",
+									"properties": {
+										"CornerRadius": {
+											"UDim": [
+												0,
+												3
+											]
+										}
+									}
+								},
+								{
+									"name": "UIStroke",
+									"className": "UIStroke",
+									"properties": {
+										"Color": [
+											0.941,
+											0.867,
+											0.69
+										],
+										"Thickness": 1,
+										"Transparency": 0.15,
+										"ApplyStrokeMode": "Border"
+									}
+								},
+								{
+									"name": "UIGradient",
+									"className": "UIGradient",
+									"properties": {
+										"Color": {
+											"ColorSequence": {
+												"keypoints": [
+													{
+														"time": 0.0,
+														"color": [
+															1,
+															1,
+															1
+														]
+													},
+													{
+														"time": 1.0,
+														"color": [
+															0.68,
+															0.68,
+															0.68
+														]
+													}
+												]
+											}
+										},
+										"Rotation": 90
+									}
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}
