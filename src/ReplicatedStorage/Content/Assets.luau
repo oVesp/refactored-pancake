@@ -114,6 +114,7 @@ local Textures: { [string]: TextureAsset } = {
 	LightColumn = { id = "rbxassetid://135891248678516", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
 	RuneCircle = { id = "rbxassetid://138815498372303", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
 	LifeWisp = { id = "rbxassetid://116146118060797", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
+	ToxicBubble = { id = "rbxassetid://108429372505182", fallback = "rbxasset://textures/particles/smoke_main.dds" },
 }
 
 --[=[

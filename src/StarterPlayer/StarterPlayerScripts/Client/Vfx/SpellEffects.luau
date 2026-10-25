@@ -51,37 +51,7 @@ local function flatLook(origin: Vector3, aim: Vector3): Vector3?
 	return if look.Magnitude > 1e-3 then look.Unit else nil
 end
 
--- Particles that spawn on a shell around the hand and pull inward while a spell charges.
-local function charge(root: BasePart, duration: number, specs: { Particles.EmitterSpec }, light: Color3): Instance
-	local anchor = Particles.Anchor(root.CFrame, Vector3.one * 4)
-	Particles.Attach(anchor, specs)
-	Particles.Light(anchor, light, 8, 1.5)
-	Particles.Follow(anchor, root, CFrame.new(0.8, 0.4, -1.6), duration, 0.5)
-	return anchor
-end
-
-local function inward(texture: string, color: ColorSequence, size: NumberSequence, rate: number): Particles.EmitterSpec
-	return {
-		texture = texture,
-		color = color,
-		size = size,
-		lifetime = R(0.35, 0.45),
-		speed = R(4, 6),
-		rate = rate,
-		shape = Enum.ParticleEmitterShape.Sphere,
-		shapeStyle = Enum.ParticleEmitterShapeStyle.Surface,
-		shapeInOut = Enum.ParticleEmitterShapeInOut.Inward,
-		transparency = N(1, 0.2, 0),
-		rotSpeed = R(-90, 90),
-	}
-end
-
-local RAGE = C(rgb(255, 220, 160), rgb(255, 100, 40), rgb(150, 20, 10))
 local DUST = C(rgb(170, 150, 125), rgb(120, 105, 90))
--- Darker, normal-blended tints for shapes that must read on bright daylight ground.
-local VENOM = C(rgb(220, 255, 170), rgb(120, 210, 60), rgb(40, 90, 30))
-local TOXIC = C(rgb(170, 235, 90), rgb(90, 160, 40), rgb(45, 90, 25))
-local HEX = C(rgb(230, 190, 255), rgb(130, 60, 190), rgb(40, 15, 60))
 
 --[=[
 	Visual recipes per skill id, for class spells and enemy attacks. Skills without a recipe
@@ -480,95 +450,21 @@ SpellEffects.overcharge = {
 	end,
 }
 
--- Nova: the ground buckles outward from a heavy stomp.
-local function quakeResolve(info: ResolveInfo)
-	local skill = Skills.ById[info.skillId]
-	local radius = skill and skill.radius or 10
-	local feet = Particles.Ground(info.origin)
-	Particles.GroundWave(feet, DUST, N(2, radius * 2.2), 0.55)
-	Particles.GroundWave(feet, RAGE, N(1, radius * 1.4), 0.4)
-	Particles.Burst(CFrame.new(feet + Vector3.new(0, 0.3, 0)), {
-		{
-			texture = "Rubble",
-			color = DUST,
-			size = N(1.8, 1.2),
-			transparency = N(0, 0, 1),
-			lifetime = R(0.7, 1),
-			speed = R(14, 24),
-			spread = Vector2.new(55, 55),
-			acceleration = Vector3.new(0, -55, 0),
-			rotSpeed = R(-200, 200),
-			emission = 0,
-			count = 16,
-		},
-		{
-			texture = "Smoke",
-			color = DUST,
-			size = N(3, 7),
-			transparency = N(0.4, 1),
-			lifetime = R(1, 1.5),
-			speed = R(radius * 1.2, radius * 1.8),
-			spread = Vector2.new(88, 88),
-			drag = 3,
-			emission = 0,
-			count = 20,
-		},
-	}, Vector3.new(4, 0.2, 4))
-	Particles.Flash(feet + Vector3.new(0, 2, 0), rgb(255, 180, 110), 20, 0.4)
+-- Nova: the ground cracks under a heavy stomp, a dust ring rolls out and rubble flies.
+local function quakeResolve(template: string): (ResolveInfo) -> ()
+	return function(info)
+		local feet = Particles.Ground(info.origin)
+		local yaw = CFrame.Angles(0, math.random() * math.pi * 2, 0)
+		-- Lifted clear of tall grass, like the other ground layers.
+		Effects.Play(template, CFrame.new(feet + Vector3.new(0, 0.6, 0)) * yaw)
+		Effects.Play("HitShake", CFrame.new(feet))
+	end
 end
 
-SpellEffects.brute_slam = { resolve = quakeResolve }
-SpellEffects.chief_stomp = { resolve = quakeResolve }
+SpellEffects.brute_slam = { resolve = quakeResolve("BruteSlam") }
+SpellEffects.chief_stomp = { resolve = quakeResolve("ChiefStomp") }
 
 -- Falling strike: a volley of arrows rains down across the target area.
-local ARROW = C(rgb(110, 85, 60), rgb(70, 55, 40))
-
-local function arrow(landing: Vector3)
-	Particles.Burst(CFrame.new(landing + Vector3.new(0, 30, 0)), {
-		{
-			texture = "Streak",
-			color = ARROW,
-			size = N(3),
-			transparency = N(0),
-			lifetime = R(0.3),
-			speed = R(100),
-			orientation = Enum.ParticleOrientation.VelocityParallel,
-			rotation = R(90),
-			direction = Enum.NormalId.Bottom,
-			emission = 0,
-			count = 1,
-		},
-		{
-			texture = "Streak",
-			color = C(rgb(255, 250, 235)),
-			size = N(6),
-			transparency = N(0.55, 1),
-			lifetime = R(0.3),
-			speed = R(96),
-			orientation = Enum.ParticleOrientation.VelocityParallel,
-			rotation = R(90),
-			direction = Enum.NormalId.Bottom,
-			count = 1,
-		},
-	})
-	task.delay(0.3, function()
-		Particles.Burst(CFrame.new(landing + Vector3.new(0, 0.2, 0)), {
-			{
-				texture = "Smoke",
-				color = DUST,
-				size = N(0.8, 2),
-				transparency = N(0.4, 1),
-				lifetime = R(0.4, 0.6),
-				speed = R(3, 5),
-				spread = Vector2.new(70, 70),
-				drag = 4,
-				emission = 0,
-				count = 3,
-			},
-		})
-	end)
-end
-
 SpellEffects.archer_volley = {
 	resolve = function(info)
 		local center = groundTarget(info)
@@ -576,132 +472,44 @@ SpellEffects.archer_volley = {
 		local radius = skill and skill.radius or 8
 		for _ = 1, 14 do
 			task.delay(math.random() * 0.35, function()
-				arrow(Particles.Ground(scatter(center, radius)))
+				local landing = Particles.Ground(scatter(center, radius))
+				Effects.Play("ArrowFall", CFrame.new(landing + Vector3.new(0, 30, 0)))
+				task.delay(0.3, function()
+					Effects.Play("ArrowLand", CFrame.new(landing + Vector3.new(0, 0.2, 0)))
+				end)
 			end)
 		end
 	end,
 }
 
--- Ground eruption: toxic bubbles boil up from a spreading pool of fumes.
+-- Ground eruption: a toxic stain soaks the ground while bubbles boil up and pop across it.
 SpellEffects.poison_snare = {
 	resolve = function(info)
 		local center = groundTarget(info)
-		local pool = Particles.Anchor(CFrame.new(center + Vector3.new(0, 0.3, 0)), Vector3.new(10, 0.3, 10))
-		Particles.Attach(pool, {
-			{
-				texture = "Smoke",
-				color = TOXIC,
-				size = N(3, 6),
-				transparency = N(1, 0.1, 1),
-				lifetime = R(1, 1.6),
-				speed = R(0.5, 1.5),
-				rotSpeed = R(-30, 30),
-				emission = 0,
-				rate = 22,
-			},
-			{
-				texture = "Wisp",
-				color = TOXIC,
-				size = N(1.2, 2.6),
-				transparency = N(0.1, 1),
-				lifetime = R(0.6, 0.9),
-				speed = R(3, 6),
-				rotSpeed = R(-90, 90),
-				emission = 0.2,
-				rate = 16,
-			},
-			{
-				texture = "SoftGlow",
-				color = VENOM,
-				size = N(0.2, 0.7, 0),
-				transparency = N(0.2, 0.5),
-				lifetime = R(0.5, 0.8),
-				speed = R(2, 4),
-				rate = 25,
-			},
-		})
-		Particles.GroundWave(center, VENOM, N(2, 13), 0.5)
-		Particles.Light(pool, rgb(120, 210, 60), 14, 1.2)
-		task.delay(1.8, Particles.Release, pool, 1.6)
+		onGround("PoisonStain", center)
+		local pool = Particles.Anchor(CFrame.new(center + Vector3.new(0, 0.6, 0)), Vector3.new(10, 0.3, 10))
+		Effects.Attach("PoisonPool", pool)
+		task.delay(1.8, Particles.Release, pool, 1.2)
 	end,
 }
 
-local DARK_SMOKE = C(rgb(40, 25, 50), rgb(15, 10, 20))
-
-local function hexMissile(color: ColorSequence, light: Color3): Recipe
+-- Hex missile: a wisp gathers at the hand, flies in a tinted haze and bursts into an unwinding swirl.
+local function hexMissile(kind: string): Recipe
 	return {
 		cast = function(root, duration)
-			return charge(root, duration, { inward("Wisp", color, N(1, 0.4), 30) }, light)
+			return Effects.Charge(kind .. "Charge", root, duration)
 		end,
 		projectile = function(body)
-			Particles.Attach(body, {
-				{
-					texture = "Wisp",
-					color = color,
-					size = N(2.6),
-					transparency = N(0, 1),
-					lifetime = R(0.15),
-					rotSpeed = R(-300, 300),
-					emission = 0.4,
-					locked = true,
-					rate = 40,
-				},
-				{
-					texture = "Smoke",
-					color = DARK_SMOKE,
-					size = N(1, 2.5),
-					transparency = N(0.4, 1),
-					lifetime = R(0.5, 0.8),
-					rotSpeed = R(-40, 40),
-					emission = 0,
-					rate = 25,
-				},
-				{
-					texture = "Glint",
-					color = color,
-					size = N(0.5, 0),
-					lifetime = R(0.3, 0.5),
-					speed = R(1, 3),
-					spread = Vector2.new(180, 180),
-					rate = 20,
-				},
-			})
-			Particles.Trail(body, { color = color, width = 0.6, lifetime = 0.3, texture = "TrailStreak" })
-			Particles.Light(body, light, 10, 1.5)
+			Effects.Attach(kind .. "Body", body)
 		end,
 		impact = function(position)
-			Particles.Burst(CFrame.new(position), {
-				{
-					texture = "Wisp",
-					color = color,
-					size = N(1.5, 4),
-					transparency = N(0.1, 1),
-					lifetime = R(0.4, 0.6),
-					speed = R(4, 8),
-					spread = Vector2.new(180, 180),
-					drag = 4,
-					rotSpeed = R(-200, 200),
-					count = 8,
-				},
-				{
-					texture = "Smoke",
-					color = DARK_SMOKE,
-					size = N(2, 4),
-					transparency = N(0.4, 1),
-					lifetime = R(0.8, 1.2),
-					speed = R(2, 4),
-					spread = Vector2.new(180, 180),
-					emission = 0,
-					count = 6,
-				},
-			})
-			Particles.Flash(position, light, 12, 0.3)
+			Effects.Play(kind .. "Burst", CFrame.new(position))
 		end,
 	}
 end
 
-SpellEffects.hex_bolt = hexMissile(VENOM, rgb(120, 210, 60))
-SpellEffects.hex_curse = hexMissile(HEX, rgb(150, 80, 220))
+SpellEffects.hex_bolt = hexMissile("Venom")
+SpellEffects.hex_curse = hexMissile("Hex")
 SpellEffects.shaman_heal = SpellEffects.mend
 
 return table.freeze(SpellEffects)

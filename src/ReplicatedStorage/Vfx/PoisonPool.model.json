@@ -1,0 +1,277 @@
+{
+	"className": "Part",
+	"properties": {
+		"Anchored": true,
+		"CanCollide": false,
+		"CanQuery": false,
+		"CanTouch": false,
+		"CastShadow": false,
+		"Transparency": 1,
+		"Size": [
+			10,
+			0.3,
+			10
+		]
+	},
+	"children": [
+		{
+			"name": "Bubbles",
+			"className": "ParticleEmitter",
+			"properties": {
+				"Rate": 30,
+				"LightEmission": 0.25,
+				"LightInfluence": 0,
+				"Rotation": {
+					"NumberRange": [
+						0,
+						0
+					]
+				},
+				"Speed": {
+					"NumberRange": [
+						0.3,
+						1
+					]
+				},
+				"Lifetime": {
+					"NumberRange": [
+						0.7,
+						1.1
+					]
+				},
+				"Size": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 1.2,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 2.4,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									0.8627,
+									1.0,
+									0.6667
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.4706,
+									0.8235,
+									0.2353
+								]
+							}
+						]
+					}
+				},
+				"FlipbookLayout": "Grid4x4",
+				"FlipbookMode": "OneShot"
+			},
+			"attributes": {
+				"TextureKey": "ToxicBubble"
+			}
+		},
+		{
+			"name": "Fumes",
+			"className": "ParticleEmitter",
+			"properties": {
+				"Rate": 18,
+				"LightEmission": 0,
+				"LightInfluence": 0,
+				"Rotation": {
+					"NumberRange": [
+						0,
+						360
+					]
+				},
+				"Speed": {
+					"NumberRange": [
+						0.5,
+						1.5
+					]
+				},
+				"Acceleration": [
+					0,
+					1,
+					0
+				],
+				"Lifetime": {
+					"NumberRange": [
+						1,
+						1.6
+					]
+				},
+				"Size": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 4,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 8,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Transparency": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 1,
+								"envelope": 0
+							},
+							{
+								"time": 0.5,
+								"value": 0.15,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 1,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									0.4706,
+									0.8235,
+									0.2353
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.1765,
+									0.3529,
+									0.098
+								]
+							}
+						]
+					}
+				},
+				"RotSpeed": {
+					"NumberRange": [
+						-30,
+						30
+					]
+				}
+			},
+			"attributes": {
+				"TextureKey": "Smoke"
+			}
+		},
+		{
+			"name": "Motes",
+			"className": "ParticleEmitter",
+			"properties": {
+				"Rate": 12,
+				"LightEmission": 1,
+				"LightInfluence": 0,
+				"Rotation": {
+					"NumberRange": [
+						0,
+						360
+					]
+				},
+				"Speed": {
+					"NumberRange": [
+						1.5,
+						3
+					]
+				},
+				"Acceleration": [
+					0,
+					1,
+					0
+				],
+				"Lifetime": {
+					"NumberRange": [
+						0.6,
+						1
+					]
+				},
+				"Size": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 0.5,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 0,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									0.8627,
+									1.0,
+									0.6667
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.4706,
+									0.8235,
+									0.2353
+								]
+							}
+						]
+					}
+				}
+			},
+			"attributes": {
+				"TextureKey": "Glint"
+			}
+		},
+		{
+			"name": "Light",
+			"className": "PointLight",
+			"properties": {
+				"Color": {
+					"Color3": [
+						0.4706,
+						0.8235,
+						0.2353
+					]
+				},
+				"Brightness": 1.2,
+				"Range": 14,
+				"Shadows": false
+			}
+		}
+	]
+}

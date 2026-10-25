@@ -603,6 +603,49 @@ def life_wisp(rng):
     return sheet(frames)
 
 
+def toxic_bubble(rng):
+    """A bubble swells with a wobbling rim, then pops into a ring of droplets that fly apart."""
+    r, a = polar(FRAME)
+    film = fbm(FRAME, rng, octaves=3, base=6)
+    phases = rng.random(8) * 2 * math.pi
+    drops = rng.random((14, 3))
+    frames = []
+    swell = 10
+    for f in range(GRID * GRID):
+        if f < swell:
+            t = f / (swell - 1)
+            radius = 0.12 + 0.26 * ease_out(t)
+            wobble = sum(0.03 * math.sin(k * 3 + 2 * math.pi * t * (k + 1)) * np.cos((k + 2) * a + phases[k]) for k in range(3))
+            rim_r = radius * (1 + wobble)
+            d = r - rim_r
+            inside = smoothstep(0.01, -0.01, d)
+            rim = np.exp(-((d / 0.018) ** 2))
+            # An oily film fills the bubble; a crescent highlight sits on its upper left.
+            hx = np.cos(a + 2.36)
+            gloss = np.exp(-(((r / rim_r) - 0.7) / 0.12) ** 2) * smoothstep(0.2, 0.8, hx)
+            alpha = np.clip(inside * (0.18 + 0.2 * film) + rim * 0.9 + gloss * 0.8, 0, 1)
+            intensity = np.clip(0.55 + 0.35 * rim + 0.45 * gloss + 0.1 * film, 0, 1)
+        else:
+            t = (f - swell + 1) / (GRID * GRID - swell)
+            radius = 0.38 + 0.08 * ease_out(t)
+            alpha = np.zeros((FRAME, FRAME), np.float32)
+            # The torn rim: a fading broken ring, and droplets thrown outward.
+            ring = np.exp(-(((r - radius) / (0.02 * (1 - t) + 0.004)) ** 2)) * (film > 0.35 + 0.4 * t)
+            alpha += ring * (1 - t)
+            for ang, dist, size in drops:
+                th = ang * 2 * math.pi
+                rr = radius + 0.09 * ease_out(t) * (0.5 + dist)
+                cx, cy = rr * math.cos(th), rr * math.sin(th)
+                x = r * np.cos(a) - cx
+                y = r * np.sin(a) - cy
+                drop = np.exp(-((np.hypot(x, y) / (0.016 + 0.018 * size) / (1 - 0.6 * t)) ** 2))
+                alpha += drop * (1 - t**2)
+            alpha = np.clip(alpha, 0, 1)
+            intensity = np.clip(0.6 + 0.4 * alpha, 0, 1)
+        frames.append(rgba(intensity, alpha))
+    return sheet(frames)
+
+
 def main():
     out = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[2] / "assets/original/vfx"
     out.mkdir(parents=True, exist_ok=True)
@@ -633,6 +676,7 @@ def main():
         "light_column.png": light_column(np.random.default_rng(SEED + 14)),
         "rune_circle.png": rune_circle(np.random.default_rng(SEED + 15)),
         "life_wisp_4x4.png": life_wisp(np.random.default_rng(SEED + 16)),
+        "toxic_bubble_4x4.png": toxic_bubble(np.random.default_rng(SEED + 17)),
     }
     for name, image in textures.items():
         image.save(out / name, optimize=True)

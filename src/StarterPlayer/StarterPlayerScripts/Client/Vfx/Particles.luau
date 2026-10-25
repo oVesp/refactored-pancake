@@ -33,26 +33,13 @@ export type EmitterSpec = {
 	zOffset: number?,
 }
 
-export type SweepSpec = {
+export type TrailSpec = {
 	color: ColorSequence,
 	lifetime: number,
+	width: number,
 	transparency: NumberSequence?,
 	texture: string?,
 	emission: number?,
-}
-
-export type TrailSpec = SweepSpec & { width: number }
-
-export type BeamSpec = {
-	texture: string,
-	color: ColorSequence,
-	width: number,
-	lifetime: number,
-	curve: number?,
-	speed: number?,
-	length: number?,
-	emission: number?,
-	segments: number?,
 }
 
 --[=[
@@ -167,13 +154,6 @@ function Particles.Attach(parent: Instance, specs: { EmitterSpec }): number
 	return longest
 end
 
---[=[ One-shot burst of particles at a CFrame; the anchor cleans itself up. ]=]
-function Particles.Burst(cframe: CFrame, specs: { EmitterSpec }, size: Vector3?): Part
-	local anchor = Particles.Anchor(cframe, size)
-	Debris:AddItem(anchor, Particles.Attach(anchor, specs) + 0.2)
-	return anchor
-end
-
 --[=[ Ribbon trail between two attachments on a part, spread along its up axis. ]=]
 function Particles.Trail(part: BasePart, spec: TrailSpec): Trail
 	local top = Instance.new("Attachment")
@@ -249,64 +229,6 @@ function Particles.Follow(anchor: BasePart, target: BasePart, offset: CFrame, du
 	anchor.CFrame = target.CFrame * offset
 end
 
---[=[
-	Textured ribbon between two points that thins and fades out over `spec.lifetime`. Endpoints are
-	attachments on invisible anchors; pass parts to keep an end on a moving target.
-]=]
-function Particles.Beam(from: Vector3 | BasePart, to: Vector3 | BasePart, spec: BeamSpec): Beam
-	local function endpoint(point: Vector3 | BasePart): (Attachment, BasePart?)
-		local attachment = Instance.new("Attachment")
-		if typeof(point) == "Vector3" then
-			local anchor = Particles.Anchor(CFrame.new(point))
-			attachment.Parent = anchor
-			return attachment, anchor
-		end
-		attachment.Parent = point
-		return attachment, nil
-	end
-	local a0, owner0 = endpoint(from)
-	local a1, owner1 = endpoint(to)
-	local beam = Instance.new("Beam")
-	beam.Attachment0 = a0
-	beam.Attachment1 = a1
-	beam.Texture = Particles.Texture(spec.texture)
-	beam.TextureMode = Enum.TextureMode.Stretch
-	beam.TextureLength = spec.length or 1
-	beam.TextureSpeed = spec.speed or 0
-	beam.Color = spec.color
-	beam.LightEmission = spec.emission or 1
-	beam.LightInfluence = 0
-	beam.FaceCamera = true
-	beam.Segments = spec.segments or 10
-	beam.CurveSize0 = spec.curve or 0
-	beam.CurveSize1 = -(spec.curve or 0)
-	beam.Width0 = spec.width
-	beam.Width1 = spec.width
-	beam.Parent = owner0 or owner1 or a0.Parent
-
-	local elapsed = 0
-	local connection: RBXScriptConnection
-	connection = RunService.RenderStepped:Connect(function(dt)
-		elapsed += dt
-		local alpha = math.min(elapsed / spec.lifetime, 1)
-		beam.Transparency = NumberSequence.new(alpha ^ 2)
-		beam.Width0 = spec.width * (1 - alpha * 0.7)
-		beam.Width1 = beam.Width0
-		if alpha >= 1 or not beam.Parent then
-			connection:Disconnect()
-			beam:Destroy()
-			a0:Destroy()
-			a1:Destroy()
-			for _, owner in { owner0, owner1 } do
-				if owner then
-					owner:Destroy()
-				end
-			end
-		end
-	end)
-	return beam
-end
-
 --[=[ Slides an anchor from `from` to `to` over `duration` seconds (ease out), then releases it. ]=]
 function Particles.Travel(anchor: BasePart, from: Vector3, to: Vector3, duration: number, linger: number)
 	local look = if (to - from).Magnitude > 1e-3 then CFrame.lookAt(from, to) else CFrame.new(from)
@@ -325,80 +247,6 @@ function Particles.Travel(anchor: BasePart, from: Vector3, to: Vector3, duration
 		end
 	end)
 	anchor.CFrame = look
-end
-
---[=[
-	Flat ring of light that spreads over the ground: a soft wave texture laid on the floor, not a
-	disc part.
-]=]
-function Particles.GroundWave(position: Vector3, color: ColorSequence, size: NumberSequence, lifetime: number)
-	Particles.Burst(CFrame.new(Particles.Ground(position) + Vector3.new(0, 0.2, 0)), {
-		{
-			texture = "RingWave",
-			color = color,
-			size = size,
-			transparency = Particles.Numbers(0.15, 0.5, 1),
-			lifetime = NumberRange.new(lifetime),
-			speed = NumberRange.new(0.01),
-			orientation = Enum.ParticleOrientation.VelocityPerpendicular,
-			rotation = NumberRange.new(0, 360),
-			count = 1,
-		},
-	})
-end
-
---[=[
-	Weapon sweep: a ribbon trail swung around `center` across `angle` degrees, from right to left
-	of `look`, between `inner` and `outer` radius.
-]=]
-function Particles.Sweep(
-	center: Vector3,
-	look: Vector3,
-	inner: number,
-	outer: number,
-	angle: number,
-	duration: number,
-	spec: SweepSpec
-)
-	local flat = Vector3.new(look.X, 0, look.Z)
-	if flat.Magnitude < 1e-3 then
-		return
-	end
-	local basis = CFrame.lookAt(center, center + flat) * CFrame.Angles(0, 0, math.rad(-12))
-	local half = math.rad(angle / 2)
-	local anchor = Particles.Anchor(basis * CFrame.Angles(0, -half, 0))
-	local near = Instance.new("Attachment")
-	near.Position = Vector3.new(0, 0, -inner)
-	near.Parent = anchor
-	local far = Instance.new("Attachment")
-	far.Position = Vector3.new(0, 0, -outer)
-	far.Parent = anchor
-	local trail = Instance.new("Trail")
-	trail.Attachment0 = near
-	trail.Attachment1 = far
-	trail.Color = spec.color
-	trail.Transparency = spec.transparency or Particles.Numbers(0, 1)
-	trail.Lifetime = spec.lifetime
-	trail.LightEmission = spec.emission or 1
-	trail.MinLength = 0
-	if spec.texture then
-		trail.Texture = Particles.Texture(spec.texture)
-		trail.TextureMode = Enum.TextureMode.Stretch
-	end
-	trail.Parent = anchor
-
-	local elapsed = 0
-	local connection: RBXScriptConnection
-	connection = RunService.RenderStepped:Connect(function(dt)
-		elapsed += dt
-		local alpha = math.min(elapsed / duration, 1)
-		local eased = 1 - (1 - alpha) ^ 3
-		anchor.CFrame = basis * CFrame.Angles(0, -half + 2 * half * eased, 0)
-		if alpha >= 1 or not anchor.Parent then
-			connection:Disconnect()
-			Particles.Release(anchor, spec.lifetime + 0.1)
-		end
-	end)
 end
 
 return Particles

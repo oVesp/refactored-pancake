@@ -1779,6 +1779,342 @@ rage_tint = {
     "attributes": {"Lifetime": 0.3},
 }
 
+# Monster attacks: lighter variants of the class effects, with no ink layers and no screen effects.
+TOXIC_HOT = (220, 255, 170)
+TOXIC = (120, 210, 60)
+TOXIC_D = (45, 90, 25)
+HEX_HOT = (230, 190, 255)
+HEX = (150, 80, 220)
+HEX_D = (60, 25, 90)
+ARROW = (110, 85, 60)
+
+
+def quake(size):
+    """A telegraphed stomp: the ground cracks, a torn dust ring rolls out and rubble flies."""
+    return anchor(
+        [
+            surface(
+                "Crack",
+                [label("Shadow", "GroundCrack", EARTH, 0.2, 1, 0.7)],
+                {"FlipbookGrid": 1, "Lifetime": 1.4, "Fade": 0.5, "Grow": 1.05},
+            ),
+            surface("Ring", [label("Ring", "ShockRing", (225, 210, 185), attrs=fade_to(DUST))], {**SHEET, "Lifetime": 0.5, "Grow": 1.1}, 1),
+            surface(
+                "Echo",
+                [label("Ring", "ShockRing", DUST, 0.3, 1, 0.75, attrs=fade_to(EARTH))],
+                {**SHEET, "Lifetime": 0.55, "Grow": 1.1, "Delay": 0.1},
+                2,
+            ),
+            attachment(
+                "Burst",
+                [
+                    emitter(
+                        "Rubble",
+                        "Rubble",
+                        {"EmitCount": 16},
+                        Size=ns(1.6, 1.1),
+                        Lifetime=nr(0.7, 1),
+                        Speed=nr(14, 24),
+                        SpreadAngle=[50, 50],
+                        Acceleration=[0, -55, 0],
+                        RotSpeed=nr(-200, 200),
+                        Color=cs(DUST),
+                        LightEmission=0,
+                        LightInfluence=1,
+                    ),
+                    dust(10, (4, 9), (size * 0.4, size * 0.6), DUST, 0.35),
+                    light((255, 200, 140), 3, size, 0.4),
+                ],
+                (0, 1, 0),
+            ),
+        ],
+        size=(size, 0.05, size),
+    )
+
+
+brute_slam = quake(24)
+chief_stomp = quake(30)
+
+# An arrow dropping onto the volley area: a dark shaft and a pale streak behind it.
+arrow_fall = anchor(
+    [
+        emitter(
+            "Shaft",
+            "Streak",
+            Size=ns(3),
+            Lifetime=nr(0.3),
+            Speed=nr(100),
+            Orientation="VelocityParallel",
+            Rotation=nr(90),
+            EmissionDirection="Bottom",
+            Color=cs(ARROW, (70, 55, 40)),
+            LightEmission=0,
+            LightInfluence=1,
+        ),
+        emitter(
+            "Streak",
+            "Streak",
+            Size=ns(6),
+            Lifetime=nr(0.3),
+            Speed=nr(96),
+            Orientation="VelocityParallel",
+            Rotation=nr(90),
+            EmissionDirection="Bottom",
+            Transparency=ns(0.55, 1),
+            Color=cs((255, 250, 235)),
+            LightEmission=0.5,
+        ),
+    ]
+)
+
+# Arrow landing: a small puff and a few chips of earth.
+arrow_land = anchor(
+    [
+        dust(3, (0.8, 2.2), (3, 5), DUST, 0.4),
+        emitter(
+            "Chips",
+            "Rubble",
+            {"EmitCount": 3},
+            Size=ns(0.5, 0.3),
+            Lifetime=nr(0.4, 0.6),
+            Speed=nr(6, 10),
+            SpreadAngle=[40, 40],
+            Acceleration=[0, -50, 0],
+            RotSpeed=nr(-300, 300),
+            Color=cs(DUST),
+            LightEmission=0,
+            LightInfluence=1,
+        ),
+    ]
+)
+
+# Poison Snare stain: a sickly blot soaking into the ground under the pool.
+poison_stain = anchor(
+    [
+        surface(
+            "Stain",
+            [
+                label("Soak", "FrostFloor", TOXIC_D, 0.05),
+                label("Sheen", "FrostFloor", TOXIC, 0.3, 2, 0.8, 0, fade_to(TOXIC_D)),
+            ],
+            {"FlipbookGrid": 1, "Lifetime": 2.6, "Fade": 0.35, "Grow": 1.08},
+        )
+    ],
+    size=(16, 0.05, 16),
+)
+
+# Poison Snare pool (Effects.Attach on a flat anchor): bubbles swell and pop over the whole area
+# under a drifting green haze.
+poison_pool = anchor(
+    [
+        stream(
+            "Bubbles",
+            "ToxicBubble",
+            30,
+            Speed=nr(0.3, 1),
+            Lifetime=nr(0.7, 1.1),
+            Size=ns(1.2, 2.4),
+            Color=cs(TOXIC_HOT, TOXIC),
+            LightEmission=0.25,
+            Rotation=nr(0),
+            **FLIP,
+        ),
+        stream(
+            "Fumes",
+            "Smoke",
+            18,
+            Speed=nr(0.5, 1.5),
+            Acceleration=[0, 1, 0],
+            Lifetime=nr(1, 1.6),
+            Size=ns(4, 8),
+            Transparency=ns(1, 0.15, 1),
+            Color=cs(TOXIC, TOXIC_D),
+            LightEmission=0,
+            RotSpeed=nr(-30, 30),
+        ),
+        stream(
+            "Motes",
+            "Glint",
+            12,
+            Speed=nr(1.5, 3),
+            Acceleration=[0, 1, 0],
+            Lifetime=nr(0.6, 1),
+            Size=ns(0.5, 0),
+            Color=cs(TOXIC_HOT, TOXIC),
+        ),
+        glow(TOXIC, 1.2, 14),
+    ],
+    size=(10, 0.3, 10),
+)
+
+venom_charge = anchor(
+    [
+        inward("Gather", "Wisp", 30, (1, 0.4), (TOXIC_HOT, TOXIC), LightEmission=0.4),
+        inward("Bubbles", "ToxicBubble", 10, (0.7, 0.4), (TOXIC_HOT, TOXIC), LightEmission=0.3, **FLIP),
+        glow(TOXIC, 1.2, 8),
+    ],
+    size=(3, 3, 3),
+    attrs=HAND,
+)
+
+hex_charge = anchor(
+    [
+        inward("Gather", "Wisp", 30, (1, 0.4), (HEX_HOT, HEX), LightEmission=0.4),
+        swirl("Swirl", (2, 0.8), (HEX_HOT, HEX), (-400, -300), LightEmission=0.6, Brightness=1.5),
+        glow(HEX, 1.2, 8),
+    ],
+    size=(3, 3, 3),
+    attrs=HAND,
+)
+
+
+def hex_body(colors, haze, extra):
+    """A hex bolt in flight: a writhing wisp core in a tinted haze, with a thin trail."""
+    hot, mid = colors
+    return anchor(
+        [
+            stream(
+                "Core",
+                "Wisp",
+                40,
+                LockedToPart=True,
+                Size=ns(2.4),
+                Lifetime=nr(0.15),
+                Transparency=ns(0, 1),
+                Color=cs(hot, mid),
+                LightEmission=0.5,
+                RotSpeed=nr(-300, 300),
+                ZOffset=1,
+            ),
+            stream(
+                "Haze",
+                "Smoke",
+                20,
+                Lifetime=nr(0.5, 0.8),
+                Size=ns(1, 2.5),
+                Transparency=ns(0.5, 1),
+                Color=cs(haze),
+                LightEmission=0,
+                RotSpeed=nr(-40, 40),
+            ),
+            extra,
+            *trail((hot, mid), 0.3, 0.6),
+            glow(mid, 1.5, 10),
+        ]
+    )
+
+
+venom_body = hex_body(
+    (TOXIC_HOT, TOXIC),
+    TOXIC_D,
+    stream(
+        "Bubbles",
+        "ToxicBubble",
+        14,
+        Speed=nr(1, 2),
+        SpreadAngle=[180, 180],
+        Lifetime=nr(0.4, 0.6),
+        Size=ns(0.5, 0.9),
+        Color=cs(TOXIC_HOT, TOXIC),
+        LightEmission=0.3,
+        Rotation=nr(0),
+        **FLIP,
+    ),
+)
+
+hex_curse_body = hex_body(
+    (HEX_HOT, HEX),
+    HEX_D,
+    stream(
+        "Swirl",
+        "ArcaneSwirl",
+        8,
+        LockedToPart=True,
+        Lifetime=nr(0.3),
+        Size=ns(2.6),
+        Transparency=ns(0.2, 1),
+        Color=cs(HEX_HOT, HEX),
+        LightEmission=0.6,
+        RotSpeed=nr(-400, -300),
+        **FLIP,
+    ),
+)
+
+
+def hex_burst(colors, haze, extra):
+    """A hex bolt hit: a swirl unwinds outward, wisps scatter and a tinted haze lingers."""
+    hot, mid = colors
+    return anchor(
+        [
+            swirl("Swirl", (1, 6), (hot, mid), (300, 400), LightEmission=0.6, Brightness=1.5, ZOffset=1),
+            emitter(
+                "Wisps",
+                "Wisp",
+                {"EmitCount": 8},
+                Size=ns(1.5, 4),
+                Lifetime=nr(0.4, 0.6),
+                Speed=nr(4, 8),
+                SpreadAngle=[180, 180],
+                Drag=4,
+                Transparency=ns(0.1, 1),
+                Color=cs(hot, mid),
+                LightEmission=0.4,
+                RotSpeed=nr(-200, 200),
+            ),
+            emitter(
+                "Haze",
+                "Smoke",
+                {"EmitCount": 6},
+                Size=ns(2, 4),
+                Lifetime=nr(0.8, 1.2),
+                Speed=nr(2, 4),
+                SpreadAngle=[180, 180],
+                Transparency=ns(0.5, 1),
+                Color=cs(haze),
+                LightEmission=0,
+            ),
+            extra,
+            light(mid, 3, 12, 0.3),
+        ]
+    )
+
+
+venom_burst = hex_burst(
+    (TOXIC_HOT, TOXIC),
+    TOXIC_D,
+    emitter(
+        "Bubbles",
+        "ToxicBubble",
+        {"EmitCount": 6},
+        Size=ns(0.8, 1.6),
+        Lifetime=nr(0.5, 0.7),
+        Speed=nr(3, 6),
+        SpreadAngle=[180, 180],
+        Drag=4,
+        Color=cs(TOXIC_HOT, TOXIC),
+        LightEmission=0.3,
+        Rotation=nr(0),
+        **FLIP,
+    ),
+)
+
+hex_curse_burst = hex_burst(
+    (HEX_HOT, HEX),
+    HEX_D,
+    emitter(
+        "Glints",
+        "Glint",
+        {"EmitCount": 12},
+        Size=ns(0.7, 0),
+        Lifetime=nr(0.4, 0.7),
+        Speed=nr(6, 12),
+        SpreadAngle=[180, 180],
+        Drag=4,
+        Color=cs(HEX_HOT, HEX),
+        LightEmission=1,
+    ),
+)
+
 TEMPLATES = {
     "StrikeSwipe": strike_swipe,
     "HitImpact": hit_impact,
@@ -1835,6 +2171,18 @@ TEMPLATES = {
     "LayOnHandsColumn": lay_on_hands_column,
     "LayOnHandsImpact": lay_on_hands_impact,
     "HolyFlash": holy_flash,
+    "BruteSlam": brute_slam,
+    "ChiefStomp": chief_stomp,
+    "ArrowFall": arrow_fall,
+    "ArrowLand": arrow_land,
+    "PoisonStain": poison_stain,
+    "PoisonPool": poison_pool,
+    "VenomCharge": venom_charge,
+    "HexCharge": hex_charge,
+    "VenomBody": venom_body,
+    "HexBody": hex_curse_body,
+    "VenomBurst": venom_burst,
+    "HexBurst": hex_curse_burst,
 }
 
 

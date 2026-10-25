@@ -47,3 +47,12 @@ Target look: the owner's reference video (2026-10-25), anime-style hits with 4 t
 - Renew: `RenewSeal`, a turning rune seal; `RenewAura`, attached for 3 s (`Effects.Attach`).
 - Shelter: `ShelterLink` (`Effects.Link`); `ShelterBubble`; `ShelterBurst`.
 - Lay On Hands: `LayOnHandsColumn`, a light column; `LayOnHandsImpact`; `HolyFlash`, a screen tint played with `SpeedLines` for the caster.
+
+Monster attacks use lighter templates with no ink layer and no screen effects:
+
+- Wolf Charge: `ChargeHit`.
+- Brute Slam and Chief Stomp: `BruteSlam` and `ChiefStomp`, a telegraphed stomp where the ground cracks, a torn dust ring rolls out and rubble flies, sized to their radius (11 and 14).
+- Archer Volley: `ArrowFall`, an arrow dropping onto the area as a dark shaft with a pale streak behind it; `ArrowLand`, a small puff and a few chips of earth.
+- Poison Snare: `PoisonStain`, a sickly blot soaking into the ground; `PoisonPool`, bubbles (`ToxicBubble`) swelling and popping over the area under a drifting green haze, attached to a flat anchor (`Effects.Attach`).
+- Hex Bolt and Hex Curse: `VenomCharge` and `HexCharge`, the casts (`Effects.Charge`); `VenomBody` and `HexBody`, a writhing wisp core in a tinted haze with a thin trail (`Effects.Attach`); `VenomBurst` and `HexBurst`, a swirl unwinding outward as wisps scatter and a tinted haze lingers.
+- Shaman Heal: the Mend templates.
