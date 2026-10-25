@@ -17,7 +17,7 @@ The inverse-sphere fog trick hides the world edge with geometry. Here three engi
 
 1. **Instance streaming** (`default.project.json`): target radius 1,024 and minimum 64 (the defaults Roblox recommends), `Opportunistic` stream-out so clients drop far regions without waiting for memory pressure, `Improved` model streaming, and `PauseOutsideLoadedArea` integrity.
 2. **Haze as the far plane** (owner choice: medium fog): atmosphere density hides detail by about 1,000 studs, right where streamed content ends. Mountains still show as silhouettes through the haze.
-3. **SLIM imposters for trees**: `Apply.luau` sets `LevelOfDetail = SLIM` on tree models, so forests beyond the streaming radius render as light composite meshes instead of disappearing. Rocks, understory, cover and pebbles are `Disabled` and stream out under the haze. Run `require(game.ServerStorage.WorldGen.Apply).ApplyStreaming()` in edit mode to update props that are already placed, then save.
+3. **SLIM imposters for trees**: `Apply.luau` sets `LevelOfDetail = SLIM` on tree models, so forests beyond the streaming radius render as light composite meshes instead of disappearing. Rocks, understory, cover and pebbles are `Disabled` and stream out under the haze. Run `require(game.ServerStorage.WorldGen.Apply).ApplyStreaming()` in edit mode to update props that are already placed, then save. The command bar caches `require` for the whole Studio session, so after Rojo syncs a new `Apply` use `require(game.ServerStorage.WorldGen.Apply:Clone())` or restart Studio. Roblox generates the SLIM meshes on its servers after the place is saved or published; until then, play sessions log `RuntimePropertySet ... being generated`.
 
 ## Not yet verified in Studio
 
