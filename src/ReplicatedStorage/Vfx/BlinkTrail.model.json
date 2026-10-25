@@ -1,0 +1,137 @@
+{
+	"className": "Part",
+	"properties": {
+		"Anchored": true,
+		"CanCollide": false,
+		"CanQuery": false,
+		"CanTouch": false,
+		"CastShadow": false,
+		"Transparency": 1,
+		"Size": [
+			1,
+			1,
+			1
+		]
+	},
+	"children": [
+		{
+			"name": "Streak",
+			"className": "Beam",
+			"properties": {
+				"Width0": 3.5,
+				"Width1": 3.5,
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									0.9608,
+									0.902,
+									1.0
+								]
+							},
+							{
+								"time": 0.5,
+								"color": [
+									0.7255,
+									0.5098,
+									1.0
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.3725,
+									0.2157,
+									0.8235
+								]
+							}
+						]
+					}
+				},
+				"Transparency": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 0.15,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 0.5,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"LightEmission": 1,
+				"LightInfluence": 0,
+				"FaceCamera": true,
+				"Segments": 1,
+				"TextureMode": "Stretch",
+				"Brightness": 2
+			},
+			"attributes": {
+				"TextureKey": "TrailStreak"
+			}
+		},
+		{
+			"name": "Bolt",
+			"className": "Beam",
+			"properties": {
+				"Width0": 2.5,
+				"Width1": 2.5,
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									0.9608,
+									0.902,
+									1.0
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.7255,
+									0.5098,
+									1.0
+								]
+							}
+						]
+					}
+				},
+				"Transparency": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 0,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 0.2,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"LightEmission": 1,
+				"LightInfluence": 0,
+				"FaceCamera": true,
+				"Segments": 12,
+				"TextureMode": "Stretch",
+				"Brightness": 3
+			},
+			"attributes": {
+				"TextureKey": "LightningBolt",
+				"Jitter": 1
+			}
+		}
+	]
+}

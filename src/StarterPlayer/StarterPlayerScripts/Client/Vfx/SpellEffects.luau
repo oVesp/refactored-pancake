@@ -76,17 +76,13 @@ local function inward(texture: string, color: ColorSequence, size: NumberSequenc
 	}
 end
 
-local STORM = C(rgb(255, 255, 235), rgb(255, 235, 110), rgb(180, 150, 255))
 local HOLY = C(rgb(255, 255, 240), rgb(255, 225, 140), rgb(255, 170, 70))
 local LIFE = C(rgb(235, 255, 220), rgb(140, 255, 150), rgb(255, 245, 170))
 local RAGE = C(rgb(255, 220, 160), rgb(255, 100, 40), rgb(150, 20, 10))
 local DUST = C(rgb(170, 150, 125), rgb(120, 105, 90))
 -- Darker, normal-blended tints for shapes that must read on bright daylight ground.
-local BOLT = C(rgb(255, 250, 210), rgb(255, 205, 60), rgb(200, 150, 255))
-local ARCANE = C(rgb(245, 230, 255), rgb(185, 130, 255), rgb(95, 55, 210))
 local WARD = C(rgb(240, 250, 255), rgb(150, 200, 255), rgb(90, 130, 255))
 local GROWTH = C(rgb(200, 255, 160), rgb(80, 210, 90), rgb(30, 130, 60))
-local SHIELD = C(rgb(190, 225, 255), rgb(80, 140, 255), rgb(60, 70, 200))
 local VENOM = C(rgb(220, 255, 170), rgb(120, 210, 60), rgb(40, 90, 30))
 local TOXIC = C(rgb(170, 235, 90), rgb(90, 160, 40), rgb(45, 90, 25))
 local HEX = C(rgb(230, 190, 255), rgb(130, 60, 190), rgb(40, 15, 60))
@@ -133,60 +129,10 @@ SpellEffects.frost_shard = {
 
 SpellEffects.spark = {
 	projectile = function(body)
-		Particles.Attach(body, {
-			{
-				texture = "Crackle",
-				color = STORM,
-				size = N(2),
-				lifetime = R(0.06, 0.12),
-				rate = 40,
-				locked = true,
-			},
-			{
-				texture = "Glint",
-				color = STORM,
-				size = N(1.3),
-				lifetime = R(0.08),
-				rate = 30,
-				locked = true,
-			},
-		})
-		Particles.Trail(body, { color = STORM, width = 0.3, lifetime = 0.12, texture = "TrailStreak" })
-		Particles.Light(body, rgb(255, 240, 140), 10, 2)
+		Effects.Attach("SparkBody", body)
 	end,
 	impact = function(position)
-		Particles.Burst(CFrame.new(position), {
-			{
-				texture = "Crackle",
-				color = STORM,
-				size = N(3.5),
-				transparency = N(0, 0.3, 1),
-				lifetime = R(0.1, 0.2),
-				count = 6,
-				locked = true,
-			},
-			{
-				texture = "Glint",
-				color = STORM,
-				size = N(2, 0),
-				lifetime = R(0.15, 0.25),
-				count = 3,
-			},
-			{
-				texture = "Streak",
-				color = STORM,
-				size = N(0.4, 0),
-				lifetime = R(0.2, 0.35),
-				speed = R(18, 30),
-				spread = Vector2.new(180, 180),
-				drag = 4,
-				acceleration = Vector3.new(0, -25, 0),
-				orientation = Enum.ParticleOrientation.VelocityParallel,
-				rotation = R(90),
-				count = 10,
-			},
-		})
-		Particles.Flash(position, rgb(255, 240, 140), 14, 0.15)
+		Effects.Play("SparkBurst", CFrame.new(position))
 	end,
 }
 
@@ -530,60 +476,30 @@ end
 SpellEffects.charge = { resolve = chargeResolve(C(rgb(235, 240, 255), rgb(130, 150, 190)), "ChargeBurst", true) }
 SpellEffects.wolf_charge = { resolve = chargeResolve(DUST, "ChargeHit", false) }
 
--- Blink: the mage folds into a swirl of arcane light and unfolds at the destination.
-local function blinkPuff(position: Vector3, closing: boolean)
-	Particles.Burst(CFrame.new(position), {
-		{
-			texture = "Twirl",
-			color = ARCANE,
-			size = if closing then N(5, 0.5) else N(0.5, 5),
-			transparency = N(0.1, 1),
-			lifetime = R(0.35),
-			rotSpeed = R(400, 500),
-			count = 2,
-		},
-		{
-			texture = "Glint",
-			color = ARCANE,
-			size = N(0.8, 0),
-			lifetime = R(0.4, 0.7),
-			speed = R(6, 12),
-			spread = Vector2.new(180, 180),
-			drag = 4,
-			count = 14,
-		},
-		{
-			texture = "Smoke",
-			color = C(rgb(150, 110, 220), rgb(60, 40, 110)),
-			size = N(2, 4),
-			transparency = N(0.5, 1),
-			lifetime = R(0.6, 0.9),
-			speed = R(1, 3),
-			spread = Vector2.new(180, 180),
-			emission = 0.3,
-			count = 5,
-		},
-	})
-	Particles.Flash(position, rgb(185, 130, 255), 14, 0.3)
+-- Plays a flat ground template on the ground under a point.
+local function onGround(name: string, position: Vector3)
+	-- Lifted clear of tall grass, like the other ground layers.
+	Effects.Play(name, CFrame.new(Particles.Ground(position) + Vector3.new(0, 0.6, 0)))
 end
 
+-- Teleport: a vortex swallows the mage, a streak and a thin bolt mark the jump, a vortex unwinds
+-- at the arrival with a ring across the ground and a violet flash for the caster.
 SpellEffects.blink = {
 	resolve = function(info)
 		local root = rootOf(info.caster)
 		if not root then
 			return
 		end
-		blinkPuff(info.origin + Vector3.new(0, 0.5, 0), true)
+		local from = info.origin + Vector3.new(0, 0.5, 0)
+		Effects.Play("BlinkOut", CFrame.new(from))
 		if (root.Position - info.origin).Magnitude > 2 then
-			Particles.Beam(info.origin + Vector3.new(0, 0.5, 0), root.Position, {
-				texture = "SoftGlow",
-				color = ARCANE,
-				width = 2.5,
-				lifetime = 0.3,
-			})
+			Effects.Link("BlinkTrail", from, root.Position, 0.3)
 		end
-		blinkPuff(root.Position, false)
-		Particles.GroundWave(root.Position, ARCANE, N(1, 9), 0.4)
+		Effects.Play("BlinkIn", CFrame.new(root.Position))
+		onGround("ArcaneRing", root.Position)
+		if isLocal(info.caster) then
+			Effects.Screen("BlinkFlash")
+		end
 	end,
 }
 
@@ -643,7 +559,7 @@ SpellEffects.lay_on_hands = {
 	end,
 }
 
--- Aura: a shell of arcane swirls that clings to the mage for a moment.
+-- Ward: a shimmering hex bubble with crawling swirls clings to the mage; a ring runs across the ground.
 SpellEffects.arcane_shield = {
 	resolve = function(info)
 		local root = rootOf(info.caster)
@@ -651,52 +567,10 @@ SpellEffects.arcane_shield = {
 			return
 		end
 		local aura = Particles.Anchor(root.CFrame)
-		Particles.Attach(aura, {
-			{
-				texture = "Twirl",
-				color = SHIELD,
-				size = N(6, 7),
-				transparency = N(1, 0, 1),
-				lifetime = R(0.5, 0.7),
-				rotSpeed = R(-260, 260),
-				emission = 0.2,
-				zOffset = 2,
-				locked = true,
-				rate = 16,
-			},
-			{
-				texture = "SoftGlow",
-				color = WARD,
-				size = N(6),
-				transparency = N(1, 0.75, 1),
-				lifetime = R(0.6),
-				zOffset = 2,
-				locked = true,
-				rate = 3,
-			},
-			{
-				texture = "Glint",
-				color = WARD,
-				size = N(0.7, 0),
-				lifetime = R(0.5, 0.8),
-				speed = R(2, 4),
-				spread = Vector2.new(180, 180),
-				rotSpeed = R(-90, 90),
-				rate = 25,
-			},
-		})
-		Particles.Light(aura, rgb(150, 200, 255), 10, 1.5)
+		Effects.Attach("ArcaneShieldBubble", aura)
 		Particles.Follow(aura, root, CFrame.identity, 2.2, 0.8)
-		Particles.GroundWave(root.Position, WARD, N(1, 10), 0.45)
-		Particles.Burst(root.CFrame, {
-			{
-				texture = "StarBurst",
-				color = WARD,
-				size = N(7, 2),
-				lifetime = R(0.25),
-				count = 1,
-			},
-		})
+		Effects.Play("ArcaneShieldBurst", root.CFrame)
+		onGround("WardRing", root.Position)
 	end,
 }
 
@@ -794,7 +668,8 @@ SpellEffects.shelter = {
 	end,
 }
 
--- Chains: lightning forks from the mage into the ground around them.
+-- Chains: lightning forks from the mage into the ground around them while arcs crawl over the body;
+-- the caster's screen washes yellow with speed lines.
 SpellEffects.overcharge = {
 	resolve = function(info)
 		local root = rootOf(info.caster)
@@ -804,53 +679,17 @@ SpellEffects.overcharge = {
 		for i = 1, 4 do
 			task.delay((i - 1) * 0.07, function()
 				local strike = Particles.Ground(scatter(root.Position, 5))
-				Particles.Beam(root.Position + Vector3.new(0, 1, 0), strike, {
-					texture = "Arc",
-					color = BOLT,
-					width = 3.5,
-					lifetime = 0.2,
-					emission = 0.4,
-				})
-				Particles.Burst(CFrame.new(strike + Vector3.new(0, 0.3, 0)), {
-					{
-						texture = "Crackle",
-						color = STORM,
-						size = N(2.5),
-						transparency = N(0, 1),
-						lifetime = R(0.15),
-						count = 2,
-					},
-					{
-						texture = "Streak",
-						color = STORM,
-						size = N(0.3, 0),
-						lifetime = R(0.2, 0.3),
-						speed = R(12, 20),
-						spread = Vector2.new(70, 70),
-						acceleration = Vector3.new(0, -30, 0),
-						orientation = Enum.ParticleOrientation.VelocityParallel,
-						rotation = R(90),
-						count = 5,
-					},
-				})
+				Effects.Link("OverchargeBolt", root.Position + Vector3.new(0, 1, 0), strike, 0.2)
+				onGround("OverchargeStrike", strike)
 			end)
 		end
 		local aura = Particles.Anchor(root.CFrame, Vector3.new(2, 4, 2))
-		Particles.Attach(aura, {
-			{
-				texture = "Arc",
-				color = BOLT,
-				size = N(4),
-				transparency = N(0, 1),
-				lifetime = R(0.08, 0.14),
-				emission = 0.4,
-				rotation = R(-25, 25),
-				locked = true,
-				rate = 14,
-			},
-		})
-		Particles.Light(aura, rgb(255, 240, 140), 12, 2)
+		Effects.Attach("OverchargeAura", aura)
 		Particles.Follow(aura, root, CFrame.identity, 1.2, 0.3)
+		if isLocal(info.caster) then
+			Effects.Screen("StormTint")
+			Effects.Screen("SpeedLines")
+		end
 	end,
 }
 

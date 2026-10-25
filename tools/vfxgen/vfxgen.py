@@ -370,6 +370,118 @@ def frost_floor(rng, size=512):
     return rgba(np.clip(0.65 + 0.35 * vein + 0.15 * feather, 0, 1), alpha)
 
 
+def bolt_path(rng, start, end, roughness, steps, decay=0.55):
+    """Jagged polyline between two points: midpoint displacement, sideways only."""
+    points = [np.array(start, np.float64), np.array(end, np.float64)]
+    spread = roughness
+    for _ in range(steps):
+        refined = [points[0]]
+        for a, b in zip(points, points[1:]):
+            mid = (a + b) / 2
+            direction = b - a
+            normal = np.array([-direction[1], direction[0]]) / (np.linalg.norm(direction) + 1e-9)
+            refined += [mid + normal * rng.normal(0, spread) * np.linalg.norm(direction), b]
+        points = refined
+        spread *= decay
+    return [tuple(p) for p in points]
+
+
+def glow_lines(lines, crisp_gain=1.0, blur=6, glow_gain=1.6):
+    glow = lines.filter(ImageFilter.GaussianBlur(blur))
+    crisp = np.asarray(lines.resize((lines.width // 2, lines.height // 2), Image.LANCZOS), np.float32) / 255
+    soft = np.asarray(glow.resize((lines.width // 2, lines.height // 2), Image.LANCZOS), np.float32) / 255
+    return rgba(np.clip(0.5 + crisp * crisp_gain, 0, 1), np.clip(crisp + soft * glow_gain, 0, 1))
+
+
+def lightning_fork(rng):
+    """Branching lightning bursting out from the centre, a new fork every frame (Random flipbook mode)."""
+    frames = []
+    big = FRAME * 2
+    for _ in range(GRID * GRID):
+        lines = Image.new("L", (big, big), 0)
+        draw = ImageDraw.Draw(lines)
+        for _ in range(int(rng.integers(2, 4))):
+            angle = rng.uniform(0, 2 * math.pi)
+            length = rng.uniform(0.32, 0.46) * big
+            end = (big / 2 + math.cos(angle) * length, big / 2 + math.sin(angle) * length)
+            trunk = bolt_path(rng, (big / 2, big / 2), end, 0.1, 6, 0.6)
+            draw.line(trunk, fill=255, width=7, joint="curve")
+            for _ in range(int(rng.integers(1, 4))):
+                at = trunk[int(rng.integers(len(trunk) // 5, len(trunk) - 4))]
+                turn = angle + rng.choice([-1, 1]) * rng.uniform(0.4, 0.9)
+                reach = length * rng.uniform(0.2, 0.4)
+                tip = (at[0] + math.cos(turn) * reach, at[1] + math.sin(turn) * reach)
+                draw.line(bolt_path(rng, at, tip, 0.12, 4, 0.6), fill=210, width=4, joint="curve")
+        frames.append(glow_lines(lines, blur=8, glow_gain=2.2))
+    return sheet(frames)
+
+
+def lightning_bolt(rng, width=1024, height=128):
+    """A long jagged bolt running left to right with a few short side branches, for beams."""
+    big_w, big_h = width * 2, height * 2
+    lines = Image.new("L", (big_w, big_h), 0)
+    draw = ImageDraw.Draw(lines)
+    # Built on a square-ish scale, then squeezed: keeps many small kinks without leaving the strip.
+    trunk = bolt_path(rng, (0, 0), (big_w, 0), 0.02, 9, 1.0)
+    reach = max(abs(y) for _, y in trunk) or 1
+    trunk = [(x, big_h / 2 + y / reach * big_h * 0.3) for x, y in trunk]
+    draw.line(trunk, fill=255, width=6, joint="curve")
+    for _ in range(8):
+        at = trunk[int(rng.integers(16, len(trunk) - 16))]
+        turn = rng.choice([-1, 1]) * rng.uniform(0.3, 0.7)
+        length = big_w * rng.uniform(0.03, 0.07)
+        end = (at[0] + math.cos(turn) * length, min(max(at[1] + math.sin(turn) * length, 6), big_h - 6))
+        draw.line(bolt_path(rng, at, end, 0.15, 4), fill=190, width=3, joint="curve")
+    return glow_lines(lines, blur=5, glow_gain=1.6)
+
+
+def arcane_swirl(rng):
+    """Ragged wisps of energy winding inward, brightening, then unravelling into motes."""
+    r, theta = polar(FRAME)
+    wisp = fbm(FRAME, rng, octaves=4, base=6)
+    streak = fbm(FRAME, np.random.default_rng(rng.integers(1 << 30)), octaves=3, base=12)
+    frames = []
+    for f in range(GRID * GRID):
+        t = f / (GRID * GRID - 1)
+        twist = 18 + 6 * t
+        phase = theta * 5 + r * twist - t * 4 + (wisp - 0.5) * 4
+        arms = (0.5 + 0.5 * np.cos(phase)) ** 6 * (0.35 + 0.65 * streak)
+        band = smoothstep(0.48, 0.25, r + 0.06 * (wisp - 0.5)) * smoothstep(0.02, 0.1 + 0.12 * t, r)
+        breakup = smoothstep(t * 0.9 - 0.15, t * 0.9 + 0.15, wisp + 0.35 * (1 - r / 0.5))
+        alpha = np.clip(arms * band * breakup * 1.6, 0, 1)
+        core = np.exp(-((r / 0.07) ** 2)) * (1 - t) * 0.7
+        frames.append(rgba(np.clip(0.5 + 0.5 * arms, 0, 1), np.clip(alpha + core, 0, 1)))
+    return sheet(frames)
+
+
+def ward_hex(rng, size=512):
+    """Shield bubble seen face on: a bright rim and a honeycomb that fades toward the middle."""
+    ys, xs = np.mgrid[0:size, 0:size].astype(np.float32)
+    x = (xs + 0.5) / size - 0.5
+    y = (ys + 0.5) / size - 0.5
+    r = np.hypot(x, y)
+    # Bulge the grid toward the rim like a sphere seen face on.
+    bulge = 1 / np.sqrt(np.clip(1 - (r / 0.47) ** 2, 0.08, 1))
+    u, v = x * bulge / 0.06, y * bulge / 0.06
+    q = (2 / 3) * u
+    rr = (-1 / 3) * u + (math.sqrt(3) / 3) * v
+    cube = np.stack([q, rr, -q - rr])
+    rounded = np.round(cube)
+    diff = np.abs(rounded - cube)
+    fix = np.argmax(diff, axis=0)
+    for axis in range(3):
+        others = [a for a in range(3) if a != axis]
+        rounded[axis] = np.where(fix == axis, -rounded[others[0]] - rounded[others[1]], rounded[axis])
+    edge = np.max(np.abs(cube - rounded), axis=0)
+    cells = smoothstep(0.38, 0.5, edge)
+    flicker = smoothstep(0.35, 0.75, fbm(size, rng, octaves=3, base=8))
+    rim = np.exp(-(((r - 0.45) / 0.02) ** 2)) * (0.75 + 0.25 * flicker)
+    inside = smoothstep(0.48, 0.45, r)
+    shell = smoothstep(0.1, 0.45, r) ** 1.5 * smoothstep(0.455, 0.4, r)
+    alpha = np.clip(0.55 * cells * shell * inside * flicker + rim + 0.12 * inside * shell, 0, 1)
+    return rgba(np.clip(0.6 + 0.4 * (rim + cells * 0.5), 0, 1), alpha)
+
+
 def main():
     out = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[2] / "assets/original/vfx"
     out.mkdir(parents=True, exist_ok=True)
@@ -392,6 +504,10 @@ def main():
         "fire_core.png": fire_core(np.random.default_rng(SEED + 6)),
         "ice_shard.png": ice_shard(np.random.default_rng(SEED + 7)),
         "frost_floor.png": frost_floor(np.random.default_rng(SEED + 8)),
+        "lightning_fork_4x4.png": lightning_fork(np.random.default_rng(SEED + 9)),
+        "lightning_bolt.png": lightning_bolt(np.random.default_rng(SEED + 10)),
+        "arcane_swirl_4x4.png": arcane_swirl(np.random.default_rng(SEED + 11)),
+        "ward_hex.png": ward_hex(np.random.default_rng(SEED + 12)),
     }
     for name, image in textures.items():
         image.save(out / name, optimize=True)

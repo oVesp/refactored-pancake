@@ -1,0 +1,289 @@
+{
+	"className": "Part",
+	"properties": {
+		"Anchored": true,
+		"CanCollide": false,
+		"CanQuery": false,
+		"CanTouch": false,
+		"CastShadow": false,
+		"Transparency": 1,
+		"Size": [
+			1,
+			1,
+			1
+		]
+	},
+	"children": [
+		{
+			"name": "Bubble",
+			"className": "ParticleEmitter",
+			"properties": {
+				"Rate": 5,
+				"LightEmission": 1,
+				"LightInfluence": 0,
+				"Rotation": {
+					"NumberRange": [
+						0,
+						360
+					]
+				},
+				"Speed": {
+					"NumberRange": [
+						0,
+						0
+					]
+				},
+				"LockedToPart": true,
+				"Size": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 7.5,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 7.5,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Lifetime": {
+					"NumberRange": [
+						0.6,
+						0.6
+					]
+				},
+				"Transparency": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 1,
+								"envelope": 0
+							},
+							{
+								"time": 0.5,
+								"value": 0.35,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 1,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									0.9412,
+									0.9804,
+									1.0
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.5882,
+									0.7843,
+									1.0
+								]
+							}
+						]
+					}
+				},
+				"Brightness": 1.5,
+				"RotSpeed": {
+					"NumberRange": [
+						-20,
+						20
+					]
+				},
+				"ZOffset": 2
+			},
+			"attributes": {
+				"TextureKey": "WardHex"
+			}
+		},
+		{
+			"name": "Swirl",
+			"className": "ParticleEmitter",
+			"properties": {
+				"Rate": 6,
+				"LightEmission": 1,
+				"LightInfluence": 0,
+				"Rotation": {
+					"NumberRange": [
+						0,
+						360
+					]
+				},
+				"Speed": {
+					"NumberRange": [
+						0,
+						0
+					]
+				},
+				"LockedToPart": true,
+				"Size": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 6.5,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 6.5,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Lifetime": {
+					"NumberRange": [
+						0.5,
+						0.5
+					]
+				},
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									0.9412,
+									0.9804,
+									1.0
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.7255,
+									0.5098,
+									1.0
+								]
+							}
+						]
+					}
+				},
+				"Brightness": 1.2,
+				"RotSpeed": {
+					"NumberRange": [
+						200,
+						300
+					]
+				},
+				"ZOffset": 2.2,
+				"FlipbookLayout": "Grid4x4",
+				"FlipbookMode": "OneShot"
+			},
+			"attributes": {
+				"TextureKey": "ArcaneSwirl"
+			}
+		},
+		{
+			"name": "Glints",
+			"className": "ParticleEmitter",
+			"properties": {
+				"Rate": 25,
+				"LightEmission": 1,
+				"LightInfluence": 0,
+				"Rotation": {
+					"NumberRange": [
+						0,
+						360
+					]
+				},
+				"Speed": {
+					"NumberRange": [
+						2,
+						4
+					]
+				},
+				"SpreadAngle": [
+					180,
+					180
+				],
+				"Lifetime": {
+					"NumberRange": [
+						0.5,
+						0.8
+					]
+				},
+				"Size": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 0.7,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 0,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									0.9412,
+									0.9804,
+									1.0
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.5882,
+									0.7843,
+									1.0
+								]
+							}
+						]
+					}
+				},
+				"RotSpeed": {
+					"NumberRange": [
+						-90,
+						90
+					]
+				}
+			},
+			"attributes": {
+				"TextureKey": "Glint"
+			}
+		},
+		{
+			"name": "Light",
+			"className": "PointLight",
+			"properties": {
+				"Color": {
+					"Color3": [
+						0.5882,
+						0.7843,
+						1.0
+					]
+				},
+				"Brightness": 1.5,
+				"Range": 10,
+				"Shadows": false
+			}
+		}
+	]
+}

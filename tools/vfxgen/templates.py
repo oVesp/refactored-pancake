@@ -35,6 +35,16 @@ MIST = (225, 245, 255)
 # Flames tint toward orange and glow only partly, so they stay orange instead of washing out in daylight.
 FLAME = ((255, 200, 90), (255, 120, 30), FIRE_D)
 EMBER_CORE = ((255, 225, 140), (255, 140, 40))
+STORM_HOT = (255, 255, 235)
+BOLT = (255, 235, 110)
+BOLT_V = (180, 150, 255)
+ARC_HOT = (245, 230, 255)
+ARC = (185, 130, 255)
+ARC_D = (95, 55, 210)
+WARD_HOT = (240, 250, 255)
+WARD = (150, 200, 255)
+WARD_D = (90, 130, 255)
+RANDOM = {"FlipbookLayout": "Grid4x4", "FlipbookMode": "Random"}
 
 FLIP = {"FlipbookLayout": "Grid4x4", "FlipbookMode": "OneShot"}
 # VelocityParallel lays a texture's x axis along the velocity; IceShard points up its frame,
@@ -207,6 +217,48 @@ def trail(colors, lifetime, width):
             "attributes": {"TextureKey": "TrailStreak", "From": "TrailTop", "To": "TrailBottom"},
         },
     ]
+
+
+def beam(name, key, width, colors, transparency=(0, 1), jitter=0, **props):
+    """A beam Effects.Link stretches between two points; Jitter re-bends it every frame, in studs."""
+    properties = {
+        "Width0": width,
+        "Width1": width,
+        "Color": cs(*colors),
+        "Transparency": ns(*transparency),
+        "LightEmission": 1,
+        "LightInfluence": 0,
+        "FaceCamera": True,
+        "Segments": 12 if jitter else 1,
+        "TextureMode": "Stretch",
+    }
+    properties.update(props)
+    return {
+        "name": name,
+        "className": "Beam",
+        "properties": properties,
+        "attributes": {"TextureKey": key, **({"Jitter": jitter} if jitter else {})},
+    }
+
+
+def ground_ring(tint, tint_to, lifetime=0.4, size=12):
+    """A torn shock ring racing out across the ground."""
+    ring = label("Ring", "ShockRing", tint, attrs=fade_to(tint_to))
+    return anchor([surface("Ring", [ring], {**SHEET, "Lifetime": lifetime, "Grow": 1.15})], size=(size, 0.05, size))
+
+
+def tint(color3, brightness, contrast, saturation, lifetime):
+    """A screen colour wash (Effects.Screen) that eases back to neutral."""
+    return {
+        "className": "ColorCorrectionEffect",
+        "properties": {
+            "TintColor": {"Color3": list(color3)},
+            "Brightness": brightness,
+            "Contrast": contrast,
+            "Saturation": saturation,
+        },
+        "attributes": {"Lifetime": lifetime},
+    }
 
 
 def fade_to(tint):
@@ -1047,6 +1099,306 @@ flame_fan_jet = anchor(
     ]
 )
 
+# Spark in flight: a crackling knot of forked lightning shedding sparks.
+spark_body = anchor(
+    [
+        stream(
+            "Fork",
+            "LightningFork",
+            30,
+            LockedToPart=True,
+            Size=ns(2.6),
+            Lifetime=nr(0.06, 0.1),
+            Color=cs(STORM_HOT, BOLT),
+            Brightness=2,
+            ZOffset=1,
+            **RANDOM,
+        ),
+        stream(
+            "Glow",
+            "SoftGlow",
+            20,
+            LockedToPart=True,
+            Size=ns(2.8),
+            Lifetime=nr(0.1),
+            Color=cs((255, 240, 140)),
+            Transparency=ns(0.7),
+            Brightness=1,
+        ),
+        stream(
+            "Sparks",
+            "SparkStreak",
+            30,
+            Orientation="VelocityParallel",
+            Speed=nr(4, 10),
+            SpreadAngle=[180, 180],
+            Drag=3,
+            Lifetime=nr(0.1, 0.2),
+            Size=ns(0.7, 0),
+            Color=cs(STORM_HOT, BOLT),
+            Brightness=2,
+            Rotation=nr(0),
+        ),
+        *trail((STORM_HOT, BOLT, BOLT_V), 0.12, 0.4),
+        glow((255, 240, 140), 2, 10),
+    ]
+)
+
+# Spark hit: a white snap, forks lashing out, a spray of sparks and a thin ring.
+spark_burst = anchor(
+    [
+        flash_star((6, 9), tint=STORM_HOT, lifetime=0.08),
+        emitter(
+            "Fork",
+            "LightningFork",
+            {"EmitCount": 4},
+            Size=ns(4.5, 5),
+            Lifetime=nr(0.12, 0.18),
+            Transparency=ns(0, 0.2, 1),
+            Color=cs(BOLT, BOLT_V),
+            LightEmission=1,
+            Brightness=2.5,
+            ZOffset=1.5,
+            **RANDOM,
+        ),
+        sparks(12, 18, 30, 180, (STORM_HOT, BOLT)),
+        emitter(
+            "Ring",
+            "RingThin",
+            Size=ns((0, 1), (1, 8)),
+            Lifetime=nr(0.15),
+            Transparency=ns(0, 1),
+            Color=cs(BOLT),
+            LightEmission=1,
+            Brightness=2,
+            ZOffset=1.8,
+        ),
+        light((255, 240, 140), 5, 14, 0.15),
+    ]
+)
+
+
+def swirl(name, size, colors, spin, **props):
+    return emitter(
+        name,
+        "ArcaneSwirl",
+        Size=ns(*size),
+        Lifetime=nr(0.35, 0.4),
+        Color=cs(*colors),
+        RotSpeed=nr(*spin),
+        **FLIP,
+        **props,
+    )
+
+
+# High tier (a screen-effect skill), so Blink keeps the near-black ink layers.
+# Blink departure: the mage is wound into a collapsing arcane vortex.
+blink_out = anchor(
+    [
+        swirl("Swirl", (6, 1), (ARC_HOT, ARC), (-500, -400), LightEmission=1, Brightness=2, ZOffset=1),
+        swirl("Ink", (7, 1.5), (INK,), (-500, -400), LightEmission=0, Transparency=ns(0.3, 1), ZOffset=0.5),
+        emitter(
+            "Glints",
+            "Glint",
+            {"EmitCount": 14},
+            Shape="Sphere",
+            ShapeStyle="Surface",
+            ShapeInOut="Inward",
+            Speed=nr(6, 10),
+            Lifetime=nr(0.3, 0.4),
+            Size=ns(0.8, 0),
+            Color=cs(ARC_HOT, ARC),
+            LightEmission=1,
+        ),
+        dust(5, (2, 4), (1, 3), (60, 40, 110), 0.5),
+        light(ARC, 4, 14, 0.3),
+    ],
+    size=(5, 5, 5),
+)
+
+# Blink arrival: a vortex unwinds outward around an ink-backed starburst.
+blink_in = anchor(
+    [
+        flash_star((7, 10), brightness=4, tint=ARC_HOT, lifetime=0.1),
+        swirl("Swirl", (1, 7), (ARC_HOT, ARC), (400, 500), LightEmission=1, Brightness=2, ZOffset=1),
+        emitter(
+            "InkStar",
+            "ImpactStar",
+            Size=ns(5, 7),
+            Lifetime=nr(0.13),
+            Transparency=ns(0.35, 1),
+            Color=cs(INK),
+            LightEmission=0,
+            ZOffset=0.5,
+        ),
+        emitter(
+            "Glints",
+            "Glint",
+            {"EmitCount": 16},
+            Speed=nr(6, 12),
+            SpreadAngle=[180, 180],
+            Drag=4,
+            Lifetime=nr(0.4, 0.7),
+            Size=ns(0.8, 0),
+            Color=cs(ARC_HOT, ARC),
+            LightEmission=1,
+        ),
+        light(ARC, 5, 16, 0.35),
+    ]
+)
+
+# Blink path (Effects.Link): a fading streak with a thin arcane bolt along it.
+blink_trail = anchor(
+    [
+        beam("Streak", "TrailStreak", 3.5, (ARC_HOT, ARC, ARC_D), (0.15, 0.5), Brightness=2),
+        beam("Bolt", "LightningBolt", 2.5, (ARC_HOT, ARC), (0, 0.2), jitter=1, Brightness=3),
+    ]
+)
+
+arcane_ring = ground_ring(ARC_HOT, ARC_D)
+blink_flash = tint((0.9, 0.82, 1), 0.08, 0.1, 0.1, 0.2)
+
+# Arcane Shield (Effects.Attach on an anchor that follows the mage): a shimmering hex bubble with
+# swirls of energy crawling over it.
+arcane_shield_bubble = anchor(
+    [
+        stream(
+            "Bubble",
+            "WardHex",
+            5,
+            LockedToPart=True,
+            Size=ns(7.5),
+            Lifetime=nr(0.6),
+            Transparency=ns(1, 0.35, 1),
+            Color=cs(WARD_HOT, WARD),
+            Brightness=1.5,
+            RotSpeed=nr(-20, 20),
+            ZOffset=2,
+        ),
+        stream(
+            "Swirl",
+            "ArcaneSwirl",
+            6,
+            LockedToPart=True,
+            Size=ns(6.5),
+            Lifetime=nr(0.5),
+            Color=cs(WARD_HOT, ARC),
+            Brightness=1.2,
+            RotSpeed=nr(200, 300),
+            ZOffset=2.2,
+            **FLIP,
+        ),
+        stream(
+            "Glints",
+            "Glint",
+            25,
+            Speed=nr(2, 4),
+            SpreadAngle=[180, 180],
+            Lifetime=nr(0.5, 0.8),
+            Size=ns(0.7, 0),
+            Color=cs(WARD_HOT, WARD),
+            RotSpeed=nr(-90, 90),
+        ),
+        glow(WARD, 1.5, 10),
+    ]
+)
+
+# Arcane Shield going up: a flash and the bubble snapping out to full size.
+arcane_shield_burst = anchor(
+    [
+        flash_star((7, 9), brightness=4, tint=WARD_HOT, lifetime=0.1),
+        emitter(
+            "Bubble",
+            "WardHex",
+            Size=ns(5, 8),
+            Lifetime=nr(0.25),
+            Transparency=ns(0, 1),
+            Color=cs(WARD_HOT, WARD),
+            LightEmission=1,
+            Brightness=2,
+            ZOffset=2,
+        ),
+        light(WARD, 5, 14, 0.3),
+    ]
+)
+
+ward_ring = ground_ring(WARD_HOT, WARD_D)
+
+# Overcharge bolt (Effects.Link): a jagged lightning beam that re-bends every frame inside a violet glow.
+overcharge_bolt = anchor(
+    [
+        beam("Glow", "SoftGlow", 6, (BOLT_V,), (0.45, 1)),
+        beam("Core", "LightningBolt", 5, (STORM_HOT, BOLT), (0, 0.2), jitter=1.5, Brightness=5),
+    ]
+)
+
+# High tier (a screen-effect skill), so the strike keeps an ink star.
+# Where an Overcharge bolt lands: forks, an ink-backed snap, sparks and a small shock ring.
+overcharge_strike = anchor(
+    [
+        surface(
+            "Ring",
+            [label("Ring", "ShockRing", BOLT, attrs=fade_to(BOLT_V))],
+            {**SHEET, "Lifetime": 0.3, "Grow": 1.15},
+        ),
+        attachment(
+            "Burst",
+            [
+                emitter(
+                    "Fork",
+                    "LightningFork",
+                    {"EmitCount": 2},
+                    Size=ns(3.5),
+                    Lifetime=nr(0.15),
+                    Transparency=ns(0, 1),
+                    Color=cs(STORM_HOT, BOLT),
+                    LightEmission=1,
+                    Brightness=2,
+                    ZOffset=1,
+                    **RANDOM,
+                ),
+                emitter(
+                    "InkStar",
+                    "ImpactStar",
+                    Size=ns(3, 4),
+                    Lifetime=nr(0.1),
+                    Transparency=ns(0.4, 1),
+                    Color=cs(INK),
+                    LightEmission=0,
+                    ZOffset=0.5,
+                ),
+                sparks(6, 12, 20, 70, (STORM_HOT, BOLT)),
+                light((255, 240, 140), 4, 12, 0.2),
+            ],
+            (0, 0.5, 0),
+        ),
+    ],
+    size=(6, 0.05, 6),
+)
+
+# Overcharge on the mage (Effects.Attach on an anchor that follows them): arcs crawling over the body.
+overcharge_aura = anchor(
+    [
+        stream(
+            "Arcs",
+            "LightningFork",
+            14,
+            LockedToPart=True,
+            Size=ns(4),
+            Lifetime=nr(0.08, 0.14),
+            Transparency=ns(0, 1),
+            Color=cs(STORM_HOT, BOLT),
+            Brightness=2,
+            Rotation=nr(-25, 25),
+            **RANDOM,
+        ),
+        glow((255, 240, 140), 2, 12),
+    ],
+    size=(2, 4, 2),
+)
+
+storm_tint = tint((1, 0.97, 0.82), 0.06, 0.15, 0.15, 0.3)
+
 # Screen effects (Effects.Screen), for the caster of a high-tier skill.
 speed_lines = {
     "className": "ScreenGui",
@@ -1097,6 +1449,20 @@ TEMPLATES = {
     "IcePatchFloor": ice_patch_floor,
     "IceSpike": ice_spike,
     "FlameFanJet": flame_fan_jet,
+    "SparkBody": spark_body,
+    "SparkBurst": spark_burst,
+    "BlinkOut": blink_out,
+    "BlinkIn": blink_in,
+    "BlinkTrail": blink_trail,
+    "ArcaneRing": arcane_ring,
+    "BlinkFlash": blink_flash,
+    "ArcaneShieldBubble": arcane_shield_bubble,
+    "ArcaneShieldBurst": arcane_shield_burst,
+    "WardRing": ward_ring,
+    "OverchargeBolt": overcharge_bolt,
+    "OverchargeStrike": overcharge_strike,
+    "OverchargeAura": overcharge_aura,
+    "StormTint": storm_tint,
 }
 
 

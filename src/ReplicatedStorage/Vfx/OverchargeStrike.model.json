@@ -1,0 +1,414 @@
+{
+	"className": "Part",
+	"properties": {
+		"Anchored": true,
+		"CanCollide": false,
+		"CanQuery": false,
+		"CanTouch": false,
+		"CastShadow": false,
+		"Transparency": 1,
+		"Size": [
+			6,
+			0.05,
+			6
+		]
+	},
+	"children": [
+		{
+			"name": "Ring",
+			"className": "SurfaceGui",
+			"properties": {
+				"Face": "Top",
+				"SizingMode": "FixedSize",
+				"CanvasSize": [
+					256,
+					256
+				],
+				"LightInfluence": 0,
+				"Brightness": 2,
+				"ClipsDescendants": false,
+				"ZOffset": 0
+			},
+			"attributes": {
+				"FlipbookGrid": 4,
+				"FramePixels": 256,
+				"Lifetime": 0.3,
+				"Grow": 1.15
+			},
+			"children": [
+				{
+					"name": "Ring",
+					"className": "ImageLabel",
+					"properties": {
+						"BackgroundTransparency": 1,
+						"AnchorPoint": [
+							0.5,
+							0.5
+						],
+						"Position": {
+							"UDim2": [
+								[
+									0.5,
+									0
+								],
+								[
+									0.5,
+									0
+								]
+							]
+						},
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									1,
+									0
+								]
+							]
+						},
+						"Rotation": 0,
+						"ImageRectSize": [
+							256,
+							256
+						],
+						"ImageColor3": {
+							"Color3": [
+								1.0,
+								0.9216,
+								0.4314
+							]
+						},
+						"ImageTransparency": 0,
+						"ZIndex": 1
+					},
+					"attributes": {
+						"TextureKey": "ShockRing",
+						"ColorTo": {
+							"Color3": [
+								0.7059,
+								0.5882,
+								1.0
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Burst",
+			"className": "Attachment",
+			"properties": {
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							0.5,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				}
+			},
+			"children": [
+				{
+					"name": "Fork",
+					"className": "ParticleEmitter",
+					"properties": {
+						"Enabled": false,
+						"Rate": 0,
+						"LightInfluence": 0,
+						"Rotation": {
+							"NumberRange": [
+								0,
+								360
+							]
+						},
+						"Speed": {
+							"NumberRange": [
+								0,
+								0
+							]
+						},
+						"Size": {
+							"NumberSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"value": 3.5,
+										"envelope": 0
+									},
+									{
+										"time": 1.0,
+										"value": 3.5,
+										"envelope": 0
+									}
+								]
+							}
+						},
+						"Lifetime": {
+							"NumberRange": [
+								0.15,
+								0.15
+							]
+						},
+						"Transparency": {
+							"NumberSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"value": 0,
+										"envelope": 0
+									},
+									{
+										"time": 1.0,
+										"value": 1,
+										"envelope": 0
+									}
+								]
+							}
+						},
+						"Color": {
+							"ColorSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"color": [
+											1.0,
+											1.0,
+											0.9216
+										]
+									},
+									{
+										"time": 1.0,
+										"color": [
+											1.0,
+											0.9216,
+											0.4314
+										]
+									}
+								]
+							}
+						},
+						"LightEmission": 1,
+						"Brightness": 2,
+						"ZOffset": 1,
+						"FlipbookLayout": "Grid4x4",
+						"FlipbookMode": "Random"
+					},
+					"attributes": {
+						"TextureKey": "LightningFork",
+						"EmitCount": 2
+					}
+				},
+				{
+					"name": "InkStar",
+					"className": "ParticleEmitter",
+					"properties": {
+						"Enabled": false,
+						"Rate": 0,
+						"LightInfluence": 0,
+						"Rotation": {
+							"NumberRange": [
+								0,
+								360
+							]
+						},
+						"Speed": {
+							"NumberRange": [
+								0,
+								0
+							]
+						},
+						"Size": {
+							"NumberSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"value": 3,
+										"envelope": 0
+									},
+									{
+										"time": 1.0,
+										"value": 4,
+										"envelope": 0
+									}
+								]
+							}
+						},
+						"Lifetime": {
+							"NumberRange": [
+								0.1,
+								0.1
+							]
+						},
+						"Transparency": {
+							"NumberSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"value": 0.4,
+										"envelope": 0
+									},
+									{
+										"time": 1.0,
+										"value": 1,
+										"envelope": 0
+									}
+								]
+							}
+						},
+						"Color": {
+							"ColorSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"color": [
+											0.0627,
+											0.0706,
+											0.1098
+										]
+									},
+									{
+										"time": 1.0,
+										"color": [
+											0.0627,
+											0.0706,
+											0.1098
+										]
+									}
+								]
+							}
+						},
+						"LightEmission": 0,
+						"ZOffset": 0.5
+					},
+					"attributes": {
+						"TextureKey": "ImpactStar",
+						"EmitCount": 1
+					}
+				},
+				{
+					"name": "Sparks",
+					"className": "ParticleEmitter",
+					"properties": {
+						"Enabled": false,
+						"Rate": 0,
+						"LightInfluence": 0,
+						"Rotation": {
+							"NumberRange": [
+								0,
+								0
+							]
+						},
+						"Speed": {
+							"NumberRange": [
+								12,
+								20
+							]
+						},
+						"Orientation": "VelocityParallel",
+						"SpreadAngle": [
+							70,
+							70
+						],
+						"Drag": 6,
+						"Acceleration": [
+							0,
+							-30,
+							0
+						],
+						"Lifetime": {
+							"NumberRange": [
+								0.18,
+								0.34
+							]
+						},
+						"Size": {
+							"NumberSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"value": 1.8,
+										"envelope": 0
+									},
+									{
+										"time": 1.0,
+										"value": 0,
+										"envelope": 0
+									}
+								]
+							}
+						},
+						"Color": {
+							"ColorSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"color": [
+											1.0,
+											1.0,
+											0.9216
+										]
+									},
+									{
+										"time": 1.0,
+										"color": [
+											1.0,
+											0.9216,
+											0.4314
+										]
+									}
+								]
+							}
+						},
+						"LightEmission": 1,
+						"Brightness": 3,
+						"ZOffset": 1
+					},
+					"attributes": {
+						"TextureKey": "SparkStreak",
+						"EmitCount": 6
+					}
+				},
+				{
+					"name": "Light",
+					"className": "PointLight",
+					"properties": {
+						"Color": {
+							"Color3": [
+								1.0,
+								0.9412,
+								0.549
+							]
+						},
+						"Brightness": 4,
+						"Range": 12,
+						"Shadows": false
+					},
+					"attributes": {
+						"FlashTime": 0.2
+					}
+				}
+			]
+		}
+	]
+}

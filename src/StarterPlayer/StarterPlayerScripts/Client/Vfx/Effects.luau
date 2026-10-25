@@ -231,6 +231,63 @@ function Effects.Charge(name: string, root: BasePart, duration: number): Instanc
 end
 
 --[=[
+	Stretches the beams of template `name` between `from` and `to` (points, or parts to follow) for
+	`duration` seconds, narrowing them to nothing as it ends. A beam with a `Jitter` attribute
+	re-bends by up to that many studs every frame, like lightning.
+]=]
+function Effects.Link(name: string, from: Vector3 | BasePart, to: Vector3 | BasePart, duration: number)
+	local source = template(name)
+	if not source then
+		return
+	end
+	local effect = source:Clone()
+	effect.CFrame = CFrame.new(if typeof(from) == "Vector3" then from else from.Position)
+	effect.Parent = folder
+	local function endpoint(point: Vector3 | BasePart): Attachment
+		local attachment = Instance.new("Attachment")
+		if typeof(point) == "Vector3" then
+			attachment.Parent = effect
+			attachment.WorldPosition = point
+		else
+			attachment.Parent = point
+		end
+		return attachment
+	end
+	local start, finish = endpoint(from), endpoint(to)
+	local beams: { { beam: Beam, width0: number, width1: number, jitter: number } } = {}
+	for _, item in effect:GetDescendants() do
+		if item:IsA("Beam") then
+			item.Attachment0 = start
+			item.Attachment1 = finish
+			local jitter = attribute(item, "Jitter", 0)
+			table.insert(beams, { beam = item, width0 = item.Width0, width1 = item.Width1, jitter = jitter })
+		end
+	end
+	local started = os.clock()
+	local connection: RBXScriptConnection
+	connection = RunService.RenderStepped:Connect(function()
+		local alpha = (os.clock() - started) / duration
+		if alpha >= 1 or not effect.Parent then
+			connection:Disconnect()
+			start:Destroy()
+			finish:Destroy()
+			effect:Destroy()
+			return
+		end
+		-- Full width for the first half, then a quick taper, so short bolts still read.
+		local width = math.min(1, (1 - alpha) * 2)
+		for _, entry in beams do
+			entry.beam.Width0 = entry.width0 * width
+			entry.beam.Width1 = entry.width1 * width
+			if entry.jitter > 0 then
+				entry.beam.CurveSize0 = (math.random() * 2 - 1) * entry.jitter
+				entry.beam.CurveSize1 = (math.random() * 2 - 1) * entry.jitter
+			end
+		end
+	end)
+end
+
+--[=[
 	Plays a screen template for the local player: a `ScreenGui` of sprite-sheet layers, or a
 	`ColorCorrectionEffect` that eases back to neutral over its `Lifetime` attribute.
 ]=]
