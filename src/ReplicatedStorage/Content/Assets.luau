@@ -124,7 +124,7 @@ local Textures: { [string]: TextureAsset } = {
 	- Enemy clips, keyed `<AnimSet><Clip>` (game-design.md 7.3): assets/blender/goblin/goblin.blend,
 	  retargeted from the reference armature.
 	- Basic attack clips, named by `SkillDef.animation`: R15 placeholders from
-	  assets/blender/combat_r15/combat_r15.blend.
+	  assets/blender/combat_r15/combat_r15.blend, uploaded through tools/upload/animations.py.
 ]=]
 local Animations: { [string]: AnimationAsset } = {
 	GoblinIdle = { keyframes = "GoblinIdle" },
@@ -134,8 +134,8 @@ local Animations: { [string]: AnimationAsset } = {
 	GoblinThrow = { keyframes = "GoblinThrow" },
 	GoblinHit = { keyframes = "GoblinHit" },
 	GoblinDeath = { keyframes = "GoblinDeath" },
-	BasicStrike = { keyframes = "BasicStrike" },
-	BasicHeavyStrike = { keyframes = "BasicHeavyStrike" },
+	BasicStrike = { id = "rbxassetid://75972502304014", keyframes = "BasicStrike" },
+	BasicHeavyStrike = { id = "rbxassetid://73823663489909", keyframes = "BasicHeavyStrike" },
 }
 
 --[=[

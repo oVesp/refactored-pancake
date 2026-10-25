@@ -870,23 +870,25 @@
 			"id": "animation:BasicStrike",
 			"type": "animation",
 			"name": "BasicStrike",
+			"assetId": "75972502304014",
 			"path": "src/ReplicatedStorage/Animations/Combat/BasicStrike.rbxmx",
 			"origin": "Agent-authored placeholder on the stock Studio R15 rig in assets/blender/combat_r15/combat_r15.blend (owner exception 2026-10-25)",
 			"license": "project",
 			"owner": "dev",
 			"status": "draft",
-			"notes": "Light attack (strike): 0.4 s, marker Hit at 0.133 s. Upper body only. Baked to .rbxanim by the Roblox Animations add-on (3.0.1 bake, re-verified identical with 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; Studio-only until uploaded."
+			"notes": "Light attack (strike): 0.4 s, marker Hit at 0.133 s. Upper body only. Baked to .rbxanim by the Roblox Animations add-on (3.0.1 bake, re-verified identical with 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-25 to user 82401475 by tools/upload/animations.py."
 		},
 		{
 			"id": "animation:BasicHeavyStrike",
 			"type": "animation",
 			"name": "BasicHeavyStrike",
+			"assetId": "73823663489909",
 			"path": "src/ReplicatedStorage/Animations/Combat/BasicHeavyStrike.rbxmx",
 			"origin": "Agent-authored placeholder on the stock Studio R15 rig in assets/blender/combat_r15/combat_r15.blend (owner exception 2026-10-25)",
 			"license": "project",
 			"owner": "dev",
 			"status": "draft",
-			"notes": "Heavy attack (heavy_strike): 1.0 s, markers Windup at 0 s and Hit at 0.5 s. Upper body only. Baked to .rbxanim by the Roblox Animations add-on (3.0.1 bake, re-verified identical with 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; Studio-only until uploaded."
+			"notes": "Heavy attack (heavy_strike): 1.0 s, markers Windup at 0 s and Hit at 0.5 s. Upper body only. Baked to .rbxanim by the Roblox Animations add-on (3.0.1 bake, re-verified identical with 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-25 to user 82401475 by tools/upload/animations.py."
 		},
 		{
 			"id": "worldgen:Apply",
