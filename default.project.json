@@ -37,9 +37,29 @@
 		"StarterGui": {
 			"$path": "src/StarterGui"
 		},
+		"Lighting": {
+			"$path": "src/Lighting",
+			"$properties": {
+				"Technology": "ShadowMap",
+				"GlobalShadows": true,
+				"ShadowSoftness": 0.2,
+				"EnvironmentDiffuseScale": 1,
+				"EnvironmentSpecularScale": 1,
+				"Brightness": 2.6,
+				"ClockTime": 9,
+				"GeographicLatitude": 52,
+				"Ambient": [0.345, 0.361, 0.384],
+				"OutdoorAmbient": [0.541, 0.557, 0.588]
+			}
+		},
 		"Workspace": {
 			"$properties": {
-				"StreamingEnabled": true
+				"StreamingEnabled": true,
+				"StreamingTargetRadius": 1024,
+				"StreamingMinRadius": 64,
+				"StreamOutBehavior": "Opportunistic",
+				"ModelStreamingBehavior": "Improved",
+				"StreamingIntegrityMode": "PauseOutsideLoadedArea"
 			},
 			"Map": {
 				"$path": "src/Workspace/Map.rbxmx"

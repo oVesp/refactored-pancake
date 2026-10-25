@@ -101,6 +101,7 @@ return {
 				"src/ReplicatedStorage/UiTemplates",
 				"src/ReplicatedStorage/Animations",
 				"src/Workspace",
+				"src/Lighting",
 			}
 		do
 			walk(dir, function(path)

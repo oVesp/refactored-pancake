@@ -1515,6 +1515,66 @@
 			"owner": "dev",
 			"status": "draft",
 			"notes": "~140 foliage/rock models used by the WorldGen scatter. Lives only in the place file, not in git. Audit per 5.10 (no scripts found; applier strips any) and record origin and licence."
+		},
+		{
+			"id": "content:Atmosphere",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Atmosphere.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Region moods, time-of-day light keys and day length for the atmosphere controller."
+		},
+		{
+			"id": "lighting:Atmosphere",
+			"type": "world",
+			"path": "src/Lighting/Atmosphere.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Lighting effect authored for Rojo; the client atmosphere controller drives its values at runtime."
+		},
+		{
+			"id": "lighting:Sky",
+			"type": "world",
+			"path": "src/Lighting/Sky.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Default Roblox skybox textures with tuned sun, moon and stars; no uploaded art."
+		},
+		{
+			"id": "lighting:Bloom",
+			"type": "world",
+			"path": "src/Lighting/Bloom.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Lighting effect authored for Rojo; the client atmosphere controller drives its values at runtime."
+		},
+		{
+			"id": "lighting:ColorCorrection",
+			"type": "world",
+			"path": "src/Lighting/ColorCorrection.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Lighting effect authored for Rojo; the client atmosphere controller drives its values at runtime."
+		},
+		{
+			"id": "lighting:SunRays",
+			"type": "world",
+			"path": "src/Lighting/SunRays.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Lighting effect authored for Rojo; the client atmosphere controller drives its values at runtime."
 		}
 	]
 }

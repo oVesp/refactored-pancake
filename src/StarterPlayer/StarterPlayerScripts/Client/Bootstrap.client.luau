@@ -19,6 +19,7 @@ local CONTROLLER_ORDER = {
 	"TargetController",
 	"CombatController",
 	"AudioController",
+	"AtmosphereController",
 	"VfxController",
 	"InputController",
 	"PromptController",

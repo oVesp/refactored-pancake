@@ -26,6 +26,11 @@ local ROOT_NAME = "Nature"
 local TILE_COLUMNS = 64
 local CHUNK_STUDS = 256
 local VOXEL = 4
+-- Trees render as SLIM imposters past the streaming radius so far forests keep their outline
+-- (docs/systems/atmosphere.md); small layers simply stream out under the haze.
+local LEVEL_OF_DETAIL: { [string]: Enum.ModelLevelOfDetail } = {
+	Trees = Enum.ModelLevelOfDetail.SLIM,
+}
 
 type Asset = {
 	name: string,
@@ -274,6 +279,7 @@ local function prepareTemplate(source: Model, asset: Asset): Model
 		end
 	end
 	template:SetAttribute("Height", boxSize.Y)
+	template.LevelOfDetail = LEVEL_OF_DETAIL[asset.layer] or Enum.ModelLevelOfDetail.Disabled
 	return template
 end
 
@@ -485,6 +491,33 @@ function WorldGen.Apply()
 	WorldGen.ApplyTerrain()
 	WorldGen.ApplyScatter()
 	WorldGen.ApplyPois()
+end
+
+--[=[
+	Re-applies the per-layer `LevelOfDetail` to props already placed under `Workspace.Nature`,
+	without re-running the scatter. Returns how many models changed.
+]=]
+function WorldGen.ApplyStreaming(): number
+	assertEditMode()
+	local root = workspace:FindFirstChild(ROOT_NAME)
+	if not root then
+		return 0
+	end
+	local changed = 0
+	for _, layerFolder in root:GetChildren() do
+		local level = LEVEL_OF_DETAIL[layerFolder.Name] or Enum.ModelLevelOfDetail.Disabled
+		for _, chunk in layerFolder:GetChildren() do
+			for _, prop in chunk:GetChildren() do
+				if prop:IsA("Model") and prop.LevelOfDetail ~= level then
+					prop.LevelOfDetail = level
+					changed += 1
+				end
+			end
+			task.wait()
+		end
+	end
+	log:Info("streaming detail set on %d props", changed)
+	return changed
 end
 
 --[=[ Removes the generated terrain and every unlocked generated prop. ]=]
