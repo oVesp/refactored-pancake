@@ -52,5 +52,5 @@ The owner wants UI to float in the world where it can: interacting with an objec
 
 - Top left: player plate (level medallion, name, HP, MP, stamina, Focus, status chips) and, under it, the target frame (shown while there is an enemy target).
 - Top right: zone plate and the Notices panel (unspent levels, spell picks; hidden when empty).
-- Bottom centre: cast bar, hotbar (hidden when empty), experience bar, key hints.
+- Bottom centre: cast bar, hotbar (8 slots, hidden when all are empty unless the spellbook is open), experience bar, key hints.
 - Toasts: top centre.

@@ -20,6 +20,19 @@ local function checkEffects(owner: string, effects: { any }?)
 end
 
 return {
+	["spell numbers are unique and only on spells"] = function()
+		local seen: { [number]: string } = {}
+		for id, skill in Skills do
+			if skill.source == "Spell" then
+				local number = skill.number
+				Expect.truthy(type(number) == "number" and number >= 1 and number % 1 == 0, `{id}: number`)
+				Expect.equal(seen[number], nil, `{id}: number {number} reused`)
+				seen[number] = id
+			else
+				Expect.equal(skill.number, nil, `{id}: only spells are numbered`)
+			end
+		end
+	end,
 	["class grants and spell lists resolve"] = function()
 		for id, class in Classes do
 			Expect.equal(#class.grants, 5, `{id} grants per level`)

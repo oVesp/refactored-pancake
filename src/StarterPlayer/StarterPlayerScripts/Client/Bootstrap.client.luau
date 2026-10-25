@@ -22,6 +22,7 @@ local CONTROLLER_ORDER = {
 	"VfxController",
 	"InputController",
 	"PromptController",
+	"DragController",
 	"HudController",
 	"SpellbookController",
 	"InventoryController",

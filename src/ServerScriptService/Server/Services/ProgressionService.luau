@@ -6,7 +6,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Classes = require(ReplicatedStorage.Content.Classes)
 local Enemies = require(ReplicatedStorage.Content.Enemies)
+local Disciplines = require(ReplicatedStorage.Content.Disciplines)
 local Formulas = require(ReplicatedStorage.Shared.Formulas)
+local Hotbar = require(ReplicatedStorage.Shared.Hotbar)
 local Logger = require(ReplicatedStorage.Shared.Logger)
 local NetServer = require(ReplicatedStorage.Shared.Net.Server)
 local Skills = require(ReplicatedStorage.Content.Skills)
@@ -42,6 +44,26 @@ local function levelInfo(profile: any): (number, number, number?)
 	return Formulas.CharacterLevel(profile.xp, Tuning.Progression.XpToNext, Tuning.Progression.LevelCap)
 end
 
+--[=[
+	True when the player may put this entry on the hotbar: a known active spell or class skill
+	(basic attacks have their own buttons) or a known Discipline.
+]=]
+local function canSlot(profile: any, kind: string, id: string): boolean
+	if kind == "Discipline" then
+		return Disciplines.ById[id] ~= nil and table.find(profile.disciplines, id) ~= nil
+	end
+	if id == Skills.Basic.Light or id == Skills.Basic.Heavy then
+		return false
+	end
+	return table.find(SkillService.KnownActives(profile), id) ~= nil
+end
+
+local function prunedHotbar(profile: any): { string }
+	return Hotbar.Prune(table.clone(profile.hotbar), function(kind, id)
+		return canSlot(profile, kind, id)
+	end)
+end
+
 --[=[ Builds the client snapshot: profile plus derived progression data. ]=]
 function ProgressionService.Snapshot(player: Player): { [string]: any }?
 	local profile = DataService.Get(player)
@@ -63,6 +85,7 @@ function ProgressionService.Snapshot(player: Player): { [string]: any }?
 		ceilings = Formulas.CircleCeilings(profile.classes, Classes.ById, Tuning.Magic),
 		actives = SkillService.KnownActives(profile),
 		granted = Formulas.GrantedSkills(profile.classes, Classes.ById),
+		hotbar = prunedHotbar(profile),
 		inventory = profile.inventory,
 		equipment = profile.equipment,
 	}
@@ -141,16 +164,26 @@ function ProgressionService.TrainClass(player: Player, classId: string): (boolea
 		return false, reason
 	end
 	local newLevel = 0
+	local grantedBefore = Formulas.GrantedSkills(profile.classes, Classes.ById)
 	DataService.Update(player, function(p: any)
+		local found = false
 		for _, entry in p.classes do
 			if entry.id == classId then
 				entry.level += 1
 				newLevel = entry.level
-				return
+				found = true
+				break
 			end
 		end
-		table.insert(p.classes, { id = classId, level = 1 })
-		newLevel = 1
+		if not found then
+			table.insert(p.classes, { id = classId, level = 1 })
+			newLevel = 1
+		end
+		for _, skillId in Formulas.GrantedSkills(p.classes, Classes.ById) do
+			if not table.find(grantedBefore, skillId) and Skills.ById[skillId].kind == "Active" then
+				Hotbar.AutoPlace(p.hotbar, Hotbar.Encode("Skill", skillId))
+			end
+		end
 	end, "classes")
 	notify(player, "Trained", Classes.ById[classId].name, newLevel)
 	local picks = totalPicks(profile)
@@ -177,6 +210,7 @@ function ProgressionService.RemoveClass(player: Player, classId: string)
 				end
 			end
 		end
+		p.hotbar = prunedHotbar(p)
 	end, "classes")
 end
 
@@ -193,8 +227,21 @@ local function learnSpell(player: Player, spellId: string)
 	end
 	DataService.Update(player, function(p: any)
 		table.insert(p.spells, spellId)
+		Hotbar.AutoPlace(p.hotbar, Hotbar.Encode("Skill", spellId))
 	end, "spells")
 	notify(player, "LearnedSpell", Skills.ById[spellId].name)
+end
+
+--[=[ Puts a known entry into hotbar slot `index` (swapping if it is already on the bar), or clears the slot. ]=]
+local function setHotbarSlot(player: Player, index: number, kind: string, id: string)
+	local profile = DataService.Get(player)
+	if not profile or (kind ~= "" and not canSlot(profile, kind, id)) then
+		return
+	end
+	local entry = if kind == "" then "" else Hotbar.Encode(kind :: Hotbar.Kind, id)
+	DataService.Update(player, function(p: any)
+		Hotbar.Place(p.hotbar, index, entry)
+	end, "hotbar")
 end
 
 local function onTrainerPrompt(prompt: ProximityPrompt, player: Player)
@@ -271,6 +318,7 @@ function ProgressionService.Init(deps: { [string]: any })
 
 	NetServer.Connect("RequestProfile", pushSnapshot)
 	NetServer.Connect("LearnSpell", learnSpell)
+	NetServer.Connect("SetHotbarSlot", setHotbarSlot)
 end
 
 function ProgressionService.Start()

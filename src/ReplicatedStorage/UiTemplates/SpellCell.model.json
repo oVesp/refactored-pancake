@@ -1,0 +1,419 @@
+{
+	"className": "TextButton",
+	"properties": {
+		"Size": {
+			"UDim2": [
+				[
+					0,
+					96
+				],
+				[
+					0,
+					84
+				]
+			]
+		},
+		"BackgroundColor3": [
+			1,
+			1,
+			1
+		],
+		"BorderSizePixel": 0,
+		"Text": "",
+		"AutoButtonColor": false,
+		"Selectable": true
+	},
+	"children": [
+		{
+			"name": "UICorner",
+			"className": "UICorner",
+			"properties": {
+				"CornerRadius": {
+					"UDim": [
+						0,
+						3
+					]
+				}
+			}
+		},
+		{
+			"name": "UIStroke",
+			"className": "UIStroke",
+			"properties": {
+				"Color": [
+					0.549,
+					0.471,
+					0.325
+				],
+				"Thickness": 1,
+				"Transparency": 0.25,
+				"ApplyStrokeMode": "Border"
+			}
+		},
+		{
+			"name": "UIGradient",
+			"className": "UIGradient",
+			"properties": {
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									0.145,
+									0.176,
+									0.227
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.082,
+									0.098,
+									0.133
+								]
+							}
+						]
+					}
+				},
+				"Rotation": 90
+			}
+		},
+		{
+			"name": "Bind_Number",
+			"className": "TextLabel",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							0.6,
+							0
+						],
+						[
+							0,
+							14
+						]
+					]
+				},
+				"BackgroundTransparency": 1,
+				"Text": "001",
+				"TextColor3": [
+					0.549,
+					0.471,
+					0.325
+				],
+				"FontFace": {
+					"Font": {
+						"family": "rbxasset://fonts/families/BuilderSans.json",
+						"weight": "Bold",
+						"style": "Normal"
+					}
+				},
+				"TextSize": 12,
+				"TextXAlignment": "Left",
+				"TextYAlignment": "Top",
+				"TextWrapped": true,
+				"Position": {
+					"UDim2": [
+						[
+							0,
+							6
+						],
+						[
+							0,
+							4
+						]
+					]
+				},
+				"ZIndex": 2
+			}
+		},
+		{
+			"name": "Bind_Slot",
+			"className": "TextLabel",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							0,
+							18
+						],
+						[
+							0,
+							18
+						]
+					]
+				},
+				"BackgroundTransparency": 0,
+				"Text": "",
+				"TextColor3": [
+					0.106,
+					0.086,
+					0.063
+				],
+				"FontFace": {
+					"Font": {
+						"family": "rbxasset://fonts/families/BuilderSans.json",
+						"weight": "Bold",
+						"style": "Normal"
+					}
+				},
+				"TextSize": 12,
+				"TextXAlignment": "Center",
+				"TextYAlignment": "Center",
+				"TextWrapped": true,
+				"Position": {
+					"UDim2": [
+						[
+							1,
+							-4
+						],
+						[
+							0,
+							4
+						]
+					]
+				},
+				"AnchorPoint": [
+					1,
+					0
+				],
+				"BackgroundColor3": [
+					0.824,
+					0.718,
+					0.514
+				],
+				"ZIndex": 3
+			},
+			"children": [
+				{
+					"name": "UICorner",
+					"className": "UICorner",
+					"properties": {
+						"CornerRadius": {
+							"UDim": [
+								0,
+								2
+							]
+						}
+					}
+				},
+				{
+					"name": "UITextSizeConstraint",
+					"className": "UITextSizeConstraint",
+					"properties": {
+						"MaxTextSize": 16,
+						"MinTextSize": 9
+					}
+				}
+			]
+		},
+		{
+			"name": "Bind_Name",
+			"className": "TextLabel",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							-12
+						],
+						[
+							0.5,
+							0
+						]
+					]
+				},
+				"BackgroundTransparency": 1,
+				"Text": "",
+				"TextColor3": [
+					0.902,
+					0.875,
+					0.812
+				],
+				"FontFace": {
+					"Font": {
+						"family": "rbxasset://fonts/families/AccanthisADFStd.json",
+						"weight": "Bold",
+						"style": "Normal"
+					}
+				},
+				"TextSize": 16,
+				"TextXAlignment": "Center",
+				"TextYAlignment": "Center",
+				"TextWrapped": true,
+				"Position": {
+					"UDim2": [
+						[
+							0.5,
+							0
+						],
+						[
+							0.5,
+							2
+						]
+					]
+				},
+				"AnchorPoint": [
+					0.5,
+					0.5
+				],
+				"TextScaled": true,
+				"ZIndex": 2
+			},
+			"children": [
+				{
+					"name": "UITextSizeConstraint",
+					"className": "UITextSizeConstraint",
+					"properties": {
+						"MaxTextSize": 16,
+						"MinTextSize": 9
+					}
+				}
+			]
+		},
+		{
+			"name": "Bind_Tag",
+			"className": "TextLabel",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							-12
+						],
+						[
+							0,
+							14
+						]
+					]
+				},
+				"BackgroundTransparency": 1,
+				"Text": "",
+				"TextColor3": [
+					0.682,
+					0.706,
+					0.749
+				],
+				"FontFace": {
+					"Font": {
+						"family": "rbxasset://fonts/families/BuilderSans.json",
+						"weight": "Medium",
+						"style": "Normal"
+					}
+				},
+				"TextSize": 12,
+				"TextXAlignment": "Center",
+				"TextYAlignment": "Bottom",
+				"TextWrapped": true,
+				"Position": {
+					"UDim2": [
+						[
+							0.5,
+							0
+						],
+						[
+							1,
+							-4
+						]
+					]
+				},
+				"AnchorPoint": [
+					0.5,
+					1
+				],
+				"ZIndex": 2
+			}
+		},
+		{
+			"name": "Bind_Shade",
+			"className": "Frame",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							0
+						],
+						[
+							1,
+							0
+						]
+					]
+				},
+				"BackgroundColor3": [
+					0.051,
+					0.063,
+					0.086
+				],
+				"BackgroundTransparency": 0.45,
+				"BorderSizePixel": 0,
+				"Visible": false,
+				"ZIndex": 1
+			},
+			"children": [
+				{
+					"name": "UICorner",
+					"className": "UICorner",
+					"properties": {
+						"CornerRadius": {
+							"UDim": [
+								0,
+								3
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Bind_Selected",
+			"className": "Frame",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							0
+						],
+						[
+							1,
+							0
+						]
+					]
+				},
+				"BackgroundTransparency": 1,
+				"Visible": false,
+				"ZIndex": 4
+			},
+			"children": [
+				{
+					"name": "UICorner",
+					"className": "UICorner",
+					"properties": {
+						"CornerRadius": {
+							"UDim": [
+								0,
+								3
+							]
+						}
+					}
+				},
+				{
+					"name": "UIStroke",
+					"className": "UIStroke",
+					"properties": {
+						"Color": [
+							0.941,
+							0.867,
+							0.69
+						],
+						"Thickness": 2,
+						"Transparency": 0,
+						"ApplyStrokeMode": "Border"
+					}
+				}
+			]
+		}
+	]
+}

@@ -1,7 +1,9 @@
 --!strict
 
 local Expect = require("../Expect")
+local Loader = require("../Loader")
 local Profile = require("../../src/ServerScriptService/Server/Data/Profile")
+local Hotbar = Loader.load("src/ReplicatedStorage/Shared/Hotbar")
 
 return {
 	["new profile is serializable and current"] = function()
@@ -28,5 +30,22 @@ return {
 		Expect.errors(function()
 			Profile.Migrate(profile)
 		end)
+	end,
+	["new profile has an empty hotbar of the shared size"] = function()
+		local profile = Profile.new()
+		Expect.equal(Profile.HotbarSize, Hotbar.Size)
+		Expect.equal(#profile.hotbar, Hotbar.Size)
+		for _, slot in profile.hotbar do
+			Expect.equal(slot, "")
+		end
+	end,
+	["migrates schema 1 by adding an empty hotbar"] = function()
+		local profile = Profile.new() :: any
+		profile.schemaVersion = 1
+		profile.hotbar = nil
+		local migrated = Profile.Migrate(profile)
+		Expect.equal(migrated.schemaVersion, Profile.SchemaVersion)
+		Expect.equal(#migrated.hotbar, Hotbar.Size)
+		Expect.truthy(Profile.IsSerializable(migrated))
 	end,
 }

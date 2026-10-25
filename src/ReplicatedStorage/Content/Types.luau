@@ -55,6 +55,8 @@ export type SkillDef = {
 	kind: "Active" | "Passive",
 	source: "Basic" | "Class" | "Spell" | "Enemy",
 	circle: number?,
+	--[=[ Spells only: fixed entry number in the spellbook, unique across all spells. ]=]
+	number: number?,
 	line: string?,
 	delivery: Delivery?,
 	targets: ("Enemy" | "Ally" | "Self")?,

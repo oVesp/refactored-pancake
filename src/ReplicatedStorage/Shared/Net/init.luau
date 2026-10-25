@@ -93,6 +93,16 @@ local Remotes: { [string]: RemoteSpec } = {
 			return arity(1, ...) and isId((...))
 		end,
 	},
+	SetHotbarSlot = {
+		direction = "ClientToServer",
+		rateLimit = { capacity = 10, perSecond = 5 },
+		validate = function(...)
+			local index, kind, id = ...
+			local indexOk = type(index) == "number" and index >= 1 and index <= 8 and index % 1 == 0
+			local entryOk = (kind == "" and id == "") or ((kind == "Skill" or kind == "Discipline") and isId(id))
+			return arity(3, ...) and indexOk and entryOk
+		end,
+	},
 	EquipItem = {
 		direction = "ClientToServer",
 		rateLimit = { capacity = 6, perSecond = 3 },

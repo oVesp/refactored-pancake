@@ -23,14 +23,19 @@ export type Profile = {
 	inventory: { ItemStack },
 	--[=[ Slot name -> item uid. ]=]
 	equipment: { [string]: number },
+	--[=[ Hotbar layout, `HOTBAR_SIZE` encoded slots (`Shared/Hotbar`); `""` is empty. ]=]
+	hotbar: { string },
 	nextUid: number,
 }
 
-local SCHEMA_VERSION = 1
+local SCHEMA_VERSION = 2
+-- Keep in step with Shared/Hotbar.Size (checked by Profile.spec).
+local HOTBAR_SIZE = 8
 
 local Profile = {}
 
 Profile.SchemaVersion = SCHEMA_VERSION
+Profile.HotbarSize = HOTBAR_SIZE
 
 --[=[
 	Returns a fresh profile for a new character, holding `starter` items. Persistent state only;
@@ -47,6 +52,7 @@ function Profile.new(starter: { { id: string, count: number } }?): Profile
 		disciplines = {},
 		inventory = {},
 		equipment = {},
+		hotbar = table.create(HOTBAR_SIZE, ""),
 		nextUid = 1,
 	}
 	for _, entry in (starter or {}) :: { { id: string, count: number } } do
@@ -62,6 +68,10 @@ end
 ]=]
 function Profile.Migrate(data: Profile): Profile
 	assert(data.schemaVersion <= SCHEMA_VERSION, `Profile schema {data.schemaVersion} is newer than {SCHEMA_VERSION}`)
+	if data.schemaVersion < 2 then
+		data.hotbar = table.create(HOTBAR_SIZE, "")
+		data.schemaVersion = 2
+	end
 	return data
 end
 

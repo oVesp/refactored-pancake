@@ -297,6 +297,26 @@
 			"notes": "Layout objects + templates; re-author in Studio when restyled."
 		},
 		{
+			"id": "ui:SpellCell",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiTemplates/SpellCell.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Layout objects + templates; re-author in Studio when restyled."
+		},
+		{
+			"id": "ui:DragLayer",
+			"type": "ui",
+			"path": "src/StarterGui/DragLayer.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Layout objects + templates; re-author in Studio when restyled."
+		},
+		{
 			"id": "ui:ItemSlot",
 			"type": "ui",
 			"path": "src/ReplicatedStorage/UiTemplates/ItemSlot.model.json",

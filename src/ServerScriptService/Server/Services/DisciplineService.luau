@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Constants = require(ReplicatedStorage.Shared.Constants)
 local Disciplines = require(ReplicatedStorage.Content.Disciplines)
+local Hotbar = require(ReplicatedStorage.Shared.Hotbar)
 local NetServer = require(ReplicatedStorage.Shared.Net.Server)
 local Types = require(script.Parent.Parent.Types)
 
@@ -55,6 +56,7 @@ function DisciplineService.LearnAll(player: Player)
 			if not table.find(p.disciplines, id) then
 				table.insert(p.disciplines, id)
 				table.insert(learned, Disciplines.ById[id].name)
+				Hotbar.AutoPlace(p.hotbar, Hotbar.Encode("Discipline", id))
 			end
 		end
 	end, "disciplines")

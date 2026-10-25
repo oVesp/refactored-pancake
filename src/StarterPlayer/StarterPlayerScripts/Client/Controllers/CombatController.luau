@@ -5,8 +5,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
-local Disciplines = require(ReplicatedStorage.Content.Disciplines)
 local Formulas = require(ReplicatedStorage.Shared.Formulas)
+local Hotbar = require(ReplicatedStorage.Shared.Hotbar)
 local NetClient = require(ReplicatedStorage.Shared.Net.Client)
 local Signal = require(ReplicatedStorage.Shared.Signal)
 local Skills = require(ReplicatedStorage.Content.Skills)
@@ -16,7 +16,6 @@ local Tuning = require(ReplicatedStorage.Content.Tuning)
 local AIM_RANGE = 300
 local PAD_AIM_DISTANCE = 30
 local DODGE_SECONDS = 0.2
-local HOTBAR_SIZE = 8
 -- Seconds a queued action may wait past its predicted ready time for the server's cast to end.
 local QUEUE_GRACE = 0.5
 
@@ -35,8 +34,8 @@ export type Slot = {
 ]=]
 local CombatController = {}
 
---[=[ Fires when the hotbar layout changes. ]=]
-CombatController.HotbarChanged = Signal.new() :: Signal.Signal<{ Slot }>
+--[=[ Fires when the hotbar layout changes; the map holds only filled slots (1..Hotbar.Size). ]=]
+CombatController.HotbarChanged = Signal.new() :: Signal.Signal<{ [number]: Slot }>
 --[=[ Fires `(skillId, reason)` when the server rejects a predicted use. ]=]
 CombatController.Rejected = Signal.new() :: Signal.Signal<string, string>
 --[=[ Fires `(skillId, aim)` when a use is sent (local feedback). ]=]
@@ -53,7 +52,7 @@ local gcdReadyAt = 0
 local lockedUntil = 0
 local queued: string? = nil
 local queuedUntil = 0
-local hotbar: { Slot } = {}
+local hotbar: { [number]: Slot } = {}
 
 local function character(): (Model?, BasePart?, Humanoid?)
 	local model = player.Character
@@ -252,8 +251,8 @@ function CombatController.ActivateSlot(index: number)
 	end
 end
 
---[=[ Current hotbar slots. ]=]
-function CombatController.Hotbar(): { Slot }
+--[=[ Current hotbar slots by index; empty slots are absent. ]=]
+function CombatController.Hotbar(): { [number]: Slot }
 	return hotbar
 end
 
@@ -299,15 +298,11 @@ function CombatController.Dodge()
 end
 
 local function rebuildHotbar(snapshot: { [string]: any })
-	local slots: { Slot } = {}
-	for _, skillId in snapshot.actives do
-		if skillId ~= Skills.Basic.Light and skillId ~= Skills.Basic.Heavy and #slots < HOTBAR_SIZE then
-			table.insert(slots, { kind = "Skill", id = skillId })
-		end
-	end
-	for _, id in Disciplines.Order do
-		if table.find(snapshot.disciplines, id) and #slots < HOTBAR_SIZE then
-			table.insert(slots, { kind = "Discipline", id = id })
+	local slots: { [number]: Slot } = {}
+	for index = 1, Hotbar.Size do
+		local kind: Hotbar.Kind?, id: string? = Hotbar.Decode(snapshot.hotbar[index] or "")
+		if kind and id then
+			slots[index] = { kind = kind, id = id }
 		end
 	end
 	hotbar = slots

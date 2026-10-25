@@ -7,6 +7,7 @@ local TweenService = game:GetService("TweenService")
 
 local Constants = require(ReplicatedStorage.Shared.Constants)
 local Disciplines = require(ReplicatedStorage.Content.Disciplines)
+local Hotbar = require(ReplicatedStorage.Shared.Hotbar)
 local Maid = require(ReplicatedStorage.Shared.Maid)
 local NetClient = require(ReplicatedStorage.Shared.Net.Client)
 local Skills = require(ReplicatedStorage.Content.Skills)
@@ -23,6 +24,8 @@ local TARGET_ATTRIBUTES = { Attributes.Hp, Attributes.MaxHp, "Level", "DisplayNa
 local TOAST_SECONDS = 4
 local MAX_TOASTS = 5
 local KEY_LABELS = { "1", "2", "3", "4", "5", "6", "7", "8" }
+-- Background transparency of an empty hotbar slot (shown only while the spellbook is open).
+local EMPTY_SLOT_TRANSPARENCY = 0.55
 
 local REJECT_TEXT: { [string]: string } = {
 	Resource = "Not enough resource",
@@ -44,6 +47,7 @@ local UIController: any
 local ProfileController: any
 local CombatController: any
 local TargetController: any
+local DragController: any
 
 local player = Players.LocalPlayer
 local characterMaid = Maid.new()
@@ -53,6 +57,8 @@ local slotFrames: { { frame: Frame, cooldown: Frame, id: string, kind: string } 
 local castEndsAt = 0
 local castStartedAt = 0
 local castFillColor: Color3? = nil
+local editingHotbar = false
+local hotbarFilled = false
 
 local function fill(barFill: GuiObject, text: GuiObject, value: number, max: number, format: string?)
 	local ratio = if max > 0 then math.clamp(value / max, 0, 1) else 0
@@ -233,16 +239,32 @@ local function renderZone()
 	)
 end
 
-local function renderHotbar(slots: { any })
+local function updateHotbarVisible()
+	bound.Bind_Hotbar.Visible = hotbarFilled or editingHotbar
+end
+
+local function renderHotbar(slots: { [number]: any })
 	UIController.ClearRows(bound.Bind_Hotbar)
 	table.clear(slotFrames)
-	bound.Bind_Hotbar.Visible = #slots > 0
-	for index, slot in slots do
+	local targets: { [number]: GuiObject } = {}
+	hotbarFilled = false
+	for index = 1, Hotbar.Size do
+		local slot = slots[index]
 		local frame = UIController.Clone("HotbarSlot") :: Frame
 		frame.LayoutOrder = index
 		-- Active makes the slot sink clicks so tapping it does not also fire the light attack.
 		frame.Active = true
+		targets[index] = frame
 		local parts = UIController.Bind(frame, { "Bind_Name", "Bind_Key", "Bind_Cost", "Bind_Cooldown" })
+		UIController.SetText(parts.Bind_Key, KEY_LABELS[index] or "")
+		if not slot then
+			UIController.SetText(parts.Bind_Name, "")
+			UIController.SetText(parts.Bind_Cost, "")
+			frame.BackgroundTransparency = EMPTY_SLOT_TRANSPARENCY
+			frame.Parent = bound.Bind_Hotbar
+			continue
+		end
+		hotbarFilled = true
 		local name, cost = slot.id, ""
 		if slot.kind == "Skill" then
 			local skill = Skills.ById[slot.id]
@@ -256,13 +278,18 @@ local function renderHotbar(slots: { any })
 			cost = string.format("%d Focus", def.cost)
 		end
 		UIController.SetText(parts.Bind_Name, name)
-		UIController.SetText(parts.Bind_Key, KEY_LABELS[index] or "")
 		UIController.SetText(parts.Bind_Cost, cost)
 		frame.InputBegan:Connect(function(input)
 			if
-				input.UserInputType == Enum.UserInputType.Touch
-				or input.UserInputType == Enum.UserInputType.MouseButton1
+				input.UserInputType ~= Enum.UserInputType.Touch
+				and input.UserInputType ~= Enum.UserInputType.MouseButton1
 			then
+				return
+			end
+			-- While the spellbook is open the bar is being arranged: presses drag instead of cast.
+			if editingHotbar then
+				DragController.Begin(input, { kind = slot.kind, id = slot.id }, name, index)
+			else
 				CombatController.ActivateSlot(index)
 			end
 		end)
@@ -272,6 +299,8 @@ local function renderHotbar(slots: { any })
 			{ frame = frame, cooldown = parts.Bind_Cooldown :: Frame, id = slot.id, kind = slot.kind }
 		)
 	end
+	DragController.SetTargets(targets)
+	updateHotbarVisible()
 end
 
 local function updateCooldowns()
@@ -309,6 +338,7 @@ function HudController.Init(deps: { [string]: any })
 	ProfileController = deps.ProfileController
 	CombatController = deps.CombatController
 	TargetController = deps.TargetController
+	DragController = deps.DragController
 end
 
 function HudController.Start()
@@ -359,6 +389,12 @@ function HudController.Start()
 	end
 	CombatController.HotbarChanged:Connect(renderHotbar)
 	renderHotbar(CombatController.Hotbar())
+	UIController.ModalChanged:Connect(function(name: string, isOpen: boolean)
+		if name == "Spellbook" then
+			editingHotbar = isOpen
+			updateHotbarVisible()
+		end
+	end)
 	CombatController.Rejected:Connect(function(_skillId: string, reason: string)
 		if REJECT_TEXT[reason] then
 			HudController.Toast(REJECT_TEXT[reason])
