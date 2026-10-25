@@ -72,11 +72,10 @@ local MOVE_INPUTS: { Enum.KeyCode } = {
 	Enum.KeyCode.Left,
 	Enum.KeyCode.Right,
 	Enum.KeyCode.Space,
-	Enum.KeyCode.Thumbstick1,
-	Enum.KeyCode.ButtonA,
 }
 
--- Movement is held by sinking its inputs above the character controls, and the touch thumbstick is hidden.
+-- Movement is held by sinking its keys above the character controls, and the touch thumbstick is hidden.
+-- Gamepad sticks and A are left alone: while a menu button is selected they drive GUI navigation.
 local function holdMovement(hold: boolean)
 	if hold then
 		ContextActionService:BindActionAtPriority(HOLD_ACTION, function()
