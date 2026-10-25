@@ -15,11 +15,16 @@ local log = Logger.new("Effects")
 
 -- Upper bound on an effect's life, in case the emit promise never settles.
 local MAX_LIFETIME = 4
+-- Share of its emitters' rate a charge-up starts at; it climbs to the full rate as the cast ends.
+local CHARGE_START_RATE = 0.35
+-- Seconds a finished charge-up keeps its live particles before it is removed.
+local CHARGE_LINGER = 0.5
 
 --[=[
 	Authored effects: templates under `ReplicatedStorage.Vfx`, edited in Studio with VFX Forge and
-	played through its emit module (`vendor/ForgeVFX`), plus the hit feedback that needs code:
-	hitstop, a body flash and screen effects. Templates hold emitters, sprite-sheet `SurfaceGui`
+	played through its emit module (`vendor/ForgeVFX`), worn by projectiles and casting hands as
+	continuous layers, plus the hit feedback that needs code: hitstop, a body flash and screen
+	effects. Templates hold emitters, sprite-sheet `SurfaceGui`
 	layers for shapes that lie level in the world, and flash lights; emitters and image labels name
 	their texture with a `TextureKey` attribute (an `Assets.Textures` key) so asset ids stay in the
 	manifest. Client-only and cosmetic.
@@ -135,14 +140,22 @@ local function animate(effect: Instance): number
 	return busy
 end
 
+local function template(name: string): BasePart?
+	local found = templates:FindFirstChild(name)
+	if found and found:IsA("BasePart") then
+		return found
+	end
+	log:Warn("Unknown effect %s", name)
+	return nil
+end
+
 --[=[ Plays the template `name` at `cframe`; the copy removes itself when the effect ends. ]=]
 function Effects.Play(name: string, cframe: CFrame): BasePart?
-	local template = templates:FindFirstChild(name)
-	if not template or not template:IsA("BasePart") then
-		log:Warn("Unknown effect %s", name)
+	local source = template(name)
+	if not source then
 		return nil
 	end
-	local effect = template:Clone()
+	local effect = source:Clone()
 	effect.CFrame = cframe
 	effect.Parent = folder
 	local started = os.clock()
@@ -155,17 +168,80 @@ function Effects.Play(name: string, cframe: CFrame): BasePart?
 end
 
 --[=[
+	Copies the continuous layers of template `name` (emitters, trails, lights, attachments) onto
+	`part`, such as a projectile body. A trail names its end attachments with `From` and `To`
+	attributes. `Particles.Release` stops the layers and removes the part.
+]=]
+function Effects.Attach(name: string, part: BasePart)
+	local source = template(name)
+	if not source then
+		return
+	end
+	for _, child in source:GetChildren() do
+		child:Clone().Parent = part
+	end
+	for _, child in part:GetChildren() do
+		if child:IsA("Trail") then
+			child.Attachment0 = part:FindFirstChild(tostring(child:GetAttribute("From"))) :: Attachment?
+			child.Attachment1 = part:FindFirstChild(tostring(child:GetAttribute("To"))) :: Attachment?
+		end
+	end
+end
+
+--[=[
+	Holds template `name` at its `Offset` attribute from `root` (the casting hand) for `duration`
+	seconds, its emitters speeding up to their full rate as the cast ends, then releases it.
+	Returns the copy; destroying it cancels the charge.
+]=]
+function Effects.Charge(name: string, root: BasePart, duration: number): Instance?
+	local source = template(name)
+	if not source then
+		return nil
+	end
+	local effect = source:Clone()
+	local offset = effect:GetAttribute("Offset")
+	local hold = CFrame.new(if typeof(offset) == "Vector3" then offset else Vector3.zero)
+	effect.CFrame = root.CFrame * hold
+	effect.Parent = folder
+	local rates: { [ParticleEmitter]: number } = {}
+	for _, item in effect:GetDescendants() do
+		if item:IsA("ParticleEmitter") then
+			rates[item] = item.Rate
+			item.Rate *= CHARGE_START_RATE
+		end
+	end
+	local started = os.clock()
+	local connection: RBXScriptConnection
+	connection = RunService.RenderStepped:Connect(function()
+		local elapsed = os.clock() - started
+		if not effect.Parent or not root.Parent or elapsed >= duration then
+			connection:Disconnect()
+			if effect.Parent then
+				Particles.Release(effect, CHARGE_LINGER)
+			end
+			return
+		end
+		effect.CFrame = root.CFrame * hold
+		local ramp = CHARGE_START_RATE + (1 - CHARGE_START_RATE) * elapsed / duration
+		for emitter, rate in rates do
+			emitter.Rate = rate * ramp
+		end
+	end)
+	return effect
+end
+
+--[=[
 	Plays a screen template for the local player: a `ScreenGui` of sprite-sheet layers, or a
 	`ColorCorrectionEffect` that eases back to neutral over its `Lifetime` attribute.
 ]=]
 function Effects.Screen(name: string)
-	local template = templates:FindFirstChild(name)
-	if template and template:IsA("ScreenGui") then
-		local gui = template:Clone()
+	local source = templates:FindFirstChild(name)
+	if source and source:IsA("ScreenGui") then
+		local gui = source:Clone()
 		gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 		Debris:AddItem(gui, playFlipbook(gui) + 0.05)
-	elseif template and template:IsA("ColorCorrectionEffect") then
-		local tint = template:Clone()
+	elseif source and source:IsA("ColorCorrectionEffect") then
+		local tint = source:Clone()
 		tint.Parent = Lighting
 		local duration = attribute(tint, "Lifetime", 0.25)
 		TweenService:Create(tint, TweenInfo.new(duration, Enum.EasingStyle.Quad), {

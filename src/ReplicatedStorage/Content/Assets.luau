@@ -100,6 +100,9 @@ local Textures: { [string]: TextureAsset } = {
 	DustPuff = { id = "rbxassetid://76251788405610", fallback = "rbxasset://textures/particles/smoke_main.dds" },
 	SpeedLines = { id = "rbxassetid://103099966804930", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
 	FlameTongue = { id = "rbxassetid://76703182113876", fallback = "rbxasset://textures/particles/fire_main.dds" },
+	FireCore = { id = "rbxassetid://138467462855131", fallback = "rbxasset://textures/particles/fire_main.dds" },
+	IceShard = { id = "rbxassetid://76360555477886", fallback = "rbxasset://textures/particles/sparkles_main.dds" },
+	FrostFloor = { id = "rbxassetid://136332719640706", fallback = "rbxasset://textures/particles/smoke_main.dds" },
 }
 
 --[=[

@@ -23,8 +23,23 @@ EARTH = (95, 80, 65)
 RAGE_HOT = (255, 190, 120)
 RAGE = (255, 90, 40)
 RAGE_D = (120, 20, 10)
+FIRE_HOT = (255, 240, 170)
+FIRE = (255, 150, 40)
+FIRE_D = (200, 50, 15)
+SMOKE = (80, 60, 50)
+SMOKE_D = (40, 35, 35)
+ICE_HOT = (240, 252, 255)
+ICE = (150, 220, 255)
+ICE_D = (70, 140, 230)
+MIST = (225, 245, 255)
+# Flames tint toward orange and glow only partly, so they stay orange instead of washing out in daylight.
+FLAME = ((255, 200, 90), (255, 120, 30), FIRE_D)
+EMBER_CORE = ((255, 225, 140), (255, 140, 40))
 
 FLIP = {"FlipbookLayout": "Grid4x4", "FlipbookMode": "OneShot"}
+# VelocityParallel lays a texture's x axis along the velocity; IceShard points up its frame,
+# so this turn makes a shard lead with its tip.
+SHARD_ALONG = -90
 SHEET = {"FlipbookGrid": 4, "FramePixels": 256}
 
 
@@ -64,9 +79,40 @@ def emitter(name, key, attrs=None, **props):
     }
 
 
-def anchor(children, size=(1, 1, 1)):
-    """The invisible root part a template is played from."""
+def stream(name, key, rate, attrs=None, **props):
+    """A continuous emitter for Effects.Attach and Effects.Charge, which stop it when the part is released."""
+    properties = {"Rate": rate, "LightEmission": 1, "LightInfluence": 0, "Rotation": nr(0, 360), "Speed": nr(0)}
+    properties.update(props)
     return {
+        "name": name,
+        "className": "ParticleEmitter",
+        "properties": properties,
+        "attributes": {"TextureKey": key, **(attrs or {})},
+    }
+
+
+def inward(name, key, rate, size, colors, transparency=(1, 0.2, 0), **props):
+    """Charge-up particles that spawn on a shell around the hand and pull inward."""
+    return stream(
+        name,
+        key,
+        rate,
+        Shape="Sphere",
+        ShapeStyle="Surface",
+        ShapeInOut="Inward",
+        Speed=nr(4, 6),
+        Lifetime=nr(0.35, 0.45),
+        Size=ns(*size),
+        Transparency=ns(*transparency),
+        Color=cs(*colors),
+        RotSpeed=nr(-90, 90),
+        **props,
+    )
+
+
+def anchor(children, size=(1, 1, 1), attrs=None):
+    """The invisible root part a template is played from."""
+    part = {
         "className": "Part",
         "properties": {
             "Anchored": True,
@@ -79,6 +125,9 @@ def anchor(children, size=(1, 1, 1)):
         },
         "children": children,
     }
+    if attrs:
+        part["attributes"] = attrs
+    return part
 
 
 def attachment(name, children, position=(0, 0, 0)):
@@ -127,6 +176,37 @@ def label(name, key, tint, transparency=0, z=1, scale=1, rotation=0, attrs=None)
         },
         "attributes": {"TextureKey": key, **(attrs or {})},
     }
+
+
+def glow(tint, brightness, reach):
+    """A steady point light that travels with an attached template and dims when it is released."""
+    return {
+        "name": "Light",
+        "className": "PointLight",
+        "properties": {"Color": {"Color3": color(tint)}, "Brightness": brightness, "Range": reach, "Shadows": False},
+    }
+
+
+def trail(colors, lifetime, width):
+    """A ribbon behind a moving part, between two attachments its From and To attributes name."""
+    return [
+        attachment("TrailTop", [], (0, width / 2, 0)),
+        attachment("TrailBottom", [], (0, -width / 2, 0)),
+        {
+            "name": "Trail",
+            "className": "Trail",
+            "properties": {
+                "Lifetime": lifetime,
+                "Color": cs(*colors),
+                "Transparency": ns(0.1, 1),
+                "LightEmission": 1,
+                "LightInfluence": 0,
+                "FaceCamera": True,
+                "MinLength": 0,
+            },
+            "attributes": {"TextureKey": "TrailStreak", "From": "TrailTop", "To": "TrailBottom"},
+        },
+    ]
 
 
 def fade_to(tint):
@@ -498,6 +578,475 @@ war_cry_wave = anchor(
     size=(26, 0.05, 26),
 )
 
+# Charge-ups (Effects.Charge): held at the casting hand, their emitters speeding up until the cast ends.
+HAND = {"Offset": {"Vector3": [0.8, 0.4, -1.6]}}
+
+fire_charge = anchor(
+    [
+        inward("Gather", "FlameTongue", 55, (1.8, 0.6), FLAME, LightEmission=0.35, Brightness=2.5, **FLIP),
+        stream(
+            "Core",
+            "FireCore",
+            20,
+            LockedToPart=True,
+            LightEmission=0.7,
+            Size=ns(1.1),
+            Lifetime=nr(0.1),
+            Color=cs(*EMBER_CORE),
+            Brightness=2,
+            RotSpeed=nr(-300, 300),
+        ),
+        stream(
+            "Embers",
+            "SparkStreak",
+            15,
+            Orientation="VelocityParallel",
+            Speed=nr(2, 5),
+            SpreadAngle=[180, 180],
+            Acceleration=[0, 6, 0],
+            Lifetime=nr(0.3, 0.5),
+            Size=ns(0.6, 0),
+            Color=cs(FIRE_HOT, FIRE),
+            Brightness=2,
+            Rotation=nr(0),
+        ),
+        glow(FIRE, 1.5, 8),
+    ],
+    size=(3, 3, 3),
+    attrs=HAND,
+)
+
+frost_charge = anchor(
+    [
+        inward("Gather", "Glint", 35, (0.7, 0.2), (ICE_HOT, ICE)),
+        inward("Splinters", "IceShard", 14, (0.8, 0.3), (ICE_HOT, ICE_D)),
+        inward("Mist", "Smoke", 10, (1.2, 0.4), (MIST,), (1, 0.6, 0.5), LightEmission=0.3),
+        stream(
+            "Core",
+            "SoftGlow",
+            15,
+            LockedToPart=True,
+            Size=ns(1.6),
+            Lifetime=nr(0.1),
+            Color=cs(ICE),
+            Transparency=ns(0.3),
+        ),
+        glow(ICE, 1.5, 8),
+    ],
+    size=(3, 3, 3),
+    attrs=HAND,
+)
+
+# Firebolt in flight (Effects.Attach): a ragged fireball head shedding flame tongues, embers and smoke.
+firebolt_body = anchor(
+    [
+        stream(
+            "Core",
+            "FireCore",
+            30,
+            LockedToPart=True,
+            LightEmission=0.6,
+            Size=ns(2),
+            Lifetime=nr(0.08, 0.12),
+            Color=cs(*EMBER_CORE),
+            Brightness=1.2,
+            RotSpeed=nr(-300, 300),
+            ZOffset=1,
+        ),
+        stream(
+            "Glow",
+            "SoftGlow",
+            20,
+            LockedToPart=True,
+            Size=ns(4.2),
+            Lifetime=nr(0.1),
+            Color=cs((255, 140, 50)),
+            Transparency=ns(0.75),
+            Brightness=1,
+        ),
+        stream(
+            "Tongues",
+            "FlameTongue",
+            90,
+            LightEmission=0.35,
+            Speed=nr(0.5, 2.5),
+            SpreadAngle=[180, 180],
+            Acceleration=[0, 4, 0],
+            Lifetime=nr(0.25, 0.4),
+            Size=ns(2.2, 0.6),
+            Color=cs(*FLAME),
+            Brightness=1.2,
+            RotSpeed=nr(-90, 90),
+            **FLIP,
+        ),
+        stream(
+            "Embers",
+            "SparkStreak",
+            25,
+            Orientation="VelocityParallel",
+            Speed=nr(4, 9),
+            SpreadAngle=[180, 180],
+            Drag=2,
+            Acceleration=[0, 6, 0],
+            Lifetime=nr(0.2, 0.4),
+            Size=ns(0.9, 0),
+            Color=cs((255, 220, 140), FIRE),
+            Brightness=2,
+            Rotation=nr(0),
+        ),
+        stream(
+            "Smoke",
+            "Smoke",
+            12,
+            LightEmission=0,
+            Acceleration=[0, 3, 0],
+            Lifetime=nr(0.6, 1),
+            Size=ns(1.2, 3.2),
+            Transparency=ns(0.55, 1),
+            Color=cs(SMOKE, SMOKE_D),
+            RotSpeed=nr(-40, 40),
+        ),
+        *trail((FIRE_HOT, FIRE, FIRE_D), 0.2, 0.9),
+        glow((255, 140, 50), 2, 12),
+    ]
+)
+
+# Firebolt hit: a hot flash, the core blooming out, flame tongues and embers flung wide, dark smoke.
+firebolt_burst = anchor(
+    [
+        flash_star((8, 12), tint=FIRE_HOT, lifetime=0.1),
+        emitter(
+            "Core",
+            "FireCore",
+            Size=ns(3, 8),
+            Lifetime=nr(0.25),
+            Transparency=ns(0, 1),
+            Color=cs((255, 225, 140), (255, 120, 30)),
+            LightEmission=0.7,
+            Brightness=1.5,
+            ZOffset=1.5,
+        ),
+        emitter(
+            "Tongues",
+            "FlameTongue",
+            {"EmitCount": 12},
+            Speed=nr(8, 16),
+            SpreadAngle=[180, 180],
+            Drag=5,
+            Acceleration=[0, 6, 0],
+            Lifetime=nr(0.35, 0.55),
+            Size=ns(2.8, 1),
+            Color=cs(*FLAME),
+            LightEmission=0.35,
+            Brightness=1.2,
+            **FLIP,
+        ),
+        sparks(14, 20, 34, 180, (FIRE_HOT, FIRE)),
+        emitter(
+            "Smoke",
+            "Smoke",
+            {"EmitCount": 6},
+            Speed=nr(2, 5),
+            SpreadAngle=[180, 180],
+            Drag=2,
+            Acceleration=[0, 2, 0],
+            Lifetime=nr(1, 1.4),
+            Size=ns(2.5, 5.5),
+            Transparency=ns(0.5, 1),
+            Color=cs(SMOKE, SMOKE_D),
+            LightEmission=0,
+        ),
+        light(FIRE, 6, 18, 0.35),
+    ]
+)
+
+# A scorch mark that glows like embers, cools and fades within a second.
+scorch = anchor(
+    [
+        surface(
+            "Burn",
+            [
+                label("Char", "FireCore", (70, 45, 30), 0.3),
+                label("Embers", "FireCore", (255, 120, 40), 0.2, 2, 0.6, 0, fade_to((80, 30, 10))),
+            ],
+            {"FlipbookGrid": 1, "Lifetime": 1, "Fade": 0.6, "Grow": 1.05},
+        )
+    ],
+    size=(6, 0.05, 6),
+)
+
+# Frost Shard in flight: a cluster of turning ice splinters in a cold glow, shedding glints and mist.
+frost_shard_body = anchor(
+    [
+        stream(
+            "Core",
+            "IceShard",
+            24,
+            LockedToPart=True,
+            LightEmission=0.4,
+            Size=ns(2.6),
+            Lifetime=nr(0.08, 0.12),
+            Color=cs((190, 235, 255), (120, 190, 250)),
+            Brightness=1,
+            ZOffset=1,
+        ),
+        stream(
+            "Glow",
+            "SoftGlow",
+            20,
+            LockedToPart=True,
+            Size=ns(3.4),
+            Lifetime=nr(0.1),
+            Color=cs(ICE),
+            Transparency=ns(0.75),
+            Brightness=1,
+        ),
+        stream(
+            "Glints",
+            "Glint",
+            40,
+            Speed=nr(0.5, 2),
+            SpreadAngle=[180, 180],
+            Lifetime=nr(0.3, 0.5),
+            Size=ns(0.7, 0),
+            Color=cs(ICE_HOT, ICE),
+        ),
+        stream(
+            "Splinters",
+            "IceShard",
+            18,
+            Speed=nr(1, 3),
+            SpreadAngle=[180, 180],
+            Lifetime=nr(0.3, 0.5),
+            Size=ns(0.7, 0.2),
+            Color=cs(ICE_HOT, ICE_D),
+            Brightness=1,
+            RotSpeed=nr(-200, 200),
+        ),
+        stream(
+            "Mist",
+            "Smoke",
+            16,
+            LightEmission=0,
+            Lifetime=nr(0.5, 0.8),
+            Size=ns(1, 2.4),
+            Transparency=ns(0.7, 1),
+            Color=cs(MIST),
+            RotSpeed=nr(-30, 30),
+        ),
+        *trail((ICE_HOT, ICE), 0.25, 0.6),
+        glow(ICE, 1.5, 10),
+    ]
+)
+
+# Frost Shard hit: a cold flash and ring, splinters flung along their flight, glints and mist.
+frost_burst = anchor(
+    [
+        flash_star((7, 10), brightness=4, tint=ICE_HOT, lifetime=0.1),
+        emitter(
+            "Shards",
+            "IceShard",
+            {"EmitCount": 10},
+            Orientation="VelocityParallel",
+            Speed=nr(18, 30),
+            SpreadAngle=[180, 180],
+            Drag=5,
+            Acceleration=[0, -20, 0],
+            Lifetime=nr(0.3, 0.5),
+            Size=ns(1.8, 0.3),
+            Color=cs(ICE_HOT, ICE),
+            LightEmission=1,
+            Brightness=2,
+            Rotation=nr(SHARD_ALONG),
+            ZOffset=1,
+        ),
+        emitter(
+            "Glints",
+            "Glint",
+            {"EmitCount": 10},
+            Speed=nr(4, 10),
+            SpreadAngle=[180, 180],
+            Drag=3,
+            Lifetime=nr(0.4, 0.7),
+            Size=ns(1, 0),
+            Color=cs(ICE_HOT, ICE),
+            LightEmission=1,
+        ),
+        emitter(
+            "Ring",
+            "RingThin",
+            Size=ns((0, 1), (1, 10)),
+            Lifetime=nr(0.2),
+            Transparency=ns(0, 1),
+            Color=cs(ICE),
+            LightEmission=1,
+            Brightness=2,
+            ZOffset=1.8,
+        ),
+        emitter(
+            "Mist",
+            "Smoke",
+            {"EmitCount": 6},
+            Speed=nr(1, 3),
+            SpreadAngle=[180, 180],
+            Lifetime=nr(0.8, 1.2),
+            Size=ns(2, 4.5),
+            Transparency=ns(0.5, 1),
+            Color=cs(MIST),
+            LightEmission=0.3,
+        ),
+        light(ICE, 5, 16, 0.3),
+    ]
+)
+
+# A small patch of rime left where a frost spell lands.
+frost_splash = anchor(
+    [
+        surface(
+            "Rime",
+            [label("Rime", "FrostFloor", (200, 235, 255), 0.1)],
+            {"FlipbookGrid": 1, "Lifetime": 1.2, "Fade": 0.5, "Grow": 1.12},
+        )
+    ],
+    size=(7, 0.05, 7),
+)
+
+# Ice Patch area: rime spreads over the ground under a cold shock ring and a low snow puff.
+ice_patch_floor = anchor(
+    [
+        surface(
+            "Rime",
+            [label("Rime", "FrostFloor", (200, 235, 255), 0.05)],
+            {"FlipbookGrid": 1, "Lifetime": 1.8, "Fade": 0.4, "Grow": 1.1},
+        ),
+        surface(
+            "Ring",
+            [label("Ring", "ShockRing", (220, 240, 255), attrs=fade_to((90, 160, 235)))],
+            {**SHEET, "Lifetime": 0.45, "Grow": 1.2},
+            1,
+        ),
+        attachment("Burst", [dust(8, (3, 6), (3, 6), MIST, 0.45), light(ICE, 5, 22, 0.6)], (0, 1, 0)),
+    ],
+    size=(16, 0.05, 16),
+)
+
+# One eruption point of Ice Patch: splinters stab up out of the ground, chips fly and fall.
+ice_spike = anchor(
+    [
+        emitter(
+            "Spikes",
+            "IceShard",
+            {"EmitCount": 3},
+            Orientation="VelocityParallel",
+            Speed=nr(14, 22),
+            SpreadAngle=[18, 18],
+            Drag=9,
+            Lifetime=nr(0.6, 0.8),
+            Size=ns((0, 0.5), (0.12, 3.4), (0.75, 3.1), (1, 0)),
+            Transparency=ns((0, 0), (0.7, 0.05), (1, 1)),
+            Color=cs((220, 245, 255), (130, 200, 255), ICE_D),
+            LightEmission=0.2,
+            Brightness=1,
+            Rotation=nr(SHARD_ALONG),
+        ),
+        emitter(
+            "Chips",
+            "IceShard",
+            {"EmitCount": 4},
+            Speed=nr(8, 14),
+            SpreadAngle=[60, 60],
+            Acceleration=[0, -40, 0],
+            Lifetime=nr(0.5, 0.7),
+            Size=ns(0.6, 0.3),
+            Color=cs(ICE_HOT, ICE),
+            LightEmission=0.3,
+            RotSpeed=nr(-300, 300),
+        ),
+        emitter(
+            "Glints",
+            "Glint",
+            {"EmitCount": 3},
+            Speed=nr(5, 10),
+            SpreadAngle=[70, 70],
+            Drag=3,
+            Acceleration=[0, -12, 0],
+            Lifetime=nr(0.4, 0.7),
+            Size=ns(1.1, 0),
+            Color=cs(ICE_HOT, ICE),
+            LightEmission=1,
+        ),
+    ]
+)
+
+# Flame Fan jet (Effects.Attach on a nozzle): each emitter's Reach attribute is its share of the range
+# (speed = range / 0.45 * Reach) and its Arc attribute its share of the cone angle; the recipe applies them.
+flame_fan_jet = anchor(
+    [
+        stream(
+            "Tongues",
+            "FlameTongue",
+            140,
+            {"Reach": 1, "Arc": 0.5},
+            EmissionDirection="Front",
+            SpreadAngle=[8, 30],
+            Drag=1.2,
+            Lifetime=nr(0.45, 0.6),
+            Size=ns(0.8, 3, 4.5),
+            Transparency=ns(0.1, 0.3, 1),
+            Color=cs(*FLAME),
+            LightEmission=0.35,
+            Brightness=1.5,
+            RotSpeed=nr(-120, 120),
+            **FLIP,
+        ),
+        stream(
+            "Core",
+            "FireCore",
+            60,
+            {"Reach": 0.7, "Arc": 0.33},
+            EmissionDirection="Front",
+            SpreadAngle=[5, 20],
+            Lifetime=nr(0.15, 0.25),
+            Size=ns(1.2, 2.8),
+            Transparency=ns(0, 1),
+            Color=cs(*EMBER_CORE),
+            LightEmission=0.7,
+            Brightness=1.5,
+        ),
+        stream(
+            "Embers",
+            "SparkStreak",
+            40,
+            {"Reach": 1.1, "Arc": 0.5},
+            EmissionDirection="Front",
+            Orientation="VelocityParallel",
+            SpreadAngle=[10, 30],
+            Acceleration=[0, 8, 0],
+            Lifetime=nr(0.3, 0.5),
+            Size=ns(0.9, 0),
+            Color=cs(FIRE_HOT, FIRE),
+            Brightness=2,
+            Rotation=nr(0),
+        ),
+        stream(
+            "Smoke",
+            "Smoke",
+            25,
+            {"Reach": 0.5, "Arc": 0.5},
+            EmissionDirection="Front",
+            LightEmission=0,
+            SpreadAngle=[10, 30],
+            Drag=3,
+            Acceleration=[0, 4, 0],
+            Lifetime=nr(0.8, 1.2),
+            Size=ns(2, 5),
+            Transparency=ns(0.6, 1),
+            Color=cs(SMOKE, SMOKE_D),
+        ),
+        glow((255, 140, 50), 2.5, 16),
+    ]
+)
+
 # Screen effects (Effects.Screen), for the caster of a high-tier skill.
 speed_lines = {
     "className": "ScreenGui",
@@ -537,6 +1086,17 @@ TEMPLATES = {
     "WarCryWave": war_cry_wave,
     "SpeedLines": speed_lines,
     "RageTint": rage_tint,
+    "FireCharge": fire_charge,
+    "FrostCharge": frost_charge,
+    "FireboltBody": firebolt_body,
+    "FireboltBurst": firebolt_burst,
+    "Scorch": scorch,
+    "FrostShardBody": frost_shard_body,
+    "FrostBurst": frost_burst,
+    "FrostSplash": frost_splash,
+    "IcePatchFloor": ice_patch_floor,
+    "IceSpike": ice_spike,
+    "FlameFanJet": flame_fan_jet,
 }
 
 

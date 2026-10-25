@@ -18,7 +18,7 @@ export type ResolveInfo = {
 
 export type Recipe = {
 	--[=[ Charge-up on the caster while a cast time runs. Returns the instance to cancel it. ]=]
-	cast: ((root: BasePart, duration: number) -> Instance)?,
+	cast: ((root: BasePart, duration: number) -> Instance?)?,
 	--[=[ Dresses the invisible projectile anchor the controller moves along the flight path. ]=]
 	projectile: ((body: BasePart) -> ())?,
 	--[=[ Projectile hit at a world position. ]=]
@@ -76,15 +76,12 @@ local function inward(texture: string, color: ColorSequence, size: NumberSequenc
 	}
 end
 
-local FIRE = C(rgb(255, 240, 170), rgb(255, 150, 40), rgb(200, 50, 15), rgb(60, 20, 10))
-local FROST = C(rgb(240, 252, 255), rgb(150, 220, 255), rgb(70, 140, 230))
 local STORM = C(rgb(255, 255, 235), rgb(255, 235, 110), rgb(180, 150, 255))
 local HOLY = C(rgb(255, 255, 240), rgb(255, 225, 140), rgb(255, 170, 70))
 local LIFE = C(rgb(235, 255, 220), rgb(140, 255, 150), rgb(255, 245, 170))
 local RAGE = C(rgb(255, 220, 160), rgb(255, 100, 40), rgb(150, 20, 10))
 local DUST = C(rgb(170, 150, 125), rgb(120, 105, 90))
 -- Darker, normal-blended tints for shapes that must read on bright daylight ground.
-local ICE = C(rgb(200, 235, 255), rgb(90, 160, 235), rgb(40, 90, 190))
 local BOLT = C(rgb(255, 250, 210), rgb(255, 205, 60), rgb(200, 150, 255))
 local ARCANE = C(rgb(245, 230, 255), rgb(185, 130, 255), rgb(95, 55, 210))
 local WARD = C(rgb(240, 250, 255), rgb(150, 200, 255), rgb(90, 130, 255))
@@ -101,190 +98,36 @@ local HEX = C(rgb(230, 190, 255), rgb(130, 60, 190), rgb(40, 15, 60))
 ]=]
 local SpellEffects: { [string]: Recipe } = {}
 
+-- Plays a flat ground template under a mid-air hit when the ground is close enough to be touched.
+local function groundMark(name: string, position: Vector3, reach: number)
+	local ground = Particles.Ground(position)
+	if (position - ground).Magnitude <= reach then
+		local yaw = CFrame.Angles(0, math.random() * math.pi * 2, 0)
+		-- Lifted clear of tall grass, like the other ground layers.
+		Effects.Play(name, CFrame.new(ground + Vector3.new(0, 0.6, 0)) * yaw)
+	end
+end
+
 SpellEffects.firebolt = {
 	cast = function(root, duration)
-		return charge(root, duration, { inward("Fire", FIRE, N(0.6, 1.2), 40) }, rgb(255, 140, 50))
+		return Effects.Charge("FireCharge", root, duration)
 	end,
 	projectile = function(body)
-		Particles.Attach(body, {
-			{
-				texture = "SoftGlow",
-				color = C(rgb(255, 200, 110)),
-				size = N(2.6),
-				transparency = N(0.2),
-				lifetime = R(0.1),
-				rate = 40,
-				locked = true,
-			},
-			{
-				texture = "Fire",
-				color = FIRE,
-				size = N(1.8),
-				transparency = N(0, 1),
-				lifetime = R(0.12),
-				rate = 40,
-				locked = true,
-			},
-			{
-				texture = "Fire",
-				color = FIRE,
-				size = N(1.8, 1.2, 0.3),
-				lifetime = R(0.2, 0.35),
-				speed = R(0.5, 2),
-				spread = Vector2.new(180, 180),
-				rotSpeed = R(-200, 200),
-				rate = 160,
-			},
-			{
-				texture = "Flame",
-				color = FIRE,
-				size = N(1.2, 2.4),
-				transparency = N(0.3, 1),
-				lifetime = R(0.4, 0.6),
-				speed = R(0.5, 1.5),
-				spread = Vector2.new(180, 180),
-				rotSpeed = R(-120, 120),
-				rate = 25,
-			},
-			{
-				texture = "Smoke",
-				color = C(rgb(80, 60, 50), rgb(40, 35, 35)),
-				size = N(1, 3),
-				transparency = N(0.6, 1),
-				lifetime = R(0.6, 1),
-				acceleration = Vector3.new(0, 3, 0),
-				rotSpeed = R(-40, 40),
-				emission = 0,
-				rate = 15,
-			},
-		})
-		Particles.Trail(body, { color = FIRE, width = 0.9, lifetime = 0.2, texture = "TrailStreak" })
-		Particles.Light(body, rgb(255, 140, 50), 12, 2)
+		Effects.Attach("FireboltBody", body)
 	end,
 	impact = function(position)
-		Particles.Burst(CFrame.new(position), {
-			{
-				texture = "Scorch",
-				color = FIRE,
-				size = N(1, 7),
-				transparency = N(0, 1),
-				lifetime = R(0.25),
-				count = 1,
-			},
-			{
-				texture = "Fire",
-				color = FIRE,
-				size = N(2, 0.5),
-				lifetime = R(0.3, 0.6),
-				speed = R(6, 14),
-				spread = Vector2.new(180, 180),
-				drag = 6,
-				rotSpeed = R(-200, 200),
-				count = 18,
-			},
-			{
-				texture = "Smoke",
-				color = C(rgb(90, 70, 60), rgb(40, 35, 35)),
-				size = N(2, 5),
-				transparency = N(0.5, 1),
-				lifetime = R(1, 1.6),
-				speed = R(2, 5),
-				spread = Vector2.new(180, 180),
-				acceleration = Vector3.new(0, 2, 0),
-				emission = 0,
-				count = 8,
-			},
-			{
-				texture = "Streak",
-				color = FIRE,
-				size = N(0.4, 0),
-				lifetime = R(0.25, 0.4),
-				speed = R(20, 35),
-				spread = Vector2.new(180, 180),
-				drag = 4,
-				acceleration = Vector3.new(0, -30, 0),
-				orientation = Enum.ParticleOrientation.VelocityParallel,
-				rotation = R(90),
-				count = 12,
-			},
-		})
-		Particles.Flash(position, rgb(255, 140, 50), 16, 0.35)
+		Effects.Play("FireboltBurst", CFrame.new(position))
+		groundMark("Scorch", position, 5)
 	end,
 }
 
 SpellEffects.frost_shard = {
 	projectile = function(body)
-		Particles.Attach(body, {
-			{
-				texture = "StarBurst",
-				color = FROST,
-				size = N(1.8),
-				transparency = N(0.1, 1),
-				lifetime = R(0.1),
-				rate = 30,
-				locked = true,
-			},
-			{
-				texture = "Glint",
-				color = FROST,
-				size = N(0.6, 0),
-				lifetime = R(0.3, 0.5),
-				speed = R(0.5, 2),
-				spread = Vector2.new(180, 180),
-				rotSpeed = R(-90, 90),
-				rate = 40,
-			},
-			{
-				texture = "Smoke",
-				color = C(rgb(220, 240, 255)),
-				size = N(1, 2.2),
-				transparency = N(0.7, 1),
-				lifetime = R(0.5, 0.8),
-				rotSpeed = R(-30, 30),
-				emission = 0.3,
-				rate = 20,
-			},
-		})
-		Particles.Trail(body, { color = FROST, width = 0.5, lifetime = 0.25, texture = "TrailStreak" })
-		Particles.Light(body, rgb(150, 220, 255), 10, 1.5)
+		Effects.Attach("FrostShardBody", body)
 	end,
 	impact = function(position)
-		Particles.Burst(CFrame.new(position), {
-			{
-				texture = "Streak",
-				color = FROST,
-				size = N(1.4, 0.2),
-				lifetime = R(0.25, 0.4),
-				speed = R(18, 30),
-				spread = Vector2.new(180, 180),
-				drag = 5,
-				orientation = Enum.ParticleOrientation.VelocityParallel,
-				rotation = R(90),
-				count = 14,
-			},
-			{
-				texture = "Glint",
-				color = FROST,
-				size = N(1, 0),
-				lifetime = R(0.4, 0.7),
-				speed = R(4, 10),
-				spread = Vector2.new(180, 180),
-				drag = 3,
-				count = 10,
-			},
-			{
-				texture = "Smoke",
-				color = C(rgb(225, 245, 255)),
-				size = N(2, 4.5),
-				transparency = N(0.5, 1),
-				lifetime = R(0.8, 1.2),
-				speed = R(1, 3),
-				spread = Vector2.new(180, 180),
-				emission = 0.3,
-				count = 6,
-			},
-		})
-		Particles.Flash(position, rgb(150, 220, 255), 14, 0.3)
+		Effects.Play("FrostBurst", CFrame.new(position))
+		groundMark("FrostSplash", position, 5)
 	end,
 }
 
@@ -555,65 +398,42 @@ local function scatter(center: Vector3, radius: number): Vector3
 	return center + Vector3.new(math.cos(angle) * distance, 0, math.sin(angle) * distance)
 end
 
--- Ground eruption: frost spikes burst out of the floor at staggered points across the area.
+-- Ground eruption: rime spreads over the area and ice splinters stab up at staggered points.
 SpellEffects.ice_patch = {
 	cast = function(root, duration)
-		return charge(root, duration, {
-			inward("Glint", FROST, N(0.7, 0.2), 35),
-			inward("Smoke", C(rgb(220, 240, 255)), N(1.2, 0.4), 12),
-		}, rgb(150, 220, 255))
+		return Effects.Charge("FrostCharge", root, duration)
 	end,
 	resolve = function(info)
 		local center = groundTarget(info)
-		Particles.GroundWave(center, FROST, N(2, 18), 0.6)
+		local yaw = CFrame.Angles(0, math.random() * math.pi * 2, 0)
+		Effects.Play("IcePatchFloor", CFrame.new(center + Vector3.new(0, 0.6, 0)) * yaw)
 		for i = 1, 8 do
 			local point = if i == 1 then center else scatter(center, 6)
 			task.delay((i - 1) * 0.045, function()
-				Particles.Burst(CFrame.new(Particles.Ground(point)), {
-					{
-						texture = "Streak",
-						color = ICE,
-						size = N(5, 3.5, 0),
-						transparency = N(0, 0.1, 1),
-						lifetime = R(0.5, 0.7),
-						speed = R(14, 24),
-						spread = Vector2.new(18, 18),
-						drag = 9,
-						orientation = Enum.ParticleOrientation.VelocityParallel,
-						rotation = R(90),
-						emission = 0.15,
-						count = 5,
-					},
-					{
-						texture = "Glint",
-						color = FROST,
-						size = N(1.1, 0),
-						lifetime = R(0.4, 0.7),
-						speed = R(5, 10),
-						spread = Vector2.new(70, 70),
-						drag = 3,
-						acceleration = Vector3.new(0, -12, 0),
-						count = 3,
-					},
-				})
+				Effects.Play("IceSpike", CFrame.new(Particles.Ground(point)))
 			end)
 		end
-		Particles.Burst(CFrame.new(center + Vector3.new(0, 0.4, 0)), {
-			{
-				texture = "Smoke",
-				color = C(rgb(230, 245, 255), rgb(170, 210, 255)),
-				size = N(2.5, 6),
-				transparency = N(1, 0.55, 1),
-				lifetime = R(1.4, 2),
-				speed = R(0.5, 1.5),
-				rotSpeed = R(-20, 20),
-				emission = 0.4,
-				count = 14,
-			},
-		}, Vector3.new(12, 0.3, 12))
-		Particles.Flash(center + Vector3.new(0, 2, 0), rgb(150, 220, 255), 18, 0.6)
 	end,
 }
+
+-- Fits a cone template to a skill: each emitter's `Reach` share of the range sets its speed (the
+-- flames cover it in 0.45 s) and its `Arc` share of the angle sets its sideways spread.
+local function aimCone(part: BasePart, range: number, angle: number)
+	local speed = range / 0.45
+	for _, item in part:GetDescendants() do
+		if not item:IsA("ParticleEmitter") then
+			continue
+		end
+		local reach = item:GetAttribute("Reach")
+		local arc = item:GetAttribute("Arc")
+		if typeof(reach) == "number" then
+			item.Speed = NumberRange.new(speed * reach * 0.8, speed * reach)
+		end
+		if typeof(arc) == "number" then
+			item.SpreadAngle = Vector2.new(item.SpreadAngle.X, angle * arc)
+		end
+	end
+end
 
 -- Fire breath: a short stream of flame jets fanning out from the hands.
 SpellEffects.flame_fan = {
@@ -624,51 +444,18 @@ SpellEffects.flame_fan = {
 		end
 		local start = origin + Vector3.new(0, 0.6, 0) + look * 1.5
 		local nozzle = Particles.Anchor(CFrame.lookAt(start, start + look))
-		local speed = range / 0.45
-		Particles.Attach(nozzle, {
-			{
-				texture = "Fire",
-				color = FIRE,
-				size = N(0.8, 3, 4.5),
-				transparency = N(0.1, 0.3, 1),
-				lifetime = R(0.45, 0.6),
-				speed = R(speed * 0.8, speed),
-				spread = Vector2.new(8, angle / 2),
-				drag = 1.2,
-				rotSpeed = R(-180, 180),
-				direction = Enum.NormalId.Front,
-				rate = 140,
-			},
-			{
-				texture = "Jet",
-				color = FIRE,
-				size = N(1.2, 2.5),
-				transparency = N(0, 1),
-				lifetime = R(0.15, 0.25),
-				speed = R(speed * 0.6, speed * 0.8),
-				spread = Vector2.new(5, angle / 3),
-				orientation = Enum.ParticleOrientation.VelocityParallel,
-				rotation = R(90),
-				direction = Enum.NormalId.Front,
-				rate = 60,
-			},
-			{
-				texture = "Smoke",
-				color = C(rgb(90, 70, 60), rgb(40, 35, 35)),
-				size = N(2, 5),
-				transparency = N(0.6, 1),
-				lifetime = R(0.8, 1.2),
-				speed = R(speed * 0.4, speed * 0.6),
-				spread = Vector2.new(10, angle / 2),
-				drag = 3,
-				acceleration = Vector3.new(0, 4, 0),
-				emission = 0,
-				direction = Enum.NormalId.Front,
-				rate = 25,
-			},
-		})
-		Particles.Light(nozzle, rgb(255, 140, 50), 16, 2.5)
+		Effects.Attach("FlameFanJet", nozzle)
+		aimCone(nozzle, range, angle)
 		task.delay(0.35, Particles.Release, nozzle, 1.3)
+		-- Scorch marks spread through the cone once the flames reach the ground.
+		task.delay(0.25, function()
+			for _ = 1, 3 do
+				local turn = CFrame.Angles(0, math.rad((math.random() - 0.5) * angle * 0.8), 0)
+				local reach = range * (0.35 + 0.55 * math.random())
+				local point = origin + turn:VectorToWorldSpace(look) * reach
+				groundMark("Scorch", point, 6)
+			end
+		end)
 	end,
 }
 

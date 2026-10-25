@@ -49,7 +49,7 @@ local CombatController: any
 type Flight = { part: BasePart, recipe: SpellEffects.Recipe? }
 
 local projectiles: { [number]: Flight } = {}
-local charges: { [Instance]: Instance } = {}
+local charges: { [Instance]: Instance? } = {}
 local effectsFolder: Folder
 
 local function neon(size: Vector3, cframe: CFrame, color: Color3, transparency: number?): Part

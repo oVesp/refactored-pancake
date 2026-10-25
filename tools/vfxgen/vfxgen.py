@@ -306,6 +306,70 @@ def flame_tongue(rng):
     return sheet(frames)
 
 
+def fire_core(rng, size=512):
+    """Fireball head: a hot round core with a ragged, licking rim."""
+    r, theta = polar(size)
+    rim = fbm(size, rng, octaves=4, base=6)
+    flicks = np.zeros_like(r)
+    for _ in range(12):
+        angle = rng.uniform(-math.pi, math.pi)
+        width = rng.uniform(0.2, 0.45)
+        delta = np.abs((theta - angle + math.pi) % (2 * math.pi) - math.pi)
+        flicks = np.maximum(flicks, rng.uniform(0.04, 0.12) * np.clip(1 - delta / width, 0, 1) ** 2)
+    reach = 0.26 + 0.1 * (rim - 0.5) + flicks
+    alpha = smoothstep(reach + 0.01, reach - 0.04, r)
+    intensity = np.clip(1.05 - 1.6 * r + 0.25 * (rim - 0.5), 0, 1)
+    return rgba(intensity, alpha)
+
+
+def ice_shard(rng, size=512):
+    """Ice splinter pointing up the frame: a jagged, uneven blade, frosty inside, bright along its edges."""
+    ys, xs = np.mgrid[0:size, 0:size].astype(np.float32)
+    x = (xs + 0.5) / size - 0.5
+    v = 1 - (ys + 0.5) / size
+    warp = fbm(size, rng, octaves=5, base=6) - 0.5
+    lean = 0.05 * (v - 0.5) + 0.04 * warp
+    # Widest a third of the way up, a long ragged point above, a chipped stub below.
+    profile = np.where(v < 0.3, np.clip((v - 0.03) / 0.27, 0, 1) ** 0.6, np.clip((1 - v) / 0.7, 0, 1) ** 1.25)
+    half = 0.17 * profile * (1 + 0.55 * warp)
+    d = np.abs(x - lean) - half
+    alpha_body = smoothstep(0.008, -0.008, d) * (v > 0.04)
+    edge = smoothstep(0.03, 0.0, np.abs(d)) * alpha_body
+    # One lit face: the side right of a wandering ridge line catches the light.
+    ridge = lean + 0.35 * half * np.sin(v * 7 + warp * 4)
+    face = np.where(x > ridge, 1.0, 0.55)
+    frost = fbm(size, np.random.default_rng(rng.integers(1 << 30)), octaves=4, base=10)
+    intensity = np.clip(face * (0.45 + 0.4 * frost) + edge * 0.7 + 0.35 * v ** 3, 0, 1)
+    silhouette = Image.fromarray((alpha_body * 255).astype(np.uint8))
+    glow = np.asarray(silhouette.filter(ImageFilter.GaussianBlur(10)), np.float32) / 255
+    alpha = np.clip(alpha_body * (0.75 + 0.25 * frost) + edge * 0.5 + glow * 0.35, 0, 1)
+    return rgba(intensity, alpha)
+
+
+def frost_floor(rng, size=512):
+    """Rime spreading over the ground from above: a feathery disc with faint cracked veins. Lay it flat."""
+    r, theta = polar(size)
+    frost = fbm(size, rng, octaves=5, base=5)
+    feather = fbm(size, np.random.default_rng(rng.integers(1 << 30)), octaves=3, base=24)
+    big = size * 2
+    veins = Image.new("L", (big, big), 0)
+    draw = ImageDraw.Draw(veins)
+    for i in range(9):
+        angle = 2 * math.pi * i / 9 + rng.uniform(-0.3, 0.3)
+        x, y = (float(c) for c in big / 2 + rng.uniform(-big * 0.04, big * 0.04, 2))
+        length = big * rng.uniform(0.12, 0.3)
+        for step in range(8):
+            angle += rng.normal(0, 0.35)
+            nx, ny = x + math.cos(angle) * length / 8, y + math.sin(angle) * length / 8
+            draw.line([(x, y), (nx, ny)], fill=int(255 * (1 - step / 10)), width=max(1, 5 - step // 2))
+            x, y = nx, ny
+    vein = np.asarray(veins.resize((size, size), Image.LANCZOS).filter(ImageFilter.GaussianBlur(1)), np.float32) / 255
+    reach = 0.34 + 0.12 * (frost - 0.5)
+    disc = smoothstep(reach, reach - 0.14, r) * (0.3 + 0.7 * frost) * (0.55 + 0.45 * feather)
+    alpha = np.clip(disc + 0.6 * vein * smoothstep(0.36, 0.12, r), 0, 1)
+    return rgba(np.clip(0.65 + 0.35 * vein + 0.15 * feather, 0, 1), alpha)
+
+
 def main():
     out = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[2] / "assets/original/vfx"
     out.mkdir(parents=True, exist_ok=True)
@@ -325,6 +389,9 @@ def main():
         "dust_puff_4x4.png": dust_puff(np.random.default_rng(SEED + 3)),
         "speed_lines_4x4.png": speed_lines(np.random.default_rng(SEED + 4)),
         "flame_tongue_4x4.png": flame_tongue(np.random.default_rng(SEED + 5)),
+        "fire_core.png": fire_core(np.random.default_rng(SEED + 6)),
+        "ice_shard.png": ice_shard(np.random.default_rng(SEED + 7)),
+        "frost_floor.png": frost_floor(np.random.default_rng(SEED + 8)),
     }
     for name, image in textures.items():
         image.save(out / name, optimize=True)
