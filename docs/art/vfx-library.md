@@ -18,14 +18,18 @@ Free particle, flipbook, noise and trail textures for VFX work (§7.5).
 4. **Each copied file gets an entry in `content/register.json`** with its origin (pack and source URL) and license. Uploaded asset ids go in the `Assets` manifest only.
 5. Uploads still pass Roblox moderation. Flipbooks must fit Roblox's flipbook layouts and size limits; resize or re-pack them before upload.
 
+## Original textures
+
+`tools/vfxgen/vfxgen.py` (Python, numpy, Pillow) generates project-owned textures into `assets/original/vfx/`: `slash_arc_4x4` (crescent flipbook), `impact_star`, `spark_streak`, `ring_thin`, `energy_strands_4x4` and `ink_burst_4x4`. They are white on alpha, so particles tint them; flipbooks are Grid4x4 at 256 px per frame. Register rows use origin `original (tools/vfxgen/vfxgen.py)` and license `project`. Prefer adding a generator here over hunting for a pack when the shape is procedural (rings, bursts, streaks, crescents, filaments).
+
 ## Spell visuals
 
-Code: client `Vfx/Particles.luau` (emitter, trail, light and ground-wave helpers) and `Vfx/SpellEffects.luau` (one recipe per skill id), dispatched by `VfxController`.
+Code: authored templates played by `Vfx/Effects.luau` (see [../systems/vfx.md](../systems/vfx.md)), and the older code recipes in `Vfx/Particles.luau` (emitter, trail, light and ground-wave helpers) and `Vfx/SpellEffects.luau` (one recipe per skill id), dispatched by `VfxController`.
 
-- Every visible shape comes from a texture on a ParticleEmitter or Trail attached to an invisible anchor. No neon spheres, cylinders or blocks. Visuals do not have to match the server hit volume.
+- Shapes come from textures: on particles, trails and beams, and on textured curved MeshParts (slashes, swirls, spikes), which the owner allowed on 2026-10-25 together with full-screen effects for high-tier skills. No plain Neon spheres, cylinders, discs or blocks. Visuals do not have to match the server hit volume.
 - Recipes so far: Cleave, War Cry, Heavy Strike, Charge (Warrior); Firebolt, Frost Shard, Spark, Flame Fan, Ice Patch, Arcane Shield, Blink, Overcharge (Mage); Mend, Smite, Rebuke, Lay on Hands, Renew, Shelter (Healer); enemy Brute Slam, Chief Stomp, Wolf Charge, Archer Volley, Poison Snare, Hex Bolt, Hex Curse, Shaman Heal. Other skills keep the neon placeholders until they get a recipe.
 - Vary the delivery shape: projectiles, ground eruptions (Ice Patch, Poison Snare), falling strikes (Lay on Hands, Archer Volley), auras (Arcane Shield, Renew), beams and chains (Shelter, Overcharge), novas (Brute Slam), dashes (Charge, Blink) and cones (Flame Fan).
 - Particles with `VelocityParallel` stretch the texture's horizontal axis along the velocity, so vertical streak textures need `rotation = 90`. Beams run the texture's vertical axis along their length: use vertical textures (`Arc`, `Streak`) or the radial `SoftGlow` for a soft column.
 - Scenes are bright daylight. White additive (`emission = 1`) shapes vanish on pale ground and sky; give the shape that carries the read a saturated tint and `emission` of 0 to 0.4, and keep additive for glows on top.
-- Textures are keys in `Assets.Textures`, copied from Kenney Particle Pack 1.1 (19 so far) into `assets/third_party/kenney/particle_pack/` and uploaded (ids in the manifest and register). An entry without `id` uses `fallback`, a particle texture that ships with the Roblox client, so a new texture can be tried before its upload.
+- Textures are keys in `Assets.Textures`: 19 copied from Kenney Particle Pack 1.1 into `assets/third_party/kenney/particle_pack/` and 6 generated originals, all uploaded (ids in the manifest and register). An entry without `id` uses `fallback`, a particle texture that ships with the Roblox client, so a new texture can be tried before its upload.
 - After uploading, set `id` in `Assets.Textures` and `assetId` in the register row; `Register.spec` checks they match.

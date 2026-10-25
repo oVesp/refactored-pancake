@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Skills = require(ReplicatedStorage.Content.Skills)
 
+local Effects = require(script.Parent.Effects)
 local Particles = require(script.Parent.Particles)
 
 export type ResolveInfo = {
@@ -582,6 +583,18 @@ local function flatLook(origin: Vector3, aim: Vector3): Vector3?
 	local look = Vector3.new(aim.X - origin.X, 0, aim.Z - origin.Z)
 	return if look.Magnitude > 1e-3 then look.Unit else nil
 end
+
+-- Light attack: a flat, level crescent swept around the front of the attacker at chest height.
+SpellEffects.strike = {
+	swing = function(origin, aim)
+		local look = flatLook(origin, aim)
+		if not look then
+			return
+		end
+		local at = origin + look * 0.8 + Vector3.new(0, 0.5, 0)
+		Effects.Play("StrikeSwipe", CFrame.lookAt(at, at + look))
+	end,
+}
 
 local function scatter(center: Vector3, radius: number): Vector3
 	local angle = math.random() * math.pi * 2

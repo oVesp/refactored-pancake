@@ -1577,6 +1577,118 @@
 			"notes": "Lighting effect authored for Rojo; the client atmosphere controller drives its values at runtime."
 		},
 		{
+			"id": "texture:SlashArc",
+			"type": "texture",
+			"name": "slash_arc_4x4.png",
+			"path": "assets/original/vfx/slash_arc_4x4.png",
+			"origin": "original (tools/vfxgen/vfxgen.py)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Grid4x4 flipbook, OneShot: crescent snaps in, then erodes. Uploaded 2026-10-25.",
+			"assetId": "135095799380260"
+		},
+		{
+			"id": "texture:ImpactStar",
+			"type": "texture",
+			"name": "impact_star.png",
+			"path": "assets/original/vfx/impact_star.png",
+			"origin": "original (tools/vfxgen/vfxgen.py)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Irregular hit starburst. Uploaded 2026-10-25.",
+			"assetId": "79747131578079"
+		},
+		{
+			"id": "texture:SparkStreak",
+			"type": "texture",
+			"name": "spark_streak.png",
+			"path": "assets/original/vfx/spark_streak.png",
+			"origin": "original (tools/vfxgen/vfxgen.py)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Horizontal streak for VelocityParallel sparks. Uploaded 2026-10-25.",
+			"assetId": "81783159595090"
+		},
+		{
+			"id": "texture:RingThin",
+			"type": "texture",
+			"name": "ring_thin.png",
+			"path": "assets/original/vfx/ring_thin.png",
+			"origin": "original (tools/vfxgen/vfxgen.py)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Thin shock ring. Uploaded 2026-10-25.",
+			"assetId": "78964690022516"
+		},
+		{
+			"id": "texture:EnergyStrands",
+			"type": "texture",
+			"name": "energy_strands_4x4.png",
+			"path": "assets/original/vfx/energy_strands_4x4.png",
+			"origin": "original (tools/vfxgen/vfxgen.py)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Grid4x4 flipbook for Random mode: flickering filaments. Uploaded 2026-10-25.",
+			"assetId": "89928226222518"
+		},
+		{
+			"id": "texture:InkBurst",
+			"type": "texture",
+			"name": "ink_burst_4x4.png",
+			"path": "assets/original/vfx/ink_burst_4x4.png",
+			"origin": "original (tools/vfxgen/vfxgen.py)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Grid4x4 flipbook, OneShot: dark contrast splash; tint it dark, LightEmission 0. Uploaded 2026-10-25.",
+			"assetId": "90518512807591"
+		},
+		{
+			"id": "vfx:StrikeSwipe",
+			"type": "vfx",
+			"path": "src/ReplicatedStorage/Vfx/StrikeSwipe.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Effect template played through ForgeVFX; textures by TextureKey attribute (docs/systems/vfx.md)."
+		},
+		{
+			"id": "vfx:HitImpact",
+			"type": "vfx",
+			"path": "src/ReplicatedStorage/Vfx/HitImpact.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Effect template played through ForgeVFX; textures by TextureKey attribute (docs/systems/vfx.md)."
+		},
+		{
+			"id": "vfx:HitShake",
+			"type": "vfx",
+			"path": "src/ReplicatedStorage/Vfx/HitShake.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Effect template played through ForgeVFX; textures by TextureKey attribute (docs/systems/vfx.md)."
+		},
+		{
+			"id": "code:ForgeVFX",
+			"type": "code",
+			"path": "vendor/ForgeVFX/ForgeVFX.rbxm",
+			"origin": "VFX Forge 2.4.0-rc1 emit module by zilibobi (https://zilibobi.itch.io/vfx-forge), extracted with tools/vendor/extract_forge.luau",
+			"license": "VFX-DL 1.1 (vendor/ForgeVFX/LICENSE.txt): game runtime only, copyleft for derivatives",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Plugin bought by the owner. Never load the module from a plugin, tool or test harness."
+		},
+		{
 			"id": "content:PropDetail",
 			"type": "data",
 			"path": "src/ReplicatedStorage/Content/PropDetail.luau",

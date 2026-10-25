@@ -36,13 +36,13 @@ CombatService.Damaged = Signal.new() :: Signal.Signal<Entity, number, string, En
 --[=[ Fires `(victim, killer)` once when an entity dies. ]=]
 CombatService.Died = Signal.new() :: Signal.Signal<Entity, Entity?>
 
-local function show(target: Entity, amount: number, kind: string, crit: boolean)
+local function show(target: Entity, amount: number, kind: string, crit: boolean, skillId: string?, source: Entity?)
 	local position = target.root.Position
 	for _, player in Players:GetPlayers() do
 		local character = player.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		if root and root:IsA("BasePart") and (root.Position - position).Magnitude <= SHOW_RADIUS then
-			NetServer.Fire("ShowDamage", player, target.model, amount, kind, crit)
+			NetServer.Fire("ShowDamage", player, target.model, amount, kind, crit, skillId, source and source.model)
 		end
 	end
 end
@@ -115,7 +115,7 @@ local function landDamage(
 	end
 
 	StatService.SetHp(target, target.hp - remaining)
-	show(target, amount, if remaining < amount then "shielded" else "damage", crit)
+	show(target, amount, if remaining < amount then "shielded" else "damage", crit, skillId, source)
 	CombatService.Damaged:Fire(target, amount, damageType, source, crit, skillId)
 	if target.hp <= 0 then
 		die(target, source)

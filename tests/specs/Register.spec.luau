@@ -100,6 +100,7 @@ return {
 				"src/StarterGui",
 				"src/ReplicatedStorage/UiTemplates",
 				"src/ReplicatedStorage/Animations",
+				"src/ReplicatedStorage/Vfx",
 				"src/Workspace",
 				"src/Lighting",
 			}

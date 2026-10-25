@@ -17,6 +17,12 @@
 			},
 			"Animations": {
 				"$path": "src/ReplicatedStorage/Animations"
+			},
+			"Vfx": {
+				"$path": "src/ReplicatedStorage/Vfx"
+			},
+			"ForgeVFX": {
+				"$path": "vendor/ForgeVFX/ForgeVFX.rbxm"
 			}
 		},
 		"ServerScriptService": {

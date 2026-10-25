@@ -1,0 +1,480 @@
+{
+	"className": "Part",
+	"properties": {
+		"Anchored": true,
+		"CanCollide": false,
+		"CanQuery": false,
+		"CanTouch": false,
+		"CastShadow": false,
+		"Transparency": 1,
+		"Size": [
+			5,
+			0.5,
+			3
+		]
+	},
+	"children": [
+		{
+			"name": "Arc",
+			"className": "Attachment",
+			"properties": {
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							0,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1.0,
+								-0.0
+							],
+							[
+								0,
+								0.0,
+								1.0
+							]
+						]
+					}
+				}
+			},
+			"children": [
+				{
+					"name": "Ink",
+					"className": "ParticleEmitter",
+					"properties": {
+						"Enabled": false,
+						"Rate": 0,
+						"LightInfluence": 0,
+						"Rotation": {
+							"NumberRange": [
+								180,
+								180
+							]
+						},
+						"Speed": {
+							"NumberRange": [
+								0.01,
+								0.01
+							]
+						},
+						"Size": {
+							"NumberSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"value": 11.5,
+										"envelope": 0
+									},
+									{
+										"time": 1.0,
+										"value": 12.8,
+										"envelope": 0
+									}
+								]
+							}
+						},
+						"Color": {
+							"ColorSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"color": [
+											0.06274509803921569,
+											0.07058823529411765,
+											0.10980392156862745
+										]
+									},
+									{
+										"time": 1.0,
+										"color": [
+											0.06274509803921569,
+											0.07058823529411765,
+											0.10980392156862745
+										]
+									}
+								]
+							}
+						},
+						"LightEmission": 0,
+						"Transparency": {
+							"NumberSequence": {
+								"keypoints": [
+									{
+										"time": 0,
+										"value": 0,
+										"envelope": 0
+									},
+									{
+										"time": 1,
+										"value": 0,
+										"envelope": 0
+									}
+								]
+							}
+						},
+						"ZOffset": -0.4,
+						"Orientation": "VelocityPerpendicular",
+						"EmissionDirection": "Top",
+						"Lifetime": {
+							"NumberRange": [
+								0.3,
+								0.3
+							]
+						},
+						"FlipbookLayout": "Grid4x4",
+						"FlipbookMode": "OneShot"
+					},
+					"attributes": {
+						"TextureKey": "SlashArc",
+						"EmitCount": 1
+					}
+				},
+				{
+					"name": "Body",
+					"className": "ParticleEmitter",
+					"properties": {
+						"Enabled": false,
+						"Rate": 0,
+						"LightInfluence": 0,
+						"Rotation": {
+							"NumberRange": [
+								180,
+								180
+							]
+						},
+						"Speed": {
+							"NumberRange": [
+								0.01,
+								0.01
+							]
+						},
+						"Size": {
+							"NumberSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"value": 10.3,
+										"envelope": 0
+									},
+									{
+										"time": 1.0,
+										"value": 11.8,
+										"envelope": 0
+									}
+								]
+							}
+						},
+						"Color": {
+							"ColorSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"color": [
+											0.5882352941176471,
+											0.7254901960784313,
+											1.0
+										]
+									},
+									{
+										"time": 1.0,
+										"color": [
+											0.23529411764705882,
+											0.3333333333333333,
+											0.6666666666666666
+										]
+									}
+								]
+							}
+						},
+						"LightEmission": 0.35,
+						"Brightness": 2,
+						"Transparency": {
+							"NumberSequence": {
+								"keypoints": [
+									{
+										"time": 0,
+										"value": 0,
+										"envelope": 0
+									},
+									{
+										"time": 1,
+										"value": 0,
+										"envelope": 0
+									}
+								]
+							}
+						},
+						"ZOffset": 0,
+						"Orientation": "VelocityPerpendicular",
+						"EmissionDirection": "Top",
+						"Lifetime": {
+							"NumberRange": [
+								0.3,
+								0.3
+							]
+						},
+						"FlipbookLayout": "Grid4x4",
+						"FlipbookMode": "OneShot"
+					},
+					"attributes": {
+						"TextureKey": "SlashArc",
+						"EmitCount": 1
+					}
+				},
+				{
+					"name": "Core",
+					"className": "ParticleEmitter",
+					"properties": {
+						"Enabled": false,
+						"Rate": 0,
+						"LightInfluence": 0,
+						"Rotation": {
+							"NumberRange": [
+								180,
+								180
+							]
+						},
+						"Speed": {
+							"NumberRange": [
+								0.01,
+								0.01
+							]
+						},
+						"Size": {
+							"NumberSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"value": 10,
+										"envelope": 0
+									},
+									{
+										"time": 1.0,
+										"value": 11.3,
+										"envelope": 0
+									}
+								]
+							}
+						},
+						"Color": {
+							"ColorSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"color": [
+											1.0,
+											1.0,
+											1.0
+										]
+									},
+									{
+										"time": 1.0,
+										"color": [
+											1.0,
+											1.0,
+											1.0
+										]
+									}
+								]
+							}
+						},
+						"LightEmission": 1,
+						"Brightness": 3,
+						"Transparency": {
+							"NumberSequence": {
+								"keypoints": [
+									{
+										"time": 0,
+										"value": 0.7,
+										"envelope": 0
+									},
+									{
+										"time": 1,
+										"value": 0.7,
+										"envelope": 0
+									}
+								]
+							}
+						},
+						"ZOffset": 0.2,
+						"Orientation": "VelocityPerpendicular",
+						"EmissionDirection": "Top",
+						"Lifetime": {
+							"NumberRange": [
+								0.3,
+								0.3
+							]
+						},
+						"FlipbookLayout": "Grid4x4",
+						"FlipbookMode": "OneShot"
+					},
+					"attributes": {
+						"TextureKey": "SlashArc",
+						"EmitCount": 1
+					}
+				}
+			]
+		},
+		{
+			"name": "Strands",
+			"className": "ParticleEmitter",
+			"properties": {
+				"Enabled": false,
+				"Rate": 0,
+				"LightInfluence": 0,
+				"Rotation": {
+					"NumberRange": [
+						0,
+						360
+					]
+				},
+				"Speed": {
+					"NumberRange": [
+						0,
+						0
+					]
+				},
+				"Size": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 3.5,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 5,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Lifetime": {
+					"NumberRange": [
+						0.1,
+						0.18
+					]
+				},
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									1.0,
+									1.0,
+									1.0
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.803921568627451,
+									0.8627450980392157,
+									0.9803921568627451
+								]
+							}
+						]
+					}
+				},
+				"LightEmission": 1,
+				"Brightness": 3,
+				"FlipbookLayout": "Grid4x4",
+				"FlipbookMode": "Random",
+				"ZOffset": 0.5
+			},
+			"attributes": {
+				"TextureKey": "EnergyStrands",
+				"EmitCount": 3
+			}
+		},
+		{
+			"name": "Sparks",
+			"className": "ParticleEmitter",
+			"properties": {
+				"Enabled": false,
+				"Rate": 0,
+				"LightInfluence": 0,
+				"Rotation": {
+					"NumberRange": [
+						0,
+						0
+					]
+				},
+				"Speed": {
+					"NumberRange": [
+						20,
+						34
+					]
+				},
+				"Orientation": "VelocityParallel",
+				"EmissionDirection": "Front",
+				"SpreadAngle": [
+					35,
+					35
+				],
+				"Drag": 6,
+				"Lifetime": {
+					"NumberRange": [
+						0.15,
+						0.28
+					]
+				},
+				"Size": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 1.8,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 0,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									1.0,
+									1.0,
+									1.0
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.803921568627451,
+									0.8627450980392157,
+									0.9803921568627451
+								]
+							}
+						]
+					}
+				},
+				"LightEmission": 1,
+				"Brightness": 3
+			},
+			"attributes": {
+				"TextureKey": "SparkStreak",
+				"EmitCount": 8,
+				"EmitDelay": 0.04
+			}
+		}
+	]
+}

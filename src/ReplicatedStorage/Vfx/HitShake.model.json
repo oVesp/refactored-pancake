@@ -1,0 +1,51 @@
+{
+	"className": "Part",
+	"properties": {
+		"Anchored": true,
+		"CanCollide": false,
+		"CanQuery": false,
+		"CanTouch": false,
+		"CastShadow": false,
+		"Transparency": 1,
+		"Size": [
+			1,
+			1,
+			1
+		]
+	},
+	"children": [
+		{
+			"name": "Shake",
+			"className": "RayValue",
+			"properties": {
+				"Tags": {
+					"Tags": [
+						"CameraShake"
+					]
+				}
+			},
+			"attributes": {
+				"Amplitude": 0.6,
+				"Frequency": 0.08,
+				"FadeInTime": 0,
+				"SustainTime": 0,
+				"FadeOutTime": 0.22,
+				"Falloff": 60,
+				"PositionInfluence": {
+					"Vector3": [
+						0.35,
+						0.35,
+						0.35
+					]
+				},
+				"RotationInfluence": {
+					"Vector3": [
+						0.12,
+						0.12,
+						0.12
+					]
+				}
+			}
+		}
+	]
+}

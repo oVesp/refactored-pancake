@@ -9,6 +9,7 @@ local TweenService = game:GetService("TweenService")
 local NetClient = require(ReplicatedStorage.Shared.Net.Client)
 local Skills = require(ReplicatedStorage.Content.Skills)
 
+local Effects = require(script.Parent.Parent.Vfx.Effects)
 local Particles = require(script.Parent.Parent.Vfx.Particles)
 local SpellEffects = require(script.Parent.Parent.Vfx.SpellEffects)
 
@@ -286,10 +287,37 @@ local function onImpact(id: number, position: Vector3, kind: string)
 	end
 end
 
-local function onDamage(model: Model, amount: number, kind: string, crit: boolean)
+local MELEE_DELIVERIES = { Melee = true, Cone = true, Dash = true }
+
+-- Weapon hit on a body: authored impact, white flash and light; hitstop and shake when the local
+-- player gives or takes it.
+local function meleeImpact(model: Model, root: BasePart, source: Model?, crit: boolean)
+	local at = root.Position + Vector3.new(0, 0.5, 0)
+	local sourceRoot = source and source:FindFirstChild("HumanoidRootPart")
+	if sourceRoot and sourceRoot:IsA("BasePart") then
+		local toward = (sourceRoot.Position - root.Position) * Vector3.new(1, 0, 1)
+		if toward.Magnitude > 1e-3 then
+			at += toward.Unit * 0.8
+		end
+	end
+	Effects.Play("HitImpact", CFrame.new(at))
+	Effects.BodyFlash(model, Color3.new(1, 1, 1), if crit then 0.22 else 0.14)
+	Particles.Flash(at, Color3.fromRGB(220, 230, 255), 14, 0.15)
+	local character = Players.LocalPlayer.Character
+	if character and (source == character or model == character) then
+		Effects.Hitstop({ model, source }, if crit then 0.09 else 0.055)
+		Effects.Play("HitShake", CFrame.new(at))
+	end
+end
+
+local function onDamage(model: Model, amount: number, kind: string, crit: boolean, skillId: string?, source: Model?)
 	local root = model and model:FindFirstChild("HumanoidRootPart") or (model and model.PrimaryPart)
 	if not root or not root:IsA("BasePart") then
 		return
+	end
+	local skill = skillId and Skills.ById[skillId]
+	if (kind == "damage" or kind == "shielded") and skill and MELEE_DELIVERIES[skill.delivery] then
+		meleeImpact(model, root, source, crit)
 	end
 	local gui = UIController.Clone("DamageNumber") :: BillboardGui
 	local text = gui:FindFirstChild("Bind_Text", true) :: TextLabel
@@ -324,6 +352,7 @@ function VfxController.Start()
 	effectsFolder.Name = "ClientEffects"
 	effectsFolder.Parent = workspace
 	Particles.Init(effectsFolder)
+	Effects.Init(effectsFolder)
 
 	NetClient.Connect("ShowCast", onCast)
 	NetClient.Connect("ShowImpact", onImpact)
