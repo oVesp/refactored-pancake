@@ -125,6 +125,10 @@ export type EnemyDef = {
 	scale: number,
 	color: Color3,
 	elite: boolean?,
+	-- ServerStorage.Templates model to clone; defaults to "Goblin".
+	template: string?,
+	-- Defaults to "Goblins". Enemies of one team call each other for help.
+	team: ("Goblins" | "Undead")?,
 }
 
 export type ItemDef = {

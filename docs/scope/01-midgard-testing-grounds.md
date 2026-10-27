@@ -39,7 +39,7 @@ One place, run as zones behind `ZoneService` (§3.7). Danger reads honestly from
 |---|---|---|---|
 | **Village Core** | Safe | Spawn/respawn, 3 class trainers, Discipline trainer, vendor stub, well, barns, houses | Class pick, dev respec, safe-zone rules |
 | **Dev Yard** | Safe | Training dummies (one per damage type + one with resist tags), spawn pads, lag test lane | Combat tuning, hit validation, Warband tests |
-| **Wheat Fields** | Lv 1–3 | Raiders, Slingers, scarecrow cover, fences | First pulls, ranged vs melee |
+| **Wheat Fields** | Lv 1–3 | Raiders, Slingers, Skeletons, scarecrow cover, fences | First pulls, ranged vs melee |
 | **Orchard Edge** | Lv 3–4 | Mixed Raider/Slinger/Trapper packs | Poison and cleanse, healing pressure |
 | **Goblin Camp** | Lv 4–6 | Palisade, tents, Brutes, optional Chieftain | Telegraphs, elite fight, leash rules |
 
@@ -158,6 +158,14 @@ Loose raiding bands, no casters.
 | Goblin Brute | 4–5 | Heavy, slow wind-up slam | Physical | Resist: physical | Telegraph + dodge, mitigation |
 | Goblin Chieftain (optional elite) | 6 | 2 phases, calls a Raider pair at 50% HP | Physical | Immune: fear | Scripted timeline (§5.6), level-gap curve vs Lv 5 |
 | Training Dummy | any | Static, configurable | — | Configurable | Damage numbers, resist math |
+
+### 5.1a Skeleton (Lv 1–3, placed in this scope)
+
+Unarmed undead on the `Undead` team, so goblin packs do not call it for help. Skinned mesh from the Studio 3D importer, rebuilt on the goblin's Humanoid layout by `tools/world/build.luau`; clips (Idle, Walk, Scratch, Defeat) uploaded from Studio. Two spawners in the Wheat Fields, away from the goblin packs.
+
+| Enemy | Lv | Role | Damage | Tags | Tests |
+|---|---|---|---|---|---|
+| Skeleton | 1–3 | Melee, slow claw swipe (Scratch) | Physical | Resist: poison; Vulnerable: holy | Aggro, chase, holy bonus |
 
 ### 5.2 Goblin Warband (Lv 7+, data-only in this scope)
 

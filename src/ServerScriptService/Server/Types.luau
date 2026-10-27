@@ -37,7 +37,7 @@ export type Entity = {
 	root: BasePart,
 	kind: "Player" | "Npc" | "Dummy",
 	player: Player?,
-	team: "Players" | "Goblins" | "Neutral",
+	team: "Players" | "Goblins" | "Undead" | "Neutral",
 	defId: string,
 	name: string,
 	level: number,

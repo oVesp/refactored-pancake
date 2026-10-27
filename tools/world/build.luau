@@ -465,6 +465,8 @@ local SPAWNERS = {
 	{ "goblin_brute", 1, 4, 5, 45, 6, 40, -690 },
 	{ "goblin_brute", 1, 4, 5, 45, 6, -30, -700 },
 	{ "goblin_chieftain", 1, 6, 6, 120, 4, 0, -725 },
+	{ "skeleton", 2, 1, 2, 25, 8, -90, -150 },
+	{ "skeleton", 2, 2, 3, 25, 8, 90, -300 },
 }
 for i, s in SPAWNERS do
 	part(
@@ -585,4 +587,77 @@ make("Animator", { Name = "Animator" }, humanoid)
 goblin.PrimaryPart = root
 
 fs.writeFile("src/ServerStorage/Templates/Goblin.rbxmx", roblox.serializeModel({ goblin }, true))
+
+-- Skeleton template: the Studio 3D import (tools/world/skeleton_import.rbxm) rebuilt on the goblin's
+-- Humanoid layout. The import supplies the bones and mesh size; the mesh id comes from Assets.
+local imported = roblox.deserializeModel(fs.readFile("tools/world/skeleton_import.rbxm"))[1]
+local importedMesh = imported:FindFirstChild("GEO_Skeleton")
+local skeletonHeight = importedMesh.Size.Y / 2
+local skeleton = model(nil, "Skeleton")
+skeleton.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
+skeleton:SetAttribute("AnimSet", "Skeleton")
+-- The import stands 5.5 studs; this brings a scale-1 skeleton to about 5 studs.
+skeleton:SetAttribute("BaseScale", 0.9)
+local skeletonRoot = part(
+	skeleton,
+	"HumanoidRootPart",
+	Vector3.new(2, 2, 1),
+	at(0, skeletonHeight, 0),
+	Color3.new(1, 1, 1),
+	Enum.Material.SmoothPlastic,
+	{
+		Transparency = 1,
+		Anchored = false,
+	}
+)
+local skeletonBody = make("MeshPart", {
+	Name = "Body",
+	MeshId = Assets.Meshes.Skeleton.id,
+	HasSkinnedMesh = true,
+	InitialSize = importedMesh.InitialSize,
+	Size = importedMesh.Size,
+	CFrame = at(0, skeletonHeight, 0),
+	Color = importedMesh.Color,
+	Material = importedMesh.Material,
+	Anchored = false,
+	CanCollide = false,
+	CanQuery = false,
+	Massless = true,
+}, skeleton)
+make("Motor6D", { Name = "Root", Part0 = skeletonRoot, Part1 = skeletonBody }, skeletonRoot)
+for _, bone in importedMesh:GetChildren() do
+	if bone.ClassName == "Bone" then
+		bone.Parent = skeletonBody
+	end
+end
+
+local skeletonHead = part(
+	skeleton,
+	"Head",
+	Vector3.new(1, 1, 1),
+	at(0, skeletonHeight * 2 - 0.6, 0),
+	Color3.new(1, 1, 1),
+	Enum.Material.SmoothPlastic,
+	{
+		Transparency = 1,
+		Anchored = false,
+		CanCollide = false,
+		CanQuery = false,
+		Massless = true,
+	}
+)
+make("WeldConstraint", { Name = "Weld", Part0 = skeletonRoot, Part1 = skeletonHead }, skeletonHead)
+
+local skeletonHumanoid = make("Humanoid", {
+	Name = "Humanoid",
+	RigType = Enum.HumanoidRigType.R15,
+	HipHeight = skeletonHeight - 1,
+	DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None,
+	HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff,
+	BreakJointsOnDeath = false,
+}, skeleton)
+make("Animator", { Name = "Animator" }, skeletonHumanoid)
+skeleton.PrimaryPart = skeletonRoot
+
+fs.writeFile("src/ServerStorage/Templates/Skeleton.rbxmx", roblox.serializeModel({ skeleton }, true))
 print("World and templates written.")

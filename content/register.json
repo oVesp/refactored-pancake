@@ -277,6 +277,38 @@
 			"notes": "Skinned goblin on a Humanoid, written by tools/world/build.luau from tools/world/goblin_rig.json."
 		},
 		{
+			"id": "template:Skeleton",
+			"type": "model",
+			"path": "src/ServerStorage/Templates/Skeleton.rbxmx",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Skinned skeleton on a Humanoid, written by tools/world/build.luau from tools/world/skeleton_import.rbxm."
+		},
+		{
+			"id": "data:SkeletonImport",
+			"type": "data",
+			"name": "skeleton_import.rbxm",
+			"path": "tools/world/skeleton_import.rbxm",
+			"origin": "Studio 3D importer output for the owner's Skeleton mesh (assets/original/characters/mobs/Skeleton, not in the repo)",
+			"license": "Owner-supplied; licence to confirm",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Raw import (mesh, 82 bones); supplies bones and mesh size to tools/world/build.luau. The mesh id is not readable outside Studio, so it lives in Assets.Meshes."
+		},
+		{
+			"id": "mesh:Skeleton",
+			"type": "mesh",
+			"name": "GEO_Skeleton",
+			"origin": "Owner's Skeleton model (assets/original/characters/mobs/Skeleton_MASTER, not in the repo)",
+			"license": "Owner-supplied; licence to confirm",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Uploaded by the owner via the Studio 3D importer 2026-10-26; no texture, the part colour shows.",
+			"assetId": "82895584857979"
+		},
+		{
 			"id": "ui:DamageNumber",
 			"type": "ui",
 			"path": "src/ReplicatedStorage/UiTemplates/DamageNumber.model.json",
@@ -865,6 +897,54 @@
 			"owner": "dev",
 			"status": "draft",
 			"notes": "KeyframeSequence written by tools/blender/export_goblin.py; Studio-only until uploaded."
+		},
+		{
+			"id": "animation:SkeletonIdle",
+			"type": "animation",
+			"name": "SkeletonIdle",
+			"assetId": "86495569494152",
+			"path": "src/ReplicatedStorage/Animations/Skeleton/SkeletonIdle.rbxmx",
+			"origin": "Owner-supplied clips fitted to the Skeleton rig in Blender (actionforge_4_clips export)",
+			"license": "Owner-supplied; licence to confirm",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Idle loop. Uploaded by the owner from Studio 2026-10-26; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider) with bones that never leave rest dropped."
+		},
+		{
+			"id": "animation:SkeletonWalk",
+			"type": "animation",
+			"name": "SkeletonWalk",
+			"assetId": "88182025210616",
+			"path": "src/ReplicatedStorage/Animations/Skeleton/SkeletonWalk.rbxmx",
+			"origin": "Owner-supplied clips fitted to the Skeleton rig in Blender (actionforge_4_clips export)",
+			"license": "Owner-supplied; licence to confirm",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Walk loop. Uploaded by the owner from Studio 2026-10-26; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider) with bones that never leave rest dropped."
+		},
+		{
+			"id": "animation:SkeletonAttack",
+			"type": "animation",
+			"name": "SkeletonScratch",
+			"assetId": "78738563687931",
+			"path": "src/ReplicatedStorage/Animations/Skeleton/SkeletonScratch.rbxmx",
+			"origin": "Owner-supplied clips fitted to the Skeleton rig in Blender (actionforge_4_clips export)",
+			"license": "Owner-supplied; licence to confirm",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Scratch, played as the Attack clip. Uploaded by the owner from Studio 2026-10-26; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider) with bones that never leave rest dropped."
+		},
+		{
+			"id": "animation:SkeletonDeath",
+			"type": "animation",
+			"name": "SkeletonDefeat",
+			"assetId": "96632426840141",
+			"path": "src/ReplicatedStorage/Animations/Skeleton/SkeletonDefeat.rbxmx",
+			"origin": "Owner-supplied clips fitted to the Skeleton rig in Blender (actionforge_4_clips export)",
+			"license": "Owner-supplied; licence to confirm",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Defeat, played as the Death clip. Uploaded by the owner from Studio 2026-10-26; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider) with bones that never leave rest dropped."
 		},
 		{
 			"id": "animation:BasicStrike",

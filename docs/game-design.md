@@ -155,7 +155,7 @@ From [low-level-human-design.md](low-level-human-design.md), adapted to this doc
 - 5 levels in classes only. Build templates: specialist (5), duo (3+2), dabbler (2+1+1+1).
 - First classes (M0.5): **Warrior, Mage, Healer**. Planned starter set (original names TBD): front-line fighter, evasion fighter, bare-hand adept, scout, healer, spellcaster, apothecary, laborer. Dabbler needs a 4th class.
 - Spells: Circles 0–1 for casters (Circle 2 at casting-line level 6, §3.2); picks per `SPELL_PICKS_PER_LEVEL`.
-- Enemies: Goblin **Rabble** (Lv 1–6, raiding bands, no casters). Goblin **Warband** (Lv 7+, organized company with casters, healers, riders and a leader) is the next band.
+- Enemies: Goblin **Rabble** (Lv 1–6, raiding bands, no casters) and the **Skeleton** (Lv 1–3, unarmed undead). Goblin **Warband** (Lv 7+, organized company with casters, healers, riders and a leader) is the next band.
 - Disciplines: Focus 2; learn 2 by level 5 via the tutorial trainer.
 - Gear: Grade I–II only; no Singular anywhere.
 - Death: Standard rules; Ironbound unavailable until post-tutorial.
@@ -391,7 +391,7 @@ Dark-navy panels, gold trim, serif headings; palette, fonts, frame recipes and H
 ### 7.4 Scope control (curation numbers)
 | Milestone | Classes | Spell Circles | Disciplines | Enemies | Zones | Level cap |
 |---|---|---|---|---|---|---|
-| M0.5 testing grounds | 3 (Warrior, Mage, Healer) | 0–1 (16 spells) | 2 | 5 Rabble + 1 elite; Warband data-only | 1 dev place (village + fields + camp) | 5 |
+| M0.5 testing grounds | 3 (Warrior, Mage, Healer) | 0–1 (16 spells) | 2 | 5 Rabble + 1 elite + Skeleton; Warband data-only | 1 dev place (village + fields + camp) | 5 |
 | M1 vertical slice | 3 | 0–1 (count per §12 Q9) | ~12 | ~6 + 1 boss | tutorial + 1 field | 5 |
 | M2 alpha | 8 | 0–3 (~60) | ~30 | ~20 | hub + 3 | 20 |
 | M3 beta | ~16 | 0–5 (~120) | ~60 | ~45 | 1 realm | 40 |
@@ -532,6 +532,7 @@ Define target concurrency per place, server count per realm, and what happens wh
 | Spell VFX look | Earlier rule: every shape a texture on a ParticleEmitter or Trail; owner set a reference video as the target level (2026-10-25) | Textured curved MeshParts and full-screen effects (high-tier skills only) are allowed; effects become Studio-editable templates played through the VFX Forge emit module the owner owns, with project-generated textures; hits add hitstop, body flash and camera shake | Owner decision; layered, authored effects reach the reference far faster than code recipes, and Forge's licence permits the module inside the game runtime |
 | VFX ink layer | Earlier rule: every effect layers a near-black non-additive ink layer for contrast | Ink only on high-tier effects (skills with screen effects: Charge, War Cry, Blink, Overcharge, Smite, Lay On Hands, future ultimates); other effects use earth or element tones (2026-10-25) | Owner decision; keeps the darkest contrast as a marker of the strongest skills |
 | Atmosphere and world performance | Owner asked for proper atmosphere (lighting, sky, per-biome mood, day/night) and a performance solution for the 10,240-stud world beyond inverse-sphere fog (2026-10-25) | Authored Lighting effects driven by a client controller that blends a mood per terrain region and a 24-minute shared day clock (6-minute moonlit night); streaming at the recommended 1,024 radius with opportunistic stream-out, haze ending detail near that radius; no SLIM imposters (they stalled play at about 5 fps); single-part props placed without a Model; client culling hides small props past 350 to 450 studs and thins trees to 40% past 600 (Studio: 5 to 56 fps in the start valley, 2026-10-25); generating props on demand only as the last resort | Each pass was measured, kept only if it helped, and shadows-off was rejected for no gain; a clock from server time needs no replication; culling moves hidden props outside the DataModel, so streaming still owns them |
+| Skeleton enemy | Owner asked for a Skeleton (Lv 1–3, no weapon, attack Scratch, clips SkeletonWalk/Scratch/Idle/Defeat) and supplied the Studio import and uploaded clips (2026-10-27) | Template rebuilt by `tools/world/build.luau` from the raw import (`tools/world/skeleton_import.rbxm`) with a HumanoidRootPart, R15 Humanoid and Animator; clip keys follow `<AnimSet><Clip>`, so `SkeletonAttack` and `SkeletonDeath` play the Scratch and Defeat clips; KeyframeSequences in the repo are exports of the uploaded clips, with bones that never leave rest dropped; new `Undead` team; `EnemyDef.template` picks the template; sets without a Run clip keep walking | Spawn and the animation controller need the goblin's rig contract; a separate team keeps goblin packs and the goblin bark off skeletons; the register requires a KeyframeSequence file per clip |
 
 ---
 

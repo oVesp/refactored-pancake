@@ -18,7 +18,7 @@ export type AnimationAsset = {
 
 export type MeshAsset = {
 	id: string,
-	texture: string,
+	texture: string?,
 }
 
 --[=[
@@ -122,7 +122,9 @@ local Textures: { [string]: TextureAsset } = {
 	stands in for any entry without an uploaded `id`; runtime registration of a KeyframeSequence only
 	works in Studio and is not seen by other clients.
 	- Enemy clips, keyed `<AnimSet><Clip>` (game-design.md 7.3): assets/blender/goblin/goblin.blend,
-	  retargeted from the reference armature.
+	  retargeted from the reference armature. Skeleton clips were animated on the imported rig and
+	  uploaded from Studio; their KeyframeSequences are exports of the uploaded clips, and Attack
+	  and Death play the Scratch and Defeat sequences.
 	- Basic attack clips, named by `SkillDef.animation`: R15 placeholders from
 	  assets/blender/combat_r15/combat_r15.blend, uploaded through tools/upload/animations.py.
 ]=]
@@ -134,6 +136,10 @@ local Animations: { [string]: AnimationAsset } = {
 	GoblinThrow = { keyframes = "GoblinThrow" },
 	GoblinHit = { keyframes = "GoblinHit" },
 	GoblinDeath = { keyframes = "GoblinDeath" },
+	SkeletonIdle = { id = "rbxassetid://86495569494152", keyframes = "SkeletonIdle" },
+	SkeletonWalk = { id = "rbxassetid://88182025210616", keyframes = "SkeletonWalk" },
+	SkeletonAttack = { id = "rbxassetid://78738563687931", keyframes = "SkeletonScratch" },
+	SkeletonDeath = { id = "rbxassetid://96632426840141", keyframes = "SkeletonDefeat" },
 	BasicStrike = { id = "rbxassetid://75972502304014", keyframes = "BasicStrike" },
 	BasicHeavyStrike = { id = "rbxassetid://73823663489909", keyframes = "BasicHeavyStrike" },
 }
@@ -144,6 +150,7 @@ local Animations: { [string]: AnimationAsset } = {
 ]=]
 local Meshes: { [string]: MeshAsset } = {
 	Goblin = { id = "rbxassetid://123543422748212", texture = "rbxassetid://101253281014930" },
+	Skeleton = { id = "rbxassetid://82895584857979" },
 }
 
 return table.freeze({

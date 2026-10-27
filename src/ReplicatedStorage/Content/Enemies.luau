@@ -3,8 +3,9 @@
 local Types = require(script.Parent.Types)
 
 --[=[
-	Goblins (scope 01, section 5). `base` is level-1 stats; `growth` is added per level above 1.
-	Rabble is placed in the world. Warband (level 7+) is data-only in M0.5 and spawns via /spawn.
+	Goblins (scope 01, section 5) and the Skeleton. `base` is level-1 stats; `growth` is added per
+	level above 1. Rabble is placed in the world. Warband (level 7+) is data-only in M0.5 and spawns
+	via /spawn.
 ]=]
 local list: { Types.EnemyDef } = {
 	{
@@ -99,6 +100,26 @@ local list: { Types.EnemyDef } = {
 		scale = 1.4,
 		color = Color3.fromRGB(120, 90, 50),
 		elite = true,
+	},
+	{
+		id = "skeleton",
+		name = "Skeleton",
+		tier = "Rabble",
+		levelMin = 1,
+		levelMax = 3,
+		behavior = "Melee",
+		base = { MaxHp = 50, PhysAtk = 7, PhysDef = 7, MagDef = 3, Agility = 6 },
+		growth = { MaxHp = 13, PhysAtk = 2, PhysDef = 1 },
+		tags = { resist = { "poison" }, vulnerable = { "holy" } },
+		skills = { "skeleton_scratch" },
+		aggroRadius = 26,
+		leashRadius = 70,
+		moveSpeed = 12,
+		xp = 13,
+		scale = 1,
+		color = Color3.fromRGB(99, 95, 98),
+		template = "Skeleton",
+		team = "Undead",
 	},
 	{
 		id = "training_dummy",

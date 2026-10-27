@@ -589,6 +589,22 @@ local list: { Types.SkillDef } = {
 		description = "Telegraphed stomp.",
 	},
 
+	-- Skeleton
+	{
+		id = "skeleton_scratch",
+		name = "Scratch",
+		kind = "Active",
+		source = "Enemy",
+		delivery = "Melee",
+		targets = "Enemy",
+		cooldown = 2,
+		windup = 0.5,
+		range = 6,
+		angle = 90,
+		damage = { type = "physical", base = 4, stat = "PhysAtk", ratio = 0.5 },
+		description = "Skeleton claw swipe.",
+	},
+
 	-- Goblin Warband
 	{
 		id = "soldier_strike",

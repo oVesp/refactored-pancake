@@ -43,7 +43,7 @@ local devSpawned: { Entity } = {}
 local random = Random.new()
 
 --[=[
-	Spawns goblins from `Spawner` parts with leash and respawn timers, keeps a per-zone active cap
+	Spawns enemies from `Spawner` parts with leash and respawn timers, keeps a per-zone active cap
 	(game-design.md 5.6), and registers training dummies.
 ]=]
 local SpawnService = {}
@@ -72,7 +72,7 @@ end
 ]=]
 function SpawnService.Spawn(enemyId: string, level: number, position: Vector3, home: Vector3?): Entity?
 	local def = Enemies.ById[enemyId]
-	local template = ServerStorage.Templates:FindFirstChild("Goblin")
+	local template = def and ServerStorage.Templates:FindFirstChild(def.template or "Goblin")
 	if not def or not template or not template:IsA("Model") then
 		log:Warn("Cannot spawn %s", enemyId)
 		return nil
@@ -100,7 +100,7 @@ function SpawnService.Spawn(enemyId: string, level: number, position: Vector3, h
 		root = root,
 		humanoid = humanoid,
 		kind = "Npc",
-		team = "Goblins",
+		team = def.team or "Goblins",
 		defId = enemyId,
 		name = def.name,
 		level = level,

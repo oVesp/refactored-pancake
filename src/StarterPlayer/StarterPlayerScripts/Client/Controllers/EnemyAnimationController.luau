@@ -147,7 +147,8 @@ function EnemyAnimationController.Start()
 			end
 			local velocity = rig.root.AssemblyLinearVelocity
 			local speed = Vector3.new(velocity.X, 0, velocity.Z).Magnitude
-			if speed > RUN_SPEED then
+			-- Sets without a run clip keep walking.
+			if speed > RUN_SPEED and rig.tracks.Run then
 				setLocomotion(rig, "Run", speed)
 			elseif speed > MOVE_SPEED then
 				setLocomotion(rig, "Walk", speed)
