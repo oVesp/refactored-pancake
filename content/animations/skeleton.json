@@ -1,0 +1,58 @@
+{
+	"set": "Skeleton",
+	"kind": "enemy",
+	"exporter": "studio",
+	"outDir": "src/ReplicatedStorage/Animations/Skeleton",
+	"defaults": {
+		"origin": "Quaternius (CC0) clips fitted to the Skeleton rig in Blender (actionforge_4_clips export)",
+		"license": "CC0 1.0 (Quaternius)"
+	},
+	"clips": {
+		"SkeletonIdle": {
+			"role": "Idle",
+			"looped": true,
+			"tier": "placeholder",
+			"notes": "Idle loop. Uploaded by the owner from Studio 2026-10-26; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider) with bones that never leave rest dropped.",
+			"assetId": "86495569494152",
+			"uploadedSha": "c7f6b0327ca7221dfdc3d9915de46e2b5e5f94b54a0445a4a90196c77ecd7073",
+			"uploadedTier": "placeholder",
+			"uploaded": "2026-10-26",
+			"history": []
+		},
+		"SkeletonWalk": {
+			"role": "Walk",
+			"looped": true,
+			"tier": "placeholder",
+			"notes": "Walk loop. Uploaded by the owner from Studio 2026-10-26; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider) with bones that never leave rest dropped.",
+			"assetId": "88182025210616",
+			"uploadedSha": "9214967b041354bc3db7987660e570c444e13d7de31b44b5bcd85f5b38b41758",
+			"uploadedTier": "placeholder",
+			"uploaded": "2026-10-26",
+			"history": []
+		},
+		"SkeletonAttack": {
+			"role": "Attack",
+			"keyframes": "SkeletonScratch",
+			"looped": false,
+			"tier": "placeholder",
+			"notes": "Scratch, played as the Attack clip. Uploaded by the owner from Studio 2026-10-26; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider) with bones that never leave rest dropped.",
+			"assetId": "78738563687931",
+			"uploadedSha": "172de1c336009582f00795be5af6dfed98b330722935cf288e46a9fd6c7e508b",
+			"uploadedTier": "placeholder",
+			"uploaded": "2026-10-26",
+			"history": []
+		},
+		"SkeletonDeath": {
+			"role": "Death",
+			"keyframes": "SkeletonDefeat",
+			"looped": false,
+			"tier": "placeholder",
+			"notes": "Defeat, played as the Death clip. Uploaded by the owner from Studio 2026-10-26; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider) with bones that never leave rest dropped.",
+			"assetId": "96632426840141",
+			"uploadedSha": "e1864848f66a1b748418937979bb41d2dfd3a9c4aa78c39678f6ff1b93a7efcb",
+			"uploadedTier": "placeholder",
+			"uploaded": "2026-10-26",
+			"history": []
+		}
+	}
+}

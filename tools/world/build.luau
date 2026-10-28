@@ -499,8 +499,9 @@ make("PointLight", { Name = "PlazaLight", Range = 40, Brightness = 0.5 }, villag
 
 fs.writeFile("src/Workspace/Map.rbxmx", roblox.serializeModel({ map }, true))
 
--- Goblin template: skinned mesh (assets/blender/goblin) on a Humanoid. Bone data comes from
--- tools/blender/export_goblin.py; scaled and tinted per enemy at spawn.
+-- Goblin template: skinned mesh (assets/blender/goblin) on a Humanoid. Bone data is the frozen
+-- tools/world/goblin_rig.json until the Goblin Scout import replaces this template; scaled and
+-- tinted per enemy at spawn.
 local Assets = require("../../src/ReplicatedStorage/Content/Assets")
 local rig = serde.decode("json", fs.readFile("tools/world/goblin_rig.json"))
 local goblinMesh = Assets.Meshes.Goblin

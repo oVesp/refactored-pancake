@@ -20,6 +20,13 @@ sourcemap.json
 *.pem
 *.key
 
+# Raw animation source clips: hashed in content/animations/*.json, never committed
+# (docs/art/animation-pipeline.md)
+assets/original/characters/**/Export/Animations/
+
+# Python bytecode
+__pycache__/
+
 # Blender autosaves
 *.blend1
 *.blend@

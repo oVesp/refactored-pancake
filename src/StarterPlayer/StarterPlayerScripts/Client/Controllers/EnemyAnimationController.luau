@@ -4,6 +4,7 @@ local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local AnimRoles = require(ReplicatedStorage.Content.AnimRoles)
 local Locomotion = require(ReplicatedStorage.Shared.Locomotion)
 local Maid = require(ReplicatedStorage.Shared.Maid)
 
@@ -24,16 +25,14 @@ local FADE = 0.2
 -- Rate changes smaller than this are not applied, so a hitstop freeze holds while the rig moves.
 local RATE_STEP = 0.05
 
-type ClipSpec = { priority: Enum.AnimationPriority, looped: boolean }
-
-local CLIPS: { [string]: ClipSpec } = {
-	Idle = { priority = Enum.AnimationPriority.Core, looped = true },
-	Walk = { priority = Enum.AnimationPriority.Core, looped = true },
-	Run = { priority = Enum.AnimationPriority.Core, looped = true },
-	Attack = { priority = Enum.AnimationPriority.Action, looped = false },
-	Throw = { priority = Enum.AnimationPriority.Action, looped = false },
-	Hit = { priority = Enum.AnimationPriority.Action, looped = false },
-	Death = { priority = Enum.AnimationPriority.Action4, looped = false },
+local PRIORITIES: { [AnimRoles.Priority]: Enum.AnimationPriority } = {
+	Core = Enum.AnimationPriority.Core,
+	Idle = Enum.AnimationPriority.Idle,
+	Movement = Enum.AnimationPriority.Movement,
+	Action = Enum.AnimationPriority.Action,
+	Action2 = Enum.AnimationPriority.Action2,
+	Action3 = Enum.AnimationPriority.Action3,
+	Action4 = Enum.AnimationPriority.Action4,
 }
 
 local maids: { [Instance]: Maid.Maid } = {}
@@ -43,7 +42,7 @@ local rigs: { [Model]: Rig } = {}
 	Plays enemy animations locally (game-design.md 5.6 visuals are client-side). Locomotion follows
 	the replicated root velocity through `Shared/Locomotion`, which smooths it and holds each clip
 	long enough that jitter never restarts one; one-shot clips follow the server's `AnimCue` attribute
-	("<clip>:<sequence>"). Clips resolve through `Animation/Clips`.
+	("<clip>:<sequence>"). Roles come from `Content/AnimRoles`; clips resolve through `Animation/Clips`.
 ]=]
 local EnemyAnimationController = {}
 
@@ -107,8 +106,8 @@ local function attach(model: Instance)
 	maids[model] = maid
 	local rig: Rig =
 		{ model = model, root = root, tracks = {}, locomotion = nil, motion = Locomotion.new(), rate = 1, dead = false }
-	for clip, spec in CLIPS do
-		local track = Clips.Load(animator, set .. clip, spec.priority, spec.looped)
+	for clip, role in AnimRoles.Enemy do
+		local track = Clips.Load(animator, set .. clip, PRIORITIES[role.priority], role.looped)
 		if track then
 			rig.tracks[clip] = track
 		end

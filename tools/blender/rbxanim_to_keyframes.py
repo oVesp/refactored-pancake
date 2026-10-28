@@ -1,36 +1,24 @@
 """Converts Motor6D .rbxanim bakes from assets/blender/combat_r15/ into KeyframeSequences.
 
 The .rbxanim files come from combat_r15.blend through the Roblox Animations add-on
-(object.rbxanims_bake_file, Motor6D mode); tools/blender/combat_bake.py bakes them headless. Run with plain Python from the repo root:
-    python tools/blender/rbxanim_to_keyframes.py
+(object.rbxanims_bake_file, Motor6D mode); tools/blender/combat_bake.py bakes them headless. Run through the animation workflow (docs/art/animation-pipeline.md):
+    python tools/anim/anim.py export Combat [clip ...]
 
-Outputs src/ReplicatedStorage/Animations/Combat/*.rbxmx, used until the clips are uploaded.
-Only animated joints get a weighted Pose; their R15 ancestors are written with Weight 0 so the
+Clips, sources, markers and looping come from content/animations/combat.json; outputs go to
+src/ReplicatedStorage/Animations/Combat/*.rbxmx. Only animated joints get a weighted Pose; their R15 ancestors are written with Weight 0 so the
 clip leaves the legs and hips to whatever locomotion track is playing underneath.
 """
 
 import json
 import os
+import sys
 import zlib
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-SOURCE = os.path.join(REPO, "assets", "blender", "combat_r15")
-OUT = os.path.join(REPO, "src", "ReplicatedStorage", "Animations", "Combat")
+MANIFEST = os.path.join(REPO, "content", "animations", "combat.json")
 
 # Enum.AnimationPriority.Action
 PRIORITY_ACTION = 2
-
-# Clip name -> (source .rbxanim, {marker name: seconds}).
-CLIPS = {
-    "BasicStrike": ("Strike", {"Hit": 0.13333}),
-    "BasicHeavyStrike": ("HeavyStrike", {"Windup": 0.0, "Hit": 0.5}),
-    "BasicStrike2": ("Strike2", {"Hit": 0.13333}),
-    "BasicStrike3": ("Strike3", {"Hit": 0.23333}),
-    "GuardHold": ("GuardHold", {}),
-    "GuardParry": ("GuardParry", {"Parry": 0.03333}),
-}
-# Clips that loop; GuardClips also sets AnimationTrack.Looped.
-LOOPED = {"GuardHold"}
 
 # R15 Motor6D tree by Part1 name.
 R15_PARENT = {
@@ -65,8 +53,8 @@ def cframe_xml(values):
         "<%s>%s</%s>" % (n, num(v), n) for n, v in zip(names, values))
 
 
-def write_clip(name, source, markers):
-    with open(os.path.join(SOURCE, source + ".rbxanim"), "rb") as f:
+def write_clip(name, source, markers, looped, out):
+    with open(source, "rb") as f:
         data = json.loads(zlib.decompress(f.read()))
     counter = [0]
 
@@ -122,16 +110,21 @@ def write_clip(name, source, markers):
     xml = ('<roblox version="4"><Item class="KeyframeSequence" referent="%s"><Properties>'
            '<string name="Name">%s</string><bool name="Loop">%s</bool><token name="Priority">%d</token>'
            '</Properties>%s</Item></roblox>\n') % (
-               ref(), name, "true" if name in LOOPED else "false", PRIORITY_ACTION, "".join(keyframes))
-    with open(os.path.join(OUT, name + ".rbxmx"), "w", encoding="utf8", newline="\n") as f:
+               ref(), name, "true" if looped else "false", PRIORITY_ACTION, "".join(keyframes))
+    with open(os.path.join(out, name + ".rbxmx"), "w", encoding="utf8", newline="\n") as f:
         f.write(xml)
 
 
 def main():
-    os.makedirs(OUT, exist_ok=True)
-    for name, (source, markers) in CLIPS.items():
-        write_clip(name, source, markers)
-    print("Combat clips written to", OUT)
+    with open(MANIFEST, encoding="utf8") as f:
+        manifest = json.load(f)
+    out = os.path.join(REPO, manifest["outDir"])
+    os.makedirs(out, exist_ok=True)
+    for name in sys.argv[1:] or list(manifest["clips"]):
+        clip = manifest["clips"][name]
+        source = os.path.join(REPO, manifest["sourceDir"], clip["source"])
+        write_clip(clip.get("keyframes", name), source, clip.get("markers", {}), clip["looped"], out)
+    print("Combat clips written to", out)
 
 
 main()

@@ -176,7 +176,7 @@ def parry_wide():
     turn("Head", twist=-12, lean=5)
 
 
-# Action -> [(frame, pose, kwargs)] at 30 FPS. Markers live in rbxanim_to_keyframes.py.
+# Action -> [(frame, pose, kwargs)] at 30 FPS. Markers live in content/animations/combat.json.
 PLANS = {
     "Strike2": [(0, rest, {}), (2, cross_load, {}), (4, cross_hit, {}), (7, cross_follow, {}),
                 (9, cross_settle, {}), (12, rest, {})],
