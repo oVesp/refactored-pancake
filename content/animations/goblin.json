@@ -5,11 +5,13 @@
 	"sourceDir": "assets/original/characters/mobs/Goblin Scout/Export/Animations",
 	"outDir": "src/ReplicatedStorage/Animations/Goblin",
 	"rig": {
-		"status": "pending-import",
-		"note": "Import Export/Goblin_Scout.fbx in Studio, rebuild the Goblin template from the raw import, then write the bone list (docs/art/animation-pipeline.md, Rig import). Until then the live ids and KeyframeSequences are the retired goblin.blend clips.",
+		"status": "ready",
+		"note": "Raw import tools/world/goblin_scout_import.rbxm (2026-10-28); exporter output matches Studio's own FBX import of the same clips within 0.0005 degrees.",
 		"bones": "tools/world/goblin_scout_bones.json",
 		"studsPerMetre": "auto",
-		"poseRoot": [],
+		"poseRoot": [
+			"root"
+		],
 		"lockedBones": [],
 		"frameStep": 2
 	},
@@ -24,14 +26,22 @@
 			"looped": true,
 			"tier": "placeholder",
 			"notes": "Action Forge clip idle_loop, remapped to the Goblin Scout rig by the owner.",
-			"exportedFrom": null,
-			"assetId": "90357216124611",
-			"uploadedSha": "8e1a133ea9c91cce015a3cee176f59ceaf9643266f18d0fa8b1f472d1c2b9de2",
+			"exportedFrom": "74f97a37d6b29dec220183940123984bb224fb94378788d8043845ef0bb2e117",
+			"assetId": "93137340496358",
+			"uploadedSha": "9be7f21b0c80199351700e5e85d0fc76ca935ed1d756716c1b14d7ee8589ce76",
 			"uploadedTier": "placeholder",
 			"uploaded": "2026-10-28",
-			"history": [],
+			"history": [
+				{
+					"assetId": "90357216124611",
+					"tier": "placeholder",
+					"source": "Goblin_Idle_A from the retired assets/blender/goblin/goblin.blend",
+					"uploaded": "2026-10-28",
+					"retired": "2026-10-28"
+				}
+			],
 			"sourceSha256": "74f97a37d6b29dec220183940123984bb224fb94378788d8043845ef0bb2e117",
-			"liveSource": "Goblin_Idle_A from the retired assets/blender/goblin/goblin.blend"
+			"uploadedSource": "GoblinScout_idle_loop_remap.fbx"
 		},
 		"GoblinWalk": {
 			"role": "Walk",
@@ -39,14 +49,22 @@
 			"looped": true,
 			"tier": "placeholder",
 			"notes": "Action Forge clip walk_loop, remapped to the Goblin Scout rig by the owner.",
-			"exportedFrom": null,
-			"assetId": "79496707204604",
-			"uploadedSha": "a6a9347e23dd2354224f308789c8b5f92bcfee82fd8f6d752b61a68b6b0c405a",
+			"exportedFrom": "3d13244a36a3607d922a3b01eb8e60346e1b427839a34a51f7a1fa66710053c2",
+			"assetId": "99302927912479",
+			"uploadedSha": "57767b33997721e0892ad38fb355b4295244bfc6ed9752b0536e545eea411ad6",
 			"uploadedTier": "placeholder",
 			"uploaded": "2026-10-28",
-			"history": [],
+			"history": [
+				{
+					"assetId": "79496707204604",
+					"tier": "placeholder",
+					"source": "Goblin_Walk from the retired assets/blender/goblin/goblin.blend",
+					"uploaded": "2026-10-28",
+					"retired": "2026-10-28"
+				}
+			],
 			"sourceSha256": "3d13244a36a3607d922a3b01eb8e60346e1b427839a34a51f7a1fa66710053c2",
-			"liveSource": "Goblin_Walk from the retired assets/blender/goblin/goblin.blend"
+			"uploadedSource": "GoblinScout_walk_loop_remap.fbx"
 		},
 		"GoblinRun": {
 			"role": "Run",
@@ -54,14 +72,22 @@
 			"looped": true,
 			"tier": "placeholder",
 			"notes": "Action Forge clip jog_fwd_loop, remapped to the Goblin Scout rig by the owner.",
-			"exportedFrom": null,
-			"assetId": "71567572512919",
-			"uploadedSha": "a6af8733f6f7c01c4d1cee92372c5cdb093a6222afe9e9223fcb239e614dc685",
+			"exportedFrom": "5029e1355c304c163307001a1ffd773336a5fa9bc9f2ad7a5e7c4ae66f408e58",
+			"assetId": "133526960064803",
+			"uploadedSha": "48693a1fc75090a1f97a4b135d6db1e01f103cfee87612978ddfd49c74fa0438",
 			"uploadedTier": "placeholder",
 			"uploaded": "2026-10-28",
-			"history": [],
+			"history": [
+				{
+					"assetId": "71567572512919",
+					"tier": "placeholder",
+					"source": "Goblin_Jog from the retired assets/blender/goblin/goblin.blend",
+					"uploaded": "2026-10-28",
+					"retired": "2026-10-28"
+				}
+			],
 			"sourceSha256": "5029e1355c304c163307001a1ffd773336a5fa9bc9f2ad7a5e7c4ae66f408e58",
-			"liveSource": "Goblin_Jog from the retired assets/blender/goblin/goblin.blend"
+			"uploadedSource": "GoblinScout_jog_fwd_loop_remap.fbx"
 		},
 		"GoblinAttack": {
 			"role": "Attack",
@@ -69,14 +95,22 @@
 			"looped": false,
 			"tier": "placeholder",
 			"notes": "Action Forge clip sword_regular_a, remapped to the Goblin Scout rig by the owner.",
-			"exportedFrom": null,
-			"assetId": "110563196893852",
-			"uploadedSha": "69869c7e0d20d7b60d8aadc3610267926890ff95bd5e9ac9565e51b95b056f5b",
+			"exportedFrom": "06b0fc8fffe2ae086be0c9f92dbe923592451bd76c34f3bce4623b87a9fb8af0",
+			"assetId": "106536653497390",
+			"uploadedSha": "32065e9237da8a3a9483851c3bdb0cf2a1768b3c8fbea1946b1566bdf0ad1d87",
 			"uploadedTier": "placeholder",
 			"uploaded": "2026-10-28",
-			"history": [],
+			"history": [
+				{
+					"assetId": "110563196893852",
+					"tier": "placeholder",
+					"source": "Goblin_Punch_Jab from the retired assets/blender/goblin/goblin.blend",
+					"uploaded": "2026-10-28",
+					"retired": "2026-10-28"
+				}
+			],
 			"sourceSha256": "06b0fc8fffe2ae086be0c9f92dbe923592451bd76c34f3bce4623b87a9fb8af0",
-			"liveSource": "Goblin_Punch_Jab from the retired assets/blender/goblin/goblin.blend"
+			"uploadedSource": "GoblinScout_sword_regular_a_remap.fbx"
 		},
 		"GoblinThrow": {
 			"role": "Throw",
@@ -84,14 +118,22 @@
 			"looped": false,
 			"tier": "placeholder",
 			"notes": "Action Forge clip overhandthrow, remapped to the Goblin Scout rig by the owner.",
-			"exportedFrom": null,
-			"assetId": "72380534780247",
-			"uploadedSha": "215504d574212373d09b98559a692f15f01be92e14c2f120be63c1c2330239b3",
+			"exportedFrom": "1b9c31396f96d2ab7d97ea90d2b6e9ce6299ab6838e2c949cf2d90a27621992d",
+			"assetId": "95138474801891",
+			"uploadedSha": "59f02876a7ee5630e1da7a9b16a27512576c612b1094f0753be31a0a9f05b93e",
 			"uploadedTier": "placeholder",
 			"uploaded": "2026-10-28",
-			"history": [],
+			"history": [
+				{
+					"assetId": "72380534780247",
+					"tier": "placeholder",
+					"source": "Goblin_OverhandThrow from the retired assets/blender/goblin/goblin.blend",
+					"uploaded": "2026-10-28",
+					"retired": "2026-10-28"
+				}
+			],
 			"sourceSha256": "1b9c31396f96d2ab7d97ea90d2b6e9ce6299ab6838e2c949cf2d90a27621992d",
-			"liveSource": "Goblin_OverhandThrow from the retired assets/blender/goblin/goblin.blend"
+			"uploadedSource": "GoblinScout_overhandthrow_remap.fbx"
 		},
 		"GoblinHit": {
 			"role": "Hit",
@@ -99,14 +141,22 @@
 			"looped": false,
 			"tier": "placeholder",
 			"notes": "Action Forge clip hit_chest, remapped to the Goblin Scout rig by the owner.",
-			"exportedFrom": null,
-			"assetId": "114573933190100",
-			"uploadedSha": "39b322408b4d4e49f7e66af196d31f4e01e83febce18f6b14a4ae5ea02709d38",
+			"exportedFrom": "7a96640def9b8a78f2b306e7bd605fde64d3e26fa17258193f265aa20c8be5f5",
+			"assetId": "125369021853241",
+			"uploadedSha": "62f043db5cfca3ab3d52e72a8c486a74f1734e4f7e84c3b445b3c2ef6c62523c",
 			"uploadedTier": "placeholder",
 			"uploaded": "2026-10-28",
-			"history": [],
+			"history": [
+				{
+					"assetId": "114573933190100",
+					"tier": "placeholder",
+					"source": "Goblin_Hit_Chest from the retired assets/blender/goblin/goblin.blend",
+					"uploaded": "2026-10-28",
+					"retired": "2026-10-28"
+				}
+			],
 			"sourceSha256": "7a96640def9b8a78f2b306e7bd605fde64d3e26fa17258193f265aa20c8be5f5",
-			"liveSource": "Goblin_Hit_Chest from the retired assets/blender/goblin/goblin.blend"
+			"uploadedSource": "GoblinScout_hit_chest_remap.fbx"
 		},
 		"GoblinDeath": {
 			"role": "Death",
@@ -114,14 +164,22 @@
 			"looped": false,
 			"tier": "placeholder",
 			"notes": "Action Forge clip death01, remapped to the Goblin Scout rig by the owner.",
-			"exportedFrom": null,
-			"assetId": "122683815689784",
-			"uploadedSha": "182adeb62665e7cd39f96d29d8fee215cee0752b3de630c6361465849168ef55",
+			"exportedFrom": "1b095a0a1a42d904101d17bf3cc712e8fb7dfb397c68b162b9cd60e107664bd7",
+			"assetId": "122979177869235",
+			"uploadedSha": "da30f1b53d4fb950b98368785ef7ba7919de1fe1bb6c2e5582215d2a766784a8",
 			"uploadedTier": "placeholder",
 			"uploaded": "2026-10-28",
-			"history": [],
+			"history": [
+				{
+					"assetId": "122683815689784",
+					"tier": "placeholder",
+					"source": "Goblin_Death_B from the retired assets/blender/goblin/goblin.blend",
+					"uploaded": "2026-10-28",
+					"retired": "2026-10-28"
+				}
+			],
 			"sourceSha256": "1b095a0a1a42d904101d17bf3cc712e8fb7dfb397c68b162b9cd60e107664bd7",
-			"liveSource": "Goblin_Death_B from the retired assets/blender/goblin/goblin.blend"
+			"uploadedSource": "GoblinScout_death01_remap.fbx"
 		}
 	},
 	"library": {

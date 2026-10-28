@@ -284,7 +284,7 @@
 			"license": "project",
 			"owner": "dev",
 			"status": "draft",
-			"notes": "Skinned goblin on a Humanoid, written by tools/world/build.luau from tools/world/goblin_rig.json."
+			"notes": "Goblin Scout on a Humanoid, written by tools/world/build.luau from tools/world/goblin_scout_import.rbxm."
 		},
 		{
 			"id": "template:Skeleton",
@@ -306,6 +306,138 @@
 			"owner": "dev",
 			"status": "draft",
 			"notes": "Raw import (mesh, 82 bones); supplies bones and mesh size to tools/world/build.luau. The mesh id is not readable outside Studio, so it lives in Assets.Meshes."
+		},
+		{
+			"id": "mesh:GoblinScoutBelt",
+			"type": "mesh",
+			"name": "Belt_low",
+			"origin": "original (owner-made Goblin Scout, assets/original/characters/mobs/Goblin Scout)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Part Belt_low of Export/Goblin_Scout.fbx, uploaded by the owner via the Studio 3D importer 2026-10-28 with a PBR SurfaceAppearance (colour 72066017057670, normal 140164751284435, metalness 112408781578784, roughness 80190390653413).",
+			"assetId": "83394005475880"
+		},
+		{
+			"id": "mesh:GoblinScoutBelts",
+			"type": "mesh",
+			"name": "Belts_low",
+			"origin": "original (owner-made Goblin Scout, assets/original/characters/mobs/Goblin Scout)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Part Belts_low of Export/Goblin_Scout.fbx, uploaded by the owner via the Studio 3D importer 2026-10-28 with a PBR SurfaceAppearance (colour 72066017057670, normal 140164751284435, metalness 112408781578784, roughness 80190390653413).",
+			"assetId": "73810130695380"
+		},
+		{
+			"id": "mesh:GoblinScoutBody",
+			"type": "mesh",
+			"name": "Body_low",
+			"origin": "original (owner-made Goblin Scout, assets/original/characters/mobs/Goblin Scout)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Part Body_low of Export/Goblin_Scout.fbx, uploaded by the owner via the Studio 3D importer 2026-10-28 with a PBR SurfaceAppearance (colour 133199116655025, normal 114706559094415, metalness 122300276025823, roughness 115073555825037).",
+			"assetId": "70677615842211"
+		},
+		{
+			"id": "mesh:GoblinScoutButtons",
+			"type": "mesh",
+			"name": "Buttons_low",
+			"origin": "original (owner-made Goblin Scout, assets/original/characters/mobs/Goblin Scout)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Part Buttons_low of Export/Goblin_Scout.fbx, uploaded by the owner via the Studio 3D importer 2026-10-28 with a PBR SurfaceAppearance (colour 138758445116239, normal 97953090067099, metalness 122300276025823, roughness 75776742803512).",
+			"assetId": "121191509186295"
+		},
+		{
+			"id": "mesh:GoblinScoutCloak",
+			"type": "mesh",
+			"name": "Cloak_low",
+			"origin": "original (owner-made Goblin Scout, assets/original/characters/mobs/Goblin Scout)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Part Cloak_low of Export/Goblin_Scout.fbx, uploaded by the owner via the Studio 3D importer 2026-10-28 with a PBR SurfaceAppearance (colour 135302660612206, normal 72423225437059, metalness 122300276025823, roughness 74446348618388).",
+			"assetId": "70972463432277"
+		},
+		{
+			"id": "mesh:GoblinScoutEyes",
+			"type": "mesh",
+			"name": "Eyes_low",
+			"origin": "original (owner-made Goblin Scout, assets/original/characters/mobs/Goblin Scout)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Part Eyes_low of Export/Goblin_Scout.fbx, uploaded by the owner via the Studio 3D importer 2026-10-28 with a PBR SurfaceAppearance (colour 121309255424232, normal 74942113275676, metalness 122300276025823, roughness 90158173562793).",
+			"assetId": "109670508494385"
+		},
+		{
+			"id": "mesh:GoblinScoutLowerTeeth",
+			"type": "mesh",
+			"name": "Lower Teeth_low",
+			"origin": "original (owner-made Goblin Scout, assets/original/characters/mobs/Goblin Scout)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Part Lower Teeth_low of Export/Goblin_Scout.fbx, uploaded by the owner via the Studio 3D importer 2026-10-28 with a PBR SurfaceAppearance (colour 71330053435174, normal 118817519147058, metalness 122300276025823, roughness 121439145577354).",
+			"assetId": "103132577820372"
+		},
+		{
+			"id": "mesh:GoblinScoutShirt",
+			"type": "mesh",
+			"name": "Shirt_low",
+			"origin": "original (owner-made Goblin Scout, assets/original/characters/mobs/Goblin Scout)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Part Shirt_low of Export/Goblin_Scout.fbx, uploaded by the owner via the Studio 3D importer 2026-10-28 with a PBR SurfaceAppearance (colour 136036675275847, normal 107818930934931, metalness 122300276025823, roughness 112839749765283).",
+			"assetId": "104686872064307"
+		},
+		{
+			"id": "mesh:GoblinScoutShorts",
+			"type": "mesh",
+			"name": "Shorts_low",
+			"origin": "original (owner-made Goblin Scout, assets/original/characters/mobs/Goblin Scout)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Part Shorts_low of Export/Goblin_Scout.fbx, uploaded by the owner via the Studio 3D importer 2026-10-28 with a PBR SurfaceAppearance (colour 136036675275847, normal 107818930934931, metalness 122300276025823, roughness 112839749765283).",
+			"assetId": "98247996535430"
+		},
+		{
+			"id": "mesh:GoblinScoutUpperTeeth",
+			"type": "mesh",
+			"name": "Upper Teeth_low",
+			"origin": "original (owner-made Goblin Scout, assets/original/characters/mobs/Goblin Scout)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Part Upper Teeth_low of Export/Goblin_Scout.fbx, uploaded by the owner via the Studio 3D importer 2026-10-28 with a PBR SurfaceAppearance (colour 71330053435174, normal 118817519147058, metalness 122300276025823, roughness 121439145577354).",
+			"assetId": "91264508192724"
+		},
+		{
+			"id": "data:GoblinScoutImport",
+			"type": "data",
+			"name": "goblin_scout_import.rbxm",
+			"path": "tools/world/goblin_scout_import.rbxm",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Raw Studio 3D import of Goblin_Scout.fbx (2026-10-28); tools/world/build.luau rebuilds the Goblin template from it."
+		},
+		{
+			"id": "data:GoblinScoutBones",
+			"type": "data",
+			"name": "goblin_scout_bones.json",
+			"path": "tools/world/goblin_scout_bones.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Bone list with rest offsets, written by tools/anim/rig_from_import.luau; the Goblin animation set's rig."
 		},
 		{
 			"id": "mesh:Skeleton",
@@ -725,30 +857,6 @@
 			"assetId": "113979896413209"
 		},
 		{
-			"id": "mesh:Goblin",
-			"type": "mesh",
-			"name": "Goblin.fbx",
-			"path": "assets/blender/goblin/Goblin.fbx",
-			"origin": "original",
-			"license": "project",
-			"owner": "dev",
-			"status": "draft",
-			"notes": "Placeholder goblin modelled in assets/blender/goblin/goblin.blend; uploaded via the Studio 3D importer 2026-10-24.",
-			"assetId": "123543422748212"
-		},
-		{
-			"id": "texture:GoblinPalette",
-			"type": "texture",
-			"name": "GoblinPalette.png",
-			"path": "assets/blender/goblin/GoblinPalette.png",
-			"origin": "original",
-			"license": "project",
-			"owner": "dev",
-			"status": "draft",
-			"notes": "Goblin colour palette; skin cell is transparent so the part colour tints it. Uploaded with mesh:Goblin.",
-			"assetId": "101253281014930"
-		},
-		{
 			"id": "texture:Arc",
 			"type": "texture",
 			"name": "spark_05.png",
@@ -821,17 +929,6 @@
 			"assetId": "139885643232674"
 		},
 		{
-			"id": "data:GoblinRig",
-			"type": "data",
-			"name": "goblin_rig.json",
-			"path": "tools/world/goblin_rig.json",
-			"origin": "original",
-			"license": "project",
-			"owner": "dev",
-			"status": "draft",
-			"notes": "Bone tree of the retired placeholder goblin in Roblox space, written by the removed tools/blender/export_goblin.py; read by tools/world/build.luau until the Goblin Scout template replaces it."
-		},
-		{
 			"id": "animation:GoblinIdle",
 			"type": "animation",
 			"name": "GoblinIdle",
@@ -841,8 +938,8 @@
 			"origin": "Action Forge (Quaternius) clips remapped to the Goblin Scout rig (assets/original/characters/mobs/Goblin Scout)",
 			"license": "CC0 1.0 (Quaternius)",
 			"owner": "dev",
-			"notes": "Action Forge clip idle_loop, remapped to the Goblin Scout rig by the owner. Pending: needs-export; the live clip is Goblin_Idle_A from the retired assets/blender/goblin/goblin.blend.",
-			"assetId": "90357216124611",
+			"notes": "Action Forge clip idle_loop, remapped to the Goblin Scout rig by the owner.",
+			"assetId": "93137340496358",
 			"status": "draft"
 		},
 		{
@@ -855,8 +952,8 @@
 			"origin": "Action Forge (Quaternius) clips remapped to the Goblin Scout rig (assets/original/characters/mobs/Goblin Scout)",
 			"license": "CC0 1.0 (Quaternius)",
 			"owner": "dev",
-			"notes": "Action Forge clip walk_loop, remapped to the Goblin Scout rig by the owner. Pending: needs-export; the live clip is Goblin_Walk from the retired assets/blender/goblin/goblin.blend.",
-			"assetId": "79496707204604",
+			"notes": "Action Forge clip walk_loop, remapped to the Goblin Scout rig by the owner.",
+			"assetId": "99302927912479",
 			"status": "draft"
 		},
 		{
@@ -869,8 +966,8 @@
 			"origin": "Action Forge (Quaternius) clips remapped to the Goblin Scout rig (assets/original/characters/mobs/Goblin Scout)",
 			"license": "CC0 1.0 (Quaternius)",
 			"owner": "dev",
-			"notes": "Action Forge clip jog_fwd_loop, remapped to the Goblin Scout rig by the owner. Pending: needs-export; the live clip is Goblin_Jog from the retired assets/blender/goblin/goblin.blend.",
-			"assetId": "71567572512919",
+			"notes": "Action Forge clip jog_fwd_loop, remapped to the Goblin Scout rig by the owner.",
+			"assetId": "133526960064803",
 			"status": "draft"
 		},
 		{
@@ -883,8 +980,8 @@
 			"origin": "Action Forge (Quaternius) clips remapped to the Goblin Scout rig (assets/original/characters/mobs/Goblin Scout)",
 			"license": "CC0 1.0 (Quaternius)",
 			"owner": "dev",
-			"notes": "Action Forge clip sword_regular_a, remapped to the Goblin Scout rig by the owner. Pending: needs-export; the live clip is Goblin_Punch_Jab from the retired assets/blender/goblin/goblin.blend.",
-			"assetId": "110563196893852",
+			"notes": "Action Forge clip sword_regular_a, remapped to the Goblin Scout rig by the owner.",
+			"assetId": "106536653497390",
 			"status": "draft"
 		},
 		{
@@ -897,8 +994,8 @@
 			"origin": "Action Forge (Quaternius) clips remapped to the Goblin Scout rig (assets/original/characters/mobs/Goblin Scout)",
 			"license": "CC0 1.0 (Quaternius)",
 			"owner": "dev",
-			"notes": "Action Forge clip overhandthrow, remapped to the Goblin Scout rig by the owner. Pending: needs-export; the live clip is Goblin_OverhandThrow from the retired assets/blender/goblin/goblin.blend.",
-			"assetId": "72380534780247",
+			"notes": "Action Forge clip overhandthrow, remapped to the Goblin Scout rig by the owner.",
+			"assetId": "95138474801891",
 			"status": "draft"
 		},
 		{
@@ -911,8 +1008,8 @@
 			"origin": "Action Forge (Quaternius) clips remapped to the Goblin Scout rig (assets/original/characters/mobs/Goblin Scout)",
 			"license": "CC0 1.0 (Quaternius)",
 			"owner": "dev",
-			"notes": "Action Forge clip hit_chest, remapped to the Goblin Scout rig by the owner. Pending: needs-export; the live clip is Goblin_Hit_Chest from the retired assets/blender/goblin/goblin.blend.",
-			"assetId": "114573933190100",
+			"notes": "Action Forge clip hit_chest, remapped to the Goblin Scout rig by the owner.",
+			"assetId": "125369021853241",
 			"status": "draft"
 		},
 		{
@@ -925,8 +1022,8 @@
 			"origin": "Action Forge (Quaternius) clips remapped to the Goblin Scout rig (assets/original/characters/mobs/Goblin Scout)",
 			"license": "CC0 1.0 (Quaternius)",
 			"owner": "dev",
-			"notes": "Action Forge clip death01, remapped to the Goblin Scout rig by the owner. Pending: needs-export; the live clip is Goblin_Death_B from the retired assets/blender/goblin/goblin.blend.",
-			"assetId": "122683815689784",
+			"notes": "Action Forge clip death01, remapped to the Goblin Scout rig by the owner.",
+			"assetId": "122979177869235",
 			"status": "draft"
 		},
 		{

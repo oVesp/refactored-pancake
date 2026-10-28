@@ -58,7 +58,7 @@ local function activeInZone(zone: string?): number
 	return count
 end
 
--- The body's SurfaceAppearance leaves the skin transparent, so the part colour shows through.
+-- Tints a template's `Body` part; the Goblin template has none, its textures carry the colour.
 local function tint(model: Model, color: Color3)
 	local body = model:FindFirstChild("Body")
 	if body and body:IsA("BasePart") then

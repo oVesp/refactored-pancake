@@ -2,7 +2,7 @@
   <Item class="Model" referent="0">
     <Properties>
       <string name="Name">Goblin</string>
-      <BinaryString name="AttributesSerialize">AgAAAAcAAABBbmltU2V0AgYAAABHb2JsaW4JAAAAQmFzZVNjYWxlBgAAAAAAAPg/</BinaryString>
+      <BinaryString name="AttributesSerialize">AgAAAAcAAABBbmltU2V0AgYAAABHb2JsaW4JAAAAQmFzZVNjYWxlBs3MzMzMzPA/</BinaryString>
       <token name="ModelStreamingMode">1</token>
       <Ref name="PrimaryPart">1</Ref>
     </Properties>
@@ -13,7 +13,7 @@
         <token name="BottomSurface">0</token>
         <CoordinateFrame name="CFrame">
           <X>0</X>
-          <Y>1.8228302</Y>
+          <Y>2</Y>
           <Z>0</Z>
           <R00>1</R00>
           <R01>0</R01>
@@ -38,18 +38,42 @@
       <Item class="Motor6D" referent="2">
         <Properties>
           <string name="Name">Root</string>
+          <CoordinateFrame name="C0">
+            <X>0</X>
+            <Y>-2</Y>
+            <Z>0</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
           <Ref name="Part0">1</Ref>
           <Ref name="Part1">3</Ref>
         </Properties>
       </Item>
     </Item>
-    <Item class="MeshPart" referent="3">
+    <Item class="Part" referent="3">
       <Properties>
-        <string name="Name">Body</string>
+        <string name="Name">Rig</string>
         <bool name="Anchored">false</bool>
+        <BinaryString name="AttributesSerialize"></BinaryString>
+        <bool name="AudioCanCollide">true</bool>
+        <float name="BackParamA">-0.5</float>
+        <float name="BackParamB">0.5</float>
+        <token name="BackSurface">0</token>
+        <token name="BackSurfaceInput">0</token>
+        <float name="BottomParamA">-0.5</float>
+        <float name="BottomParamB">0.5</float>
+        <token name="BottomSurface">4</token>
+        <token name="BottomSurfaceInput">0</token>
         <CoordinateFrame name="CFrame">
           <X>0</X>
-          <Y>1.8228302</Y>
+          <Y>0</Y>
           <Z>0</Z>
           <R00>1</R00>
           <R01>0</R01>
@@ -63,973 +87,2831 @@
         </CoordinateFrame>
         <bool name="CanCollide">false</bool>
         <bool name="CanQuery">false</bool>
-        <Color3uint8 name="Color3uint8">7247430</Color3uint8>
-        <bool name="DoubleSided">true</bool>
-        <bool name="HasSkinnedMesh">true</bool>
-        <Vector3 name="InitialSize">
-          <X>1.5180206</X>
-          <Y>1.2380676</Y>
-          <Z>0.4807129</Z>
-        </Vector3>
+        <bool name="CanTouch">true</bool>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <bool name="CastShadow">true</bool>
+        <string name="CollisionGroup">Default</string>
+        <int name="CollisionGroupId">0</int>
+        <Color3uint8 name="Color3uint8">10724005</Color3uint8>
+        <PhysicalProperties name="CustomPhysicalProperties">
+          <CustomPhysics>false</CustomPhysics>
+        </PhysicalProperties>
+        <bool name="EnableFluidForces">true</bool>
+        <token name="formFactorRaw">1</token>
+        <float name="FrontParamA">-0.5</float>
+        <float name="FrontParamB">0.5</float>
+        <token name="FrontSurface">0</token>
+        <token name="FrontSurfaceInput">0</token>
+        <float name="LeftParamA">-0.5</float>
+        <float name="LeftParamB">0.5</float>
+        <token name="LeftSurface">0</token>
+        <token name="LeftSurfaceInput">0</token>
+        <bool name="Locked">false</bool>
         <bool name="Massless">true</bool>
-        <Content name="MeshContent">
-          <uri>rbxassetid://123543422748212</uri>
-        </Content>
+        <token name="Material">256</token>
+        <string name="MaterialVariantSerialized"></string>
+        <CoordinateFrame name="PivotOffset">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <float name="Reflectance">0</float>
+        <float name="RightParamA">-0.5</float>
+        <float name="RightParamB">0.5</float>
+        <token name="RightSurface">0</token>
+        <token name="RightSurfaceInput">0</token>
+        <int name="RootPriority">0</int>
+        <Vector3 name="RotVelocity">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+        </Vector3>
+        <bool name="DefinesCapabilities">false</bool>
+        <BinaryString name="SerializedOverrides">
+        </BinaryString>
+        <token name="shape">1</token>
         <Vector3 name="size">
-          <X>4.4561462</X>
-          <Y>3.6343384</Y>
-          <Z>1.4111481</Z>
+          <X>2</X>
+          <Y>2</Y>
+          <Z>1</Z>
+        </Vector3>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <float name="TopParamA">-0.5</float>
+        <float name="TopParamB">0.5</float>
+        <token name="TopSurface">3</token>
+        <token name="TopSurfaceInput">0</token>
+        <float name="Transparency">1</float>
+        <Vector3 name="Velocity">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
         </Vector3>
       </Properties>
-      <Item class="SurfaceAppearance" referent="4">
+      <Item class="Bone" referent="4">
         <Properties>
-          <string name="Name">Palette</string>
-          <token name="AlphaMode">0</token>
-          <Content name="ColorMapContent">
-            <uri>rbxassetid://101253281014930</uri>
-          </Content>
-        </Properties>
-      </Item>
-      <Item class="Bone" referent="5">
-        <Properties>
-          <string name="Name">root</string>
+          <string name="Name">root.x</string>
+          <BinaryString name="AttributesSerialize"></BinaryString>
           <CoordinateFrame name="CFrame">
             <X>0</X>
-            <Y>-1.8228302</Y>
-            <Z>0.059768677</Z>
+            <Y>0.029470444</Y>
+            <Z>-0.08932495</Z>
             <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>0</R11>
-            <R12>-1</R12>
-            <R20>0</R20>
-            <R21>1</R21>
-            <R22>0</R22>
+            <R01>0.00000000000000012246434</R01>
+            <R02>-0.0000028277193</R02>
+            <R10>-0.00000000000000012246469</R10>
+            <R11>1</R11>
+            <R12>-0.00000000000000012246434</R12>
+            <R20>0.0000028277193</R20>
+            <R21>0.00000000000000012246469</R21>
+            <R22>1</R22>
           </CoordinateFrame>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <bool name="DefinesCapabilities">false</bool>
+          <BinaryString name="SerializedOverrides">
+          </BinaryString>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <bool name="Visible">false</bool>
         </Properties>
-        <Item class="Bone" referent="6">
+        <Item class="Bone" referent="5">
           <Properties>
-            <string name="Name">pelvis</string>
+            <string name="Name">spine_01.x</string>
+            <BinaryString name="AttributesSerialize"></BinaryString>
             <CoordinateFrame name="CFrame">
-              <X>0</X>
-              <Y>0.14706421</Y>
-              <Z>-1.5876312</Z>
+              <X>0.00000014067456</X>
+              <Y>0.25198865</Y>
+              <Z>0.049748413</Z>
               <R00>1</R00>
-              <R01>0</R01>
-              <R02>0</R02>
-              <R10>0</R10>
-              <R11>-0.24967957</R11>
-              <R12>0.96832275</R12>
-              <R20>0</R20>
-              <R21>-0.96832275</R21>
-              <R22>-0.24967957</R22>
+              <R01>0.00000067855234</R01>
+              <R02>0.0000027450972</R02>
+              <R10>-0.000000000000105278525</R10>
+              <R11>0.9707816</R11>
+              <R12>-0.23996454</R12>
+              <R20>-0.0000028277186</R20>
+              <R21>0.23996454</R21>
+              <R22>0.9707816</R22>
             </CoordinateFrame>
+            <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+            <bool name="DefinesCapabilities">false</bool>
+            <BinaryString name="SerializedOverrides">
+            </BinaryString>
+            <int64 name="SourceAssetId">-1</int64>
+            <BinaryString name="Tags"></BinaryString>
+            <bool name="Visible">false</bool>
           </Properties>
-          <Item class="Bone" referent="7">
+          <Item class="Bone" referent="6">
             <Properties>
-              <string name="Name">spine_01</string>
+              <string name="Name">spine_02.x</string>
+              <BinaryString name="AttributesSerialize"></BinaryString>
               <CoordinateFrame name="CFrame">
-                <X>0</X>
-                <Y>0.21975708</Y>
-                <Z>0</Z>
+                <X>0.0000000000000015607497</X>
+                <Y>0.25701833</Y>
+                <Z>0.00000011920929</Z>
                 <R00>1</R00>
-                <R01>0</R01>
-                <R02>0</R02>
-                <R10>0</R10>
-                <R11>0.9916229</R11>
-                <R12>-0.12913513</R12>
-                <R20>0</R20>
-                <R21>0.12913513</R21>
-                <R22>0.9916229</R22>
+                <R01>0.0000000000000020040766</R01>
+                <R02>0.0000000000005676312</R02>
+                <R10>-0.000000000000058833994</R10>
+                <R11>0.99497384</R11>
+                <R12>0.10013543</R12>
+                <R20>-0.00000000000056457746</R20>
+                <R21>-0.10013543</R21>
+                <R22>0.99497384</R22>
               </CoordinateFrame>
+              <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+              <bool name="DefinesCapabilities">false</bool>
+              <BinaryString name="SerializedOverrides">
+              </BinaryString>
+              <int64 name="SourceAssetId">-1</int64>
+              <BinaryString name="Tags"></BinaryString>
+              <bool name="Visible">false</bool>
             </Properties>
-            <Item class="Bone" referent="8">
+            <Item class="Bone" referent="7">
               <Properties>
-                <string name="Name">spine_02</string>
+                <string name="Name">spine_03.x</string>
+                <BinaryString name="AttributesSerialize"></BinaryString>
                 <CoordinateFrame name="CFrame">
-                  <X>0</X>
-                  <Y>0.26216125</Y>
-                  <Z>0</Z>
+                  <X>-0.0000000000000036711628</X>
+                  <Y>0.25631452</Y>
+                  <Z>-0.00000014901161</Z>
                   <R00>1</R00>
-                  <R01>0</R01>
-                  <R02>0</R02>
-                  <R10>0</R10>
-                  <R11>0.98805237</R11>
-                  <R12>-0.15409851</R12>
-                  <R20>0</R20>
-                  <R21>0.15409851</R21>
-                  <R22>0.98805237</R22>
+                  <R01>-0.000000000000000019268517</R01>
+                  <R02>-0.0000000000000000014167152</R02>
+                  <R10>0.000000000000000019251365</R10>
+                  <R11>0.9875409</R11>
+                  <R12>0.15736277</R12>
+                  <R20>-0.0000000000000000016330795</R20>
+                  <R21>-0.15736277</R21>
+                  <R22>0.9875409</R22>
                 </CoordinateFrame>
+                <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                <bool name="DefinesCapabilities">false</bool>
+                <BinaryString name="SerializedOverrides">
+                </BinaryString>
+                <int64 name="SourceAssetId">-1</int64>
+                <BinaryString name="Tags"></BinaryString>
+                <bool name="Visible">false</bool>
               </Properties>
-              <Item class="Bone" referent="9">
+              <Item class="Bone" referent="8">
                 <Properties>
-                  <string name="Name">spine_03</string>
+                  <string name="Name">shoulder.l</string>
+                  <BinaryString name="AttributesSerialize"></BinaryString>
                   <CoordinateFrame name="CFrame">
-                    <X>0</X>
-                    <Y>0.29858398</Y>
-                    <Z>0</Z>
-                    <R00>1</R00>
-                    <R01>0</R01>
-                    <R02>0</R02>
-                    <R10>0</R10>
-                    <R11>0.98257446</R11>
-                    <R12>-0.18583679</R12>
-                    <R20>0</R20>
-                    <R21>0.18583679</R21>
-                    <R22>0.98257446</R22>
+                    <X>-0.19832416</X>
+                    <Y>0.09217739</Y>
+                    <Z>-0.016385734</Z>
+                    <R00>-0.000101247766</R00>
+                    <R01>-0.9986185</R01>
+                    <R02>-0.05254603</R02>
+                    <R10>-0.017916389</R10>
+                    <R11>0.05253941</R11>
+                    <R12>-0.99845815</R12>
+                    <R20>0.9998395</R20>
+                    <R21>0.0008403435</R21>
+                    <R22>-0.017896956</R22>
                   </CoordinateFrame>
+                  <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                  <bool name="DefinesCapabilities">false</bool>
+                  <BinaryString name="SerializedOverrides">
+                  </BinaryString>
+                  <int64 name="SourceAssetId">-1</int64>
+                  <BinaryString name="Tags"></BinaryString>
+                  <bool name="Visible">false</bool>
                 </Properties>
-                <Item class="Bone" referent="10">
+                <Item class="Bone" referent="9">
                   <Properties>
-                    <string name="Name">neck_01</string>
+                    <string name="Name">arm_stretch.l</string>
+                    <BinaryString name="AttributesSerialize"></BinaryString>
                     <CoordinateFrame name="CFrame">
-                      <X>0</X>
-                      <Y>0.3694458</Y>
-                      <Z>0</Z>
-                      <R00>1</R00>
-                      <R01>0</R01>
-                      <R02>0</R02>
-                      <R10>0</R10>
-                      <R11>0.7555084</R11>
-                      <R12>0.6551361</R12>
-                      <R20>0</R20>
-                      <R21>-0.6551361</R21>
-                      <R22>0.7555084</R22>
+                      <X>0.000000018626451</X>
+                      <Y>0.42793733</Y>
+                      <Z>-0.00000047683716</Z>
+                      <R00>0.99679375</R00>
+                      <R01>0.008655142</R01>
+                      <R02>-0.07954474</R02>
+                      <R10>-0.068172716</R10>
+                      <R11>0.61232406</R11>
+                      <R12>-0.7876622</R12>
+                      <R20>0.041889824</R20>
+                      <R21>0.79055953</R21>
+                      <R22>0.6109508</R22>
                     </CoordinateFrame>
+                    <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                    <bool name="DefinesCapabilities">false</bool>
+                    <BinaryString name="SerializedOverrides">
+                    </BinaryString>
+                    <int64 name="SourceAssetId">-1</int64>
+                    <BinaryString name="Tags"></BinaryString>
+                    <bool name="Visible">false</bool>
                   </Properties>
-                  <Item class="Bone" referent="11">
+                  <Item class="Bone" referent="10">
                     <Properties>
-                      <string name="Name">head</string>
+                      <string name="Name">arm_twist.l</string>
+                      <BinaryString name="AttributesSerialize"></BinaryString>
                       <CoordinateFrame name="CFrame">
-                        <X>0</X>
-                        <Y>0.27137756</Y>
+                        <X>0.000000014901161</X>
+                        <Y>-0.00000011920929</Y>
                         <Z>0</Z>
                         <R00>1</R00>
-                        <R01>0</R01>
-                        <R02>0</R02>
-                        <R10>0</R10>
-                        <R11>0.91755676</R11>
-                        <R12>-0.39759827</R12>
-                        <R20>0</R20>
-                        <R21>0.39759827</R21>
-                        <R22>0.91755676</R22>
+                        <R01>-0.000000013038518</R01>
+                        <R02>0.000000052154064</R02>
+                        <R10>0.000000013038516</R10>
+                        <R11>1</R11>
+                        <R12>0.00000003696186</R12>
+                        <R20>-0.000000052154064</R20>
+                        <R21>-0.00000003696186</R21>
+                        <R22>1</R22>
                       </CoordinateFrame>
+                      <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                      <bool name="DefinesCapabilities">false</bool>
+                      <BinaryString name="SerializedOverrides">
+                      </BinaryString>
+                      <int64 name="SourceAssetId">-1</int64>
+                      <BinaryString name="Tags"></BinaryString>
+                      <bool name="Visible">false</bool>
                     </Properties>
                   </Item>
-                </Item>
-                <Item class="Bone" referent="12">
-                  <Properties>
-                    <string name="Name">clavicle_l</string>
-                    <CoordinateFrame name="CFrame">
-                      <X>-0.041397095</X>
-                      <Y>0.27108765</Y>
-                      <Z>-0.23236084</Z>
-                      <R00>0.6359253</R00>
-                      <R01>-0.76672363</R01>
-                      <R02>-0.08796692</R02>
-                      <R10>0.15489197</R10>
-                      <R11>0.23846436</R11>
-                      <R12>-0.9587097</R12>
-                      <R20>0.7560425</R20>
-                      <R21>0.5960541</R21>
-                      <R22>0.27041626</R22>
-                    </CoordinateFrame>
-                  </Properties>
-                  <Item class="Bone" referent="13">
+                  <Item class="Bone" referent="11">
                     <Properties>
-                      <string name="Name">upperarm_l</string>
+                      <string name="Name">forearm_stretch.l</string>
+                      <BinaryString name="AttributesSerialize"></BinaryString>
                       <CoordinateFrame name="CFrame">
-                        <X>0</X>
-                        <Y>0.44491577</Y>
-                        <Z>-0</Z>
-                        <R00>-0.016082764</R00>
-                        <R01>-0.6151886</R01>
-                        <R02>0.788208</R02>
-                        <R10>0.1076355</R10>
-                        <R11>0.78266907</R11>
-                        <R12>0.61305237</R12>
-                        <R20>-0.99406433</R20>
-                        <R21>0.0947113</R21>
-                        <R22>0.053634644</R22>
+                        <X>-0.000000044703484</X>
+                        <Y>0.6195241</Y>
+                        <Z>-0.00000023841858</Z>
+                        <R00>0.79786575</R00>
+                        <R01>-0.60283524</R01>
+                        <R02>-0.0000009417532</R02>
+                        <R10>0.60283524</R10>
+                        <R11>0.7978657</R11>
+                        <R12>0.0000002082557</R12>
+                        <R20>0.00000062584877</R20>
+                        <R21>-0.0000007338821</R21>
+                        <R22>1</R22>
                       </CoordinateFrame>
+                      <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                      <bool name="DefinesCapabilities">false</bool>
+                      <BinaryString name="SerializedOverrides">
+                      </BinaryString>
+                      <int64 name="SourceAssetId">-1</int64>
+                      <BinaryString name="Tags"></BinaryString>
+                      <bool name="Visible">false</bool>
                     </Properties>
-                    <Item class="Bone" referent="14">
+                    <Item class="Bone" referent="12">
                       <Properties>
-                        <string name="Name">lowerarm_l</string>
+                        <string name="Name">forearm_twist.l</string>
+                        <BinaryString name="AttributesSerialize"></BinaryString>
                         <CoordinateFrame name="CFrame">
-                          <X>0</X>
-                          <Y>0.6094513</Y>
-                          <Z>0</Z>
-                          <R00>0.99990845</R00>
-                          <R01>-0.0134887695</R01>
-                          <R02>0.0002746582</R02>
-                          <R10>0.013458252</R10>
-                          <R11>0.99897766</R11>
-                          <R12>0.043273926</R12>
-                          <R20>-0.000869751</R20>
-                          <R21>-0.043273926</R21>
-                          <R22>0.9990692</R22>
+                          <X>0.000000059604645</X>
+                          <Y>0.31338277</Y>
+                          <Z>0.00000023841858</Z>
+                          <R00>0.9964347</R00>
+                          <R01>-0.00000028765098</R01>
+                          <R02>0.08436751</R02>
+                          <R10>0.0000002682209</R10>
+                          <R11>1</R11>
+                          <R12>0.00000024163762</R12>
+                          <R20>-0.08436751</R20>
+                          <R21>-0.000000218147</R21>
+                          <R22>0.9964347</R22>
                         </CoordinateFrame>
+                        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                        <bool name="DefinesCapabilities">false</bool>
+                        <BinaryString name="SerializedOverrides">
+                        </BinaryString>
+                        <int64 name="SourceAssetId">-1</int64>
+                        <BinaryString name="Tags"></BinaryString>
+                        <bool name="Visible">false</bool>
                       </Properties>
-                      <Item class="Bone" referent="15">
+                    </Item>
+                    <Item class="Bone" referent="13">
+                      <Properties>
+                        <string name="Name">hand.l</string>
+                        <BinaryString name="AttributesSerialize"></BinaryString>
+                        <CoordinateFrame name="CFrame">
+                          <X>-0.000000059604645</X>
+                          <Y>0.6267655</Y>
+                          <Z>0.00000047683716</Z>
+                          <R00>0.9822559</R00>
+                          <R01>0.14968263</R01>
+                          <R02>0.11299819</R02>
+                          <R10>-0.16809845</R10>
+                          <R11>0.96983373</R11>
+                          <R12>0.17653745</R12>
+                          <R20>-0.083164856</R20>
+                          <R21>-0.19239976</R21>
+                          <R22>0.9777863</R22>
+                        </CoordinateFrame>
+                        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                        <bool name="DefinesCapabilities">false</bool>
+                        <BinaryString name="SerializedOverrides">
+                        </BinaryString>
+                        <int64 name="SourceAssetId">-1</int64>
+                        <BinaryString name="Tags"></BinaryString>
+                        <bool name="Visible">false</bool>
+                      </Properties>
+                      <Item class="Bone" referent="14">
                         <Properties>
-                          <string name="Name">hand_l</string>
+                          <string name="Name">index1_base.l</string>
+                          <BinaryString name="AttributesSerialize"></BinaryString>
                           <CoordinateFrame name="CFrame">
-                            <X>0</X>
-                            <Y>0.57492065</Y>
-                            <Z>0</Z>
-                            <R00>0.9998169</R00>
-                            <R01>0.018798828</R01>
-                            <R02>-0.0002746582</R02>
-                            <R10>-0.018798828</R10>
-                            <R11>0.99967957</R11>
-                            <R12>-0.016799927</R12>
-                            <R20>-0.000045776367</R20>
-                            <R21>0.016799927</R21>
-                            <R22>0.9998627</R22>
+                            <X>-0.092184156</X>
+                            <Y>0.13603681</Y>
+                            <Z>0.020614147</Z>
+                            <R00>0.9931109</R00>
+                            <R01>-0.116024286</R01>
+                            <R02>0.01641117</R02>
+                            <R10>0.117179185</R10>
+                            <R11>0.9833228</R11>
+                            <R12>-0.13908786</R12>
+                            <R20>0.00000008940696</R20>
+                            <R21>0.14005268</R21>
+                            <R22>0.99014425</R22>
                           </CoordinateFrame>
+                          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                          <bool name="DefinesCapabilities">false</bool>
+                          <BinaryString name="SerializedOverrides">
+                          </BinaryString>
+                          <int64 name="SourceAssetId">-1</int64>
+                          <BinaryString name="Tags"></BinaryString>
+                          <bool name="Visible">false</bool>
                         </Properties>
-                        <Item class="Bone" referent="16">
+                        <Item class="Bone" referent="15">
                           <Properties>
-                            <string name="Name">index_01_l</string>
+                            <string name="Name">index1.l</string>
+                            <BinaryString name="AttributesSerialize"></BinaryString>
                             <CoordinateFrame name="CFrame">
-                              <X>-0.009994507</X>
-                              <Y>0.2682495</Y>
-                              <Z>-0.13075256</Z>
-                              <R00>-0</R00>
-                              <R01>0</R01>
-                              <R02>1</R02>
-                              <R10>-0.17259216</R10>
-                              <R11>0.9850006</R11>
-                              <R12>-0</R12>
-                              <R20>-0.9850006</R20>
-                              <R21>-0.17259216</R21>
-                              <R22>-0</R22>
+                              <X>-0.00000008940697</X>
+                              <Y>0.30472884</Y>
+                              <Z>0.00000023841858</Z>
+                              <R00>0.9984289</R00>
+                              <R01>-0.02145445</R01>
+                              <R02>-0.05176379</R02>
+                              <R10>0.0044320216</R10>
+                              <R11>0.95113903</R11>
+                              <R12>-0.30873135</R12>
+                              <R20>0.055858213</R20>
+                              <R21>0.30801687</R21>
+                              <R22>0.94973975</R22>
                             </CoordinateFrame>
+                            <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                            <bool name="DefinesCapabilities">false</bool>
+                            <BinaryString name="SerializedOverrides">
+                            </BinaryString>
+                            <int64 name="SourceAssetId">-1</int64>
+                            <BinaryString name="Tags"></BinaryString>
+                            <bool name="Visible">false</bool>
                           </Properties>
-                          <Item class="Bone" referent="17">
+                          <Item class="Bone" referent="16">
                             <Properties>
-                              <string name="Name">index_02_l</string>
+                              <string name="Name">index2.l</string>
+                              <BinaryString name="AttributesSerialize"></BinaryString>
                               <CoordinateFrame name="CFrame">
-                                <X>0</X>
-                                <Y>0.10832214</Y>
+                                <X>-0.00000011920929</X>
+                                <Y>0.13280162</Y>
                                 <Z>0</Z>
-                                <R00>0.9997711</R00>
-                                <R01>0.02154541</R01>
-                                <R02>0</R02>
-                                <R10>-0.02154541</R10>
-                                <R11>0.9997711</R11>
-                                <R12>0</R12>
-                                <R20>0</R20>
-                                <R21>0</R21>
-                                <R22>1</R22>
+                                <R00>0.99605256</R00>
+                                <R01>0.08843045</R01>
+                                <R02>-0.0077129602</R02>
+                                <R10>-0.08873574</R10>
+                                <R11>0.9942203</R11>
+                                <R12>-0.06043237</R12>
+                                <R20>0.00232432</R20>
+                                <R21>0.060878225</R21>
+                                <R22>0.99814266</R22>
                               </CoordinateFrame>
+                              <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                              <bool name="DefinesCapabilities">false</bool>
+                              <BinaryString name="SerializedOverrides">
+                              </BinaryString>
+                              <int64 name="SourceAssetId">-1</int64>
+                              <BinaryString name="Tags"></BinaryString>
+                              <bool name="Visible">false</bool>
                             </Properties>
-                            <Item class="Bone" referent="18">
+                            <Item class="Bone" referent="17">
                               <Properties>
-                                <string name="Name">index_03_l</string>
+                                <string name="Name">index3.l</string>
+                                <BinaryString name="AttributesSerialize"></BinaryString>
                                 <CoordinateFrame name="CFrame">
-                                  <X>0</X>
-                                  <Y>0.08332825</Y>
+                                  <X>0.00000023841858</X>
+                                  <Y>0.13029984</Y>
                                   <Z>0</Z>
-                                  <R00>0.99975586</R00>
-                                  <R01>0.021759033</R01>
-                                  <R02>0</R02>
-                                  <R10>-0.021759033</R10>
-                                  <R11>0.99975586</R11>
-                                  <R12>0</R12>
-                                  <R20>0</R20>
-                                  <R21>0</R21>
-                                  <R22>1</R22>
+                                  <R00>0.9989312</R00>
+                                  <R01>-0.046034347</R01>
+                                  <R02>-0.004177406</R02>
+                                  <R10>0.045301814</R10>
+                                  <R11>0.99296385</R11>
+                                  <R12>-0.10941056</R12>
+                                  <R20>0.009184656</R20>
+                                  <R21>0.10910436</R21>
+                                  <R22>0.99398804</R22>
                                 </CoordinateFrame>
+                                <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                                <bool name="DefinesCapabilities">false</bool>
+                                <BinaryString name="SerializedOverrides">
+                                </BinaryString>
+                                <int64 name="SourceAssetId">-1</int64>
+                                <BinaryString name="Tags"></BinaryString>
+                                <bool name="Visible">false</bool>
                               </Properties>
                             </Item>
                           </Item>
                         </Item>
+                      </Item>
+                      <Item class="Bone" referent="18">
+                        <Properties>
+                          <string name="Name">middle1_base.l</string>
+                          <BinaryString name="AttributesSerialize"></BinaryString>
+                          <CoordinateFrame name="CFrame">
+                            <X>-0.007098019</X>
+                            <Y>0.152601</Y>
+                            <Z>0.0001180172</Z>
+                            <R00>0.9997307</R00>
+                            <R01>0.02320894</R01>
+                            <R02>0.000009028522</R02>
+                            <R10>-0.023208944</R10>
+                            <R11>0.9997306</R11>
+                            <R12>0.00038633752</R12>
+                            <R20>-0.000000059604638</R20>
+                            <R21>-0.000386443</R21>
+                            <R22>1</R22>
+                          </CoordinateFrame>
+                          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                          <bool name="DefinesCapabilities">false</bool>
+                          <BinaryString name="SerializedOverrides">
+                          </BinaryString>
+                          <int64 name="SourceAssetId">-1</int64>
+                          <BinaryString name="Tags"></BinaryString>
+                          <bool name="Visible">false</bool>
+                        </Properties>
                         <Item class="Bone" referent="19">
                           <Properties>
-                            <string name="Name">middle_01_l</string>
+                            <string name="Name">middle1.l</string>
+                            <BinaryString name="AttributesSerialize"></BinaryString>
                             <CoordinateFrame name="CFrame">
-                              <X>-0.0036621094</X>
-                              <Y>0.28160095</Y>
-                              <Z>-0.06123352</Z>
-                              <R00>-0</R00>
-                              <R01>0</R01>
-                              <R02>1</R02>
-                              <R10>-0.052749634</R10>
-                              <R11>0.99861145</R11>
-                              <R12>0</R12>
-                              <R20>-0.99861145</R20>
-                              <R21>-0.052749634</R21>
-                              <R22>-0</R22>
+                              <X>0.000000029802322</X>
+                              <Y>0.3058402</Y>
+                              <Z>0.00000023841858</Z>
+                              <R00>0.99530864</R00>
+                              <R01>0.09651228</R01>
+                              <R02>0.0067921244</R02>
+                              <R10>-0.09029897</R10>
+                              <R11>0.9518498</R11>
+                              <R12>-0.29296425</R12>
+                              <R20>-0.03473973</R20>
+                              <R21>0.2909765</R21>
+                              <R22>0.95609933</R22>
                             </CoordinateFrame>
+                            <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                            <bool name="DefinesCapabilities">false</bool>
+                            <BinaryString name="SerializedOverrides">
+                            </BinaryString>
+                            <int64 name="SourceAssetId">-1</int64>
+                            <BinaryString name="Tags"></BinaryString>
+                            <bool name="Visible">false</bool>
                           </Properties>
                           <Item class="Bone" referent="20">
                             <Properties>
-                              <string name="Name">middle_02_l</string>
+                              <string name="Name">middle2.l</string>
+                              <BinaryString name="AttributesSerialize"></BinaryString>
                               <CoordinateFrame name="CFrame">
-                                <X>0</X>
-                                <Y>0.11982727</Y>
-                                <Z>0</Z>
-                                <R00>0.99998474</R00>
-                                <R01>0.0043792725</R01>
-                                <R02>0</R02>
-                                <R10>-0.0043792725</R10>
-                                <R11>0.99998474</R11>
-                                <R12>0</R12>
-                                <R20>0</R20>
-                                <R21>0</R21>
-                                <R22>1</R22>
+                                <X>0.000000059604645</X>
+                                <Y>0.16326995</Y>
+                                <Z>-0.00000071525574</Z>
+                                <R00>0.99795157</R00>
+                                <R01>0.03271066</R01>
+                                <R02>0.054979846</R02>
+                                <R10>-0.0037339325</R10>
+                                <R11>0.8877156</R11>
+                                <R12>-0.4603774</R12>
+                                <R20>-0.0638657</R20>
+                                <R21>0.45922902</R21>
+                                <R22>0.8860193</R22>
                               </CoordinateFrame>
+                              <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                              <bool name="DefinesCapabilities">false</bool>
+                              <BinaryString name="SerializedOverrides">
+                              </BinaryString>
+                              <int64 name="SourceAssetId">-1</int64>
+                              <BinaryString name="Tags"></BinaryString>
+                              <bool name="Visible">false</bool>
                             </Properties>
                             <Item class="Bone" referent="21">
                               <Properties>
-                                <string name="Name">middle_03_l</string>
+                                <string name="Name">middle3.l</string>
+                                <BinaryString name="AttributesSerialize"></BinaryString>
                                 <CoordinateFrame name="CFrame">
                                   <X>0</X>
-                                  <Y>0.09043884</Y>
-                                  <Z>0</Z>
-                                  <R00>0.9988251</R00>
-                                  <R01>0.048339844</R01>
-                                  <R02>0</R02>
-                                  <R10>-0.048339844</R10>
-                                  <R11>0.9988251</R11>
-                                  <R12>0</R12>
-                                  <R20>0</R20>
-                                  <R21>0</R21>
-                                  <R22>1</R22>
+                                  <Y>0.16751975</Y>
+                                  <Z>0.00000047683716</Z>
+                                  <R00>0.9977008</R00>
+                                  <R01>0.066682264</R01>
+                                  <R02>0.012110349</R02>
+                                  <R10>-0.06538148</R10>
+                                  <R11>0.99405354</R11>
+                                  <R12>-0.08708034</R12>
+                                  <R20>-0.017845046</R20>
+                                  <R21>0.08608832</R21>
+                                  <R22>0.9961278</R22>
                                 </CoordinateFrame>
+                                <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                                <bool name="DefinesCapabilities">false</bool>
+                                <BinaryString name="SerializedOverrides">
+                                </BinaryString>
+                                <int64 name="SourceAssetId">-1</int64>
+                                <BinaryString name="Tags"></BinaryString>
+                                <bool name="Visible">false</bool>
                               </Properties>
                             </Item>
                           </Item>
                         </Item>
-                        <Item class="Bone" referent="22">
+                      </Item>
+                      <Item class="Bone" referent="22">
+                        <Properties>
+                          <string name="Name">pinky1_base.l</string>
+                          <BinaryString name="AttributesSerialize"></BinaryString>
+                          <CoordinateFrame name="CFrame">
+                            <X>0.17952216</X>
+                            <Y>0.12960261</Y>
+                            <Z>0.019639492</Z>
+                            <R00>0.951557</R00>
+                            <R01>0.30358407</R01>
+                            <R02>-0.04874393</R02>
+                            <R10>-0.30747238</R10>
+                            <R11>0.9395237</R11>
+                            <R12>-0.15085088</R12>
+                            <R20>0.0000001490116</R20>
+                            <R21>0.15853062</R21>
+                            <R22>0.98735404</R22>
+                          </CoordinateFrame>
+                          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                          <bool name="DefinesCapabilities">false</bool>
+                          <BinaryString name="SerializedOverrides">
+                          </BinaryString>
+                          <int64 name="SourceAssetId">-1</int64>
+                          <BinaryString name="Tags"></BinaryString>
+                          <bool name="Visible">false</bool>
+                        </Properties>
+                        <Item class="Bone" referent="23">
                           <Properties>
-                            <string name="Name">pinky_01_l</string>
+                            <string name="Name">pinky1.l</string>
+                            <BinaryString name="AttributesSerialize"></BinaryString>
                             <CoordinateFrame name="CFrame">
-                              <X>-0.00894165</X>
-                              <Y>0.26298523</Y>
-                              <Z>0.08363342</Z>
-                              <R00>-0.000015258789</R00>
-                              <R01>0</R01>
-                              <R02>1</R02>
-                              <R10>0.07833862</R10>
-                              <R11>0.996933</R11>
-                              <R12>0</R12>
-                              <R20>-0.996933</R20>
-                              <R21>0.07833862</R21>
-                              <R22>-0.000015258789</R22>
+                              <X>-0.000000059604645</X>
+                              <Y>0.2597786</Y>
+                              <Z>-0.00000047683716</Z>
+                              <R00>0.96670604</R00>
+                              <R01>0.23289959</R01>
+                              <R02>0.10600587</R02>
+                              <R10>-0.21241125</R10>
+                              <R11>0.9613638</R11>
+                              <R12>-0.17510337</R12>
+                              <R20>-0.1426917</R20>
+                              <R21>0.14675663</R21>
+                              <R22>0.97882664</R22>
                             </CoordinateFrame>
+                            <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                            <bool name="DefinesCapabilities">false</bool>
+                            <BinaryString name="SerializedOverrides">
+                            </BinaryString>
+                            <int64 name="SourceAssetId">-1</int64>
+                            <BinaryString name="Tags"></BinaryString>
+                            <bool name="Visible">false</bool>
                           </Properties>
-                          <Item class="Bone" referent="23">
+                          <Item class="Bone" referent="24">
                             <Properties>
-                              <string name="Name">pinky_02_l</string>
+                              <string name="Name">pinky2.l</string>
+                              <BinaryString name="AttributesSerialize"></BinaryString>
                               <CoordinateFrame name="CFrame">
-                                <X>0</X>
-                                <Y>0.09611511</Y>
-                                <Z>0</Z>
-                                <R00>0.99961853</R00>
-                                <R01>-0.027801514</R01>
-                                <R02>0</R02>
-                                <R10>0.027801514</R10>
-                                <R11>0.99961853</R11>
-                                <R12>0</R12>
-                                <R20>0</R20>
-                                <R21>0</R21>
-                                <R22>1</R22>
+                                <X>0.000000014901161</X>
+                                <Y>0.109181836</Y>
+                                <Z>0.00000071525574</Z>
+                                <R00>0.96405196</R00>
+                                <R01>-0.16886999</R01>
+                                <R02>0.20515081</R02>
+                                <R10>0.23331085</R10>
+                                <R11>0.90745807</R11>
+                                <R12>-0.34940797</R12>
+                                <R20>-0.12716123</R20>
+                                <R21>0.3847113</R21>
+                                <R22>0.91423595</R22>
                               </CoordinateFrame>
+                              <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                              <bool name="DefinesCapabilities">false</bool>
+                              <BinaryString name="SerializedOverrides">
+                              </BinaryString>
+                              <int64 name="SourceAssetId">-1</int64>
+                              <BinaryString name="Tags"></BinaryString>
+                              <bool name="Visible">false</bool>
                             </Properties>
-                            <Item class="Bone" referent="24">
+                            <Item class="Bone" referent="25">
                               <Properties>
-                                <string name="Name">pinky_03_l</string>
+                                <string name="Name">pinky3.l</string>
+                                <BinaryString name="AttributesSerialize"></BinaryString>
                                 <CoordinateFrame name="CFrame">
-                                  <X>0</X>
-                                  <Y>0.076690674</Y>
+                                  <X>-0.000000059604645</X>
+                                  <Y>0.10548824</Y>
                                   <Z>0</Z>
-                                  <R00>0.9996643</R00>
-                                  <R01>0.025878906</R01>
-                                  <R02>0</R02>
-                                  <R10>-0.025878906</R10>
-                                  <R11>0.9996643</R11>
-                                  <R12>0</R12>
-                                  <R20>0</R20>
-                                  <R21>0</R21>
-                                  <R22>1</R22>
+                                  <R00>0.99763453</R00>
+                                  <R01>0.06799482</R01>
+                                  <R02>0.010101715</R02>
+                                  <R10>-0.06765851</R10>
+                                  <R11>0.9972405</R11>
+                                  <R12>-0.030559806</R12>
+                                  <R20>-0.012151746</R20>
+                                  <R21>0.02980405</R21>
+                                  <R22>0.999482</R22>
                                 </CoordinateFrame>
+                                <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                                <bool name="DefinesCapabilities">false</bool>
+                                <BinaryString name="SerializedOverrides">
+                                </BinaryString>
+                                <int64 name="SourceAssetId">-1</int64>
+                                <BinaryString name="Tags"></BinaryString>
+                                <bool name="Visible">false</bool>
                               </Properties>
                             </Item>
                           </Item>
                         </Item>
-                        <Item class="Bone" referent="25">
+                      </Item>
+                      <Item class="Bone" referent="26">
+                        <Properties>
+                          <string name="Name">ring1_base.l</string>
+                          <BinaryString name="AttributesSerialize"></BinaryString>
+                          <CoordinateFrame name="CFrame">
+                            <X>0.09747648</X>
+                            <Y>0.14734113</Y>
+                            <Z>0.0046076775</Z>
+                            <R00>0.9825973</R00>
+                            <R01>0.18561186</R01>
+                            <R02>-0.007128735</R02>
+                            <R10>-0.18574868</R10>
+                            <R11>0.98187345</R11>
+                            <R12>-0.0377105</R12>
+                            <R20>0</R20>
+                            <R21>0.038378388</R21>
+                            <R22>0.99926335</R22>
+                          </CoordinateFrame>
+                          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                          <bool name="DefinesCapabilities">false</bool>
+                          <BinaryString name="SerializedOverrides">
+                          </BinaryString>
+                          <int64 name="SourceAssetId">-1</int64>
+                          <BinaryString name="Tags"></BinaryString>
+                          <bool name="Visible">false</bool>
+                        </Properties>
+                        <Item class="Bone" referent="27">
                           <Properties>
-                            <string name="Name">ring_01_l</string>
+                            <string name="Name">ring1.l</string>
+                            <BinaryString name="AttributesSerialize"></BinaryString>
                             <CoordinateFrame name="CFrame">
-                              <X>-0.0044555664</X>
-                              <Y>0.2758026</Y>
-                              <Z>0.016998291</Z>
-                              <R00>-0.000015258789</R00>
-                              <R01>0</R01>
-                              <R02>1</R02>
-                              <R10>0.035598755</R10>
-                              <R11>0.99935913</R11>
-                              <R12>0</R12>
-                              <R20>-0.99935913</R20>
-                              <R21>0.035598755</R21>
-                              <R22>-0.000015258789</R22>
+                              <X>-0.000000029802322</X>
+                              <Y>0.29028228</Y>
+                              <Z>0</Z>
+                              <R00>0.9890872</R00>
+                              <R01>0.14044997</R01>
+                              <R02>0.04450102</R02>
+                              <R10>-0.12906972</R10>
+                              <R11>0.9716721</R11>
+                              <R12>-0.19797555</R12>
+                              <R20>-0.071046054</R20>
+                              <R21>0.19007134</R21>
+                              <R22>0.9791963</R22>
                             </CoordinateFrame>
+                            <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                            <bool name="DefinesCapabilities">false</bool>
+                            <BinaryString name="SerializedOverrides">
+                            </BinaryString>
+                            <int64 name="SourceAssetId">-1</int64>
+                            <BinaryString name="Tags"></BinaryString>
+                            <bool name="Visible">false</bool>
                           </Properties>
-                        </Item>
-                        <Item class="Bone" referent="26">
-                          <Properties>
-                            <string name="Name">thumb_01_l</string>
-                            <CoordinateFrame name="CFrame">
-                              <X>-0.0602417</X>
-                              <Y>0.053604126</Y>
-                              <Z>-0.10487366</Z>
-                              <R00>-0.86343384</R00>
-                              <R01>-0.41215515</R01>
-                              <R02>0.2909088</R02>
-                              <R10>-0.50439453</R10>
-                              <R11>0.69488525</R11>
-                              <R12>-0.512558</R12>
-                              <R20>0.009109497</R20>
-                              <R21>-0.58929443</R21>
-                              <R22>-0.8078766</R22>
-                            </CoordinateFrame>
-                          </Properties>
-                          <Item class="Bone" referent="27">
+                          <Item class="Bone" referent="28">
                             <Properties>
-                              <string name="Name">thumb_02_l</string>
+                              <string name="Name">ring2.l</string>
+                              <BinaryString name="AttributesSerialize"></BinaryString>
                               <CoordinateFrame name="CFrame">
-                                <X>0</X>
-                                <Y>0.12991333</Y>
+                                <X>-0.000000029802322</X>
+                                <Y>0.12707579</Y>
                                 <Z>0</Z>
-                                <R00>0.9998169</R00>
-                                <R01>0.018051147</R01>
-                                <R02>-0.0067443848</R02>
-                                <R10>-0.016693115</R10>
-                                <R11>0.98617554</R11>
-                                <R12>0.16488647</R12>
-                                <R20>0.009628296</R20>
-                                <R21>-0.16474915</R21>
-                                <R22>0.98628235</R22>
+                                <R00>0.9883019</R00>
+                                <R01>-0.05460789</R01>
+                                <R02>0.1423986</R02>
+                                <R10>0.11099586</R10>
+                                <R11>0.8978731</R11>
+                                <R12>-0.42603278</R12>
+                                <R20>-0.10459112</R20>
+                                <R21>0.43685466</R21>
+                                <R22>0.89343095</R22>
                               </CoordinateFrame>
+                              <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                              <bool name="DefinesCapabilities">false</bool>
+                              <BinaryString name="SerializedOverrides">
+                              </BinaryString>
+                              <int64 name="SourceAssetId">-1</int64>
+                              <BinaryString name="Tags"></BinaryString>
+                              <bool name="Visible">false</bool>
                             </Properties>
-                            <Item class="Bone" referent="28">
+                            <Item class="Bone" referent="29">
                               <Properties>
-                                <string name="Name">thumb_03_l</string>
+                                <string name="Name">ring3.l</string>
+                                <BinaryString name="AttributesSerialize"></BinaryString>
                                 <CoordinateFrame name="CFrame">
-                                  <X>-0</X>
-                                  <Y>0.13146973</Y>
-                                  <Z>0</Z>
-                                  <R00>0.99890137</R00>
-                                  <R01>0.045455933</R01>
-                                  <R02>-0.011505127</R02>
-                                  <R10>-0.044433594</R10>
-                                  <R11>0.9959564</R11>
-                                  <R12>0.07817078</R12>
-                                  <R20>0.01499939</R20>
-                                  <R21>-0.07757568</R21>
-                                  <R22>0.99687195</R22>
+                                  <X>0.000000059604645</X>
+                                  <Y>0.13809413</Y>
+                                  <Z>-0.00000047683716</Z>
+                                  <R00>0.98548764</R00>
+                                  <R01>-0.16208237</R01>
+                                  <R02>0.050432894</R02>
+                                  <R10>0.16913414</R10>
+                                  <R11>0.9628199</R11>
+                                  <R12>-0.21064565</R12>
+                                  <R20>-0.014415843</R20>
+                                  <R21>0.2161186</R21>
+                                  <R22>0.9762608</R22>
                                 </CoordinateFrame>
+                                <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                                <bool name="DefinesCapabilities">false</bool>
+                                <BinaryString name="SerializedOverrides">
+                                </BinaryString>
+                                <int64 name="SourceAssetId">-1</int64>
+                                <BinaryString name="Tags"></BinaryString>
+                                <bool name="Visible">false</bool>
                               </Properties>
                             </Item>
+                          </Item>
+                        </Item>
+                      </Item>
+                      <Item class="Bone" referent="30">
+                        <Properties>
+                          <string name="Name">thumb1.l</string>
+                          <BinaryString name="AttributesSerialize"></BinaryString>
+                          <CoordinateFrame name="CFrame">
+                            <X>-0.08398846</X>
+                            <Y>0.15280354</Y>
+                            <Z>0.07123375</Z>
+                            <R00>0.14929342</R00>
+                            <R01>-0.44590965</R01>
+                            <R02>0.8825396</R02>
+                            <R10>0.48401734</R10>
+                            <R11>0.8112545</R11>
+                            <R12>0.3280143</R12>
+                            <R20>-0.86222893</R20>
+                            <R21>0.37819406</R21>
+                            <R22>0.33694297</R22>
+                          </CoordinateFrame>
+                          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                          <bool name="DefinesCapabilities">false</bool>
+                          <BinaryString name="SerializedOverrides">
+                          </BinaryString>
+                          <int64 name="SourceAssetId">-1</int64>
+                          <BinaryString name="Tags"></BinaryString>
+                          <bool name="Visible">false</bool>
+                        </Properties>
+                        <Item class="Bone" referent="31">
+                          <Properties>
+                            <string name="Name">thumb2.l</string>
+                            <BinaryString name="AttributesSerialize"></BinaryString>
+                            <CoordinateFrame name="CFrame">
+                              <X>0.00000035762787</X>
+                              <Y>0.18835458</Y>
+                              <Z>-0.00000035762787</Z>
+                              <R00>0.9248094</R00>
+                              <R01>-0.25859854</R01>
+                              <R02>-0.27902424</R02>
+                              <R10>0.2323623</R10>
+                              <R11>0.9647016</R11>
+                              <R12>-0.12393035</R12>
+                              <R20>0.30122328</R20>
+                              <R21>0.049777225</R21>
+                              <R22>0.9522537</R22>
+                            </CoordinateFrame>
+                            <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                            <bool name="DefinesCapabilities">false</bool>
+                            <BinaryString name="SerializedOverrides">
+                            </BinaryString>
+                            <int64 name="SourceAssetId">-1</int64>
+                            <BinaryString name="Tags"></BinaryString>
+                            <bool name="Visible">false</bool>
+                          </Properties>
+                          <Item class="Bone" referent="32">
+                            <Properties>
+                              <string name="Name">thumb3.l</string>
+                              <BinaryString name="AttributesSerialize"></BinaryString>
+                              <CoordinateFrame name="CFrame">
+                                <X>-0.00000071525574</X>
+                                <Y>0.21771854</Y>
+                                <Z>0.00000035762787</Z>
+                                <R00>0.94819736</R00>
+                                <R01>0.101488866</R01>
+                                <R02>0.30103457</R02>
+                                <R10>-0.21594468</R10>
+                                <R11>0.9009172</R11>
+                                <R12>0.37645227</R12>
+                                <R20>-0.23300147</R20>
+                                <R21>-0.42195782</R21>
+                                <R22>0.87616324</R22>
+                              </CoordinateFrame>
+                              <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                              <bool name="DefinesCapabilities">false</bool>
+                              <BinaryString name="SerializedOverrides">
+                              </BinaryString>
+                              <int64 name="SourceAssetId">-1</int64>
+                              <BinaryString name="Tags"></BinaryString>
+                              <bool name="Visible">false</bool>
+                            </Properties>
                           </Item>
                         </Item>
                       </Item>
                     </Item>
                   </Item>
                 </Item>
-                <Item class="Bone" referent="29">
+              </Item>
+              <Item class="Bone" referent="33">
+                <Properties>
+                  <string name="Name">shoulder.r</string>
+                  <BinaryString name="AttributesSerialize"></BinaryString>
+                  <CoordinateFrame name="CFrame">
+                    <X>0.19832416</X>
+                    <Y>0.09217739</Y>
+                    <Z>-0.016385734</Z>
+                    <R00>-0.000101247766</R00>
+                    <R01>0.9986185</R01>
+                    <R02>0.05254603</R02>
+                    <R10>0.017916389</R10>
+                    <R11>0.05253941</R11>
+                    <R12>-0.99845815</R12>
+                    <R20>-0.9998395</R20>
+                    <R21>0.0008403435</R21>
+                    <R22>-0.017896956</R22>
+                  </CoordinateFrame>
+                  <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                  <bool name="DefinesCapabilities">false</bool>
+                  <BinaryString name="SerializedOverrides">
+                  </BinaryString>
+                  <int64 name="SourceAssetId">-1</int64>
+                  <BinaryString name="Tags"></BinaryString>
+                  <bool name="Visible">false</bool>
+                </Properties>
+                <Item class="Bone" referent="34">
                   <Properties>
-                    <string name="Name">clavicle_r</string>
+                    <string name="Name">arm_stretch.r</string>
+                    <BinaryString name="AttributesSerialize"></BinaryString>
                     <CoordinateFrame name="CFrame">
-                      <X>0.041397095</X>
-                      <Y>0.27108765</Y>
-                      <Z>-0.23236084</Z>
-                      <R00>0.6359253</R00>
-                      <R01>0.76672363</R01>
-                      <R02>0.08796692</R02>
-                      <R10>-0.15489197</R10>
-                      <R11>0.23846436</R11>
-                      <R12>-0.9587097</R12>
-                      <R20>-0.7560425</R20>
-                      <R21>0.5960541</R21>
-                      <R22>0.27041626</R22>
+                      <X>-0.000000018626451</X>
+                      <Y>0.42793733</Y>
+                      <Z>-0.00000047683716</Z>
+                      <R00>0.99679375</R00>
+                      <R01>-0.008655142</R01>
+                      <R02>0.07954474</R02>
+                      <R10>0.068172716</R10>
+                      <R11>0.61232406</R11>
+                      <R12>-0.7876622</R12>
+                      <R20>-0.041889824</R20>
+                      <R21>0.79055953</R21>
+                      <R22>0.6109508</R22>
                     </CoordinateFrame>
+                    <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                    <bool name="DefinesCapabilities">false</bool>
+                    <BinaryString name="SerializedOverrides">
+                    </BinaryString>
+                    <int64 name="SourceAssetId">-1</int64>
+                    <BinaryString name="Tags"></BinaryString>
+                    <bool name="Visible">false</bool>
                   </Properties>
-                  <Item class="Bone" referent="30">
+                  <Item class="Bone" referent="35">
                     <Properties>
-                      <string name="Name">upperarm_r</string>
+                      <string name="Name">forearm_stretch.r</string>
+                      <BinaryString name="AttributesSerialize"></BinaryString>
                       <CoordinateFrame name="CFrame">
-                        <X>0</X>
-                        <Y>0.44491577</Y>
-                        <Z>0</Z>
-                        <R00>-0.016082764</R00>
-                        <R01>0.6151886</R01>
-                        <R02>-0.788208</R02>
-                        <R10>-0.1076355</R10>
-                        <R11>0.78266907</R11>
-                        <R12>0.61305237</R12>
-                        <R20>0.99406433</R20>
-                        <R21>0.0947113</R21>
-                        <R22>0.053634644</R22>
+                        <X>-0.000000029802322</X>
+                        <Y>0.61952406</Y>
+                        <Z>-0.00000047683716</Z>
+                        <R00>0.7978657</R00>
+                        <R01>0.60283524</R01>
+                        <R02>0.0000011321115</R02>
+                        <R10>-0.60283524</R10>
+                        <R11>0.7978657</R11>
+                        <R12>0.000000101781154</R12>
+                        <R20>-0.0000008419156</R20>
+                        <R21>-0.0000007636844</R21>
+                        <R22>1</R22>
                       </CoordinateFrame>
+                      <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                      <bool name="DefinesCapabilities">false</bool>
+                      <BinaryString name="SerializedOverrides">
+                      </BinaryString>
+                      <int64 name="SourceAssetId">-1</int64>
+                      <BinaryString name="Tags"></BinaryString>
+                      <bool name="Visible">false</bool>
                     </Properties>
-                    <Item class="Bone" referent="31">
+                    <Item class="Bone" referent="36">
                       <Properties>
-                        <string name="Name">lowerarm_r</string>
+                        <string name="Name">forearm_twist.r</string>
+                        <BinaryString name="AttributesSerialize"></BinaryString>
                         <CoordinateFrame name="CFrame">
-                          <X>0</X>
-                          <Y>0.6094513</Y>
-                          <Z>0</Z>
-                          <R00>0.99990845</R00>
-                          <R01>0.0134887695</R01>
-                          <R02>-0.0002746582</R02>
-                          <R10>-0.013458252</R10>
-                          <R11>0.99897766</R11>
-                          <R12>0.043273926</R12>
-                          <R20>0.000869751</R20>
-                          <R21>-0.043273926</R21>
-                          <R22>0.9990692</R22>
+                          <X>-0.00000029802322</X>
+                          <Y>0.31338298</Y>
+                          <Z>0.00000047683716</Z>
+                          <R00>0.9964347</R00>
+                          <R01>0.00000024039716</R01>
+                          <R02>-0.08436782</R02>
+                          <R10>-0.00000023841858</R10>
+                          <R11>1</R11>
+                          <R12>0.000000033527126</R12>
+                          <R20>0.08436782</R20>
+                          <R21>-0.000000013292735</R21>
+                          <R22>0.9964347</R22>
                         </CoordinateFrame>
+                        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                        <bool name="DefinesCapabilities">false</bool>
+                        <BinaryString name="SerializedOverrides">
+                        </BinaryString>
+                        <int64 name="SourceAssetId">-1</int64>
+                        <BinaryString name="Tags"></BinaryString>
+                        <bool name="Visible">false</bool>
                       </Properties>
-                      <Item class="Bone" referent="32">
+                    </Item>
+                    <Item class="Bone" referent="37">
+                      <Properties>
+                        <string name="Name">hand.r</string>
+                        <BinaryString name="AttributesSerialize"></BinaryString>
+                        <CoordinateFrame name="CFrame">
+                          <X>-0.00000011920929</X>
+                          <Y>0.62676567</Y>
+                          <Z>0.00000023841858</Z>
+                          <R00>0.9822558</R00>
+                          <R01>-0.1496827</R01>
+                          <R02>-0.11299844</R02>
+                          <R10>0.16809854</R10>
+                          <R11>0.9698338</R11>
+                          <R12>0.17653733</R12>
+                          <R20>0.08316511</R20>
+                          <R21>-0.1923997</R21>
+                          <R22>0.9777863</R22>
+                        </CoordinateFrame>
+                        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                        <bool name="DefinesCapabilities">false</bool>
+                        <BinaryString name="SerializedOverrides">
+                        </BinaryString>
+                        <int64 name="SourceAssetId">-1</int64>
+                        <BinaryString name="Tags"></BinaryString>
+                        <bool name="Visible">false</bool>
+                      </Properties>
+                      <Item class="Bone" referent="38">
                         <Properties>
-                          <string name="Name">hand_r</string>
+                          <string name="Name">index1_base.r</string>
+                          <BinaryString name="AttributesSerialize"></BinaryString>
                           <CoordinateFrame name="CFrame">
-                            <X>0</X>
-                            <Y>0.57492065</Y>
-                            <Z>0</Z>
-                            <R00>0.9998169</R00>
-                            <R01>-0.018798828</R01>
-                            <R02>0.0002746582</R02>
-                            <R10>0.018798828</R10>
-                            <R11>0.99967957</R11>
-                            <R12>-0.016799927</R12>
-                            <R20>0.000045776367</R20>
-                            <R21>0.016799927</R21>
-                            <R22>0.9998627</R22>
+                            <X>0.092184484</X>
+                            <Y>0.13603649</Y>
+                            <Z>0.020614624</Z>
+                            <R00>0.9931108</R00>
+                            <R01>0.11602454</R01>
+                            <R02>-0.01641105</R02>
+                            <R10>-0.11717942</R10>
+                            <R11>0.98332274</R11>
+                            <R12>-0.13908772</R12>
+                            <R20>-0.000000230968</R20>
+                            <R21>0.14005254</R21>
+                            <R22>0.99014413</R22>
                           </CoordinateFrame>
+                          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                          <bool name="DefinesCapabilities">false</bool>
+                          <BinaryString name="SerializedOverrides">
+                          </BinaryString>
+                          <int64 name="SourceAssetId">-1</int64>
+                          <BinaryString name="Tags"></BinaryString>
+                          <bool name="Visible">false</bool>
                         </Properties>
-                        <Item class="Bone" referent="33">
-                          <Properties>
-                            <string name="Name">index_01_r</string>
-                            <CoordinateFrame name="CFrame">
-                              <X>0.009994507</X>
-                              <Y>0.2682495</Y>
-                              <Z>-0.13075256</Z>
-                              <R00>-0.000015258789</R00>
-                              <R01>0</R01>
-                              <R02>-1</R02>
-                              <R10>0.17259216</R10>
-                              <R11>0.9850006</R11>
-                              <R12>-0</R12>
-                              <R20>0.9850006</R20>
-                              <R21>-0.17259216</R21>
-                              <R22>-0</R22>
-                            </CoordinateFrame>
-                          </Properties>
-                          <Item class="Bone" referent="34">
-                            <Properties>
-                              <string name="Name">index_02_r</string>
-                              <CoordinateFrame name="CFrame">
-                                <X>0</X>
-                                <Y>0.10832214</Y>
-                                <Z>0</Z>
-                                <R00>0.9997711</R00>
-                                <R01>-0.02154541</R01>
-                                <R02>0</R02>
-                                <R10>0.02154541</R10>
-                                <R11>0.9997711</R11>
-                                <R12>0</R12>
-                                <R20>0</R20>
-                                <R21>0</R21>
-                                <R22>1</R22>
-                              </CoordinateFrame>
-                            </Properties>
-                            <Item class="Bone" referent="35">
-                              <Properties>
-                                <string name="Name">index_03_r</string>
-                                <CoordinateFrame name="CFrame">
-                                  <X>0</X>
-                                  <Y>0.08332825</Y>
-                                  <Z>0</Z>
-                                  <R00>0.99975586</R00>
-                                  <R01>-0.021759033</R01>
-                                  <R02>0</R02>
-                                  <R10>0.021759033</R10>
-                                  <R11>0.99975586</R11>
-                                  <R12>0</R12>
-                                  <R20>0</R20>
-                                  <R21>0</R21>
-                                  <R22>1</R22>
-                                </CoordinateFrame>
-                              </Properties>
-                            </Item>
-                          </Item>
-                        </Item>
-                        <Item class="Bone" referent="36">
-                          <Properties>
-                            <string name="Name">middle_01_r</string>
-                            <CoordinateFrame name="CFrame">
-                              <X>0.0036621094</X>
-                              <Y>0.28160095</Y>
-                              <Z>-0.06123352</Z>
-                              <R00>-0</R00>
-                              <R01>0</R01>
-                              <R02>-1</R02>
-                              <R10>0.052749634</R10>
-                              <R11>0.99861145</R11>
-                              <R12>0</R12>
-                              <R20>0.99861145</R20>
-                              <R21>-0.052749634</R21>
-                              <R22>-0</R22>
-                            </CoordinateFrame>
-                          </Properties>
-                          <Item class="Bone" referent="37">
-                            <Properties>
-                              <string name="Name">middle_02_r</string>
-                              <CoordinateFrame name="CFrame">
-                                <X>0</X>
-                                <Y>0.11982727</Y>
-                                <Z>0</Z>
-                                <R00>0.99998474</R00>
-                                <R01>-0.0043792725</R01>
-                                <R02>0</R02>
-                                <R10>0.0043792725</R10>
-                                <R11>0.99998474</R11>
-                                <R12>0</R12>
-                                <R20>0</R20>
-                                <R21>0</R21>
-                                <R22>1</R22>
-                              </CoordinateFrame>
-                            </Properties>
-                            <Item class="Bone" referent="38">
-                              <Properties>
-                                <string name="Name">middle_03_r</string>
-                                <CoordinateFrame name="CFrame">
-                                  <X>0</X>
-                                  <Y>0.09043884</Y>
-                                  <Z>0</Z>
-                                  <R00>0.9988251</R00>
-                                  <R01>-0.048339844</R01>
-                                  <R02>0</R02>
-                                  <R10>0.048339844</R10>
-                                  <R11>0.9988251</R11>
-                                  <R12>0</R12>
-                                  <R20>0</R20>
-                                  <R21>0</R21>
-                                  <R22>1</R22>
-                                </CoordinateFrame>
-                              </Properties>
-                            </Item>
-                          </Item>
-                        </Item>
                         <Item class="Bone" referent="39">
                           <Properties>
-                            <string name="Name">pinky_01_r</string>
+                            <string name="Name">index1.r</string>
+                            <BinaryString name="AttributesSerialize"></BinaryString>
                             <CoordinateFrame name="CFrame">
-                              <X>0.00894165</X>
-                              <Y>0.26298523</Y>
-                              <Z>0.08363342</Z>
-                              <R00>-0.000015258789</R00>
-                              <R01>0</R01>
-                              <R02>-1</R02>
-                              <R10>-0.07833862</R10>
-                              <R11>0.996933</R11>
-                              <R12>0</R12>
-                              <R20>0.996933</R20>
-                              <R21>0.07833862</R21>
-                              <R22>-0.000015258789</R22>
+                              <X>0</X>
+                              <Y>0.304729</Y>
+                              <Z>0</Z>
+                              <R00>0.99842894</R00>
+                              <R01>0.021454537</R01>
+                              <R02>0.05176375</R02>
+                              <R10>-0.004432112</R10>
+                              <R11>0.951139</R11>
+                              <R12>-0.30873153</R12>
+                              <R20>-0.055858206</R20>
+                              <R21>0.30801702</R21>
+                              <R22>0.94973975</R22>
                             </CoordinateFrame>
+                            <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                            <bool name="DefinesCapabilities">false</bool>
+                            <BinaryString name="SerializedOverrides">
+                            </BinaryString>
+                            <int64 name="SourceAssetId">-1</int64>
+                            <BinaryString name="Tags"></BinaryString>
+                            <bool name="Visible">false</bool>
                           </Properties>
                           <Item class="Bone" referent="40">
                             <Properties>
-                              <string name="Name">pinky_02_r</string>
+                              <string name="Name">index2.r</string>
+                              <BinaryString name="AttributesSerialize"></BinaryString>
                               <CoordinateFrame name="CFrame">
-                                <X>0</X>
-                                <Y>0.09611511</Y>
-                                <Z>0</Z>
-                                <R00>0.99961853</R00>
-                                <R01>0.027801514</R01>
-                                <R02>0</R02>
-                                <R10>-0.027801514</R10>
-                                <R11>0.99961853</R11>
-                                <R12>0</R12>
-                                <R20>0</R20>
-                                <R21>0</R21>
-                                <R22>1</R22>
+                                <X>0.00000011920929</X>
+                                <Y>0.13280147</Y>
+                                <Z>-0.00000023841858</Z>
+                                <R00>0.9960525</R00>
+                                <R01>-0.088430636</R01>
+                                <R02>0.0077130217</R02>
+                                <R10>0.08873593</R10>
+                                <R11>0.99422026</R11>
+                                <R12>-0.06043226</R12>
+                                <R20>-0.0023243797</R20>
+                                <R21>0.06087812</R21>
+                                <R22>0.99814254</R22>
                               </CoordinateFrame>
+                              <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                              <bool name="DefinesCapabilities">false</bool>
+                              <BinaryString name="SerializedOverrides">
+                              </BinaryString>
+                              <int64 name="SourceAssetId">-1</int64>
+                              <BinaryString name="Tags"></BinaryString>
+                              <bool name="Visible">false</bool>
                             </Properties>
                             <Item class="Bone" referent="41">
                               <Properties>
-                                <string name="Name">pinky_03_r</string>
+                                <string name="Name">index3.r</string>
+                                <BinaryString name="AttributesSerialize"></BinaryString>
                                 <CoordinateFrame name="CFrame">
-                                  <X>0</X>
-                                  <Y>0.076690674</Y>
-                                  <Z>-0</Z>
-                                  <R00>0.9996643</R00>
-                                  <R01>-0.025878906</R01>
-                                  <R02>0</R02>
-                                  <R10>0.025878906</R10>
-                                  <R11>0.9996643</R11>
-                                  <R12>0</R12>
-                                  <R20>0</R20>
-                                  <R21>0</R21>
-                                  <R22>1</R22>
+                                  <X>-0.00000023841858</X>
+                                  <Y>0.13029987</Y>
+                                  <Z>0.00000047683716</Z>
+                                  <R00>0.9989312</R00>
+                                  <R01>0.046034224</R01>
+                                  <R02>0.0041773356</R02>
+                                  <R10>-0.0453017</R10>
+                                  <R11>0.9929638</R11>
+                                  <R12>-0.109410614</R12>
+                                  <R20>-0.009184576</R20>
+                                  <R21>0.10910442</R21>
+                                  <R22>0.993988</R22>
                                 </CoordinateFrame>
-                              </Properties>
-                            </Item>
-                          </Item>
-                        </Item>
-                        <Item class="Bone" referent="42">
-                          <Properties>
-                            <string name="Name">ring_01_r</string>
-                            <CoordinateFrame name="CFrame">
-                              <X>0.0044555664</X>
-                              <Y>0.2758026</Y>
-                              <Z>0.016998291</Z>
-                              <R00>-0.000015258789</R00>
-                              <R01>0</R01>
-                              <R02>-1</R02>
-                              <R10>-0.035598755</R10>
-                              <R11>0.99935913</R11>
-                              <R12>0</R12>
-                              <R20>0.99935913</R20>
-                              <R21>0.035598755</R21>
-                              <R22>-0.000015258789</R22>
-                            </CoordinateFrame>
-                          </Properties>
-                        </Item>
-                        <Item class="Bone" referent="43">
-                          <Properties>
-                            <string name="Name">thumb_01_r</string>
-                            <CoordinateFrame name="CFrame">
-                              <X>0.0602417</X>
-                              <Y>0.053604126</Y>
-                              <Z>-0.10487366</Z>
-                              <R00>-0.86343384</R00>
-                              <R01>0.41215515</R01>
-                              <R02>-0.2909088</R02>
-                              <R10>0.50439453</R10>
-                              <R11>0.69488525</R11>
-                              <R12>-0.512558</R12>
-                              <R20>-0.009109497</R20>
-                              <R21>-0.58929443</R21>
-                              <R22>-0.8078766</R22>
-                            </CoordinateFrame>
-                          </Properties>
-                          <Item class="Bone" referent="44">
-                            <Properties>
-                              <string name="Name">thumb_02_r</string>
-                              <CoordinateFrame name="CFrame">
-                                <X>0</X>
-                                <Y>0.12991333</Y>
-                                <Z>0</Z>
-                                <R00>0.9998169</R00>
-                                <R01>-0.018051147</R01>
-                                <R02>0.0067443848</R02>
-                                <R10>0.016693115</R10>
-                                <R11>0.98617554</R11>
-                                <R12>0.16488647</R12>
-                                <R20>-0.009628296</R20>
-                                <R21>-0.16474915</R21>
-                                <R22>0.98628235</R22>
-                              </CoordinateFrame>
-                            </Properties>
-                            <Item class="Bone" referent="45">
-                              <Properties>
-                                <string name="Name">thumb_03_r</string>
-                                <CoordinateFrame name="CFrame">
-                                  <X>0</X>
-                                  <Y>0.13146973</Y>
-                                  <Z>0</Z>
-                                  <R00>0.99890137</R00>
-                                  <R01>-0.045455933</R01>
-                                  <R02>0.011505127</R02>
-                                  <R10>0.044418335</R10>
-                                  <R11>0.9959564</R11>
-                                  <R12>0.07817078</R12>
-                                  <R20>-0.01499939</R20>
-                                  <R21>-0.07757568</R21>
-                                  <R22>0.99687195</R22>
-                                </CoordinateFrame>
+                                <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                                <bool name="DefinesCapabilities">false</bool>
+                                <BinaryString name="SerializedOverrides">
+                                </BinaryString>
+                                <int64 name="SourceAssetId">-1</int64>
+                                <BinaryString name="Tags"></BinaryString>
+                                <bool name="Visible">false</bool>
                               </Properties>
                             </Item>
                           </Item>
                         </Item>
                       </Item>
+                      <Item class="Bone" referent="42">
+                        <Properties>
+                          <string name="Name">middle1_base.r</string>
+                          <BinaryString name="AttributesSerialize"></BinaryString>
+                          <CoordinateFrame name="CFrame">
+                            <X>0.0070982873</X>
+                            <Y>0.15260085</Y>
+                            <Z>0.0001180172</Z>
+                            <R00>0.9997307</R00>
+                            <R01>-0.023208736</R01>
+                            <R02>-0.000008911255</R02>
+                            <R10>0.023208737</R10>
+                            <R11>0.99973065</R11>
+                            <R12>0.000386426</R12>
+                            <R20>-0.000000059604645</R20>
+                            <R21>-0.00038652867</R21>
+                            <R22>1</R22>
+                          </CoordinateFrame>
+                          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                          <bool name="DefinesCapabilities">false</bool>
+                          <BinaryString name="SerializedOverrides">
+                          </BinaryString>
+                          <int64 name="SourceAssetId">-1</int64>
+                          <BinaryString name="Tags"></BinaryString>
+                          <bool name="Visible">false</bool>
+                        </Properties>
+                        <Item class="Bone" referent="43">
+                          <Properties>
+                            <string name="Name">middle1.r</string>
+                            <BinaryString name="AttributesSerialize"></BinaryString>
+                            <CoordinateFrame name="CFrame">
+                              <X>-0.00000008940697</X>
+                              <Y>0.30583996</Y>
+                              <Z>0.00000023841858</Z>
+                              <R00>0.99530864</R00>
+                              <R01>-0.09651236</R01>
+                              <R02>-0.0067921467</R02>
+                              <R10>0.09029904</R10>
+                              <R11>0.9518499</R11>
+                              <R12>-0.29296428</R12>
+                              <R20>0.03473977</R20>
+                              <R21>0.29097652</R21>
+                              <R22>0.9560994</R22>
+                            </CoordinateFrame>
+                            <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                            <bool name="DefinesCapabilities">false</bool>
+                            <BinaryString name="SerializedOverrides">
+                            </BinaryString>
+                            <int64 name="SourceAssetId">-1</int64>
+                            <BinaryString name="Tags"></BinaryString>
+                            <bool name="Visible">false</bool>
+                          </Properties>
+                          <Item class="Bone" referent="44">
+                            <Properties>
+                              <string name="Name">middle2.r</string>
+                              <BinaryString name="AttributesSerialize"></BinaryString>
+                              <CoordinateFrame name="CFrame">
+                                <X>-0.000000059604645</X>
+                                <Y>0.1632702</Y>
+                                <Z>0</Z>
+                                <R00>0.99795157</R00>
+                                <R01>-0.032710712</R01>
+                                <R02>-0.054979812</R02>
+                                <R10>0.0037339926</R10>
+                                <R11>0.8877156</R11>
+                                <R12>-0.46037742</R12>
+                                <R20>0.06386569</R20>
+                                <R21>0.45922905</R21>
+                                <R22>0.8860193</R22>
+                              </CoordinateFrame>
+                              <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                              <bool name="DefinesCapabilities">false</bool>
+                              <BinaryString name="SerializedOverrides">
+                              </BinaryString>
+                              <int64 name="SourceAssetId">-1</int64>
+                              <BinaryString name="Tags"></BinaryString>
+                              <bool name="Visible">false</bool>
+                            </Properties>
+                            <Item class="Bone" referent="45">
+                              <Properties>
+                                <string name="Name">middle3.r</string>
+                                <BinaryString name="AttributesSerialize"></BinaryString>
+                                <CoordinateFrame name="CFrame">
+                                  <X>-0.00000011920929</X>
+                                  <Y>0.16751957</Y>
+                                  <Z>0.00000023841858</Z>
+                                  <R00>0.9977008</R00>
+                                  <R01>-0.06668225</R01>
+                                  <R02>-0.012110399</R02>
+                                  <R10>0.06538146</R10>
+                                  <R11>0.99405354</R11>
+                                  <R12>-0.0870803</R12>
+                                  <R20>0.017845092</R20>
+                                  <R21>0.086088285</R21>
+                                  <R22>0.9961278</R22>
+                                </CoordinateFrame>
+                                <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                                <bool name="DefinesCapabilities">false</bool>
+                                <BinaryString name="SerializedOverrides">
+                                </BinaryString>
+                                <int64 name="SourceAssetId">-1</int64>
+                                <BinaryString name="Tags"></BinaryString>
+                                <bool name="Visible">false</bool>
+                              </Properties>
+                            </Item>
+                          </Item>
+                        </Item>
+                      </Item>
+                      <Item class="Bone" referent="46">
+                        <Properties>
+                          <string name="Name">pinky1_base.r</string>
+                          <BinaryString name="AttributesSerialize"></BinaryString>
+                          <CoordinateFrame name="CFrame">
+                            <X>-0.17952195</X>
+                            <Y>0.12960264</Y>
+                            <Z>0.01963973</Z>
+                            <R00>0.95155704</R00>
+                            <R01>-0.30358413</R01>
+                            <R02>0.04874404</R02>
+                            <R10>0.30747244</R10>
+                            <R11>0.9395237</R11>
+                            <R12>-0.15085094</R12>
+                            <R20>-0.00000023096803</R20>
+                            <R21>0.15853071</R21>
+                            <R22>0.9873541</R22>
+                          </CoordinateFrame>
+                          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                          <bool name="DefinesCapabilities">false</bool>
+                          <BinaryString name="SerializedOverrides">
+                          </BinaryString>
+                          <int64 name="SourceAssetId">-1</int64>
+                          <BinaryString name="Tags"></BinaryString>
+                          <bool name="Visible">false</bool>
+                        </Properties>
+                        <Item class="Bone" referent="47">
+                          <Properties>
+                            <string name="Name">pinky1.r</string>
+                            <BinaryString name="AttributesSerialize"></BinaryString>
+                            <CoordinateFrame name="CFrame">
+                              <X>-0.000000059604645</X>
+                              <Y>0.25977802</Y>
+                              <Z>-0.00000023841858</Z>
+                              <R00>0.96670604</R00>
+                              <R01>-0.23289955</R01>
+                              <R02>-0.10600591</R02>
+                              <R10>0.21241124</R10>
+                              <R11>0.9613638</R11>
+                              <R12>-0.1751032</R12>
+                              <R20>0.1426917</R20>
+                              <R21>0.14675647</R21>
+                              <R22>0.97882664</R22>
+                            </CoordinateFrame>
+                            <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                            <bool name="DefinesCapabilities">false</bool>
+                            <BinaryString name="SerializedOverrides">
+                            </BinaryString>
+                            <int64 name="SourceAssetId">-1</int64>
+                            <BinaryString name="Tags"></BinaryString>
+                            <bool name="Visible">false</bool>
+                          </Properties>
+                          <Item class="Bone" referent="48">
+                            <Properties>
+                              <string name="Name">pinky2.r</string>
+                              <BinaryString name="AttributesSerialize"></BinaryString>
+                              <CoordinateFrame name="CFrame">
+                                <X>0.0000001937151</X>
+                                <Y>0.10918248</Y>
+                                <Z>0.00000047683716</Z>
+                                <R00>0.96405196</R00>
+                                <R01>0.16886999</R01>
+                                <R02>-0.2051509</R02>
+                                <R10>-0.23331094</R10>
+                                <R11>0.90745795</R11>
+                                <R12>-0.34940848</R12>
+                                <R20>0.12716119</R20>
+                                <R21>0.38471183</R21>
+                                <R22>0.91423583</R22>
+                              </CoordinateFrame>
+                              <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                              <bool name="DefinesCapabilities">false</bool>
+                              <BinaryString name="SerializedOverrides">
+                              </BinaryString>
+                              <int64 name="SourceAssetId">-1</int64>
+                              <BinaryString name="Tags"></BinaryString>
+                              <bool name="Visible">false</bool>
+                            </Properties>
+                            <Item class="Bone" referent="49">
+                              <Properties>
+                                <string name="Name">pinky3.r</string>
+                                <BinaryString name="AttributesSerialize"></BinaryString>
+                                <CoordinateFrame name="CFrame">
+                                  <X>0.000000029802322</X>
+                                  <Y>0.10548854</Y>
+                                  <Z>0</Z>
+                                  <R00>0.9976346</R00>
+                                  <R01>-0.067994855</R01>
+                                  <R02>-0.010101698</R02>
+                                  <R10>0.06765856</R10>
+                                  <R11>0.9972404</R11>
+                                  <R12>-0.030559594</R12>
+                                  <R20>0.012151716</R20>
+                                  <R21>0.029803837</R21>
+                                  <R22>0.999482</R22>
+                                </CoordinateFrame>
+                                <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                                <bool name="DefinesCapabilities">false</bool>
+                                <BinaryString name="SerializedOverrides">
+                                </BinaryString>
+                                <int64 name="SourceAssetId">-1</int64>
+                                <BinaryString name="Tags"></BinaryString>
+                                <bool name="Visible">false</bool>
+                              </Properties>
+                            </Item>
+                          </Item>
+                        </Item>
+                      </Item>
+                      <Item class="Bone" referent="50">
+                        <Properties>
+                          <string name="Name">ring1_base.r</string>
+                          <BinaryString name="AttributesSerialize"></BinaryString>
+                          <CoordinateFrame name="CFrame">
+                            <X>-0.097476006</X>
+                            <Y>0.1473408</Y>
+                            <Z>0.004607439</Z>
+                            <R00>0.9825973</R00>
+                            <R01>-0.18561178</R01>
+                            <R02>0.007128821</R02>
+                            <R10>0.1857486</R10>
+                            <R11>0.98187345</R11>
+                            <R12>-0.03771037</R12>
+                            <R20>-0.00000011175871</R20>
+                            <R21>0.038378276</R21>
+                            <R22>0.9992633</R22>
+                          </CoordinateFrame>
+                          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                          <bool name="DefinesCapabilities">false</bool>
+                          <BinaryString name="SerializedOverrides">
+                          </BinaryString>
+                          <int64 name="SourceAssetId">-1</int64>
+                          <BinaryString name="Tags"></BinaryString>
+                          <bool name="Visible">false</bool>
+                        </Properties>
+                        <Item class="Bone" referent="51">
+                          <Properties>
+                            <string name="Name">ring1.r</string>
+                            <BinaryString name="AttributesSerialize"></BinaryString>
+                            <CoordinateFrame name="CFrame">
+                              <X>-0.00000008940697</X>
+                              <Y>0.29028267</Y>
+                              <Z>0.00000071525574</Z>
+                              <R00>0.98908716</R00>
+                              <R01>-0.14045002</R01>
+                              <R02>-0.04450108</R02>
+                              <R10>0.12906975</R10>
+                              <R11>0.9716721</R11>
+                              <R12>-0.1979755</R12>
+                              <R20>0.07104612</R20>
+                              <R21>0.19007128</R21>
+                              <R22>0.97919625</R22>
+                            </CoordinateFrame>
+                            <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                            <bool name="DefinesCapabilities">false</bool>
+                            <BinaryString name="SerializedOverrides">
+                            </BinaryString>
+                            <int64 name="SourceAssetId">-1</int64>
+                            <BinaryString name="Tags"></BinaryString>
+                            <bool name="Visible">false</bool>
+                          </Properties>
+                          <Item class="Bone" referent="52">
+                            <Properties>
+                              <string name="Name">ring2.r</string>
+                              <BinaryString name="AttributesSerialize"></BinaryString>
+                              <CoordinateFrame name="CFrame">
+                                <X>-0.000000059604645</X>
+                                <Y>0.12707554</Y>
+                                <Z>-0.00000023841858</Z>
+                                <R00>0.9883019</R00>
+                                <R01>0.054607965</R01>
+                                <R02>-0.14239863</R02>
+                                <R10>-0.11099593</R10>
+                                <R11>0.8978731</R11>
+                                <R12>-0.42603278</R12>
+                                <R20>0.1045911</R20>
+                                <R21>0.43685466</R21>
+                                <R22>0.89343095</R22>
+                              </CoordinateFrame>
+                              <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                              <bool name="DefinesCapabilities">false</bool>
+                              <BinaryString name="SerializedOverrides">
+                              </BinaryString>
+                              <int64 name="SourceAssetId">-1</int64>
+                              <BinaryString name="Tags"></BinaryString>
+                              <bool name="Visible">false</bool>
+                            </Properties>
+                            <Item class="Bone" referent="53">
+                              <Properties>
+                                <string name="Name">ring3.r</string>
+                                <BinaryString name="AttributesSerialize"></BinaryString>
+                                <CoordinateFrame name="CFrame">
+                                  <X>-0.00000008940697</X>
+                                  <Y>0.13809448</Y>
+                                  <Z>0</Z>
+                                  <R00>0.98548764</R00>
+                                  <R01>0.16208231</R01>
+                                  <R02>-0.050432894</R02>
+                                  <R10>-0.16913408</R10>
+                                  <R11>0.9628199</R11>
+                                  <R12>-0.21064572</R12>
+                                  <R20>0.014415845</R20>
+                                  <R21>0.21611866</R21>
+                                  <R22>0.9762608</R22>
+                                </CoordinateFrame>
+                                <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                                <bool name="DefinesCapabilities">false</bool>
+                                <BinaryString name="SerializedOverrides">
+                                </BinaryString>
+                                <int64 name="SourceAssetId">-1</int64>
+                                <BinaryString name="Tags"></BinaryString>
+                                <bool name="Visible">false</bool>
+                              </Properties>
+                            </Item>
+                          </Item>
+                        </Item>
+                      </Item>
+                      <Item class="Bone" referent="54">
+                        <Properties>
+                          <string name="Name">thumb1.r</string>
+                          <BinaryString name="AttributesSerialize"></BinaryString>
+                          <CoordinateFrame name="CFrame">
+                            <X>0.083988965</X>
+                            <Y>0.15280351</Y>
+                            <Z>0.071234226</Z>
+                            <R00>0.14929332</R00>
+                            <R01>0.44590992</R01>
+                            <R02>-0.8825396</R02>
+                            <R10>-0.48401746</R10>
+                            <R11>0.8112544</R11>
+                            <R12>0.3280146</R12>
+                            <R20>0.862229</R20>
+                            <R21>0.37819412</R21>
+                            <R22>0.33694303</R22>
+                          </CoordinateFrame>
+                          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                          <bool name="DefinesCapabilities">false</bool>
+                          <BinaryString name="SerializedOverrides">
+                          </BinaryString>
+                          <int64 name="SourceAssetId">-1</int64>
+                          <BinaryString name="Tags"></BinaryString>
+                          <bool name="Visible">false</bool>
+                        </Properties>
+                        <Item class="Bone" referent="55">
+                          <Properties>
+                            <string name="Name">thumb2.r</string>
+                            <BinaryString name="AttributesSerialize"></BinaryString>
+                            <CoordinateFrame name="CFrame">
+                              <X>0.00000023841858</X>
+                              <Y>0.18835437</Y>
+                              <Z>0.00000023841858</Z>
+                              <R00>0.92480934</R00>
+                              <R01>0.25859848</R01>
+                              <R02>0.2790244</R02>
+                              <R10>-0.23236218</R10>
+                              <R11>0.96470165</R11>
+                              <R12>-0.1239305</R12>
+                              <R20>-0.30122346</R20>
+                              <R21>0.049777366</R21>
+                              <R22>0.95225364</R22>
+                            </CoordinateFrame>
+                            <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                            <bool name="DefinesCapabilities">false</bool>
+                            <BinaryString name="SerializedOverrides">
+                            </BinaryString>
+                            <int64 name="SourceAssetId">-1</int64>
+                            <BinaryString name="Tags"></BinaryString>
+                            <bool name="Visible">false</bool>
+                          </Properties>
+                          <Item class="Bone" referent="56">
+                            <Properties>
+                              <string name="Name">thumb3.r</string>
+                              <BinaryString name="AttributesSerialize"></BinaryString>
+                              <CoordinateFrame name="CFrame">
+                                <X>0.00000023841858</X>
+                                <Y>0.2177183</Y>
+                                <Z>0.00000011920929</Z>
+                                <R00>0.94819736</R00>
+                                <R01>-0.10148897</R01>
+                                <R02>-0.3010345</R02>
+                                <R10>0.21594478</R10>
+                                <R11>0.90091705</R11>
+                                <R12>0.37645233</R12>
+                                <R20>0.23300135</R20>
+                                <R21>-0.42195794</R21>
+                                <R22>0.8761632</R22>
+                              </CoordinateFrame>
+                              <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                              <bool name="DefinesCapabilities">false</bool>
+                              <BinaryString name="SerializedOverrides">
+                              </BinaryString>
+                              <int64 name="SourceAssetId">-1</int64>
+                              <BinaryString name="Tags"></BinaryString>
+                              <bool name="Visible">false</bool>
+                            </Properties>
+                          </Item>
+                        </Item>
+                      </Item>
                     </Item>
+                  </Item>
+                  <Item class="Bone" referent="57">
+                    <Properties>
+                      <string name="Name">arm_twist.r</string>
+                      <BinaryString name="AttributesSerialize"></BinaryString>
+                      <CoordinateFrame name="CFrame">
+                        <X>-0.000000029802322</X>
+                        <Y>-0.00000011920929</Y>
+                        <Z>0</Z>
+                        <R00>1</R00>
+                        <R01>0.000000013038518</R01>
+                        <R02>-0.000000052154064</R02>
+                        <R10>-0.000000013038516</R10>
+                        <R11>1</R11>
+                        <R12>0.00000003696186</R12>
+                        <R20>0.000000052154064</R20>
+                        <R21>-0.00000003696186</R21>
+                        <R22>1</R22>
+                      </CoordinateFrame>
+                      <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                      <bool name="DefinesCapabilities">false</bool>
+                      <BinaryString name="SerializedOverrides">
+                      </BinaryString>
+                      <int64 name="SourceAssetId">-1</int64>
+                      <BinaryString name="Tags"></BinaryString>
+                      <bool name="Visible">false</bool>
+                    </Properties>
                   </Item>
                 </Item>
               </Item>
-            </Item>
-          </Item>
-          <Item class="Bone" referent="46">
-            <Properties>
-              <string name="Name">thigh_l</string>
-              <CoordinateFrame name="CFrame">
-                <X>-0.22015381</X>
-                <Y>0.045654297</Y>
-                <Z>-0.075653076</Z>
-                <R00>1</R00>
-                <R01>0</R01>
-                <R02>0</R02>
-                <R10>0</R10>
-                <R11>-0.9564209</R11>
-                <R12>0.2919922</R12>
-                <R20>0</R20>
-                <R21>-0.2919922</R21>
-                <R22>-0.9564209</R22>
-              </CoordinateFrame>
-            </Properties>
-            <Item class="Bone" referent="47">
-              <Properties>
-                <string name="Name">calf_l</string>
-                <CoordinateFrame name="CFrame">
-                  <X>0</X>
-                  <Y>0.6684418</Y>
-                  <Z>0</Z>
-                  <R00>1</R00>
-                  <R01>0</R01>
-                  <R02>-0.0002593994</R02>
-                  <R10>0.000045776367</R10>
-                  <R11>0.97998047</R11>
-                  <R12>0.19906616</R12>
-                  <R20>0.0002593994</R20>
-                  <R21>-0.19906616</R21>
-                  <R22>0.97998047</R22>
-                </CoordinateFrame>
-              </Properties>
-              <Item class="Bone" referent="48">
+              <Item class="Bone" referent="58">
                 <Properties>
-                  <string name="Name">foot_l</string>
+                  <string name="Name">neck.x</string>
+                  <BinaryString name="AttributesSerialize"></BinaryString>
                   <CoordinateFrame name="CFrame">
-                    <X>0</X>
-                    <Y>0.7121124</Y>
-                    <Z>0</Z>
+                    <X>-0.000000000000008430011</X>
+                    <Y>0.25628185</Y>
+                    <Z>-0.000000029802322</Z>
                     <R00>1</R00>
-                    <R01>0.00024414063</R01>
-                    <R02>0.0011138916</R02>
-                    <R10>0.0009765625</R10>
-                    <R11>0.31201172</R11>
-                    <R12>-0.95007324</R12>
-                    <R20>-0.000579834</R20>
-                    <R21>0.95007324</R21>
-                    <R22>0.31201172</R22>
+                    <R01>-0.00000000000000010518286</R01>
+                    <R02>-0.000000000000000059705916</R02>
+                    <R10>0.00000000000000010516761</R10>
+                    <R11>0.51239496</R11>
+                    <R12>0.85875</R12>
+                    <R20>-0.000000000000000059732763</R20>
+                    <R21>-0.85875</R21>
+                    <R22>0.51239496</R22>
                   </CoordinateFrame>
+                  <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                  <bool name="DefinesCapabilities">false</bool>
+                  <BinaryString name="SerializedOverrides">
+                  </BinaryString>
+                  <int64 name="SourceAssetId">-1</int64>
+                  <BinaryString name="Tags"></BinaryString>
+                  <bool name="Visible">false</bool>
                 </Properties>
-                <Item class="Bone" referent="49">
+                <Item class="Bone" referent="59">
                   <Properties>
-                    <string name="Name">ball_l</string>
+                    <string name="Name">head.x</string>
+                    <BinaryString name="AttributesSerialize"></BinaryString>
                     <CoordinateFrame name="CFrame">
-                      <X>0</X>
-                      <Y>0.45263672</Y>
+                      <X>-0.000000000000016096736</X>
+                      <Y>0.13065064</Y>
                       <Z>0</Z>
-                      <R00>-1</R00>
-                      <R01>-0.0004272461</R01>
-                      <R02>0.0009460449</R02>
-                      <R10>0</R10>
-                      <R11>0.90805054</R11>
-                      <R12>0.41885376</R12>
-                      <R20>-0.0010375977</R20>
-                      <R21>0.41885376</R21>
-                      <R22>-0.90805054</R22>
+                      <R00>1</R00>
+                      <R01>-0.00000000000000013876749</R01>
+                      <R02>-0.000000000000000061423805</R02>
+                      <R10>0.000000000000000015944548</R10>
+                      <R11>0.4985953</R11>
+                      <R12>-0.8668349</R12>
+                      <R20>0.00000000000000015091417</R20>
+                      <R21>0.8668349</R21>
+                      <R22>0.4985953</R22>
                     </CoordinateFrame>
-                  </Properties>
-                </Item>
-              </Item>
-            </Item>
-          </Item>
-          <Item class="Bone" referent="50">
-            <Properties>
-              <string name="Name">thigh_r</string>
-              <CoordinateFrame name="CFrame">
-                <X>0.22015381</X>
-                <Y>0.045654297</Y>
-                <Z>-0.075653076</Z>
-                <R00>1</R00>
-                <R01>0</R01>
-                <R02>0</R02>
-                <R10>0</R10>
-                <R11>-0.9564209</R11>
-                <R12>0.2919922</R12>
-                <R20>0</R20>
-                <R21>-0.2919922</R21>
-                <R22>-0.9564209</R22>
-              </CoordinateFrame>
-            </Properties>
-            <Item class="Bone" referent="51">
-              <Properties>
-                <string name="Name">calf_r</string>
-                <CoordinateFrame name="CFrame">
-                  <X>0</X>
-                  <Y>0.6684418</Y>
-                  <Z>0</Z>
-                  <R00>1</R00>
-                  <R01>0</R01>
-                  <R02>0.0002593994</R02>
-                  <R10>-0.000045776367</R10>
-                  <R11>0.97998047</R11>
-                  <R12>0.19906616</R12>
-                  <R20>-0.0002593994</R20>
-                  <R21>-0.19906616</R21>
-                  <R22>0.97998047</R22>
-                </CoordinateFrame>
-              </Properties>
-              <Item class="Bone" referent="52">
-                <Properties>
-                  <string name="Name">foot_r</string>
-                  <CoordinateFrame name="CFrame">
-                    <X>0</X>
-                    <Y>0.7121124</Y>
-                    <Z>0</Z>
-                    <R00>1</R00>
-                    <R01>-0.00024414063</R01>
-                    <R02>-0.0011138916</R02>
-                    <R10>-0.0009765625</R10>
-                    <R11>0.31201172</R11>
-                    <R12>-0.95007324</R12>
-                    <R20>0.000579834</R20>
-                    <R21>0.95007324</R21>
-                    <R22>0.31201172</R22>
-                  </CoordinateFrame>
-                </Properties>
-                <Item class="Bone" referent="53">
-                  <Properties>
-                    <string name="Name">ball_r</string>
-                    <CoordinateFrame name="CFrame">
-                      <X>0</X>
-                      <Y>0.45263672</Y>
-                      <Z>0</Z>
-                      <R00>-1</R00>
-                      <R01>0.0004272461</R01>
-                      <R02>-0.0009460449</R02>
-                      <R10>0</R10>
-                      <R11>0.90805054</R11>
-                      <R12>0.41885376</R12>
-                      <R20>0.0010375977</R20>
-                      <R21>0.41885376</R21>
-                      <R22>-0.90805054</R22>
-                    </CoordinateFrame>
+                    <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                    <bool name="DefinesCapabilities">false</bool>
+                    <BinaryString name="SerializedOverrides">
+                    </BinaryString>
+                    <int64 name="SourceAssetId">-1</int64>
+                    <BinaryString name="Tags"></BinaryString>
+                    <bool name="Visible">false</bool>
                   </Properties>
                 </Item>
               </Item>
             </Item>
           </Item>
         </Item>
+        <Item class="Bone" referent="60">
+          <Properties>
+            <string name="Name">thigh_stretch.l</string>
+            <BinaryString name="AttributesSerialize"></BinaryString>
+            <CoordinateFrame name="CFrame">
+              <X>-0.28307682</X>
+              <Y>0</Y>
+              <Z>0.0000008493662</Z>
+              <R00>0.015687853</R00>
+              <R01>-0.12645026</R01>
+              <R02>0.9918488</R02>
+              <R10>-0.32905003</R10>
+              <R11>-0.93736947</R11>
+              <R12>-0.11430019</R12>
+              <R20>0.94418216</R20>
+              <R21>-0.3245748</R21>
+              <R22>-0.056313775</R22>
+            </CoordinateFrame>
+            <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+            <bool name="DefinesCapabilities">false</bool>
+            <BinaryString name="SerializedOverrides">
+            </BinaryString>
+            <int64 name="SourceAssetId">-1</int64>
+            <BinaryString name="Tags"></BinaryString>
+            <bool name="Visible">false</bool>
+          </Properties>
+          <Item class="Bone" referent="61">
+            <Properties>
+              <string name="Name">thigh_twist.l</string>
+              <BinaryString name="AttributesSerialize"></BinaryString>
+              <CoordinateFrame name="CFrame">
+                <X>0</X>
+                <Y>0</Y>
+                <Z>0.000000059604645</Z>
+                <R00>1</R00>
+                <R01>-0.00000000000000013877788</R01>
+                <R02>-0.000000037252903</R02>
+                <R10>0</R10>
+                <R11>1</R11>
+                <R12>-0.0000000037252903</R12>
+                <R20>0.000000037252903</R20>
+                <R21>0.0000000037252903</R21>
+                <R22>1</R22>
+              </CoordinateFrame>
+              <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+              <bool name="DefinesCapabilities">false</bool>
+              <BinaryString name="SerializedOverrides">
+              </BinaryString>
+              <int64 name="SourceAssetId">-1</int64>
+              <BinaryString name="Tags"></BinaryString>
+              <bool name="Visible">false</bool>
+            </Properties>
+          </Item>
+          <Item class="Bone" referent="62">
+            <Properties>
+              <string name="Name">leg_stretch.l</string>
+              <BinaryString name="AttributesSerialize"></BinaryString>
+              <CoordinateFrame name="CFrame">
+                <X>0</X>
+                <Y>0.8830409</Y>
+                <Z>0.000000029802322</Z>
+                <R00>0.7291579</R00>
+                <R01>0.68434554</R01>
+                <R02>-0.0000006627963</R02>
+                <R10>-0.6843455</R10>
+                <R11>0.7291579</R11>
+                <R12>-0.00000016728305</R12>
+                <R20>0.00000036880374</R20>
+                <R21>0.0000005755574</R21>
+                <R22>1</R22>
+              </CoordinateFrame>
+              <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+              <bool name="DefinesCapabilities">false</bool>
+              <BinaryString name="SerializedOverrides">
+              </BinaryString>
+              <int64 name="SourceAssetId">-1</int64>
+              <BinaryString name="Tags"></BinaryString>
+              <bool name="Visible">false</bool>
+            </Properties>
+            <Item class="Bone" referent="63">
+              <Properties>
+                <string name="Name">foot.l</string>
+                <BinaryString name="AttributesSerialize"></BinaryString>
+                <CoordinateFrame name="CFrame">
+                  <X>0.000000067055225</X>
+                  <Y>0.5965841</Y>
+                  <Z>-0.00000017881393</Z>
+                  <R00>-0.059529573</R00>
+                  <R01>-0.9823087</R01>
+                  <R02>0.17755547</R02>
+                  <R10>0.09864159</R10>
+                  <R11>0.17121163</R11>
+                  <R12>0.9802839</R12>
+                  <R20>-0.9933409</R20>
+                  <R21>0.07587022</R21>
+                  <R22>0.086704336</R22>
+                </CoordinateFrame>
+                <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                <bool name="DefinesCapabilities">false</bool>
+                <BinaryString name="SerializedOverrides">
+                </BinaryString>
+                <int64 name="SourceAssetId">-1</int64>
+                <BinaryString name="Tags"></BinaryString>
+                <bool name="Visible">false</bool>
+              </Properties>
+              <Item class="Bone" referent="64">
+                <Properties>
+                  <string name="Name">toes_01.l</string>
+                  <BinaryString name="AttributesSerialize"></BinaryString>
+                  <CoordinateFrame name="CFrame">
+                    <X>0.00000020861626</X>
+                    <Y>0.39277402</Y>
+                    <Z>-0.00000008940697</Z>
+                    <R00>-0.99999964</R00>
+                    <R01>0.00000062370964</R01>
+                    <R02>-0.00085900223</R02>
+                    <R10>0.00015467033</R10>
+                    <R11>0.9837865</R11>
+                    <R12>-0.17934376</R12>
+                    <R20>0.0008449629</R20>
+                    <R21>-0.17934382</R21>
+                    <R22>-0.98378617</R22>
+                  </CoordinateFrame>
+                  <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                  <bool name="DefinesCapabilities">false</bool>
+                  <BinaryString name="SerializedOverrides">
+                  </BinaryString>
+                  <int64 name="SourceAssetId">-1</int64>
+                  <BinaryString name="Tags"></BinaryString>
+                  <bool name="Visible">false</bool>
+                </Properties>
+              </Item>
+            </Item>
+            <Item class="Bone" referent="65">
+              <Properties>
+                <string name="Name">leg_twist.l</string>
+                <BinaryString name="AttributesSerialize"></BinaryString>
+                <CoordinateFrame name="CFrame">
+                  <X>0</X>
+                  <Y>0.2982921</Y>
+                  <Z>-0.00000014901161</Z>
+                  <R00>1</R00>
+                  <R01>0.000000029802322</R01>
+                  <R02>0.000000037252903</R02>
+                  <R10>-0.000000029802322</R10>
+                  <R11>1</R11>
+                  <R12>0.000000016763803</R12>
+                  <R20>-0.000000037252903</R20>
+                  <R21>-0.000000016763805</R21>
+                  <R22>1</R22>
+                </CoordinateFrame>
+                <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                <bool name="DefinesCapabilities">false</bool>
+                <BinaryString name="SerializedOverrides">
+                </BinaryString>
+                <int64 name="SourceAssetId">-1</int64>
+                <BinaryString name="Tags"></BinaryString>
+                <bool name="Visible">false</bool>
+              </Properties>
+            </Item>
+          </Item>
+        </Item>
+        <Item class="Bone" referent="66">
+          <Properties>
+            <string name="Name">thigh_stretch.r</string>
+            <BinaryString name="AttributesSerialize"></BinaryString>
+            <CoordinateFrame name="CFrame">
+              <X>0.28307676</X>
+              <Y>0.00000011920929</Y>
+              <Z>-0.00000075250864</Z>
+              <R00>0.015682532</R00>
+              <R01>0.12644842</R01>
+              <R02>-0.99184924</R02>
+              <R10>0.32905</R10>
+              <R11>-0.9373695</R11>
+              <R12>-0.11430019</R12>
+              <R20>-0.9441823</R20>
+              <R21>-0.3245755</R21>
+              <R22>-0.05630818</R22>
+            </CoordinateFrame>
+            <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+            <bool name="DefinesCapabilities">false</bool>
+            <BinaryString name="SerializedOverrides">
+            </BinaryString>
+            <int64 name="SourceAssetId">-1</int64>
+            <BinaryString name="Tags"></BinaryString>
+            <bool name="Visible">false</bool>
+          </Properties>
+          <Item class="Bone" referent="67">
+            <Properties>
+              <string name="Name">thigh_twist.r</string>
+              <BinaryString name="AttributesSerialize"></BinaryString>
+              <CoordinateFrame name="CFrame">
+                <X>0</X>
+                <Y>0</Y>
+                <Z>-0.000000059604645</Z>
+                <R00>1</R00>
+                <R01>-0.00000008940696</R01>
+                <R02>0.000000081956394</R02>
+                <R10>0.00000008940697</R10>
+                <R11>1</R11>
+                <R12>-0.000000055879347</R12>
+                <R20>-0.00000008195639</R20>
+                <R21>0.000000055879354</R21>
+                <R22>1</R22>
+              </CoordinateFrame>
+              <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+              <bool name="DefinesCapabilities">false</bool>
+              <BinaryString name="SerializedOverrides">
+              </BinaryString>
+              <int64 name="SourceAssetId">-1</int64>
+              <BinaryString name="Tags"></BinaryString>
+              <bool name="Visible">false</bool>
+            </Properties>
+          </Item>
+          <Item class="Bone" referent="68">
+            <Properties>
+              <string name="Name">leg_stretch.r</string>
+              <BinaryString name="AttributesSerialize"></BinaryString>
+              <CoordinateFrame name="CFrame">
+                <X>0</X>
+                <Y>0.88304114</Y>
+                <Z>-0.00000008940697</Z>
+                <R00>0.729158</R00>
+                <R01>-0.6843454</R01>
+                <R02>0.0000008040297</R02>
+                <R10>0.6843455</R10>
+                <R11>0.729158</R11>
+                <R12>-0.0000001599009</R12>
+                <R20>-0.00000047683716</R20>
+                <R21>0.000000666827</R21>
+                <R22>1</R22>
+              </CoordinateFrame>
+              <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+              <bool name="DefinesCapabilities">false</bool>
+              <BinaryString name="SerializedOverrides">
+              </BinaryString>
+              <int64 name="SourceAssetId">-1</int64>
+              <BinaryString name="Tags"></BinaryString>
+              <bool name="Visible">false</bool>
+            </Properties>
+            <Item class="Bone" referent="69">
+              <Properties>
+                <string name="Name">foot.r</string>
+                <BinaryString name="AttributesSerialize"></BinaryString>
+                <CoordinateFrame name="CFrame">
+                  <X>-0.00000015646219</X>
+                  <Y>0.59658384</Y>
+                  <Z>-0.00000017881393</Z>
+                  <R00>-0.059529778</R00>
+                  <R01>0.9823086</R01>
+                  <R02>-0.1775557</R02>
+                  <R10>-0.098641455</R10>
+                  <R11>0.17121185</R11>
+                  <R12>0.98028386</R12>
+                  <R20>0.99334085</R20>
+                  <R21>0.07587043</R21>
+                  <R22>0.08670415</R22>
+                </CoordinateFrame>
+                <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                <bool name="DefinesCapabilities">false</bool>
+                <BinaryString name="SerializedOverrides">
+                </BinaryString>
+                <int64 name="SourceAssetId">-1</int64>
+                <BinaryString name="Tags"></BinaryString>
+                <bool name="Visible">false</bool>
+              </Properties>
+              <Item class="Bone" referent="70">
+                <Properties>
+                  <string name="Name">toes_01.r</string>
+                  <BinaryString name="AttributesSerialize"></BinaryString>
+                  <CoordinateFrame name="CFrame">
+                    <X>-0.00000023841858</X>
+                    <Y>0.39277375</Y>
+                    <Z>-0.00000020861626</Z>
+                    <R00>-0.99999964</R00>
+                    <R01>-0.00000066992646</R01>
+                    <R02>-0.0008433736</R02>
+                    <R10>0.00015059486</R10>
+                    <R11>0.98378646</R11>
+                    <R12>-0.1793439</R12>
+                    <R20>0.0008298196</R20>
+                    <R21>-0.17934395</R21>
+                    <R22>-0.9837861</R22>
+                  </CoordinateFrame>
+                  <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                  <bool name="DefinesCapabilities">false</bool>
+                  <BinaryString name="SerializedOverrides">
+                  </BinaryString>
+                  <int64 name="SourceAssetId">-1</int64>
+                  <BinaryString name="Tags"></BinaryString>
+                  <bool name="Visible">false</bool>
+                </Properties>
+              </Item>
+            </Item>
+            <Item class="Bone" referent="71">
+              <Properties>
+                <string name="Name">leg_twist.r</string>
+                <BinaryString name="AttributesSerialize"></BinaryString>
+                <CoordinateFrame name="CFrame">
+                  <X>-0.00000031292439</X>
+                  <Y>0.29829174</Y>
+                  <Z>-0.00000014901161</Z>
+                  <R00>1</R00>
+                  <R01>0.000000089406946</R01>
+                  <R02>-0.000000011175864</R02>
+                  <R10>-0.000000089406946</R10>
+                  <R11>1</R11>
+                  <R12>0.00000005029142</R12>
+                  <R20>0.000000011175868</R20>
+                  <R21>-0.00000005029142</R21>
+                  <R22>1</R22>
+                </CoordinateFrame>
+                <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+                <bool name="DefinesCapabilities">false</bool>
+                <BinaryString name="SerializedOverrides">
+                </BinaryString>
+                <int64 name="SourceAssetId">-1</int64>
+                <BinaryString name="Tags"></BinaryString>
+                <bool name="Visible">false</bool>
+              </Properties>
+            </Item>
+          </Item>
+        </Item>
       </Item>
     </Item>
-    <Item class="Part" referent="54">
+    <Item class="MeshPart" referent="72">
+      <Properties>
+        <string name="Name">Belt_low</string>
+        <bool name="Anchored">false</bool>
+        <CoordinateFrame name="CFrame">
+          <X>0</X>
+          <Y>1.8634796</Y>
+          <Z>-0.14755249</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanQuery">false</bool>
+        <bool name="CanTouch">false</bool>
+        <bool name="HasSkinnedMesh">true</bool>
+        <Vector3 name="InitialSize">
+          <X>0.9630585</X>
+          <Y>0.14552307</Y>
+          <Z>0.76828</Z>
+        </Vector3>
+        <bool name="Massless">true</bool>
+        <Content name="MeshContent">
+          <uri>rbxassetid://83394005475880</uri>
+        </Content>
+        <Vector3 name="size">
+          <X>0.9630585</X>
+          <Y>0.14552307</Y>
+          <Z>0.76828</Z>
+        </Vector3>
+      </Properties>
+      <Item class="SurfaceAppearance" referent="73">
+        <Properties>
+          <string name="Name">SurfaceAppearance</string>
+          <token name="AlphaMode">0</token>
+          <Content name="ColorMapContent">
+            <uri>rbxassetid://72066017057670</uri>
+          </Content>
+          <Content name="MetalnessMapContent">
+            <uri>rbxassetid://112408781578784</uri>
+          </Content>
+          <Content name="NormalMapContent">
+            <uri>rbxassetid://140164751284435</uri>
+          </Content>
+          <Content name="RoughnessMapContent">
+            <uri>rbxassetid://80190390653413</uri>
+          </Content>
+        </Properties>
+      </Item>
+      <Item class="Motor6D" referent="74">
+        <Properties>
+          <string name="Name">Belt_lowMotor6D</string>
+          <CoordinateFrame name="C0">
+            <X>-0</X>
+            <Y>1.8634796</Y>
+            <Z>-0.14755249</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <CoordinateFrame name="C1">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Ref name="Part0">3</Ref>
+          <Ref name="Part1">72</Ref>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="MeshPart" referent="75">
+      <Properties>
+        <string name="Name">Belts_low</string>
+        <bool name="Anchored">false</bool>
+        <CoordinateFrame name="CFrame">
+          <X>-0.06272888</X>
+          <Y>2.351822</Y>
+          <Z>-0.1109314</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanQuery">false</bool>
+        <bool name="CanTouch">false</bool>
+        <bool name="HasSkinnedMesh">true</bool>
+        <Vector3 name="InitialSize">
+          <X>1.1104126</X>
+          <Y>1.1336823</Y>
+          <Z>1.0133514</Z>
+        </Vector3>
+        <bool name="Massless">true</bool>
+        <Content name="MeshContent">
+          <uri>rbxassetid://73810130695380</uri>
+        </Content>
+        <Vector3 name="size">
+          <X>1.1104126</X>
+          <Y>1.1336823</Y>
+          <Z>1.0133514</Z>
+        </Vector3>
+      </Properties>
+      <Item class="SurfaceAppearance" referent="76">
+        <Properties>
+          <string name="Name">SurfaceAppearance</string>
+          <token name="AlphaMode">0</token>
+          <Content name="ColorMapContent">
+            <uri>rbxassetid://72066017057670</uri>
+          </Content>
+          <Content name="MetalnessMapContent">
+            <uri>rbxassetid://112408781578784</uri>
+          </Content>
+          <Content name="NormalMapContent">
+            <uri>rbxassetid://140164751284435</uri>
+          </Content>
+          <Content name="RoughnessMapContent">
+            <uri>rbxassetid://80190390653413</uri>
+          </Content>
+        </Properties>
+      </Item>
+      <Item class="Motor6D" referent="77">
+        <Properties>
+          <string name="Name">Belts_lowMotor6D</string>
+          <CoordinateFrame name="C0">
+            <X>-0.06272888</X>
+            <Y>2.351822</Y>
+            <Z>-0.1109314</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <CoordinateFrame name="C1">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Ref name="Part0">3</Ref>
+          <Ref name="Part1">75</Ref>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="MeshPart" referent="78">
+      <Properties>
+        <string name="Name">Body_low</string>
+        <bool name="Anchored">false</bool>
+        <CoordinateFrame name="CFrame">
+          <X>-0.000015258789</X>
+          <Y>1.8665314</Y>
+          <Z>-0.3061676</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanQuery">false</bool>
+        <bool name="CanTouch">false</bool>
+        <bool name="HasSkinnedMesh">true</bool>
+        <Vector3 name="InitialSize">
+          <X>3.8025208</X>
+          <Y>3.7469177</Y>
+          <Z>1.2919464</Z>
+        </Vector3>
+        <bool name="Massless">true</bool>
+        <Content name="MeshContent">
+          <uri>rbxassetid://70677615842211</uri>
+        </Content>
+        <Vector3 name="size">
+          <X>3.8025208</X>
+          <Y>3.7469177</Y>
+          <Z>1.2919464</Z>
+        </Vector3>
+      </Properties>
+      <Item class="SurfaceAppearance" referent="79">
+        <Properties>
+          <string name="Name">SurfaceAppearance</string>
+          <token name="AlphaMode">0</token>
+          <Content name="ColorMapContent">
+            <uri>rbxassetid://133199116655025</uri>
+          </Content>
+          <Content name="MetalnessMapContent">
+            <uri>rbxassetid://122300276025823</uri>
+          </Content>
+          <Content name="NormalMapContent">
+            <uri>rbxassetid://114706559094415</uri>
+          </Content>
+          <Content name="RoughnessMapContent">
+            <uri>rbxassetid://115073555825037</uri>
+          </Content>
+        </Properties>
+      </Item>
+      <Item class="Motor6D" referent="80">
+        <Properties>
+          <string name="Name">Body_lowMotor6D</string>
+          <CoordinateFrame name="C0">
+            <X>-0.000015258789</X>
+            <Y>1.8665314</Y>
+            <Z>-0.30615234</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <CoordinateFrame name="C1">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Ref name="Part0">3</Ref>
+          <Ref name="Part1">78</Ref>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="MeshPart" referent="81">
+      <Properties>
+        <string name="Name">Buttons_low</string>
+        <bool name="Anchored">false</bool>
+        <CoordinateFrame name="CFrame">
+          <X>-0.001663208</X>
+          <Y>1.9203186</Y>
+          <Z>-0.52104187</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanQuery">false</bool>
+        <bool name="CanTouch">false</bool>
+        <bool name="HasSkinnedMesh">true</bool>
+        <Vector3 name="InitialSize">
+          <X>0.10877991</X>
+          <Y>0.863266</Y>
+          <Z>0.13549805</Z>
+        </Vector3>
+        <bool name="Massless">true</bool>
+        <Content name="MeshContent">
+          <uri>rbxassetid://121191509186295</uri>
+        </Content>
+        <Vector3 name="size">
+          <X>0.10877991</X>
+          <Y>0.863266</Y>
+          <Z>0.13549805</Z>
+        </Vector3>
+      </Properties>
+      <Item class="SurfaceAppearance" referent="82">
+        <Properties>
+          <string name="Name">SurfaceAppearance</string>
+          <token name="AlphaMode">0</token>
+          <Content name="ColorMapContent">
+            <uri>rbxassetid://138758445116239</uri>
+          </Content>
+          <Content name="MetalnessMapContent">
+            <uri>rbxassetid://122300276025823</uri>
+          </Content>
+          <Content name="NormalMapContent">
+            <uri>rbxassetid://97953090067099</uri>
+          </Content>
+          <Content name="RoughnessMapContent">
+            <uri>rbxassetid://75776742803512</uri>
+          </Content>
+        </Properties>
+      </Item>
+      <Item class="Motor6D" referent="83">
+        <Properties>
+          <string name="Name">Buttons_lowMotor6D</string>
+          <CoordinateFrame name="C0">
+            <X>-0.001663208</X>
+            <Y>1.9203186</Y>
+            <Z>-0.5210266</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <CoordinateFrame name="C1">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Ref name="Part0">3</Ref>
+          <Ref name="Part1">81</Ref>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="MeshPart" referent="84">
+      <Properties>
+        <string name="Name">Cloak_low</string>
+        <bool name="Anchored">false</bool>
+        <CoordinateFrame name="CFrame">
+          <X>-0.1574707</X>
+          <Y>2.6530762</Y>
+          <Z>-0.07998657</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanQuery">false</bool>
+        <bool name="CanTouch">false</bool>
+        <bool name="HasSkinnedMesh">true</bool>
+        <Vector3 name="InitialSize">
+          <X>1.7253876</X>
+          <Y>0.7162781</Y>
+          <Z>0.9124756</Z>
+        </Vector3>
+        <bool name="Massless">true</bool>
+        <Content name="MeshContent">
+          <uri>rbxassetid://70972463432277</uri>
+        </Content>
+        <Vector3 name="size">
+          <X>1.7253876</X>
+          <Y>0.7162781</Y>
+          <Z>0.9124756</Z>
+        </Vector3>
+      </Properties>
+      <Item class="SurfaceAppearance" referent="85">
+        <Properties>
+          <string name="Name">SurfaceAppearance</string>
+          <token name="AlphaMode">0</token>
+          <Content name="ColorMapContent">
+            <uri>rbxassetid://135302660612206</uri>
+          </Content>
+          <Content name="MetalnessMapContent">
+            <uri>rbxassetid://122300276025823</uri>
+          </Content>
+          <Content name="NormalMapContent">
+            <uri>rbxassetid://72423225437059</uri>
+          </Content>
+          <Content name="RoughnessMapContent">
+            <uri>rbxassetid://74446348618388</uri>
+          </Content>
+        </Properties>
+      </Item>
+      <Item class="Motor6D" referent="86">
+        <Properties>
+          <string name="Name">Cloak_lowMotor6D</string>
+          <CoordinateFrame name="C0">
+            <X>-0.1574707</X>
+            <Y>2.6530762</Y>
+            <Z>-0.07998657</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <CoordinateFrame name="C1">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Ref name="Part0">3</Ref>
+          <Ref name="Part1">84</Ref>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="MeshPart" referent="87">
+      <Properties>
+        <string name="Name">Eyes_low</string>
+        <bool name="Anchored">false</bool>
+        <CoordinateFrame name="CFrame">
+          <X>0</X>
+          <Y>3.3234406</Y>
+          <Z>-0.47071838</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanQuery">false</bool>
+        <bool name="CanTouch">false</bool>
+        <bool name="HasSkinnedMesh">true</bool>
+        <Vector3 name="InitialSize">
+          <X>0.6600189</X>
+          <Y>0.23808289</Y>
+          <Z>0.2383728</Z>
+        </Vector3>
+        <bool name="Massless">true</bool>
+        <Content name="MeshContent">
+          <uri>rbxassetid://109670508494385</uri>
+        </Content>
+        <Vector3 name="size">
+          <X>0.6600189</X>
+          <Y>0.23808289</Y>
+          <Z>0.2383728</Z>
+        </Vector3>
+      </Properties>
+      <Item class="SurfaceAppearance" referent="88">
+        <Properties>
+          <string name="Name">SurfaceAppearance</string>
+          <token name="AlphaMode">0</token>
+          <Content name="ColorMapContent">
+            <uri>rbxassetid://121309255424232</uri>
+          </Content>
+          <Content name="MetalnessMapContent">
+            <uri>rbxassetid://122300276025823</uri>
+          </Content>
+          <Content name="NormalMapContent">
+            <uri>rbxassetid://74942113275676</uri>
+          </Content>
+          <Content name="RoughnessMapContent">
+            <uri>rbxassetid://90158173562793</uri>
+          </Content>
+        </Properties>
+      </Item>
+      <Item class="Motor6D" referent="89">
+        <Properties>
+          <string name="Name">Eyes_lowMotor6D</string>
+          <CoordinateFrame name="C0">
+            <X>0</X>
+            <Y>3.3234406</Y>
+            <Z>-0.47071838</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <CoordinateFrame name="C1">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Ref name="Part0">3</Ref>
+          <Ref name="Part1">87</Ref>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="MeshPart" referent="90">
+      <Properties>
+        <string name="Name">Lower Teeth_low</string>
+        <bool name="Anchored">false</bool>
+        <CoordinateFrame name="CFrame">
+          <X>0</X>
+          <Y>2.9811707</Y>
+          <Z>-0.52326965</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanQuery">false</bool>
+        <bool name="CanTouch">false</bool>
+        <bool name="HasSkinnedMesh">true</bool>
+        <Vector3 name="InitialSize">
+          <X>0.38633728</X>
+          <Y>0.073898315</Y>
+          <Z>0.26452637</Z>
+        </Vector3>
+        <bool name="Massless">true</bool>
+        <Content name="MeshContent">
+          <uri>rbxassetid://103132577820372</uri>
+        </Content>
+        <Vector3 name="size">
+          <X>0.38633728</X>
+          <Y>0.073898315</Y>
+          <Z>0.26452637</Z>
+        </Vector3>
+      </Properties>
+      <Item class="SurfaceAppearance" referent="91">
+        <Properties>
+          <string name="Name">SurfaceAppearance</string>
+          <token name="AlphaMode">0</token>
+          <Content name="ColorMapContent">
+            <uri>rbxassetid://71330053435174</uri>
+          </Content>
+          <Content name="MetalnessMapContent">
+            <uri>rbxassetid://122300276025823</uri>
+          </Content>
+          <Content name="NormalMapContent">
+            <uri>rbxassetid://118817519147058</uri>
+          </Content>
+          <Content name="RoughnessMapContent">
+            <uri>rbxassetid://121439145577354</uri>
+          </Content>
+        </Properties>
+      </Item>
+      <Item class="Motor6D" referent="92">
+        <Properties>
+          <string name="Name">Lower Teeth_lowMotor6D</string>
+          <CoordinateFrame name="C0">
+            <X>0</X>
+            <Y>2.9811707</Y>
+            <Z>-0.52326965</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <CoordinateFrame name="C1">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Ref name="Part0">3</Ref>
+          <Ref name="Part1">90</Ref>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="MeshPart" referent="93">
+      <Properties>
+        <string name="Name">Shirt_low</string>
+        <bool name="Anchored">false</bool>
+        <CoordinateFrame name="CFrame">
+          <X>0.00015258789</X>
+          <Y>2.0764313</Y>
+          <Z>-0.09373474</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanQuery">false</bool>
+        <bool name="CanTouch">false</bool>
+        <bool name="HasSkinnedMesh">true</bool>
+        <Vector3 name="InitialSize">
+          <X>1.1030273</X>
+          <Y>1.4959259</Y>
+          <Z>0.93673706</Z>
+        </Vector3>
+        <bool name="Massless">true</bool>
+        <Content name="MeshContent">
+          <uri>rbxassetid://104686872064307</uri>
+        </Content>
+        <Vector3 name="size">
+          <X>1.1030273</X>
+          <Y>1.4959259</Y>
+          <Z>0.93673706</Z>
+        </Vector3>
+      </Properties>
+      <Item class="SurfaceAppearance" referent="94">
+        <Properties>
+          <string name="Name">SurfaceAppearance</string>
+          <token name="AlphaMode">0</token>
+          <Content name="ColorMapContent">
+            <uri>rbxassetid://136036675275847</uri>
+          </Content>
+          <Content name="MetalnessMapContent">
+            <uri>rbxassetid://122300276025823</uri>
+          </Content>
+          <Content name="NormalMapContent">
+            <uri>rbxassetid://107818930934931</uri>
+          </Content>
+          <Content name="RoughnessMapContent">
+            <uri>rbxassetid://112839749765283</uri>
+          </Content>
+        </Properties>
+      </Item>
+      <Item class="Motor6D" referent="95">
+        <Properties>
+          <string name="Name">Shirt_lowMotor6D</string>
+          <CoordinateFrame name="C0">
+            <X>0.00015258789</X>
+            <Y>2.0764313</Y>
+            <Z>-0.09371948</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <CoordinateFrame name="C1">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Ref name="Part0">3</Ref>
+          <Ref name="Part1">93</Ref>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="MeshPart" referent="96">
+      <Properties>
+        <string name="Name">Upper Teeth_low</string>
+        <bool name="Anchored">false</bool>
+        <CoordinateFrame name="CFrame">
+          <X>0</X>
+          <Y>3.046753</Y>
+          <Z>-0.5302124</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanQuery">false</bool>
+        <bool name="CanTouch">false</bool>
+        <bool name="HasSkinnedMesh">true</bool>
+        <Vector3 name="InitialSize">
+          <X>0.39717102</X>
+          <Y>0.10549927</Y>
+          <Z>0.26593018</Z>
+        </Vector3>
+        <bool name="Massless">true</bool>
+        <Content name="MeshContent">
+          <uri>rbxassetid://91264508192724</uri>
+        </Content>
+        <Vector3 name="size">
+          <X>0.39717102</X>
+          <Y>0.10549927</Y>
+          <Z>0.26593018</Z>
+        </Vector3>
+      </Properties>
+      <Item class="SurfaceAppearance" referent="97">
+        <Properties>
+          <string name="Name">SurfaceAppearance</string>
+          <token name="AlphaMode">0</token>
+          <Content name="ColorMapContent">
+            <uri>rbxassetid://71330053435174</uri>
+          </Content>
+          <Content name="MetalnessMapContent">
+            <uri>rbxassetid://122300276025823</uri>
+          </Content>
+          <Content name="NormalMapContent">
+            <uri>rbxassetid://118817519147058</uri>
+          </Content>
+          <Content name="RoughnessMapContent">
+            <uri>rbxassetid://121439145577354</uri>
+          </Content>
+        </Properties>
+      </Item>
+      <Item class="Motor6D" referent="98">
+        <Properties>
+          <string name="Name">Upper Teeth_lowMotor6D</string>
+          <CoordinateFrame name="C0">
+            <X>-0</X>
+            <Y>3.046753</Y>
+            <Z>-0.5302124</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <CoordinateFrame name="C1">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Ref name="Part0">3</Ref>
+          <Ref name="Part1">96</Ref>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="MeshPart" referent="99">
+      <Properties>
+        <string name="Name">Shorts_low</string>
+        <bool name="Anchored">false</bool>
+        <CoordinateFrame name="CFrame">
+          <X>0.000030517578</X>
+          <Y>1.2945557</Y>
+          <Z>-0.13484192</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanQuery">false</bool>
+        <bool name="CanTouch">false</bool>
+        <bool name="HasSkinnedMesh">true</bool>
+        <Vector3 name="InitialSize">
+          <X>1.2730408</X>
+          <Y>0.8102112</Y>
+          <Z>0.8383789</Z>
+        </Vector3>
+        <bool name="Massless">true</bool>
+        <Content name="MeshContent">
+          <uri>rbxassetid://98247996535430</uri>
+        </Content>
+        <Vector3 name="size">
+          <X>1.2730408</X>
+          <Y>0.8102112</Y>
+          <Z>0.8383789</Z>
+        </Vector3>
+      </Properties>
+      <Item class="SurfaceAppearance" referent="100">
+        <Properties>
+          <string name="Name">SurfaceAppearance</string>
+          <token name="AlphaMode">0</token>
+          <Content name="ColorMapContent">
+            <uri>rbxassetid://136036675275847</uri>
+          </Content>
+          <Content name="MetalnessMapContent">
+            <uri>rbxassetid://122300276025823</uri>
+          </Content>
+          <Content name="NormalMapContent">
+            <uri>rbxassetid://107818930934931</uri>
+          </Content>
+          <Content name="RoughnessMapContent">
+            <uri>rbxassetid://112839749765283</uri>
+          </Content>
+        </Properties>
+      </Item>
+      <Item class="Motor6D" referent="101">
+        <Properties>
+          <string name="Name">Shorts_lowMotor6D</string>
+          <CoordinateFrame name="C0">
+            <X>0.000030517578</X>
+            <Y>1.2945557</Y>
+            <Z>-0.13484192</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <CoordinateFrame name="C1">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Ref name="Part0">3</Ref>
+          <Ref name="Part1">99</Ref>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Part" referent="102">
       <Properties>
         <string name="Name">Head</string>
         <bool name="Anchored">false</bool>
         <token name="BottomSurface">0</token>
         <CoordinateFrame name="CFrame">
           <X>0</X>
-          <Y>3.0728302</Y>
+          <Y>3.399994</Y>
           <Z>0</Z>
           <R00>1</R00>
           <R01>0</R01>
@@ -1054,24 +2936,24 @@
         <token name="TopSurface">0</token>
         <float name="Transparency">1</float>
       </Properties>
-      <Item class="WeldConstraint" referent="55">
+      <Item class="WeldConstraint" referent="103">
         <Properties>
           <string name="Name">Weld</string>
           <Ref name="Part0Internal">1</Ref>
-          <Ref name="Part1Internal">54</Ref>
+          <Ref name="Part1Internal">102</Ref>
         </Properties>
       </Item>
     </Item>
-    <Item class="Humanoid" referent="56">
+    <Item class="Humanoid" referent="104">
       <Properties>
         <string name="Name">Humanoid</string>
         <bool name="BreakJointsOnDeath">false</bool>
         <token name="DisplayDistanceType">2</token>
         <token name="HealthDisplayType">2</token>
-        <float name="HipHeight">0.822832</float>
+        <float name="HipHeight">1</float>
         <token name="RigType">1</token>
       </Properties>
-      <Item class="Animator" referent="57">
+      <Item class="Animator" referent="105">
         <Properties>
           <string name="Name">Animator</string>
         </Properties>

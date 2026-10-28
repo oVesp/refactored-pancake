@@ -19,6 +19,10 @@ export type AnimationAsset = {
 export type MeshAsset = {
 	id: string,
 	texture: string?,
+	-- SurfaceAppearance PBR maps; `texture` is the colour map.
+	normal: string?,
+	metalness: string?,
+	roughness: string?,
 }
 
 --[=[
@@ -133,13 +137,13 @@ local Animations: { [string]: AnimationAsset } = {
 	BasicStrike3 = { id = "rbxassetid://131814313813160", keyframes = "BasicStrike3" },
 	GuardHold = { id = "rbxassetid://109555153765403", keyframes = "GuardHold" },
 	GuardParry = { id = "rbxassetid://77764665687591", keyframes = "GuardParry" },
-	GoblinIdle = { id = "rbxassetid://90357216124611", keyframes = "GoblinIdle" },
-	GoblinWalk = { id = "rbxassetid://79496707204604", keyframes = "GoblinWalk" },
-	GoblinRun = { id = "rbxassetid://71567572512919", keyframes = "GoblinRun" },
-	GoblinAttack = { id = "rbxassetid://110563196893852", keyframes = "GoblinAttack" },
-	GoblinThrow = { id = "rbxassetid://72380534780247", keyframes = "GoblinThrow" },
-	GoblinHit = { id = "rbxassetid://114573933190100", keyframes = "GoblinHit" },
-	GoblinDeath = { id = "rbxassetid://122683815689784", keyframes = "GoblinDeath" },
+	GoblinIdle = { id = "rbxassetid://93137340496358", keyframes = "GoblinIdle" },
+	GoblinWalk = { id = "rbxassetid://99302927912479", keyframes = "GoblinWalk" },
+	GoblinRun = { id = "rbxassetid://133526960064803", keyframes = "GoblinRun" },
+	GoblinAttack = { id = "rbxassetid://106536653497390", keyframes = "GoblinAttack" },
+	GoblinThrow = { id = "rbxassetid://95138474801891", keyframes = "GoblinThrow" },
+	GoblinHit = { id = "rbxassetid://125369021853241", keyframes = "GoblinHit" },
+	GoblinDeath = { id = "rbxassetid://122979177869235", keyframes = "GoblinDeath" },
 	SkeletonIdle = { id = "rbxassetid://86495569494152", keyframes = "SkeletonIdle" },
 	SkeletonWalk = { id = "rbxassetid://88182025210616", keyframes = "SkeletonWalk" },
 	SkeletonAttack = { id = "rbxassetid://78738563687931", keyframes = "SkeletonScratch" },
@@ -149,10 +153,80 @@ local Animations: { [string]: AnimationAsset } = {
 
 --[=[
 	Skinned meshes uploaded through the Studio 3D importer. Read by tools/world/build.luau when it
-	writes NPC templates; scripts never reference these at runtime.
+	writes NPC templates; scripts never reference these at runtime. GoblinScout* are the parts of the
+	Goblin template (tools/world/goblin_scout_import.rbxm), keyed by import part name.
 ]=]
 local Meshes: { [string]: MeshAsset } = {
-	Goblin = { id = "rbxassetid://123543422748212", texture = "rbxassetid://101253281014930" },
+	GoblinScoutBelt = {
+		id = "rbxassetid://83394005475880",
+		texture = "rbxassetid://72066017057670",
+		normal = "rbxassetid://140164751284435",
+		metalness = "rbxassetid://112408781578784",
+		roughness = "rbxassetid://80190390653413",
+	},
+	GoblinScoutBelts = {
+		id = "rbxassetid://73810130695380",
+		texture = "rbxassetid://72066017057670",
+		normal = "rbxassetid://140164751284435",
+		metalness = "rbxassetid://112408781578784",
+		roughness = "rbxassetid://80190390653413",
+	},
+	GoblinScoutBody = {
+		id = "rbxassetid://70677615842211",
+		texture = "rbxassetid://133199116655025",
+		normal = "rbxassetid://114706559094415",
+		metalness = "rbxassetid://122300276025823",
+		roughness = "rbxassetid://115073555825037",
+	},
+	GoblinScoutButtons = {
+		id = "rbxassetid://121191509186295",
+		texture = "rbxassetid://138758445116239",
+		normal = "rbxassetid://97953090067099",
+		metalness = "rbxassetid://122300276025823",
+		roughness = "rbxassetid://75776742803512",
+	},
+	GoblinScoutCloak = {
+		id = "rbxassetid://70972463432277",
+		texture = "rbxassetid://135302660612206",
+		normal = "rbxassetid://72423225437059",
+		metalness = "rbxassetid://122300276025823",
+		roughness = "rbxassetid://74446348618388",
+	},
+	GoblinScoutEyes = {
+		id = "rbxassetid://109670508494385",
+		texture = "rbxassetid://121309255424232",
+		normal = "rbxassetid://74942113275676",
+		metalness = "rbxassetid://122300276025823",
+		roughness = "rbxassetid://90158173562793",
+	},
+	GoblinScoutLowerTeeth = {
+		id = "rbxassetid://103132577820372",
+		texture = "rbxassetid://71330053435174",
+		normal = "rbxassetid://118817519147058",
+		metalness = "rbxassetid://122300276025823",
+		roughness = "rbxassetid://121439145577354",
+	},
+	GoblinScoutShirt = {
+		id = "rbxassetid://104686872064307",
+		texture = "rbxassetid://136036675275847",
+		normal = "rbxassetid://107818930934931",
+		metalness = "rbxassetid://122300276025823",
+		roughness = "rbxassetid://112839749765283",
+	},
+	GoblinScoutShorts = {
+		id = "rbxassetid://98247996535430",
+		texture = "rbxassetid://136036675275847",
+		normal = "rbxassetid://107818930934931",
+		metalness = "rbxassetid://122300276025823",
+		roughness = "rbxassetid://112839749765283",
+	},
+	GoblinScoutUpperTeeth = {
+		id = "rbxassetid://91264508192724",
+		texture = "rbxassetid://71330053435174",
+		normal = "rbxassetid://118817519147058",
+		metalness = "rbxassetid://122300276025823",
+		roughness = "rbxassetid://121439145577354",
+	},
 	Skeleton = { id = "rbxassetid://82895584857979" },
 }
 

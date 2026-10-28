@@ -5,7 +5,6 @@
 -- Greybox uses Roblox materials only; Kenney meshes replace props once uploads are possible.
 local fs = require("@lune/fs")
 local roblox = require("@lune/roblox")
-local serde = require("@lune/serde")
 
 local Instance = roblox.Instance
 local Vector3 = roblox.Vector3
@@ -499,29 +498,29 @@ make("PointLight", { Name = "PlazaLight", Range = 40, Brightness = 0.5 }, villag
 
 fs.writeFile("src/Workspace/Map.rbxmx", roblox.serializeModel({ map }, true))
 
--- Goblin template: skinned mesh (assets/blender/goblin) on a Humanoid. Bone data is the frozen
--- tools/world/goblin_rig.json until the Goblin Scout import replaces this template; scaled and
--- tinted per enemy at spawn.
+-- Goblin template: the Goblin Scout's Studio 3D import (tools/world/goblin_scout_import.rbxm) on a
+-- Humanoid. The import's RootPart carries the bone tree at the feet and the skinned parts hang off it
+-- by Motor6D; it becomes "Rig" under a new HumanoidRootPart. Lune cannot read the import's mesh and
+-- SurfaceAppearance ids, so they come from Assets.Meshes.GoblinScout<Part>.
 local Assets = require("../../src/ReplicatedStorage/Content/Assets")
-local rig = serde.decode("json", fs.readFile("tools/world/goblin_rig.json"))
-local goblinMesh = Assets.Meshes.Goblin
+local scout = roblox.deserializeModel(fs.readFile("tools/world/goblin_scout_import.rbxm"))[1]
+local scoutRig = scout:FindFirstChild("RootPart")
+local scoutOrigin = scoutRig.CFrame.Position
+-- Humanoid layout: root centre one stud above the hips, hips one stud above the ground.
+local goblinHip = 1
+local goblinRootHeight = goblinHip + 1
 
-local function vec(values: { number }): any
-	return Vector3.new(values[1], values[2], values[3])
-end
-
-local bodyHeight = rig.rootHeight
 local goblin = model(nil, "Goblin")
 -- Streams in whole, so clients see the rig and Animator together with the Enemy tag.
 goblin.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
 goblin:SetAttribute("AnimSet", "Goblin")
--- Spawn multiplies the enemy scale by this so a level-1 raider stands about 4 studs tall.
-goblin:SetAttribute("BaseScale", 1.5)
+-- The import stands about 3.75 studs; this brings a level-1 raider to about 4 studs.
+goblin:SetAttribute("BaseScale", 1.05)
 local root = part(
 	goblin,
 	"HumanoidRootPart",
 	Vector3.new(2, 2, 1),
-	at(0, bodyHeight, 0),
+	at(0, goblinRootHeight, 0),
 	Color3.new(1, 1, 1),
 	Enum.Material.SmoothPlastic,
 	{
@@ -529,33 +528,48 @@ local root = part(
 		Anchored = false,
 	}
 )
-local body = make("MeshPart", {
-	Name = "Body",
-	MeshId = goblinMesh.id,
-	-- Serialized flag the importer sets; without it the mesh renders unskinned.
-	HasSkinnedMesh = true,
-	InitialSize = vec(rig.initialSize),
-	Size = vec(rig.size),
-	CFrame = at(0, bodyHeight, 0),
-	Color = rgb(110, 150, 70),
-	DoubleSided = true,
-	Anchored = false,
-	CanCollide = false,
-	CanQuery = false,
-	Massless = true,
-}, goblin)
--- Overlay alpha lets the part colour show through the texture's transparent skin.
-make("SurfaceAppearance", { Name = "Palette", ColorMap = goblinMesh.texture, AlphaMode = Enum.AlphaMode.Overlay }, body)
-make("Motor6D", { Name = "Root", Part0 = root, Part1 = body }, root)
 
-local bones: { [string]: any } = {}
-for _, bone in rig.bones do
-	local c = bone.cframe
-	local parent = if bone.parent then bones[bone.parent] else body
-	bones[bone.name] = make("Bone", {
-		Name = bone.name,
-		CFrame = CFrame.new(c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11], c[12]),
-	}, parent)
+scoutRig.Name = "Rig"
+scoutRig.CFrame = at(0, 0, 0)
+scoutRig.Transparency = 1
+scoutRig.Anchored = false
+scoutRig.CanCollide = false
+scoutRig.CanQuery = false
+scoutRig.Massless = true
+scoutRig.Parent = goblin
+make("Motor6D", { Name = "Root", Part0 = root, Part1 = scoutRig, C0 = at(0, -goblinRootHeight, 0) }, root)
+
+for _, child in scout:GetChildren() do
+	if child.ClassName ~= "MeshPart" then
+		continue
+	end
+	local key = "GoblinScout" .. string.gsub(string.gsub(child.Name, "_low$", ""), " ", "")
+	local asset = Assets.Meshes[key]
+	assert(asset, `Assets.Meshes.{key} missing for import part {child.Name}`)
+	local mesh = make("MeshPart", {
+		Name = child.Name,
+		MeshId = asset.id,
+		-- Serialized flag the importer sets; without it the mesh renders unskinned.
+		HasSkinnedMesh = true,
+		InitialSize = child.InitialSize,
+		Size = child.Size,
+		CFrame = child.CFrame - scoutOrigin,
+		Anchored = false,
+		CanCollide = false,
+		CanQuery = false,
+		CanTouch = false,
+		Massless = true,
+	}, goblin)
+	make("SurfaceAppearance", {
+		Name = "SurfaceAppearance",
+		ColorMap = asset.texture,
+		NormalMap = asset.normal,
+		MetalnessMap = asset.metalness,
+		RoughnessMap = asset.roughness,
+		AlphaMode = Enum.AlphaMode.Overlay,
+	}, mesh)
+	local joint = child:FindFirstChildOfClass("Motor6D")
+	make("Motor6D", { Name = joint.Name, Part0 = scoutRig, Part1 = mesh, C0 = joint.C0, C1 = joint.C1 }, mesh)
 end
 
 -- Invisible anchor at head height for nameplates and the target marker.
@@ -563,7 +577,7 @@ local head = part(
 	goblin,
 	"Head",
 	Vector3.new(1, 1, 1),
-	at(0, bodyHeight + 1.25, 0),
+	at(0, 3.4, 0),
 	Color3.new(1, 1, 1),
 	Enum.Material.SmoothPlastic,
 	{
@@ -579,7 +593,7 @@ make("WeldConstraint", { Name = "Weld", Part0 = root, Part1 = head }, head)
 local humanoid = make("Humanoid", {
 	Name = "Humanoid",
 	RigType = Enum.HumanoidRigType.R15,
-	HipHeight = bodyHeight - 1,
+	HipHeight = goblinHip,
 	DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None,
 	HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff,
 	BreakJointsOnDeath = false,

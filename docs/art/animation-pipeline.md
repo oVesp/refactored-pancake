@@ -11,6 +11,7 @@ tables, and a spec that keeps them in step. Mechanics reference for `docs/game-d
 | `content/animations/<set>.json` | Manifest per set: exporter, source folder, rig, and per clip its role, source file, looping, markers, tier, notes, hashes, live asset id and id history. Source of truth for everything below. |
 | `tools/anim/anim.py` | `scan`, `status`, `export`, `upload`, `sync` (below). |
 | `tools/anim/rig_from_import.luau` | Bone list with rest offsets from a raw Studio import (Rig import). |
+| `tools/anim/compare.luau` | Pose-by-pose difference between two KeyframeSequences (exporter check). |
 | `tools/blender/export_clips.py` | Exporter `fbx`: one FBX per clip → KeyframeSequence, headless Blender 5.2. |
 | `tools/blender/rbxanim_to_keyframes.py` | Exporter `rbxanim`: `.rbxanim` bakes of the R15 combat rig → KeyframeSequence. |
 | Exporter `studio` | Clips animated and uploaded in Studio; the committed KeyframeSequence is an export of the uploaded clip (Skeleton). The tool only tracks them. |
@@ -68,14 +69,14 @@ A set's rig block stays `pending-import` until the mesh is in Studio and the set
 1. Import the character FBX (for the Goblin Scout, `Export/Goblin_Scout.fbx`) with the Studio 3D importer and save the raw import as `tools/world/<set>_import.rbxm`.
 2. Rebuild the set's template from the raw import in `tools/world/build.luau` (the Skeleton path) and register the mesh ids in `Assets.Meshes`.
 3. Write the bone list: `lune run tools/anim/rig_from_import tools/world/<set>_import.rbxm tools/world/<set>_bones.json`, and point `rig.bones` at it. Each bone records its rest offset in studs.
-4. Keep `rig.studsPerMetre` at `"auto"` (the exporter compares those offsets with the FBX rest pose and prints the median ratio) or set a number; set `rig.poseRoot` to the pose wrappers above the root bone (empty for raw imports such as the Skeleton) and `rig.status` to `ready`.
-5. `export` one clip, play it in Studio on the new template and check it against the Blender playback, then `export` and `upload` the rest.
+4. Keep `rig.studsPerMetre` at `"auto"` (the exporter compares those offsets with the FBX rest pose and prints the median ratio; 100 for Auto-Rig Pro exports) or set a number; set `rig.poseRoot` to the pose names Studio writes above the root bone (`["root"]`, the FBX armature name, for the Goblin Scout) and `rig.status` to `ready`.
+5. Import one clip FBX on the rig with the Animation Editor, save that KeyframeSequence from Studio, `export` the same clip and run `lune run tools/anim/compare <studio.rbxm> <exported.rbxmx>`; differences should be under 0.001 degrees. Then `export` the rest, play a few on the template in Studio, and `upload`.
 
 ## Sets
 
 | Set | Exporter | Source | Rig |
 |---|---|---|---|
-| Goblin | fbx | Goblin Scout, `assets/original/characters/mobs/Goblin Scout/Export/Animations` (Action Forge clips remapped by the owner) | pending import; the template and live ids are the retired `goblin.blend` goblin until the Scout template and clips land together |
+| Goblin | fbx | Goblin Scout, `assets/original/characters/mobs/Goblin Scout/Export/Animations` (Action Forge clips remapped by the owner) | `tools/world/goblin_scout_import.rbxm`; exports match Studio's own import of the same clips within 0.0005 degrees |
 | Skeleton | studio | Uploaded from Studio by the owner | n/a |
 | Combat | rbxanim | `assets/blender/combat_r15/*.rbxanim` | stock R15 |
 

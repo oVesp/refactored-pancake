@@ -13,7 +13,6 @@ local source, out = process.args[1], process.args[2]
 assert(source and out, "usage: lune run tools/anim/rig_from_import <import.rbxm> <out.json>")
 
 local bones = {}
-local mesh: any = nil
 for _, root in roblox.deserializeModel(fs.readFile(source)) do
 	for _, item in { root, table.unpack(root:GetDescendants()) } do
 		if item:IsA("Bone") then
@@ -23,13 +22,10 @@ for _, root in roblox.deserializeModel(fs.readFile(source)) do
 				parent = if parent and parent:IsA("Bone") then parent.Name else nil,
 				offset = item.CFrame.Position.Magnitude,
 			})
-		elseif item:IsA("MeshPart") and not mesh then
-			mesh = item
 		end
 	end
 end
 assert(#bones > 0, `{source} has no bones`)
-assert(mesh, `{source} has no MeshPart`)
 
-fs.writeFile(out, serde.encode("json", { source = source, mesh = mesh.Name, bones = bones }, true) .. "\n")
-print(`{#bones} bones under {mesh.Name}`)
+fs.writeFile(out, serde.encode("json", { source = source, bones = bones }, true) .. "\n")
+print(`{#bones} bones`)
