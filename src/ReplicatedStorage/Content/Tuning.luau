@@ -148,5 +148,14 @@ return table.freeze({
 		WaitStale = 0.75,
 		--[=[ Studs beyond its reach where an enemy without a token waits. ]=]
 		WaitDistance = 6,
+		--[=[ Seconds between tactical updates (slot assignment) per target, staggered. ]=]
+		TacticInterval = 0.5,
+		--[=[ Engagement slots around each target, per ring (radius comes from each enemy's reach). ]=]
+		Slots = table.freeze({ Melee = 6, Ranged = 8 }),
+		--[=[ Slot cost added for leaving the current slot, and per taken neighbouring slot. ]=]
+		SlotSwitchCost = 4,
+		SlotCongestion = 3,
+		--[=[ Allies closer than Radius studs push each other apart, up to Strength studs. ]=]
+		Separation = table.freeze({ Radius = 4, Strength = 3 }),
 	}),
 })

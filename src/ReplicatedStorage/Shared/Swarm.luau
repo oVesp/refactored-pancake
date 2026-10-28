@@ -172,6 +172,132 @@ function Swarm.Drop(ledger: Ledger, holder: any)
 	end
 end
 
+export type Ring = "Melee" | "Ranged"
+
+--[=[ An enemy asking for an engagement slot around its target. ]=]
+export type Seeker = {
+	key: any,
+	--[=[ Stable order for ties (spawn sequence). ]=]
+	seq: number,
+	position: Vector3,
+	ring: Ring,
+	--[=[ Distance from the target where this enemy stands. ]=]
+	radius: number,
+	--[=[ Slot index held since the last assignment, if any. ]=]
+	current: number?,
+}
+
+export type SlotOptions = {
+	--[=[ Slots per ring. ]=]
+	counts: { [Ring]: number },
+	--[=[ Slot indices per ring that are inside walls. ]=]
+	blocked: { [string]: { [number]: boolean } }?,
+	--[=[ Extra cost for leaving the current slot, so assignments stay stable. ]=]
+	switchCost: number,
+	--[=[ Cost per already-taken slot next to this one, in any ring. ]=]
+	congestion: number,
+}
+
+--[=[ Ring an enemy stands in: melee in close, everyone else out at range. ]=]
+function Swarm.RingOf(slot: SlotKind): Ring?
+	if slot == "None" then
+		return nil
+	elseif slot == "Melee" then
+		return "Melee"
+	end
+	return "Ranged"
+end
+
+--[=[ Flat unit direction of slot `index` (1-based) out of `count` around the target. ]=]
+function Swarm.SlotDirection(index: number, count: number): Vector3
+	local angle = (index - 1) / count * math.pi * 2
+	return Vector3.new(math.cos(angle), 0, math.sin(angle))
+end
+
+local function slotAngle(index: number, count: number): number
+	return (index - 1) / count * math.pi * 2
+end
+
+local function angleBetween(a: number, b: number): number
+	local d = math.abs(a - b) % (math.pi * 2)
+	return math.min(d, math.pi * 2 - d)
+end
+
+--[=[
+	Greedy slot assignment around one target at `center`. Repeatedly takes the cheapest
+	(seeker, free slot) pair, where cost is the walk to the slot plus `switchCost` for leaving the
+	current slot plus `congestion` for each taken neighbour within one slot width in any ring.
+	Never gives two seekers the same slot; seekers left over get none. Returns key to index.
+]=]
+function Swarm.AssignSlots(seekers: { Seeker }, center: Vector3, options: SlotOptions): { [any]: number }
+	local ordered = table.clone(seekers)
+	table.sort(ordered, function(a, b)
+		return a.seq < b.seq
+	end)
+	local taken: { [Ring]: { [number]: boolean } } = { Melee = {}, Ranged = {} }
+	local takenAngles: { { angle: number, width: number } } = {}
+	local result: { [any]: number } = {}
+	local blocked = options.blocked or {}
+
+	local remaining = #ordered
+	while remaining > 0 do
+		local bestSeeker: Seeker?, bestIndex, bestCost = nil, 0, math.huge
+		for _, seeker in ordered do
+			if result[seeker.key] then
+				continue
+			end
+			local count = options.counts[seeker.ring]
+			local ringBlocked = blocked[seeker.ring] or {}
+			for index = 1, count do
+				if taken[seeker.ring][index] or ringBlocked[index] then
+					continue
+				end
+				local point = center + Swarm.SlotDirection(index, count) * seeker.radius
+				local offset = point - seeker.position
+				local cost = Vector3.new(offset.X, 0, offset.Z).Magnitude
+				if seeker.current ~= index then
+					cost += options.switchCost
+				end
+				local angle = slotAngle(index, count)
+				for _, other in takenAngles do
+					if angleBetween(angle, other.angle) < math.max(other.width, math.pi * 2 / count) - 1e-6 then
+						cost += options.congestion
+					end
+				end
+				if cost < bestCost then
+					bestSeeker, bestIndex, bestCost = seeker, index, cost
+				end
+			end
+		end
+		if not bestSeeker then
+			break
+		end
+		result[bestSeeker.key] = bestIndex
+		local count = options.counts[bestSeeker.ring]
+		taken[bestSeeker.ring][bestIndex] = true
+		table.insert(takenAngles, { angle = slotAngle(bestIndex, count), width = math.pi * 2 / count })
+		remaining -= 1
+	end
+	return result
+end
+
+--[=[
+	Flat push away from neighbours closer than `radius`, growing as they get closer: the sum of
+	unit directions scaled by (radius - distance) / radius. Zero when nobody is that close.
+]=]
+function Swarm.Separation(position: Vector3, neighbours: { Vector3 }, radius: number): Vector3
+	local push = Vector3.new(0, 0, 0)
+	for _, other in neighbours do
+		local offset = Vector3.new(position.X - other.X, 0, position.Z - other.Z)
+		local distance = offset.Magnitude
+		if distance < radius then
+			local direction = if distance > 1e-3 then offset.Unit else Vector3.new(1, 0, 0)
+			push += direction * ((radius - distance) / radius)
+		end
+	end
+	return push
+end
+
 --[=[ The holder's token, if any. ]=]
 function Swarm.Held(ledger: Ledger, holder: any): Token?
 	return ledger.tokens[holder]

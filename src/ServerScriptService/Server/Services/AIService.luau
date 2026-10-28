@@ -35,6 +35,7 @@ type Brain = {
 local AGGRO_ON_HIT_RADIUS = 60
 local HEAL_THRESHOLD = 0.7
 local ARRIVE_DISTANCE = 4
+local SLOT_ARRIVE = 1.5
 
 local log = Logger.new("AIService")
 
@@ -291,6 +292,25 @@ local function preferredRange(brain: Brain): number
 	return reach
 end
 
+-- Push away from other enemies closer than the separation radius, in studs.
+local function separation(brain: Brain): Vector3
+	local settings = Tuning.Swarm.Separation
+	local position = brain.entity.root.Position
+	local neighbours: { Vector3 } = {}
+	for _, other in EntityService.All() do
+		if other ~= brain.entity and other.alive and other.kind == "Npc" then
+			local at = other.root.Position
+			if (at - position).Magnitude < settings.Radius then
+				table.insert(neighbours, at)
+			end
+		end
+	end
+	if #neighbours == 0 then
+		return Vector3.zero
+	end
+	return Swarm.Separation(position, neighbours, settings.Radius) * settings.Strength
+end
+
 local function startReturn(brain: Brain)
 	SquadService.Leave(brain.member)
 	setState(brain, "Return")
@@ -400,25 +420,35 @@ local function think(brain: Brain, now: number)
 	local cleared = SquadService.HasToken(member)
 		or (attackKind ~= nil and SquadService.RequestToken(member, attackKind, now))
 	setState(brain, if cleared then "Aggro" else "Position")
-	if not cleared and member.profile.slot == "Melee" then
-		-- No token: hold just outside reach and let the token holders fight. Ranged enemies
-		-- already wait at their own distance.
-		local hold = preferredRange(brain) + Tuning.Swarm.WaitDistance
+	local melee = member.profile.slot == "Melee"
+	local reach = preferredRange(brain)
+	member.reach = reach
+	local keep = brain.def.keepDistance
+	local slotDirection = SquadService.SlotDirection(member)
+	local spot: Vector3? = nil
+	if slotDirection and not (keep and distance < keep) then
+		-- Engagement slot: in reach with a token, just outside it without one.
+		local radius = if not melee then reach elseif cleared then reach - 1 else reach + Tuning.Swarm.WaitDistance
+		spot = target.root.Position + slotDirection * radius
+	elseif not cleared and melee then
+		-- No slot free: hold outside reach on the current bearing.
 		local offset = flat(root.Position - target.root.Position)
-		if math.abs(offset.Magnitude - hold) > 2 then
-			local direction = if offset.Magnitude > 0.1 then offset.Unit else Vector3.new(1, 0, 0)
-			local spot = target.root.Position + direction * hold
-			if not ZoneService.IsSafe(spot) then
-				moveTo(brain, spot, now)
-				return
-			end
+		local bearing = if offset.Magnitude > 0.1 then offset.Unit else Vector3.new(1, 0, 0)
+		spot = target.root.Position + bearing * (reach + Tuning.Swarm.WaitDistance)
+	end
+	if spot then
+		local destination = spot + separation(brain)
+		if
+			(flat(destination) - flat(root.Position)).Magnitude > SLOT_ARRIVE and not ZoneService.IsSafe(destination)
+		then
+			moveTo(brain, destination, now)
+		else
+			stop(brain)
+			face(brain, target.root.Position)
 		end
-		stop(brain)
-		face(brain, target.root.Position)
 		return
 	end
 
-	local keep = brain.def.keepDistance
 	if keep and distance < keep then
 		local away = flat(root.Position - target.root.Position)
 		local direction = if away.Magnitude > 0.1 then away.Unit else Vector3.new(1, 0, 0)
@@ -428,7 +458,7 @@ local function think(brain: Brain, now: number)
 		else
 			stop(brain)
 		end
-	elseif distance > preferredRange(brain) then
+	elseif distance > reach then
 		moveTo(brain, target.root.Position, now)
 	else
 		stop(brain)

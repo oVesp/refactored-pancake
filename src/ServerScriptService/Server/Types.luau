@@ -77,6 +77,12 @@ export type SquadMember = {
 	entity: Entity,
 	profile: Swarm.Profile,
 	target: Entity?,
+	--[=[ Creation order; breaks ties in slot assignment. ]=]
+	seq: number,
+	--[=[ Distance from the target where the enemy fights; AIService keeps it current. ]=]
+	reach: number,
+	--[=[ Engagement slot index in the member's ring, from the last tactical update. ]=]
+	slot: number?,
 }
 
 return nil
