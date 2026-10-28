@@ -2,7 +2,7 @@
 
 Code: `Server/Services/ProgressionService.luau`, `DisciplineService.luau`, `InventoryService.luau`; content `Classes`, `Skills`, `Disciplines`, `Items`, `Tuning`; client `SpellbookController`, `DragController`, `InventoryController`, `CharacterController`; shared `Shared/Hotbar.luau`.
 
-- Character level comes from XP (`Tuning.Progression.XpToNext`, cap 5). Each level is an unspent level, spent at a class trainer: the ProximityPrompt on a `Trainer`-tagged part opens the trainer panel (`OpenTrainer`), and its button sends `RequestTrain`, which the server checks for the tag, range and rate limit before training. XP gains and loot show over the character (`ShowGain`).
+- Character level comes from XP (`Tuning.Progression.XpToNext`, cap 5). The level-1 level and, for a caster, its spell pick are spent in the character creator ([character creation](character-creation.md)). Every later level is an unspent level, spent at a class trainer: the ProximityPrompt on a `Trainer`-tagged part opens the trainer panel (`OpenTrainer`), and its button sends `RequestTrain`, which the server checks for the tag, range and rate limit before training. XP gains and loot show over the character (`ShowGain`).
 - Each class level grants one class skill (Active or Passive). Caster levels also grant `SpellPicksPerLevel` picks from the class list, limited by the casting line's Tier ceiling (`Formulas.TierCeilings`).
 - Kill XP scales with the level difference. Death adds XP debt (10% of the current level's requirement) that later XP repays first, and applies Weakened after respawn.
 - Disciplines are learned from the Discipline trainer and occupy Focus capacity while active.

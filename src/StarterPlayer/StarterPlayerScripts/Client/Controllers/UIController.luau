@@ -42,6 +42,8 @@ local UIController = {}
 UIController.ModalChanged = Signal.new() :: Signal.Signal<string, boolean>
 
 local openModal: ScreenGui? = nil
+-- A locked modal stays open: no other modal opens and it cannot be closed until unlocked.
+local lockedModal: string? = nil
 local switching = false
 
 type WorldView = {
@@ -299,6 +301,9 @@ end
 	`target` anchors the rig at that object instead of the character.
 ]=]
 function UIController.Open(name: string, target: PVInstance?)
+	if lockedModal and lockedModal ~= name then
+		return
+	end
 	local screen = UIController.GetScreen(name)
 	if openModal and openModal ~= screen then
 		switching = true
@@ -320,6 +325,9 @@ end
 
 --[=[ Closes a modal screen if open. ]=]
 function UIController.Close(name: string)
+	if lockedModal == name then
+		return
+	end
 	local screen = UIController.GetScreen(name)
 	local view = world
 	if not screen.Enabled and not (view and view.screen == screen) then
@@ -348,11 +356,19 @@ end
 
 --[=[ Closes whichever modal is open. Returns true if one was. ]=]
 function UIController.CloseTop(): boolean
-	if openModal then
+	if openModal and lockedModal ~= openModal.Name then
 		UIController.Close(openModal.Name)
 		return true
 	end
 	return false
+end
+
+--[=[
+	Locks a modal (the character creator): while locked, other modals do not open and this one
+	ignores close requests. Pass nil to unlock.
+]=]
+function UIController.SetLocked(name: string?)
+	lockedModal = name
 end
 
 --[=[ True while a screen is open in the world, holding the camera and movement. ]=]

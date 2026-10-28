@@ -26,9 +26,10 @@ export type MeshAsset = {
 }
 
 --[=[
-	Asset manifest (game-design.md 7.3): the only place asset ids live. Every key has a row in
-	content/register.json (origin, license, review state). Audio comes from the Creator Store
-	while upload quota is limited (game-design.md 7.5).
+	Asset manifest (game-design.md 7.3): the only place asset ids live, except Marketplace
+	avatar items, which `Content/Appearance` lists by catalog id (one register row per source).
+	Every key has a row in content/register.json (origin, license, review state). Audio comes
+	from the Creator Store while upload quota is limited (game-design.md 7.5).
 ]=]
 local Audio: { [string]: AudioAsset } = {
 	Swing = { id = "rbxassetid://134671877618939", volume = 0.5 },
@@ -230,7 +231,14 @@ local Meshes: { [string]: MeshAsset } = {
 	Skeleton = { id = "rbxassetid://82895584857979" },
 }
 
+--[=[ Roblox stock animations used outside the clip manifests. ]=]
+local Stock: { [string]: string } = {
+	-- Default R15 idle, played on the character creator preview.
+	PreviewIdle = "rbxassetid://507766388",
+}
+
 return table.freeze({
+	Stock = table.freeze(Stock),
 	Audio = table.freeze(Audio),
 	Textures = table.freeze(Textures),
 	Animations = table.freeze(Animations),

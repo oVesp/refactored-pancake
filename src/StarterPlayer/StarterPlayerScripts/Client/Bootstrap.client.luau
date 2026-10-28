@@ -29,6 +29,7 @@ local CONTROLLER_ORDER = {
 	"SpellbookController",
 	"InventoryController",
 	"TrainerController",
+	"CreatorController",
 	"GainController",
 	"CharacterController",
 	"DeathController",

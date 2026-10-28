@@ -12705,5 +12705,619 @@
         <BinaryString name="Tags">UmVzcGF3blBvaW50</BinaryString>
       </Properties>
     </Item>
+    <Item class="Model" referent="514">
+      <Properties>
+        <string name="Name">CreationStage</string>
+        <token name="ModelStreamingMode">2</token>
+      </Properties>
+      <Item class="Part" referent="515">
+        <Properties>
+          <string name="Name">Floor</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>0</X>
+            <Y>399.7</Y>
+            <Z>20</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Color3uint8 name="Color3uint8">3419690</Color3uint8>
+          <token name="Material">800</token>
+          <Vector3 name="size">
+            <X>44</X>
+            <Y>1</Y>
+            <Z>44</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="516">
+        <Properties>
+          <string name="Name">Ceiling</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>0</X>
+            <Y>422.7</Y>
+            <Z>20</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Color3uint8 name="Color3uint8">3419690</Color3uint8>
+          <token name="Material">800</token>
+          <Vector3 name="size">
+            <X>44</X>
+            <Y>1</Y>
+            <Z>44</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="517">
+        <Properties>
+          <string name="Name">Wall1</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>0</X>
+            <Y>411.2</Y>
+            <Z>40</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Color3uint8 name="Color3uint8">3419690</Color3uint8>
+          <token name="Material">880</token>
+          <Vector3 name="size">
+            <X>17</X>
+            <Y>22</Y>
+            <Z>1</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="518">
+        <Properties>
+          <string name="Name">Wall2</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>14.142136</X>
+            <Y>411.2</Y>
+            <Z>34.142136</Z>
+            <R00>0.70710754</R00>
+            <R01>0</R01>
+            <R02>0.70710754</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>-0.70710754</R20>
+            <R21>0</R21>
+            <R22>0.70710754</R22>
+          </CoordinateFrame>
+          <Color3uint8 name="Color3uint8">3419690</Color3uint8>
+          <token name="Material">880</token>
+          <Vector3 name="size">
+            <X>17</X>
+            <Y>22</Y>
+            <Z>1</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="519">
+        <Properties>
+          <string name="Name">Wall3</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>20</X>
+            <Y>411.2</Y>
+            <Z>20</Z>
+            <R00>0</R00>
+            <R01>0</R01>
+            <R02>1</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>-1</R20>
+            <R21>0</R21>
+            <R22>0</R22>
+          </CoordinateFrame>
+          <Color3uint8 name="Color3uint8">3419690</Color3uint8>
+          <token name="Material">880</token>
+          <Vector3 name="size">
+            <X>17</X>
+            <Y>22</Y>
+            <Z>1</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="520">
+        <Properties>
+          <string name="Name">Wall4</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>14.142136</X>
+            <Y>411.2</Y>
+            <Z>5.8578644</Z>
+            <R00>-0.70710754</R00>
+            <R01>0</R01>
+            <R02>0.70710754</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>-0.70710754</R20>
+            <R21>0</R21>
+            <R22>-0.70710754</R22>
+          </CoordinateFrame>
+          <Color3uint8 name="Color3uint8">3419690</Color3uint8>
+          <token name="Material">880</token>
+          <Vector3 name="size">
+            <X>17</X>
+            <Y>22</Y>
+            <Z>1</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="521">
+        <Properties>
+          <string name="Name">Wall5</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>0</X>
+            <Y>411.2</Y>
+            <Z>0</Z>
+            <R00>-1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>-0</R20>
+            <R21>0</R21>
+            <R22>-1</R22>
+          </CoordinateFrame>
+          <Color3uint8 name="Color3uint8">3419690</Color3uint8>
+          <token name="Material">880</token>
+          <Vector3 name="size">
+            <X>17</X>
+            <Y>22</Y>
+            <Z>1</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="522">
+        <Properties>
+          <string name="Name">Wall6</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>-14.142136</X>
+            <Y>411.2</Y>
+            <Z>5.8578644</Z>
+            <R00>-0.70710754</R00>
+            <R01>0</R01>
+            <R02>-0.70710754</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0.70710754</R20>
+            <R21>0</R21>
+            <R22>-0.70710754</R22>
+          </CoordinateFrame>
+          <Color3uint8 name="Color3uint8">3419690</Color3uint8>
+          <token name="Material">880</token>
+          <Vector3 name="size">
+            <X>17</X>
+            <Y>22</Y>
+            <Z>1</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="523">
+        <Properties>
+          <string name="Name">Wall7</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>-20</X>
+            <Y>411.2</Y>
+            <Z>20</Z>
+            <R00>0</R00>
+            <R01>0</R01>
+            <R02>-1</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>1</R20>
+            <R21>0</R21>
+            <R22>0</R22>
+          </CoordinateFrame>
+          <Color3uint8 name="Color3uint8">3419690</Color3uint8>
+          <token name="Material">880</token>
+          <Vector3 name="size">
+            <X>17</X>
+            <Y>22</Y>
+            <Z>1</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="524">
+        <Properties>
+          <string name="Name">Wall8</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>-14.142136</X>
+            <Y>411.2</Y>
+            <Z>34.142136</Z>
+            <R00>0.70710754</R00>
+            <R01>0</R01>
+            <R02>-0.70710754</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0.70710754</R20>
+            <R21>0</R21>
+            <R22>0.70710754</R22>
+          </CoordinateFrame>
+          <Color3uint8 name="Color3uint8">3419690</Color3uint8>
+          <token name="Material">880</token>
+          <Vector3 name="size">
+            <X>17</X>
+            <Y>22</Y>
+            <Z>1</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="525">
+        <Properties>
+          <string name="Name">Pedestal</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>0</X>
+            <Y>400.7</Y>
+            <Z>20</Z>
+            <R00>-0</R00>
+            <R01>-1</R01>
+            <R02>0</R02>
+            <R10>1</R10>
+            <R11>-0</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Color3uint8 name="Color3uint8">9868945</Color3uint8>
+          <token name="Material">784</token>
+          <token name="shape">2</token>
+          <Vector3 name="size">
+            <X>1</X>
+            <Y>7</Y>
+            <Z>7</Z>
+          </Vector3>
+          <BinaryString name="Tags">Q3JlYXRvclN0YWdl</BinaryString>
+          <token name="TopSurface">0</token>
+        </Properties>
+        <Item class="PointLight" referent="526">
+          <Properties>
+            <string name="Name">Key</string>
+            <float name="Brightness">0.8</float>
+            <Color3 name="Color">
+              <R>1</R>
+              <G>0.9254902</G>
+              <B>0.8392157</B>
+            </Color3>
+            <float name="Range">14</float>
+          </Properties>
+        </Item>
+      </Item>
+      <Item class="Part" referent="527">
+        <Properties>
+          <string name="Name">FocusFull</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>0</X>
+            <Y>403.5</Y>
+            <Z>20</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <bool name="CanCollide">false</bool>
+          <bool name="CanQuery">false</bool>
+          <bool name="CanTouch">false</bool>
+          <Color3uint8 name="Color3uint8">16777215</Color3uint8>
+          <token name="Material">1792</token>
+          <Vector3 name="size">
+            <X>1</X>
+            <Y>1</Y>
+            <Z>1</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+          <float name="Transparency">1</float>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="528">
+        <Properties>
+          <string name="Name">CameraFull</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>-1</X>
+            <Y>404.2</Y>
+            <Z>29.5</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <bool name="CanCollide">false</bool>
+          <bool name="CanQuery">false</bool>
+          <bool name="CanTouch">false</bool>
+          <Color3uint8 name="Color3uint8">16777215</Color3uint8>
+          <token name="Material">1792</token>
+          <Vector3 name="size">
+            <X>1</X>
+            <Y>1</Y>
+            <Z>1</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+          <float name="Transparency">1</float>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="529">
+        <Properties>
+          <string name="Name">FocusHead</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>0</X>
+            <Y>405.3</Y>
+            <Z>20</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <bool name="CanCollide">false</bool>
+          <bool name="CanQuery">false</bool>
+          <bool name="CanTouch">false</bool>
+          <Color3uint8 name="Color3uint8">16777215</Color3uint8>
+          <token name="Material">1792</token>
+          <Vector3 name="size">
+            <X>1</X>
+            <Y>1</Y>
+            <Z>1</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+          <float name="Transparency">1</float>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="530">
+        <Properties>
+          <string name="Name">CameraHead</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>-0.80000305</X>
+            <Y>405.8</Y>
+            <Z>26.5</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <bool name="CanCollide">false</bool>
+          <bool name="CanQuery">false</bool>
+          <bool name="CanTouch">false</bool>
+          <Color3uint8 name="Color3uint8">16777215</Color3uint8>
+          <token name="Material">1792</token>
+          <Vector3 name="size">
+            <X>1</X>
+            <Y>1</Y>
+            <Z>1</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+          <float name="Transparency">1</float>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="531">
+        <Properties>
+          <string name="Name">Torch1</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>-9</X>
+            <Y>403.2</Y>
+            <Z>14</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Color3uint8 name="Color3uint8">5257768</Color3uint8>
+          <token name="Material">512</token>
+          <Vector3 name="size">
+            <X>1</X>
+            <Y>6</Y>
+            <Z>1</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+        </Properties>
+        <Item class="Fire" referent="532">
+          <Properties>
+            <string name="Name">Flame</string>
+            <float name="heat_xml">4</float>
+            <float name="size_xml">3</float>
+          </Properties>
+        </Item>
+        <Item class="PointLight" referent="533">
+          <Properties>
+            <string name="Name">Glow</string>
+            <float name="Brightness">0.9</float>
+            <Color3 name="Color">
+              <R>1</R>
+              <G>0.6666667</G>
+              <B>0.39215687</B>
+            </Color3>
+            <float name="Range">18</float>
+          </Properties>
+        </Item>
+      </Item>
+      <Item class="Part" referent="534">
+        <Properties>
+          <string name="Name">Torch2</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>9</X>
+            <Y>403.2</Y>
+            <Z>14</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Color3uint8 name="Color3uint8">5257768</Color3uint8>
+          <token name="Material">512</token>
+          <Vector3 name="size">
+            <X>1</X>
+            <Y>6</Y>
+            <Z>1</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+        </Properties>
+        <Item class="Fire" referent="535">
+          <Properties>
+            <string name="Name">Flame</string>
+            <float name="heat_xml">4</float>
+            <float name="size_xml">3</float>
+          </Properties>
+        </Item>
+        <Item class="PointLight" referent="536">
+          <Properties>
+            <string name="Name">Glow</string>
+            <float name="Brightness">0.9</float>
+            <Color3 name="Color">
+              <R>1</R>
+              <G>0.6666667</G>
+              <B>0.39215687</B>
+            </Color3>
+            <float name="Range">18</float>
+          </Properties>
+        </Item>
+      </Item>
+      <Item class="Part" referent="537">
+        <Properties>
+          <string name="Name">Fill</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>0</X>
+            <Y>408.2</Y>
+            <Z>29</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <bool name="CanCollide">false</bool>
+          <bool name="CanQuery">false</bool>
+          <bool name="CanTouch">false</bool>
+          <Color3uint8 name="Color3uint8">16777215</Color3uint8>
+          <token name="Material">1792</token>
+          <Vector3 name="size">
+            <X>1</X>
+            <Y>1</Y>
+            <Z>1</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+          <float name="Transparency">1</float>
+        </Properties>
+        <Item class="SpotLight" referent="538">
+          <Properties>
+            <string name="Name">Fill</string>
+            <float name="Angle">60</float>
+            <float name="Brightness">3</float>
+            <Color3 name="Color">
+              <R>0.92156863</R>
+              <G>0.93333334</G>
+              <B>1</B>
+            </Color3>
+            <token name="Face">5</token>
+            <float name="Range">24</float>
+          </Properties>
+        </Item>
+      </Item>
+    </Item>
   </Item>
 </roblox>

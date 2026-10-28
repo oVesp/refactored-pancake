@@ -202,6 +202,7 @@ local function renderTarget(model: Model?, locked: boolean)
 end
 
 local function renderProfile(snapshot: { [string]: any })
+	setText("Bind_NameText", if snapshot.name ~= "" then snapshot.name else player.DisplayName)
 	setText("Bind_LevelText", tostring(snapshot.level))
 	if snapshot.xpNeed then
 		fill(bound.Bind_XpFill, bound.Bind_XpText, snapshot.xpInto, snapshot.xpNeed, "XP %d / %d")

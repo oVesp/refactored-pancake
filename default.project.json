@@ -30,7 +30,15 @@
 				"$path": "src/ServerScriptService/Server"
 			}
 		},
+		"Players": {
+			"$properties": {
+				"CharacterAutoLoads": false
+			}
+		},
 		"StarterPlayer": {
+			"$properties": {
+				"LoadCharacterAppearance": false
+			},
 			"StarterPlayerScripts": {
 				"Client": {
 					"$path": "src/StarterPlayer/StarterPlayerScripts/Client"

@@ -23,6 +23,7 @@ local MAX_SPAWN = 5
 
 local log = Logger.new("DevService")
 
+local AvatarService: any
 local CombatService: any
 local EntityService: any
 local InventoryService: any
@@ -87,6 +88,14 @@ local commands: { [string]: Handler } = {
 		end
 		ProgressionService.GrantXp(player, math.floor(amount))
 		return `Granted {math.floor(amount)} XP`
+	end,
+	newchar = function(player, args)
+		local classId = args[1] and string.lower(args[1])
+		if classId and not Classes.ById[classId] then
+			return "Usage: /newchar [warrior|mage|healer]"
+		end
+		local ok, reason = AvatarService.CreateDefault(player, classId)
+		return if ok then "Created a default character" else `Cannot create: {reason}`
 	end,
 	class = function(player, args)
 		local action, classId = args[1], args[2] and string.lower(args[2])
@@ -252,6 +261,7 @@ local function createCommands()
 end
 
 function DevService.Init(deps: { [string]: any })
+	AvatarService = deps.AvatarService
 	CombatService = deps.CombatService
 	EntityService = deps.EntityService
 	InventoryService = deps.InventoryService

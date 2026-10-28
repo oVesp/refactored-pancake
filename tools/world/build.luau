@@ -496,6 +496,83 @@ end
 -- Lighting fill so the greybox reads
 make("PointLight", { Name = "PlazaLight", Range = 40, Brightness = 0.5 }, village:FindFirstChild("Plaza"))
 
+-- Character creation stage (docs/systems/character-creation.md): a closed, torch-lit hall high
+-- above the village, inside the streaming radius. The creator previews the character on the
+-- pedestal; `CameraFull`/`CameraHead` are the camera's framings, looking at `FocusFull`/`FocusHead`.
+local STAGE_Y = G + 400
+local STAGE_Z = 20
+local stageColor = rgb(52, 46, 42)
+local stage = model(map, "CreationStage")
+stage.ModelStreamingMode = Enum.ModelStreamingMode.Persistent
+part(stage, "Floor", Vector3.new(44, 1, 44), at(0, STAGE_Y - 0.5, STAGE_Z), stageColor, Enum.Material.Slate)
+part(stage, "Ceiling", Vector3.new(44, 1, 44), at(0, STAGE_Y + 22.5, STAGE_Z), stageColor, Enum.Material.Slate)
+for i = 0, 7 do
+	local angle = math.rad(i * 45)
+	local wallAt = Vector3.new(math.sin(angle) * 20, STAGE_Y + 11, STAGE_Z + math.cos(angle) * 20)
+	part(
+		stage,
+		`Wall{i + 1}`,
+		Vector3.new(17, 22, 1),
+		CFrame.lookAt(wallAt, Vector3.new(0, STAGE_Y + 11, STAGE_Z)),
+		stageColor,
+		Enum.Material.Cobblestone
+	)
+end
+local pedestal = part(
+	stage,
+	"Pedestal",
+	Vector3.new(1, 7, 7),
+	at(0, STAGE_Y + 0.5, STAGE_Z) * CFrame.Angles(0, 0, math.rad(90)),
+	COLORS.stone,
+	Enum.Material.Marble,
+	{ Shape = Enum.PartType.Cylinder, Tags = { "CreatorStage" } }
+)
+make("PointLight", { Name = "Key", Range = 14, Brightness = 0.8, Color = rgb(255, 236, 214) }, pedestal)
+local marker = { Transparency = 1, CanCollide = false, CanTouch = false, CanQuery = false }
+-- The preview stands on the pedestal facing +Z, toward the camera.
+part(stage, "FocusFull", Vector3.one, at(0, STAGE_Y + 3.3, STAGE_Z), Color3.new(1, 1, 1), Enum.Material.Air, marker)
+part(
+	stage,
+	"CameraFull",
+	Vector3.one,
+	at(-1, STAGE_Y + 4, STAGE_Z + 9.5),
+	Color3.new(1, 1, 1),
+	Enum.Material.Air,
+	marker
+)
+part(stage, "FocusHead", Vector3.one, at(0, STAGE_Y + 5.1, STAGE_Z), Color3.new(1, 1, 1), Enum.Material.Air, marker)
+part(
+	stage,
+	"CameraHead",
+	Vector3.one,
+	at(-0.8, STAGE_Y + 5.6, STAGE_Z + 6.5),
+	Color3.new(1, 1, 1),
+	Enum.Material.Air,
+	marker
+)
+for i, x in { -9, 9 } do
+	local stand = part(
+		stage,
+		`Torch{i}`,
+		Vector3.new(1, 6, 1),
+		at(x, STAGE_Y + 3, STAGE_Z - 6),
+		COLORS.darkWood,
+		Enum.Material.Wood
+	)
+	make("Fire", { Name = "Flame", Size = 3, Heat = 4 }, stand)
+	make("PointLight", { Name = "Glow", Range = 18, Brightness = 0.9, Color = rgb(255, 170, 100) }, stand)
+end
+local fill =
+	part(stage, "Fill", Vector3.one, at(0, STAGE_Y + 8, STAGE_Z + 9), Color3.new(1, 1, 1), Enum.Material.Air, marker)
+make("SpotLight", {
+	Name = "Fill",
+	Range = 24,
+	Angle = 60,
+	Brightness = 3,
+	Face = Enum.NormalId.Front,
+	Color = rgb(235, 238, 255),
+}, fill)
+
 fs.writeFile("src/Workspace/Map.rbxmx", roblox.serializeModel({ map }, true))
 
 -- Goblin template: the Goblin Scout's Studio 3D import (tools/world/goblin_scout_import.rbxm) on a

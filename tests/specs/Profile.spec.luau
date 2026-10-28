@@ -48,4 +48,23 @@ return {
 		Expect.equal(#migrated.hotbar, Hotbar.Size)
 		Expect.truthy(Profile.IsSerializable(migrated))
 	end,
+	["new profile starts uncreated"] = function()
+		local profile = Profile.new()
+		Expect.equal(profile.created, false)
+		Expect.equal(profile.name, "")
+		Expect.equal(profile.heritage, "human")
+	end,
+	["migrates schema 2 to an uncreated character"] = function()
+		local profile = Profile.new() :: any
+		profile.schemaVersion = 2
+		profile.created = nil
+		profile.name = nil
+		profile.appearance = nil
+		profile.heritage = "Human"
+		local migrated = Profile.Migrate(profile)
+		Expect.equal(migrated.schemaVersion, Profile.SchemaVersion)
+		Expect.equal(migrated.created, false)
+		Expect.equal(migrated.heritage, "human")
+		Expect.truthy(Profile.IsSerializable(migrated))
+	end,
 }

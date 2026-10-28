@@ -13,7 +13,13 @@ export type ItemStack = {
 
 export type Profile = {
 	schemaVersion: number,
+	--[=[ False until the character creator has run (docs/systems/character-creation.md). ]=]
+	created: boolean,
+	--[=[ Character name; `""` before creation. ]=]
+	name: string,
 	heritage: string,
+	--[=[ Creator look (`Shared/Avatar.Look` fields); empty before creation. ]=]
+	appearance: { [string]: string },
 	--[=[ Build path: classes in the order they were taken (game-design.md 3.1). ]=]
 	classes: { ClassEntry },
 	xp: number,
@@ -28,7 +34,7 @@ export type Profile = {
 	nextUid: number,
 }
 
-local SCHEMA_VERSION = 2
+local SCHEMA_VERSION = 3
 -- Keep in step with Shared/Hotbar.Size (checked by Profile.spec).
 local HOTBAR_SIZE = 8
 
@@ -44,7 +50,10 @@ Profile.HotbarSize = HOTBAR_SIZE
 function Profile.new(starter: { { id: string, count: number } }?): Profile
 	local profile: Profile = {
 		schemaVersion = SCHEMA_VERSION,
-		heritage = "Human",
+		created = false,
+		name = "",
+		heritage = "human",
+		appearance = {},
 		classes = {},
 		xp = 0,
 		xpDebt = 0,
@@ -71,6 +80,13 @@ function Profile.Migrate(data: Profile): Profile
 	if data.schemaVersion < 2 then
 		data.hotbar = table.create(HOTBAR_SIZE, "")
 		data.schemaVersion = 2
+	end
+	if data.schemaVersion < 3 then
+		data.created = false
+		data.name = ""
+		data.heritage = "human"
+		data.appearance = {}
+		data.schemaVersion = 3
 	end
 	return data
 end

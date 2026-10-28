@@ -2891,6 +2891,144 @@
 			"owner": "dev",
 			"status": "draft",
 			"notes": "Client hide and thinning distances for the generated props."
+		},
+		{
+			"id": "content:Appearance",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Appearance.luau",
+			"notes": "Character creator looks; Marketplace catalog ids grouped by the catalog:* rows.",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft"
+		},
+		{
+			"id": "content:Heritages",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Heritages.luau",
+			"notes": "Heritage roster; generic genre race names (game-design.md 2). Only Human playable.",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft"
+		},
+		{
+			"id": "content:Names",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Names.luau",
+			"notes": "Placeholder Norse-style given names; checked against the forbidden character-name list.",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft"
+		},
+		{
+			"id": "ui:Creator",
+			"type": "ui",
+			"path": "src/StarterGui/Creator.model.json",
+			"notes": "Full-screen character creator, layout after the owner's BG3 reference; Yggdrasil content.",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft"
+		},
+		{
+			"id": "ui:CreatorOption",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiTemplates/CreatorOption.model.json",
+			"notes": "Creator list row.",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft"
+		},
+		{
+			"id": "ui:CreatorSwatch",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiTemplates/CreatorSwatch.model.json",
+			"notes": "Creator hair colour swatch; colour set from Content/Appearance.",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft"
+		},
+		{
+			"id": "avatar:PreviewIdle",
+			"type": "animation",
+			"assetId": "507766388",
+			"name": "R15 idle (Animation1)",
+			"origin": "Roblox stock Animate script",
+			"creator": "Roblox",
+			"license": "Roblox stock asset",
+			"notes": "Creator preview idle.",
+			"owner": "dev",
+			"status": "draft"
+		},
+		{
+			"id": "catalog:RobloxFaces",
+			"type": "avatar",
+			"name": "Man Face 86487700, Woman Face 86487766",
+			"origin": "Roblox Marketplace",
+			"creator": "Roblox",
+			"license": "Roblox Marketplace item (free)",
+			"notes": "Classic face decals per gender. Applied through HumanoidDescription without ownership (tested in Studio 2026-10-28); can vanish if delisted or moderated.",
+			"owner": "dev",
+			"status": "draft"
+		},
+		{
+			"id": "catalog:RobloxHair",
+			"type": "avatar",
+			"name": "11 hair styles x black/brown/blonde/red",
+			"origin": "Roblox Marketplace",
+			"creator": "Roblox",
+			"license": "Roblox Marketplace item (free)",
+			"notes": "Ids in Content/Appearance HAIR. Applied through HumanoidDescription without ownership (tested in Studio 2026-10-28); can vanish if delisted or moderated.",
+			"owner": "dev",
+			"status": "draft"
+		},
+		{
+			"id": "catalog:BeardsHairyBusiness",
+			"type": "avatar",
+			"name": "Stubble, Well Kept beards",
+			"origin": "Roblox Marketplace UGC",
+			"creator": "Hairy Business",
+			"license": "Roblox Marketplace UGC (paid, worn without ownership)",
+			"notes": "Ids in Content/Appearance FACIAL_HAIR. Owner approved paid UGC ids 2026-10-28. Applied through HumanoidDescription without ownership (tested in Studio 2026-10-28); can vanish if delisted or moderated.",
+			"owner": "dev",
+			"status": "draft"
+		},
+		{
+			"id": "catalog:BeardsU8DEV",
+			"type": "avatar",
+			"name": "Gentleman's Beard, Greek Mythology God Beard",
+			"origin": "Roblox Marketplace UGC",
+			"creator": "U8DEV",
+			"license": "Roblox Marketplace UGC (paid, worn without ownership)",
+			"notes": "Ids in Content/Appearance FACIAL_HAIR. Owner approved paid UGC ids 2026-10-28. Applied through HumanoidDescription without ownership (tested in Studio 2026-10-28); can vanish if delisted or moderated.",
+			"owner": "dev",
+			"status": "draft"
+		},
+		{
+			"id": "catalog:OutfitsPoor",
+			"type": "avatar",
+			"name": "Medieval Tunic shirts and Tunic Pants (6 colours)",
+			"origin": "Roblox Marketplace UGC",
+			"creator": "po_or",
+			"license": "Roblox Marketplace UGC (paid, worn without ownership)",
+			"notes": "Classic Shirt/Pants pairs in Content/Appearance OUTFITS. Applied through HumanoidDescription without ownership (tested in Studio 2026-10-28); can vanish if delisted or moderated.",
+			"owner": "dev",
+			"status": "draft"
+		},
+		{
+			"id": "catalog:OutfitsATF",
+			"type": "avatar",
+			"name": "Medieval Villager / Peasant and Hunter shirt+pants",
+			"origin": "Roblox Marketplace UGC",
+			"creator": "[ATF] The Ravagers",
+			"license": "Roblox Marketplace UGC (paid, worn without ownership)",
+			"notes": "Classic Shirt/Pants pairs in Content/Appearance OUTFITS. Applied through HumanoidDescription without ownership (tested in Studio 2026-10-28); can vanish if delisted or moderated.",
+			"owner": "dev",
+			"status": "draft"
 		}
 	]
 }

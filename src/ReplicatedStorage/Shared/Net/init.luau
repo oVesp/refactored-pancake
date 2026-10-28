@@ -131,6 +131,25 @@ local Remotes: { [string]: RemoteSpec } = {
 			return arity(1, ...) and isCount((...))
 		end,
 	},
+	--[=[ `(creation)`: a flat table of string fields; `Shared/Avatar.ValidateCreation` checks the content. ]=]
+	CreateCharacter = {
+		direction = "ClientToServer",
+		rateLimit = { capacity = 2, perSecond = 0.5 },
+		validate = function(...)
+			local creation = ...
+			if not arity(1, ...) or type(creation) ~= "table" then
+				return false
+			end
+			local count = 0
+			for key, value in creation do
+				count += 1
+				if type(key) ~= "string" or type(value) ~= "string" or #value > MAX_ID_LENGTH then
+					return false
+				end
+			end
+			return count <= 12
+		end,
+	},
 
 	SendProfileSnapshot = { direction = "ServerToClient" },
 	RejectSkill = { direction = "ServerToClient" },

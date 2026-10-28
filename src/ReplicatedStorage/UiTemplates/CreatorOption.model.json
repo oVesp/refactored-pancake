@@ -1,0 +1,187 @@
+{
+	"className": "TextButton",
+	"properties": {
+		"Size": {
+			"UDim2": [
+				[
+					1,
+					0
+				],
+				[
+					0,
+					50
+				]
+			]
+		},
+		"BackgroundColor3": [
+			1,
+			1,
+			1
+		],
+		"BackgroundTransparency": 0.05,
+		"BorderSizePixel": 0,
+		"Text": "",
+		"AutoButtonColor": true
+	},
+	"children": [
+		{
+			"name": "UICorner",
+			"className": "UICorner",
+			"properties": {
+				"CornerRadius": {
+					"UDim": [
+						0,
+						3
+					]
+				}
+			}
+		},
+		{
+			"name": "Bind_Stroke",
+			"className": "UIStroke",
+			"properties": {
+				"Color": [
+					0.549,
+					0.471,
+					0.325
+				],
+				"Thickness": 1,
+				"Transparency": 0.3,
+				"ApplyStrokeMode": "Border"
+			}
+		},
+		{
+			"name": "UIGradient",
+			"className": "UIGradient",
+			"properties": {
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									0.145,
+									0.176,
+									0.227
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.082,
+									0.098,
+									0.133
+								]
+							}
+						]
+					}
+				},
+				"Rotation": 90
+			}
+		},
+		{
+			"name": "UIPadding",
+			"className": "UIPadding",
+			"properties": {
+				"PaddingLeft": {
+					"UDim": [
+						0,
+						14
+					]
+				},
+				"PaddingRight": {
+					"UDim": [
+						0,
+						12
+					]
+				}
+			}
+		},
+		{
+			"name": "Bind_Label",
+			"className": "TextLabel",
+			"properties": {
+				"Text": "",
+				"FontFace": {
+					"Font": {
+						"family": "rbxasset://fonts/families/AccanthisADFStd.json",
+						"weight": "Bold",
+						"style": "Normal"
+					}
+				},
+				"TextSize": 17,
+				"TextColor3": [
+					0.902,
+					0.875,
+					0.812
+				],
+				"BackgroundTransparency": 1,
+				"TextXAlignment": "Left",
+				"TextYAlignment": "Center",
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							-90
+						],
+						[
+							1,
+							0
+						]
+					]
+				}
+			}
+		},
+		{
+			"name": "Bind_Detail",
+			"className": "TextLabel",
+			"properties": {
+				"Text": "",
+				"FontFace": {
+					"Font": {
+						"family": "rbxasset://fonts/families/BuilderSans.json",
+						"weight": "Medium",
+						"style": "Normal"
+					}
+				},
+				"TextSize": 13,
+				"TextColor3": [
+					0.682,
+					0.706,
+					0.749
+				],
+				"BackgroundTransparency": 1,
+				"TextXAlignment": "Right",
+				"TextYAlignment": "Center",
+				"Size": {
+					"UDim2": [
+						[
+							0,
+							90
+						],
+						[
+							1,
+							0
+						]
+					]
+				},
+				"Position": {
+					"UDim2": [
+						[
+							1,
+							0
+						],
+						[
+							0,
+							0
+						]
+					]
+				},
+				"AnchorPoint": [
+					1,
+					0
+				]
+			}
+		}
+	]
+}

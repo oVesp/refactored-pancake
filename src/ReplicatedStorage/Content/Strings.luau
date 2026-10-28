@@ -29,4 +29,9 @@ return table.freeze({
 	CastNoResource = "Not enough resource to finish the cast.",
 	DevOnly = "Dev command refused.",
 	DevDone = "%s",
+	BadLook = "That look is not available.",
+	BadCreation = "The character could not be created.",
+	HeritageLocked = "That race is not available yet.",
+	BadName = "Pick a name from the list.",
+	NeedSpell = "Choose a starting spell.",
 })

@@ -52,6 +52,7 @@ The owner wants UI to float in the world where it can: interacting with an objec
   - Each world screen has a rig in `ReplicatedStorage/UiRigs/<Screen>.model.json`: `Root` stands for the character's head looking ahead (for the trainer, looking at the NPC) and `Panel` gives the panel's direction from the head and its size in studs. Attributes on `Panel`: `ScreenFill` (share of the view, default 0.8) and `PixelsPerStud` (canvas density, default 150). Move or resize `Panel` in Studio to re-author a menu.
 - XP and looted items float up over the character (`FloatingGain` BillboardGui, `GainController`) instead of screen toasts.
 - The HUD (bars, hotbar, target frame, cast bar, toasts, Notices) stays on the screen.
+- Exception: the character creator is a full-screen screen over a staged scene (list panel left, detail panel right, step tabs on top, name and confirm under the character, after the owner's BG3 layout reference), because its camera frames the character instead of looking out of it.
 
 ## HUD layout
 

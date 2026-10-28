@@ -76,6 +76,8 @@ function ProgressionService.Snapshot(player: Player): { [string]: any }?
 	end
 	local level, into, need = levelInfo(profile)
 	return {
+		created = profile.created,
+		name = profile.name,
 		level = level,
 		xp = profile.xp,
 		xpInto = into,
@@ -219,7 +221,8 @@ function ProgressionService.RemoveClass(player: Player, classId: string)
 	end, "classes")
 end
 
-local function learnSpell(player: Player, spellId: string)
+--[=[ Learns a spell with one of the player's picks, notifying the reason when refused. ]=]
+function ProgressionService.LearnSpell(player: Player, spellId: string)
 	local profile = DataService.Get(player)
 	if not profile then
 		return
@@ -331,7 +334,7 @@ function ProgressionService.Init(deps: { [string]: any })
 	StatusService = deps.StatusService
 
 	NetServer.Connect("RequestProfile", pushSnapshot)
-	NetServer.Connect("LearnSpell", learnSpell)
+	NetServer.Connect("LearnSpell", ProgressionService.LearnSpell)
 	NetServer.Connect("RequestTrain", requestTrain)
 	NetServer.Connect("SetHotbarSlot", setHotbarSlot)
 end
