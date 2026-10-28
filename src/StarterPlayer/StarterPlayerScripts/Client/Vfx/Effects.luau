@@ -313,21 +313,45 @@ function Effects.Screen(name: string)
 	end
 end
 
+-- Tracks held by `Hitstop`: the speed to give back and when. Overlapping hitstops (a parry and
+-- its blocked hit, a multi-target swing) extend one hold, so the 0 of a held track is never
+-- saved as the speed to restore and the clip is never left frozen mid-swing.
+type Hold = { speed: number, release: number }
+local holds: { [AnimationTrack]: Hold } = {}
+
+local function releaseHold(track: AnimationTrack)
+	local hold = holds[track]
+	if not hold then
+		return
+	end
+	local left = hold.release - os.clock()
+	if left > 0.001 then
+		task.delay(left, releaseHold, track)
+		return
+	end
+	holds[track] = nil
+	if track.IsPlaying and track.Speed == 0 then
+		track:AdjustSpeed(hold.speed)
+	end
+end
+
 --[=[ Freezes every playing animation on the models for `duration` seconds (hit pause). ]=]
 function Effects.Hitstop(models: { Model? }, duration: number)
+	local release = os.clock() + duration
 	for _, model in models do
 		local animator = model and model:FindFirstChildWhichIsA("Animator", true)
 		if not animator then
 			continue
 		end
 		for _, track in (animator :: Animator):GetPlayingAnimationTracks() do
-			local speed = track.Speed
-			track:AdjustSpeed(0)
-			task.delay(duration, function()
-				if track.IsPlaying then
-					track:AdjustSpeed(speed)
-				end
-			end)
+			local hold = holds[track]
+			if hold then
+				hold.release = math.max(hold.release, release)
+			elseif track.Speed ~= 0 then
+				holds[track] = { speed = track.Speed, release = release }
+				track:AdjustSpeed(0)
+				task.delay(duration, releaseHold, track)
+			end
 		end
 	end
 end
