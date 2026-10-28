@@ -3,7 +3,7 @@
 Code: `Server/Services/ProgressionService.luau`, `DisciplineService.luau`, `InventoryService.luau`; content `Classes`, `Skills`, `Disciplines`, `Items`, `Tuning`; client `SpellbookController`, `DragController`, `InventoryController`, `CharacterController`; shared `Shared/Hotbar.luau`.
 
 - Character level comes from XP (`Tuning.Progression.XpToNext`, cap 5). Each level is an unspent level, spent at a class trainer: the ProximityPrompt on a `Trainer`-tagged part opens the trainer panel (`OpenTrainer`), and its button sends `RequestTrain`, which the server checks for the tag, range and rate limit before training. XP gains and loot show over the character (`ShowGain`).
-- Each class level grants one class skill (Active or Passive). Caster levels also grant `SpellPicksPerLevel` picks from the class list, limited by the casting line's Circle ceiling (`Formulas.CircleCeilings`).
+- Each class level grants one class skill (Active or Passive). Caster levels also grant `SpellPicksPerLevel` picks from the class list, limited by the casting line's Tier ceiling (`Formulas.TierCeilings`).
 - Kill XP scales with the level difference. Death adds XP debt (10% of the current level's requirement) that later XP repays first, and applies Weakened after respawn.
 - Disciplines are learned from the Discipline trainer and occupy Focus capacity while active.
 - Loot rolls server-side (`ContentServerOnly/Loot`) straight into the inventory. Two equipment slots (weapon, armor); item modifiers feed `StatService`.
@@ -12,7 +12,7 @@ Code: `Server/Services/ProgressionService.luau`, `DisciplineService.luau`, `Inve
 ## Spellbook
 
 - Opened with B. Two tabs: **Spells** (every spell, numbered by its fixed `number` in `Content/Skills`) and **Techniques** (class actives in class and grant order, then Disciplines). Pages of 16 cells (`UiTemplates/SpellCell`), with a detail pane beside the grid.
-- Each entry is Known, Learnable (a spell `Formulas.CanLearnSpell` allows now) or Locked. Locked entries show as silhouettes: number, Circle or grant level, and the reason, but no name or effect. Learnable spells show in full with a Learn button (`LearnSpell`).
+- Each entry is Known, Learnable (a spell `Formulas.CanLearnSpell` allows now) or Locked. Locked entries show as silhouettes: number, Tier or grant level, and the reason, but no name or effect. Learnable spells show in full with a Learn button (`LearnSpell`).
 - Filters: status (All, Known, Learnable, Locked) and a class cycle (All, each class, General for Disciplines). Changing tab or filter returns to page 1 and keeps the selection when it is still listed.
 
 ## Hotbar

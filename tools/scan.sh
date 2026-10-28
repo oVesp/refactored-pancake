@@ -17,7 +17,7 @@ if [ -n "$secrets" ]; then
 	failed=1
 fi
 
-# The forbidden-terms list lives outside the repo because it names the source series.
+# The forbidden-terms list lives outside the repo because it holds the source series' character names.
 terms="${YGG_FORBIDDEN_TERMS:-$HOME/.yggdrasil/forbidden-terms.txt}"
 if [ -f "$terms" ]; then
 	hits=$(grep -rnIiwF -f "$terms" src tests || true)

@@ -15,8 +15,8 @@ Status: **approved scope, revision 2; built 2026-10-24 (see §10).** Milestone *
 
 | # | Decision |
 |---|---|
-| D1 | New milestone **M0.5 Testing Grounds** between M0 and M1. M1 targets unchanged except its Circle range (§3 below). |
-| D2 | **1 spell pick per caster class level** here (`SPELL_PICKS_PER_LEVEL = 1`, data constant). **Circle 2 unlocks at casting-line level 6**, so levels 1–5 use Circles 0–1 only. |
+| D1 | New milestone **M0.5 Testing Grounds** between M0 and M1. M1 targets unchanged except its Tier range (§3 below). |
+| D2 | **1 spell pick per caster class level** (`SPELL_PICKS_PER_LEVEL = 1`, data constant; the target, not a placeholder). **Tier 2 unlocks at casting-line level 8**, so levels 1–5 use Tiers 0–1 only. |
 | D3 | Minimal Disciplines: Focus pool + 2 Disciplines from a trainer NPC. |
 | D4 | §4's 8-class starter list and its templates stay as the future plan. This place has 3 classes, so it tests 5 / 3+2 / 2+2+1 / 3+1+1; dabbler (2+1+1+1) waits for a 4th class. |
 | D5 | Midgard is used. Public-domain myth and folklore names are allowed (§2 of the design doc, amended). |
@@ -47,20 +47,22 @@ Fiction (light): goblin raiders steal grain and livestock from the village. No n
 
 ---
 
-## 3. Circles at levels 1–5
+## 3. Tiers at levels 1–5
 
-Rule (§3.2): the Circle ceiling follows levels in the **deepest compatible casting line**, not total level. Unlock table lives in `Content/Magic` and is tunable:
+Rule (§3.2): the Tier ceiling follows levels in the caster's **own magic system** (Arcane, Divine, Spiritual, Alternative), not total level; systems never sum. Unlock table lives in `Tuning.Magic` and is tunable:
 
-| Circle | Casting-line level |
+| Tier | Casting-line level |
 |---|---|
 | 0, 1 | 1 |
-| 2 | 6 |
-| 3 | 12 |
-| n (≥2) | 6 × (n − 1) |
+| 2 | 8 |
+| 3 | 15 |
+| 4 | 22 |
+| 5 | 29 |
+| n (≥2) | 7 × (n − 1) + 1 |
 
-So Circle 3 lands at 12, Circle 6 at 30 and Circle 10 at 54. That matches the research benchmarks: ordinary folk top out around 2, elites around 3.
+`MaxTier = 5` covers the 1–30 scope.
 
-Here: Mage and Healer see **Circles 0–1 only**. Circle 0 is utility and costs like Circle 1 (§3.2).
+Here: Mage and Healer see **Tiers 0–1 only**. Tier 0 is utility and costs like Tier 1 (§3.2).
 
 ---
 
@@ -92,7 +94,7 @@ Every class level grants **one class skill**, either **Active** (hotbar) or **Pa
 
 | Lv | Grant | Kind | Effect | Tests |
 |---|---|---|---|---|
-| 1 | Arcane Line | Passive | Opens the arcane casting line (Circle 0–1) | Casting-line ceiling rule |
+| 1 | Arcane Line | Passive | Opens the arcane casting line (Tier 0–1) | Casting-line ceiling rule |
 | 2 | Mana Flow | Passive | +MP regen | Resource regen modifier |
 | 3 | Blink | Active | Short teleport | Server movement validation |
 | 4 | Elemental Focus | Passive | +burn/slow chance | Proc-on-hit passives |
@@ -102,17 +104,17 @@ Every class level grants **one class skill**, either **Active** (hotbar) or **Pa
 
 | Lv | Grant | Kind | Effect | Tests |
 |---|---|---|---|---|
-| 1 | Divine Line | Passive | Opens the divine casting line (Circle 0–1) | Second casting line, incompatibility cap |
+| 1 | Divine Line | Passive | Opens the divine casting line (Tier 0–1) | Second casting line, incompatibility cap |
 | 2 | Gentle Hands | Passive | +Healing done | Outgoing-heal modifier |
 | 3 | Rebuke | Active | Holy knockback around self | Knockback, self area |
 | 4 | Devotion | Passive | +Magic Defense, +Resistance | Mitigation passive |
 | 5 | Lay On Hands | Active | Large single heal, long cooldown | Long cooldowns |
 
-### 4.2 Spell lists (Circles 0–1)
+### 4.2 Spell lists (Tiers 0–1)
 
 8 spells per caster class; 5 picks by level 5, so the list always offers choice.
 
-| Mage | Circle | Delivery | Tests |
+| Mage | Tier | Delivery | Tests |
 |---|---|---|---|
 | Light | 0 | Self | Utility cost rule |
 | Kindle | 0 | Target object | Interactable world props |
@@ -123,7 +125,7 @@ Every class level grants **one class skill**, either **Active** (hotbar) or **Pa
 | Ice Patch | 1 | Ground target | Ground AoE, root |
 | Arcane Shield | 1 | Self | Damage absorb |
 
-| Healer | Circle | Delivery | Tests |
+| Healer | Tier | Delivery | Tests |
 |---|---|---|---|
 | Glow | 0 | Ally | Utility cost rule |
 | Purify Water | 0 | Target object | Interactable world props |
@@ -134,7 +136,7 @@ Every class level grants **one class skill**, either **Active** (hotbar) or **Pa
 | Shelter | 1 | Ally | Shield, friendly-target rules |
 | Bless | 1 | Ally | Minor stat buff |
 
-Moved to Circle 2+ (M1 or later): chaining lightning, area heal-and-smite, resurrection.
+Moved to Tier 2+ (M1 or later): chaining lightning, area heal-and-smite, resurrection.
 
 ### 4.3 Disciplines (D3)
 
@@ -235,7 +237,7 @@ Toolbox audio needed: footsteps (grass, wood), melee swing/hit, spell cast/impac
 
 1. Join → pick class at trainer → kill goblins → reach level 5 in each class, on desktop and phone emulator.
 2. Every class skill, passive and spell in §4 resolves through the server path. Passives show in stats. Rejected casts roll back client prediction.
-3. Circle 2 spells are refused at casting-line level 5 (unit test + playtest).
+3. Tier 2 spells are refused at casting-line level 7 and allowed at 8 (unit test + playtest).
 4. Each Rabble AI state (idle, patrol, aggro, attack, return) observed. Leash and respawn work. Hexer interrupt works in the Dev Yard.
 5. Multiclass to 5 total levels using each D4 template.
 6. Dev commands refused for non-allowlisted users in a published test.
@@ -252,7 +254,7 @@ Verified by Studio playtest (single client, Studio) and Lune unit tests.
 |---|---|
 | 1. Class pick at trainer, kill goblins, reach level 5 | Pass on desktop: trainer prompts train classes; kills grant XP; each class taken to level 5 in play (via `/level 5` plus the same `TrainClass` path the trainer uses). **Phone emulator not tested.** |
 | 2. Skills, passives, spells resolve server-side; rejects roll back | Pass: every Warrior, Mage and Healer active and all 16 spells fired in play with the expected damage, heal, shield, status, teleport or prop change; all 9 passives observed through `Stat_*`/`Extra_*` attributes; cooldown, unknown-skill and malformed calls rejected; the client clears its predicted cooldown on reject. |
-| 3. Circle 2 refused at line level 5 | Pass in unit tests (`Formulas.spec`); no Circle 2 content exists to try in play. |
+| 3. Tier 2 refused at line level 7 | Pass in unit tests (`Formulas.spec`, allowed at 8); no Tier 2 content exists to try in play. |
 | 4. Rabble AI states, leash, respawn; Hexer interrupt | Pass: idle, patrol, aggro, attack, return observed; leash resets HP; Charge interrupts the Hexer's cast; Chieftain phase 2 summons two Raiders. |
 | 5. Multiclass with each template | Pass in unit tests for all four templates; 2+2+1 and 3+1+1 also exercised in play. |
 | 6. Dev commands refused for non-allowlisted users | **Not verified**: needs a published test; Studio always allows dev commands. |

@@ -23,8 +23,8 @@ Faithful = **systems and structure**, never content:
 
 | Keep (systems) | Replace (content) |
 |---|---|
-| Level cap 100 = race levels + class levels; class caps 15 / 10 / 5 | All class names except generic fantasy terms |
-| 3 spells per caster level; spell power in 10 tiers + a capstone tier | Spell/skill names (original or plainly descriptive) |
+| Level cap 100 = race levels + class levels; class caps 15 / 10 / 5 | Character names and direct references to unique characters (generic canon names are allowed, §2) |
+| 1 spell pick per caster level; spell power in Tiers gated per magic system (§3.2) | Spell/skill names that point at a unique character |
 | Items graded by *data capacity* filled with crystals | Every named item, set, artifact |
 | Guild strongholds with an NPC level budget | Every named location, faction, character, event |
 | A native warrior-skill layer powered by *focus* | Every named technique |
@@ -38,18 +38,18 @@ Faithful = **systems and structure**, never content:
 Hard rules. They apply to code, data, UI text, textures, audio and marketing.
 
 1. **No characters, no events, no plot.** No one in the game may be a recognizable character from the source series, a lookalike, or a renamed copy (same role + same gimmick counts as copying).
-2. **No series proper nouns.** Not for places, factions, classes, spells, techniques, items, races, titles, or in-jokes. Generic words (warrior, mage, fireball, healing) are fine; distinctive coinages are not. **Public-domain names are fine even when the source also uses them**: myth, folklore and history (Midgard, Yggdrasil, goblin, valkyrie, rune). The test is whether the name predates the series and appears in public-domain sources. A source-specific spelling, compound or twist on such a name is still a coinage.
-3. **Mechanics are fair game, expressions are not.** A *rule* (3 spells per level) is borrowable; a *stat block, class list, skill list or level table* copied verbatim is not.
+2. **Generic canon names are allowed; character names are not.** Generic names from the source series (classes, spells, monsters, systems, terms such as Tier) may be used. Forbidden: names of characters and direct references to unique characters (a personal name, title, epithet, guild or named group that identifies them). Public-domain names (myth, folklore and history: Midgard, Yggdrasil, goblin, valkyrie, rune) stay fine. Rule 1 still applies: no characters, events or plot.
+3. **Mechanics are fair game, expressions are not.** A *rule* (1 spell pick per level) is borrowable; a *stat block, class list, skill list or level table* copied verbatim is not.
 4. **Title and key art are original.** "Worldtree" is a placeholder; run a clearance check before any public page uses it.
 5. **Norse myth is public domain.** Realm, creature and god names from the myths may be used directly. What stays forbidden is the source's *expression*: its realm-to-theme assignments, its race-to-realm placements, and any character or item built on a myth name the way the source built it.
 6. **Every content entry carries provenance** (§7.1): author, origin (original / generic / licensed asset), license, review state. Unreviewed content cannot ship.
-7. **Review gate:** a reviewer checks each new content batch against a *forbidden-terms list* kept outside the repo's public data (it itself contains series names). Reviewer signs off in the content register.
+7. **Review gate:** a reviewer checks each new content batch against a *forbidden-terms list* kept outside the repo's public data (it holds character names and unique-character references from the series). Reviewer signs off in the content register.
 
 ### 2.1 Terminology map (use the right column in all player-facing and internal names)
 
-| Mechanic | Source-game term (do not use) | Project term |
+| Mechanic | Source-game term (allowed since the §2 rule 2 change; project terms stay where already in use) | Project term |
 |---|---|---|
-| Spell power ranks 1–10 + capstone | "Tier", "Super-Tier" | **Circle** 1–10, **Apex** rites |
+| Spell power ranks | "Tier", "Super-Tier" | **Tier** 0–5 in the 1–30 scope (§3.2); higher Tiers and **Apex** rites later |
 | Native warrior skill layer | "Martial Arts" | **Disciplines** |
 | Resource for Disciplines | — | **Focus** |
 | Gear power budget | "Data capacity", "data crystals" | **Capacity**, **Imprints** |
@@ -74,15 +74,16 @@ All numbers below are **starting points** to be tuned. They live in data modules
 - **Stats** (9): HP, MP, Physical Attack, Physical Defense, Agility, Magic Attack, Magic Defense, Resistance, Special. Derived: crit, move speed. Stats never shorten the GCD or cast times; only the `Haste` item affix does (§3.5).
 - **Death & progression safety**: see §3.9.
 
-### 3.2 Magic (Circles)
-- 10 Circles + Apex rites. **3 spells per caster class level**, chosen from that class's list.
-- **Circle ceiling follows the deepest compatible casting line**, not total level. Mixed incompatible lines cap lower. This is the main anti-"hybrid cheese" rule.
-- **Circle unlock** (tunable, `Content/Magic`): Circles 0–1 at casting-line level 1; Circle *n* ≥ 2 at line level `6 × (n − 1)` (2 → 6, 3 → 12, 6 → 30, 10 → 54). Levels 1–5 therefore cast Circles 0–1 only.
-- **Spell picks per caster class level**: `SPELL_PICKS_PER_LEVEL`, a data constant. Target 3; M0.5 uses 1 (§11).
-- Zero-Circle utility spells exist but cost like Circle 1 (soft sink, flavor).
+### 3.2 Magic (Tiers)
+- **Four magic systems** (casting lines): **Arcane, Divine, Spiritual, Alternative**. Each caster class belongs to one. Caster levels of different systems are tracked independently and never sum.
+- **1 spell pick per caster class level** (`SPELL_PICKS_PER_LEVEL`, `Tuning.Magic.SpellPicksPerLevel = 1`), chosen from that class's list. This is the target, not a placeholder.
+- **Tier gate per system** (tunable, `Tuning.Magic`): Tier 0 cantrips and Tier 1 at line level 1; Tier *n* ≥ 2 at line level `7 × (n − 1) + 1` (`TierStep = 7`). T1 at line levels 1–7, T2 8–14, T3 15–21, T4 22–28, T5 29–30. `MaxTier = 5` for the 1–30 scope. Levels 1–5 therefore cast Tiers 0–1 only.
+- **Tier ceiling follows the system's own line level**, not total level. Levels in an incompatible system cost one Tier (`MixedLinePenalty`, never below Tier 1). This is the main anti-"hybrid cheese" rule.
+- The caster-class roster and the spell grimoire live in the design spreadsheet `overlord_yggdrasil_early_game_bestiary_with_classes_and_grimoire.xlsx` (tabs *Caster Classes* and *Grimoire*).
+- Tier 0 utility spells exist but cost like Tier 1 (soft sink, flavor).
 - Spells deliver through **real-time delivery types**: projectile, cone, ground target, self, ally, summon. Magic damage is not blockable by physical armor; it is reduced by magic defense/resistance.
-- Resurrection spells exist, scale with Circle, cost XP/levels/materials.
-- Launch content: Circles 0–3 (alpha), 4–5 (beta). No Apex at launch.
+- Resurrection spells exist, scale with Tier, cost XP/levels/materials.
+- Launch content: Tiers 0–3 (alpha), 4–5 (beta). No Apex at launch.
 
 ### 3.3 Disciplines (native warrior layer, Human-eligible)
 | Rule | Value |
@@ -141,7 +142,7 @@ Faithful rule: lose levels, drop gear, delete at level ≤5. **Rejected as defau
 |---|---|
 | **Standard** (default) | XP debt (earn it back), temporary stat penalty, durability loss. Gear drops only in flagged PvP zones. |
 | **Ironbound** (opt-in realm/server) | The faithful penalty: level loss + one dropped gear piece. Protected tier: players below level 6 drop to level 1 instead of deletion (no permanent loss). Better rewards/ladders. |
-| **Resurrection** | Spell/item based, scaled by Circle, costs materials; a corpse run is available in Standard. |
+| **Resurrection** | Spell/item based, scaled by Tier, costs materials; a corpse run is available in Standard. |
 
 ### 3.10 Economy
 Faucets: monsters, quests, vendors (small), tournaments. Sinks: crafting, repairs, Imprints, Hold upkeep, respec items, trainer fees. **No pay-to-win**: money buys time or cosmetics (§9.4). Every currency has a documented source/sink line in the balance sheet.
@@ -154,7 +155,7 @@ From [low-level-human-design.md](low-level-human-design.md), adapted to this doc
 
 - 5 levels in classes only. Build templates: specialist (5), duo (3+2), dabbler (2+1+1+1).
 - First classes (M0.5): **Warrior, Mage, Healer**. Planned starter set (original names TBD): front-line fighter, evasion fighter, bare-hand adept, scout, healer, spellcaster, apothecary, laborer. Dabbler needs a 4th class.
-- Spells: Circles 0–1 for casters (Circle 2 at casting-line level 6, §3.2); picks per `SPELL_PICKS_PER_LEVEL`.
+- Spells: Tiers 0–1 for casters (Tier 2 at casting-line level 8, §3.2); 1 pick per caster level (`SPELL_PICKS_PER_LEVEL`).
 - Enemies: Goblin **Rabble** (Lv 1–6, raiding bands, no casters) and the **Skeleton** (Lv 1–3, unarmed undead). Goblin **Warband** (Lv 7+, organized company with casters, healers, riders and a leader) is the next band.
 - Disciplines: Focus 2; learn 2 by level 5 via the tutorial trainer.
 - Gear: Grade I–II only; no Singular anywhere.
@@ -389,10 +390,10 @@ Dark-navy panels, gold trim, serif headings; palette, fonts, frame recipes and H
 `Category_Name_Variant` (e.g. `Icon_Spell_Fire`), Pascal case in-engine, lower-snake on disk. Folders mirror Explorer. Textures power-of-two where possible, minimal resolution that reads on a phone. Audio normalized, loops tested. No asset ids hard-coded in scripts; they live in content data/`Assets` manifest.
 
 ### 7.4 Scope control (curation numbers)
-| Milestone | Classes | Spell Circles | Disciplines | Enemies | Zones | Level cap |
+| Milestone | Classes | Spell Tiers | Disciplines | Enemies | Zones | Level cap |
 |---|---|---|---|---|---|---|
 | M0.5 testing grounds | 3 (Warrior, Mage, Healer) | 0–1 (16 spells) | 2 | 5 Rabble + 1 elite + Skeleton; Warband data-only | 1 dev place (village + fields + camp) | 5 |
-| M1 vertical slice | 3 | 0–1 (count per §12 Q9) | ~12 | ~6 + 1 boss | tutorial + 1 field | 5 |
+| M1 vertical slice | 3 | 0–1 | ~12 | ~6 + 1 boss | tutorial + 1 field | 5 |
 | M2 alpha | 8 | 0–3 (~60) | ~30 | ~20 | hub + 3 | 20 |
 | M3 beta | ~16 | 0–5 (~120) | ~60 | ~45 | 1 realm | 40 |
 | Launch | ~24 | 0–6 | ~90 | ~80 | hub + 2 realms | 60 |
@@ -484,7 +485,7 @@ Define target concurrency per place, server count per realm, and what happens wh
 | Milestone | Deliverable | Exit criteria |
 |---|---|---|
 | **M0 Foundations** (done 2026-10-23) | Rojo project, bootstrap, Net layer, Data stub, UI shell, CI | A player joins, a profile loads in memory, HUD shows replicated HP, tests and lint pass, Git initialized with hooks and the auto-commit gate working |
-| **M0.5 Testing Grounds** (built 2026-10-24; open items in scope 01 §10) | One dev place in Midgard: Farming Village, fields, goblin camp; Warrior/Mage/Healer to level 5; dev commands ([scope 01](scope/01-midgard-testing-grounds.md)) | Every skill, passive and spell resolves server-side; Circle 2 refused at line level 5; Rabble AI states and leash work; dev commands gated; all assets registered |
+| **M0.5 Testing Grounds** (built 2026-10-24; open items in scope 01 §10) | One dev place in Midgard: Farming Village, fields, goblin camp; Warrior/Mage/Healer to level 5; dev commands ([scope 01](scope/01-midgard-testing-grounds.md)) | Every skill, passive and spell resolves server-side; Tier 2 refused at line level 7 (allowed at 8); Rabble AI states and leash work; dev commands gated; all assets registered |
 | **M1 Vertical slice** | Levels 1–5, 3 classes, 12 Disciplines, ~20 spells, 6 enemies + boss, tutorial zone | 30-minute loop playable on phone and desktop; combat feel signed off; no exploit found in rate-limit/validation tests |
 | **M2 Alpha** | Hub + 3 zones, 8 classes, crafting v1, parties, trading v1, cap 20 | Soak test with bots at target concurrency; telemetry live |
 | **M3 Beta** | Guild Holds v1, tournaments v1, Ironbound realm, cap 40 | Economy balance sheet reviewed; moderation tooling in place |
@@ -502,15 +503,15 @@ Define target concurrency per place, server count per realm, and what happens wh
 | Hit detection | Players may expect client-side feel | Predicted visuals, **server-resolved** hits, bounded lag compensation | Exploit resistance without losing responsiveness |
 | UI | "Not all coded from scratch" | Studio-authored screens + templates + controllers; no code-built screens | Maintainability, localization, designer iteration |
 | Tooling | Not specified | Rojo + Git + lint/types/tests; Studio MCP for UI and playtests | Review, CI, repeatability |
-| Original naming | "Faithful" | Systems faithful, all names original (§2.1) | IP safety, own identity |
+| Original naming | "Faithful" | Systems faithful, all names original (§2.1). Superseded 2026-10-28 by *Naming rule* below | IP safety, own identity |
 | Data | "Doesn't need to save yet" | In-memory but contract-first and serializable-only | Zero-rewrite swap-in later |
 | Characters | Agent shouldn't rig | Standard rigs + licensed/assembled monsters; agent wires, not authors, except the placeholder exceptions in §8.2 (goblin, R15 combat clips) | Quality and scope realism |
 | Free models | Convenience | Audit before use | Backdoor risk |
 | Commits | "Handle commits automatically" | Auto-commit local logical units behind a green gate; push, PR and release stay manual | Automation without risking secrets, broken `main`, or unreviewed publication |
 | History and logs | No logs inside scripts | Change history lives in Git; runtime logging goes through one `Logger`; telemetry for diagnostics | Comments rot, Git does not; one switch controls log noise |
 | Best practice vs request | "Always choose the best approach" | When a request conflicts, best practice is applied and the deviation is recorded in the commit body and this log | Keeps decisions auditable |
-| Spell picks at M0.5 | 3 spells per caster level (§3.2) | 1 pick per level in M0.5 (`SPELL_PICKS_PER_LEVEL`) | 3 picks would need ≥15 Circle 0–1 spells per class for a placeholder place |
-| Circle pacing | Research estimate: levels 1–5 reach tier 2 | Circle 2 unlocks at casting-line level 6 | Owner wants Circle 2 later; keeps low levels readable |
+| Spell picks at M0.5 | 3 spells per caster level (§3.2) | 1 pick per level in M0.5 (`SPELL_PICKS_PER_LEVEL`). Superseded 2026-10-28 by *Spell picks* below | 3 picks would need ≥15 Tier 0–1 spells per class for a placeholder place |
+| Circle pacing | Research estimate: levels 1–5 reach tier 2 | Circle 2 unlocks at casting-line level 6. Superseded 2026-10-28 by *Tier step* below | Owner wants Circle 2 later; keeps low levels readable |
 | Public-domain names | Old §2 asked for Norse-neutral realm labels | Myth/folklore names allowed (Midgard first); source pairings and coinages still forbidden | Owner decision; myth predates the series |
 | Unit tests | §5.1 named TestEZ or Jest-Lua | Lune unit tests for pure modules; Studio playtests for integration | Runs in CI and pre-commit without Studio |
 | Toolchain manager | Not specified | Rokit pins every tool, including luau-lsp; Roblox type definitions pinned to the same luau-lsp tag | Reproducible gate on every machine |
@@ -533,6 +534,10 @@ Define target concurrency per place, server count per realm, and what happens wh
 | VFX ink layer | Earlier rule: every effect layers a near-black non-additive ink layer for contrast | Ink only on high-tier effects (skills with screen effects: Charge, War Cry, Blink, Overcharge, Smite, Lay On Hands, future ultimates); other effects use earth or element tones (2026-10-25) | Owner decision; keeps the darkest contrast as a marker of the strongest skills |
 | Atmosphere and world performance | Owner asked for proper atmosphere (lighting, sky, per-biome mood, day/night) and a performance solution for the 10,240-stud world beyond inverse-sphere fog (2026-10-25) | Authored Lighting effects driven by a client controller that blends a mood per terrain region and a 24-minute shared day clock (6-minute moonlit night); streaming at the recommended 1,024 radius with opportunistic stream-out, haze ending detail near that radius; no SLIM imposters (they stalled play at about 5 fps); single-part props placed without a Model; client culling hides small props past 350 to 450 studs and thins trees to 40% past 600 (Studio: 5 to 56 fps in the start valley, 2026-10-25); generating props on demand only as the last resort | Each pass was measured, kept only if it helped, and shadows-off was rejected for no gain; a clock from server time needs no replication; culling moves hidden props outside the DataModel, so streaming still owns them |
 | Skeleton enemy | Owner asked for a Skeleton (Lv 1–3, no weapon, attack Scratch, clips SkeletonWalk/Scratch/Idle/Defeat) and supplied the Studio import and uploaded clips (2026-10-27) | Template rebuilt by `tools/world/build.luau` from the raw import (`tools/world/skeleton_import.rbxm`) with a HumanoidRootPart, R15 Humanoid and Animator; clip keys follow `<AnimSet><Clip>`, so `SkeletonAttack` and `SkeletonDeath` play the Scratch and Defeat clips; KeyframeSequences in the repo are exports of the uploaded clips, with bones that never leave rest dropped; new `Undead` team; `EnemyDef.template` picks the template; sets without a Run clip keep walking | Spawn and the animation controller need the goblin's rig contract; a separate team keeps goblin packs and the goblin bark off skeletons; the register requires a KeyframeSequence file per clip |
+| Naming rule | §2 rule 2 forbade every series proper noun; owner changed it (2026-10-28) | Generic canon names (classes, spells, monsters, systems, terms) may be used; names of characters and direct references to unique characters stay forbidden, as do characters, events and plot; the out-of-repo forbidden-terms list keeps only character names and unique-character references | Owner decision; shared genre vocabulary reads naturally while the source's characters stay out |
+| Circle → Tier | Spell power was called "Circle" to avoid the source term | Renamed to **Tier** everywhere: skill field `tier`, `Tuning.Magic.TierStep`/`MaxTier`, `Formulas.TierUnlockLevel`/`TierCeilings`, refusal reason `TierLocked`, UI text | Owner decision (2026-10-28), allowed by the new naming rule |
+| Spell picks | Target 3 per caster level, M0.5 at 1 | 1 pick per caster level is the target (`SpellPicksPerLevel = 1`); resolves §12 Q8 | Owner methodology (2026-10-28) |
+| Tier step | Circle *n* at line level `6 × (n − 1)`, 10 Circles | Tier *n* ≥ 2 at line level `7 × (n − 1) + 1` (T2 8, T3 15, T4 22, T5 29), `MaxTier = 5` for levels 1–30; Arcane, Divine, Spiritual and Alternative lines counted independently, never summed; incompatible-line penalty kept because the anti-hybrid rule (§3.2) still stands | Owner methodology (2026-10-28); one Tier per 7 line levels across the 1–30 scope |
 
 ---
 
@@ -544,4 +549,4 @@ Define target concurrency per place, server count per realm, and what happens wh
 5. Target concurrency per realm and server cost envelope.
 6. Real Data module delivery date. (Schema version starts at 1.)
 7. Guild siege schedule and protections for casual players.
-8. M1 spell picks: with Circles 0–1 only at level 5, 3 picks per level needs ≥15 spells per caster class. Grow the lists, or keep picks below 3 until Circle 2?
+8. ~~M1 spell picks~~ Resolved 2026-10-28: 1 pick per caster level is the target (§3.2, §11 *Spell picks*).
