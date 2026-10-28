@@ -170,5 +170,18 @@ return table.freeze({
 		DisruptCooldown = 8,
 		--[=[ Seconds of slack an interrupt must have before the player's cast would end. ]=]
 		DisruptMargin = 0.2,
+		--[=[ Morale (0-100 scale). Deaths count within Radius studs, a leader's within LeaderRadius. ]=]
+		Morale = table.freeze({
+			Default = table.freeze({ base = 100, fleeBelow = 30 }),
+			DamageWeight = 60,
+			AllyDeath = 15,
+			LeaderDeath = 40,
+			Regen = 3,
+			LeaderBonus = 20,
+			RallyBonus = 20,
+			Hysteresis = 25,
+			Radius = 30,
+			LeaderRadius = 60,
+		}),
 	}),
 })

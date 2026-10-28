@@ -12,7 +12,7 @@ local Skills = Loader.load("src/ReplicatedStorage/Content/Skills").ById
 local Statuses = Loader.load("src/ReplicatedStorage/Content/Statuses").ById
 
 local function profile(id: string): any
-	return Swarm.Profile(Enemies[id], Tuning.Swarm.TokenCost, Skills, Statuses)
+	return Swarm.Profile(Enemies[id], Tuning.Swarm.TokenCost, Tuning.Swarm.Morale.Default, Skills, Statuses)
 end
 
 local TIMEOUT = 4
@@ -269,5 +269,29 @@ return {
 		Expect.truthy(Swarm.CanInterruptInTime(2.5, 6, 10, 11, 1.2, 0.2), "in reach")
 		Expect.equal(Swarm.CanInterruptInTime(1.2, 6, 10, 11, 1.2, 0.2), false, "cast ends first")
 		Expect.equal(Swarm.CanInterruptInTime(2.5, 40, 10, 11, 1.2, 0.2), false, "too far")
+	end,
+	["morale is optional and leaders are marked"] = function()
+		Expect.equal(profile("skeleton").morale, nil, "undead never flee")
+		Expect.equal(profile("goblin_chieftain").morale, nil, "bosses never flee")
+		Expect.truthy(profile("goblin_raider").morale, "goblins have morale")
+		Expect.truthy(profile("warband_captain").leader, "captain leads")
+		Expect.equal(profile("goblin_raider").leader, false, "raider does not lead")
+	end,
+	["enemies flee below their threshold and come back with margin"] = function()
+		local settings = Tuning.Swarm.Morale
+		local config = { base = 100, fleeBelow = 30 }
+		local morale = Swarm.DamageMorale(100, 100, 100, settings)
+		Expect.equal(morale, 100 - settings.DamageWeight, "full-HP hit")
+		local fleeing
+		morale, fleeing = Swarm.MoraleStep(20, false, 0, config, false, false, settings)
+		Expect.truthy(fleeing, "flees below threshold")
+		morale, fleeing = Swarm.MoraleStep(40, true, 0, config, false, false, settings)
+		Expect.truthy(fleeing, "keeps fleeing inside the hysteresis band")
+		morale, fleeing = Swarm.MoraleStep(60, true, 0, config, false, false, settings)
+		Expect.equal(fleeing, false, "returns above the band")
+		morale, fleeing = Swarm.MoraleStep(20, false, 0, config, true, false, settings)
+		Expect.equal(fleeing, false, "a leader nearby holds the line")
+		morale = Swarm.MoraleStep(99, false, 10, config, false, false, settings)
+		Expect.equal(morale, 100, "regen caps at base")
 	end,
 }

@@ -13,7 +13,7 @@ local Types = require(script.Parent.Parent.Types)
 type Entity = Types.Entity
 type Member = Types.SquadMember
 
-type State = "Idle" | "Patrol" | "Aggro" | "Position" | "Attack" | "Disrupt" | "Return"
+type State = "Idle" | "Patrol" | "Aggro" | "Position" | "Attack" | "Disrupt" | "Flee" | "Regroup" | "Return"
 
 type Brain = {
 	entity: Entity,
@@ -28,7 +28,8 @@ type Brain = {
 	waypointIndex: number,
 	pathTarget: Vector3?,
 	nextPathAt: number,
-	summoned: boolean,
+	--[=[ Indices of `combat.summons` entries already spawned. ]=]
+	summoned: { [number]: boolean },
 	member: Member,
 }
 
@@ -36,6 +37,7 @@ local AGGRO_ON_HIT_RADIUS = 60
 local HEAL_THRESHOLD = 0.7
 local ARRIVE_DISTANCE = 4
 local SLOT_ARRIVE = 1.5
+local REGROUP_DISTANCE = 6
 
 local log = Logger.new("AIService")
 
@@ -55,7 +57,8 @@ local blockParams = RaycastParams.new()
 blockParams.FilterType = Enum.RaycastFilterType.Exclude
 
 --[=[
-	Server-only enemy brains (game-design.md 5.6): idle, patrol, aggro, position, attack, return.
+	Server-only enemy brains (game-design.md 5.6): idle, patrol, aggro, position, attack, disrupt,
+	flee, regroup, return.
 	Each thinks on a jittered interval; detection is a distance check over living players;
 	PathfindingService only runs when the straight line is blocked. Attacks need a token from
 	SquadService; without one the enemy waits in position.
@@ -371,24 +374,65 @@ local function startReturn(brain: Brain)
 	brain.entity.tauntedBy = nil
 end
 
-local function bossPhase(brain: Brain)
+-- Spawns each `combat.summons` entry once, when HP first falls below its threshold.
+local function summon(brain: Brain)
 	local entity = brain.entity
-	if brain.def.behavior ~= "Boss" or brain.summoned or entity.hp > entity.stats.MaxHp * 0.5 then
+	local summons = brain.def.combat and brain.def.combat.summons
+	if not summons then
 		return
 	end
-	brain.summoned = true
-	entity.model:SetAttribute("Phase", 2)
-	StatusService.Apply(entity, "rally", 600, nil, entity)
-	for i = 1, 2 do
-		local offset = Vector3.new(if i == 1 then -6 else 6, 0, 4)
-		local position = entity.root.Position + offset
-		local summon =
-			SpawnService.Spawn("goblin_raider", 4, Vector3.new(position.X, brain.home.Y, position.Z), brain.home)
-		if summon then
-			SpawnService.TrackSummon(summon)
+	for index, entry in summons do
+		if brain.summoned[index] or entity.hp > entity.stats.MaxHp * entry.belowHp then
+			continue
+		end
+		brain.summoned[index] = true
+		entity.model:SetAttribute("Phase", index + 1)
+		CombatService.ApplyEffects(entity, entity, entry.selfEffects)
+		for i = 1, entry.count do
+			local angle = (i - 0.5) / entry.count * math.pi * 2
+			local position = entity.root.Position + Vector3.new(math.cos(angle) * 6, 0, math.sin(angle) * 6)
+			local spawned = SpawnService.Spawn(
+				entry.enemy,
+				entry.level,
+				Vector3.new(position.X, brain.home.Y, position.Z),
+				brain.home
+			)
+			if spawned then
+				SpawnService.TrackSummon(spawned)
+			end
+		end
+		log:Debug("%s summons %d %s", entity.name, entry.count, entry.enemy)
+	end
+end
+
+-- Flee home, or regroup on a nearby leader, while morale is broken. Returns true while it does.
+local function fleeOrRegroup(brain: Brain, target: Entity, now: number): boolean
+	local member = brain.member
+	if not SquadService.UpdateMorale(member, now) then
+		return false
+	end
+	local root = brain.entity.root
+	local leader = SquadService.LeaderOf(member)
+	if leader then
+		setState(brain, "Regroup")
+		local away = flat(leader.root.Position - target.root.Position)
+		local behind = if away.Magnitude > 0.1 then away.Unit else Vector3.new(1, 0, 0)
+		local spot = leader.root.Position + behind * REGROUP_DISTANCE + separation(brain)
+		if (flat(spot) - flat(root.Position)).Magnitude > SLOT_ARRIVE then
+			moveTo(brain, spot, now)
+		else
+			stop(brain)
+			face(brain, target.root.Position)
+		end
+	else
+		setState(brain, "Flee")
+		if (flat(brain.home) - flat(root.Position)).Magnitude > ARRIVE_DISTANCE then
+			moveTo(brain, brain.home, now)
+		else
+			stop(brain)
 		end
 	end
-	log:Debug("%s entered phase 2", entity.name)
+	return true
 end
 
 local function think(brain: Brain, now: number)
@@ -408,6 +452,7 @@ local function think(brain: Brain, now: number)
 		if fromHome <= ARRIVE_DISTANCE + 2 then
 			StatusService.Clear(entity)
 			StatService.Refill(entity)
+			SquadService.ResetMorale(brain.member)
 			setState(brain, "Idle")
 		else
 			StatService.SetHp(
@@ -452,7 +497,10 @@ local function think(brain: Brain, now: number)
 		return
 	end
 
-	bossPhase(brain)
+	summon(brain)
+	if fleeOrRegroup(brain, target, now) then
+		return
+	end
 	local distance = (target.root.Position - root.Position).Magnitude
 	if disrupt(brain, target, distance, now) then
 		return
@@ -539,7 +587,7 @@ function AIService.Attach(entity: Entity, home: Vector3, leash: number)
 		waypointIndex = 1,
 		pathTarget = nil,
 		nextPathAt = 0,
-		summoned = false,
+		summoned = {},
 		member = SquadService.NewMember(entity, def),
 	}
 	entity.model:SetAttribute("AiState", "Idle")

@@ -47,17 +47,88 @@ local SquadService = {}
 --[=[ Creates the squad record for an enemy; AIService keeps it on the brain. ]=]
 function SquadService.NewMember(entity: Entity, def: any): Member
 	memberSeq += 1
+	local profile = Swarm.Profile(def, Tuning.Swarm.TokenCost, Tuning.Swarm.Morale.Default, Skills.ById, Statuses.ById)
 	local member: Member = {
 		entity = entity,
-		profile = Swarm.Profile(def, Tuning.Swarm.TokenCost, Skills.ById, Statuses.ById),
+		profile = profile,
 		target = nil,
 		seq = memberSeq,
 		reach = 6,
 		slot = nil,
 		role = "Pressure",
+		morale = if profile.morale then profile.morale.base else 0,
+		fleeing = false,
+		moraleAt = os.clock(),
 	}
 	members[entity] = member
 	return member
+end
+
+--[=[ Nearest living leader of the member's team within Morale.LeaderRadius, other than itself. ]=]
+function SquadService.LeaderOf(member: Member): Entity?
+	local position = member.entity.root.Position
+	local best, bestDistance = nil, Tuning.Swarm.Morale.LeaderRadius
+	for entity, other in members do
+		if other ~= member and other.profile.leader and entity.alive and entity.team == member.entity.team then
+			local distance = (entity.root.Position - position).Magnitude
+			if distance <= bestDistance then
+				best, bestDistance = entity, distance
+			end
+		end
+	end
+	return best
+end
+
+--[=[
+	Updates the member's morale and returns true while it flees. Starting to flee gives back its
+	token and slot. Enemies without morale never flee.
+]=]
+function SquadService.UpdateMorale(member: Member, now: number): boolean
+	local config = member.profile.morale
+	if not config then
+		return false
+	end
+	local dt = now - member.moraleAt
+	member.moraleAt = now
+	local wasFleeing = member.fleeing
+	member.morale, member.fleeing = Swarm.MoraleStep(
+		member.morale,
+		member.fleeing,
+		dt,
+		config,
+		SquadService.LeaderOf(member) ~= nil,
+		member.entity.statuses.rally ~= nil,
+		Tuning.Swarm.Morale
+	)
+	if member.fleeing and not wasFleeing then
+		SquadService.DropToken(member)
+		member.slot = nil
+	end
+	return member.fleeing
+end
+
+--[=[ Restores full morale (back home after a reset). ]=]
+function SquadService.ResetMorale(member: Member)
+	local config = member.profile.morale
+	member.morale = if config then config.base else 0
+	member.fleeing = false
+end
+
+-- Morale lost by everyone of `victim`'s team near it when it dies.
+local function moraleOnDeath(victim: Member)
+	local settings = Tuning.Swarm.Morale
+	local position = victim.entity.root.Position
+	for entity, other in members do
+		if other ~= victim and other.profile.morale and entity.alive and entity.team == victim.entity.team then
+			local distance = (entity.root.Position - position).Magnitude
+			if distance <= settings.Radius then
+				other.morale -= settings.AllyDeath
+			end
+			if victim.profile.leader and distance <= settings.LeaderRadius then
+				other.morale -= settings.LeaderDeath
+			end
+		end
+	end
 end
 
 --[=[ Leaves the current target's squad, giving back any token. ]=]
@@ -114,6 +185,9 @@ end
 function SquadService.RequestToken(member: Member, kind: Swarm.TokenKind, now: number): boolean
 	if member.profile.slot == "None" then
 		return true
+	end
+	if member.fleeing then
+		return false
 	end
 	local ledger = ledgerOf(member)
 	if not ledger then
@@ -209,6 +283,9 @@ end
 local function assignRoles(state: TargetState)
 	local byTeam: { [string]: { Swarm.RoleCandidate } } = {}
 	for member in state.members do
+		if member.fleeing then
+			continue
+		end
 		local team = member.entity.team
 		byTeam[team] = byTeam[team] or {}
 		table.insert(byTeam[team], {
@@ -245,7 +322,7 @@ local function tactic(target: Entity, state: TargetState)
 	local radii: { [Swarm.Ring]: number } = {}
 	for member in state.members do
 		local ring: Swarm.Ring? = Swarm.RingOf(member.profile.slot)
-		if ring and member.entity.alive then
+		if ring and member.entity.alive and not member.fleeing then
 			local outer = member.reach + (if ring == "Melee" then swarm.WaitDistance else 0)
 			radii[ring] = math.max(radii[ring] or 0, outer)
 			table.insert(seekers, {
@@ -305,7 +382,19 @@ function SquadService.Init(deps: { [string]: any })
 end
 
 function SquadService.Start()
-	CombatService.Died:Connect(forget)
+	CombatService.Died:Connect(function(victim: Entity)
+		local member = members[victim]
+		if member then
+			moraleOnDeath(member)
+		end
+		forget(victim)
+	end)
+	CombatService.Damaged:Connect(function(target: Entity, amount: number)
+		local member = members[target]
+		if member and member.profile.morale and amount > 0 then
+			member.morale = Swarm.DamageMorale(member.morale, amount, target.stats.MaxHp, Tuning.Swarm.Morale)
+		end
+	end)
 	EntityService.Removing:Connect(function(entity: Entity)
 		forget(entity)
 		task.defer(refreshFilter)

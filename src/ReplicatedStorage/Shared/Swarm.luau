@@ -44,6 +44,9 @@ export type Profile = {
 	roles: { [string]: number },
 	--[=[ Skills that can interrupt a player's cast: a Stun-kind effect behind a telegraphed windup. ]=]
 	interrupts: { string },
+	--[=[ Nil for enemies that never flee. ]=]
+	morale: { base: number, fleeBelow: number }?,
+	leader: boolean,
 }
 
 --[=[ True when a skill can interrupt a player's cast and is telegraphed: an enemy-targeted skill
@@ -63,9 +66,15 @@ end
 
 --[=[
 	Combat profile of an enemy with defaults filled in. `def` is a Content EnemyDef; `skills` and
-	`statuses` are the Content ById tables.
+	`statuses` are the Content ById tables; defaults come from Tuning.Swarm. `combat.morale = false` means the enemy never flees.
 ]=]
-function Swarm.Profile(def: any, defaultCost: number, skills: { [string]: any }, statuses: { [string]: any }): Profile
+function Swarm.Profile(
+	def: any,
+	defaultCost: number,
+	defaultMorale: { base: number, fleeBelow: number },
+	skills: { [string]: any },
+	statuses: { [string]: any }
+): Profile
 	local combat = def.combat or {}
 	local interrupts = {}
 	for _, skillId in def.skills do
@@ -79,7 +88,47 @@ function Swarm.Profile(def: any, defaultCost: number, skills: { [string]: any },
 		tokenCost = combat.tokenCost or defaultCost,
 		roles = combat.roles or { Pressure = 1 },
 		interrupts = interrupts,
+		morale = if combat.morale == false then nil else combat.morale or defaultMorale,
+		leader = combat.leader == true,
 	}
+end
+
+export type MoraleSettings = {
+	--[=[ Morale lost when taking damage equal to max HP. ]=]
+	DamageWeight: number,
+	--[=[ Morale regained per second, up to the enemy's base. ]=]
+	Regen: number,
+	--[=[ Added while a living leader of the team is near, and while rallied. ]=]
+	LeaderBonus: number,
+	RallyBonus: number,
+	--[=[ A fleeing enemy returns only above fleeBelow + Hysteresis. ]=]
+	Hysteresis: number,
+}
+
+--[=[ Morale after taking `amount` damage out of `maxHp`. ]=]
+function Swarm.DamageMorale(morale: number, amount: number, maxHp: number, settings: MoraleSettings): number
+	return morale - amount / math.max(maxHp, 1) * settings.DamageWeight
+end
+
+--[=[
+	Advances morale by `dt` seconds of regeneration and decides whether the enemy flees. Leader and
+	rally bonuses count toward the decision but are not stored. Returns morale and fleeing.
+]=]
+function Swarm.MoraleStep(
+	morale: number,
+	fleeing: boolean,
+	dt: number,
+	config: { base: number, fleeBelow: number },
+	leaderNear: boolean,
+	rallied: boolean,
+	settings: MoraleSettings
+): (number, boolean)
+	morale = math.min(config.base, morale + settings.Regen * dt)
+	local effective = morale
+		+ (if leaderNear then settings.LeaderBonus else 0)
+		+ (if rallied then settings.RallyBonus else 0)
+	local threshold = if fleeing then config.fleeBelow + settings.Hysteresis else config.fleeBelow
+	return morale, effective < threshold
 end
 
 export type RoleCandidate = {

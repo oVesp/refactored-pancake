@@ -85,6 +85,11 @@ export type SquadMember = {
 	slot: number?,
 	--[=[ Squad role from the last tactical update. ]=]
 	role: Swarm.Role,
+	--[=[ Stored morale without leader or rally bonuses; unused when the profile has none. ]=]
+	morale: number,
+	fleeing: boolean,
+	--[=[ os.clock() of the last morale update. ]=]
+	moraleAt: number,
 }
 
 return nil

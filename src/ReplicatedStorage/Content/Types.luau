@@ -106,6 +106,14 @@ export type StatusDef = {
 	modifiers: StatBlock?,
 }
 
+export type Summon = {
+	belowHp: number,
+	enemy: string,
+	count: number,
+	level: number,
+	selfEffects: { Effect }?,
+}
+
 --[=[ Group-combat data for an enemy (docs/systems/ai-and-spawning.md, Group combat). ]=]
 export type CombatDef = {
 	--[=[ Ring and stand-off distance the enemy uses; "None" never waits for a token. Default Melee. ]=]
@@ -117,6 +125,15 @@ export type CombatDef = {
 		Reserve). Disruptor needs a telegraphed stun skill. Default { Pressure = 1 }.
 	]=]
 	roles: { [string]: number }?,
+	--[=[
+		Morale that drops with damage and nearby deaths; below `fleeBelow` the enemy flees or
+		regroups on its leader. `false` never flees (undead, bosses). Default Tuning.Swarm.Morale.Default.
+	]=]
+	morale: ({ base: number, fleeBelow: number } | false)?,
+	--[=[ Gives nearby allies of its team a morale bonus; its death costs them morale. ]=]
+	leader: boolean?,
+	--[=[ Adds spawned once the enemy's HP falls below `belowHp` (fraction), with optional self effects. ]=]
+	summons: { Summon }?,
 }
 
 export type EnemyDef = {
@@ -125,7 +142,11 @@ export type EnemyDef = {
 	tier: "Rabble" | "Warband" | "Training",
 	levelMin: number,
 	levelMax: number,
-	behavior: "Melee" | "Ranged" | "Trapper" | "Brute" | "Caster" | "Healer" | "Rider" | "Leader" | "Boss" | "Dummy",
+	--[=[
+		Special cases only: "Dummy" never thinks; "Boss" labels an encounter boss. Group combat
+		comes from `combat`.
+	]=]
+	behavior: ("Boss" | "Dummy")?,
 	base: StatBlock,
 	growth: StatBlock,
 	tags: Tags,

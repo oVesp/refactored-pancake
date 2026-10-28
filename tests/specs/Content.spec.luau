@@ -115,6 +115,26 @@ return {
 		end
 		Expect.truthy(Enemies.goblin_hexer.tier == "Warband", "Hexer is Warband")
 	end,
+	["enemy combat data resolves"] = function()
+		for id, enemy in Enemies do
+			local combat = enemy.combat
+			Expect.truthy(combat, `{id}: combat data`)
+			local morale = combat.morale
+			if morale then
+				Expect.truthy(morale.fleeBelow < morale.base, `{id}: flees below its base morale`)
+			end
+			for _, summon in combat.summons or {} do
+				Expect.truthy(Enemies[summon.enemy], `{id}: summons unknown {summon.enemy}`)
+				Expect.truthy(summon.belowHp > 0 and summon.belowHp < 1, `{id}: summon threshold`)
+				Expect.truthy(summon.count >= 1 and summon.level >= 1, `{id}: summon count and level`)
+				checkEffects(id, summon.selfEffects)
+			end
+			Expect.truthy(
+				enemy.behavior == nil or enemy.behavior == "Boss" or enemy.behavior == "Dummy",
+				`{id}: behavior is only for special cases`
+			)
+		end
+	end,
 	["loot and starter items resolve"] = function()
 		for enemyId, drops in Loot do
 			Expect.truthy(Enemies[enemyId], `loot for unknown enemy {enemyId}`)
