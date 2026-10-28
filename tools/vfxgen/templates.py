@@ -350,48 +350,6 @@ def blade_surface(name, lifetime, grow, extra=None):
     )
 
 
-# Light attack: a level crescent (a surface, since particle quads always face the camera).
-strike_swipe = anchor(
-    [
-        blade_surface("Blade", 0.3, 1.12),
-        attachment(
-            "Center",
-            [
-                emitter(
-                    "Strands",
-                    "EnergyStrands",
-                    {"EmitCount": 3},
-                    Size=ns(3.5, 5),
-                    Lifetime=nr(0.1, 0.18),
-                    Color=cs(WHITE, STEEL),
-                    LightEmission=1,
-                    Brightness=3,
-                    FlipbookLayout="Grid4x4",
-                    FlipbookMode="Random",
-                    ZOffset=0.5,
-                ),
-                emitter(
-                    "Sparks",
-                    "SparkStreak",
-                    {"EmitCount": 8, "EmitDelay": 0.04},
-                    Orientation="VelocityParallel",
-                    EmissionDirection="Front",
-                    Speed=nr(20, 34),
-                    SpreadAngle=[35, 35],
-                    Drag=6,
-                    Lifetime=nr(0.15, 0.28),
-                    Size=ns(1.8, 0),
-                    Color=cs(WHITE, STEEL),
-                    LightEmission=1,
-                    Brightness=3,
-                    Rotation=nr(0),
-                ),
-            ],
-        ),
-    ],
-    size=(11, 0.05, 11),
-)
-
 # Melee hit: starburst, ring, sparks, filaments and a puff of dust.
 hit_impact = anchor(
     [
@@ -2115,8 +2073,196 @@ hex_curse_burst = hex_burst(
     ),
 )
 
+# Fist attacks and guard (docs/systems/vfx.md, "Melee"). The root's top face points along the
+# punch (or toward the attacker for guard effects), so `EmissionDirection` Top follows it; rings
+# are camera-facing particles so they read from any angle.
+PARRY_HOT = (255, 248, 220)
+PARRY = (255, 210, 110)
+PARRY_D = (230, 140, 40)
+AIR = (225, 232, 245)
+
+
+def air_ring(name, size, lifetime, tint=AIR, key="RingThin", delay=0, brightness=2, transparency=0.15):
+    return emitter(
+        name,
+        key,
+        {"EmitDelay": delay} if delay else None,
+        Size=ns((0, size[0]), (1, size[1])),
+        Lifetime=nr(lifetime),
+        Transparency=ns(transparency, 1),
+        Color=cs(WHITE, tint),
+        LightEmission=1,
+        Brightness=brightness,
+        ZOffset=1.8,
+    )
+
+
+def streaks(name, count, speed, spread, size, lifetime, colors=(WHITE, AIR), brightness=2.5, drag=9, **props):
+    return emitter(
+        name,
+        "SparkStreak",
+        {"EmitCount": count},
+        Orientation="VelocityParallel",
+        EmissionDirection="Top",
+        Speed=nr(*speed),
+        SpreadAngle=[spread, spread],
+        Drag=drag,
+        Lifetime=nr(*lifetime),
+        Size=ns(size, 0),
+        Color=cs(*colors),
+        LightEmission=1,
+        Brightness=brightness,
+        Rotation=nr(0),
+        ZOffset=1.6,
+        **props,
+    )
+
+
+def puff(count, size, speed, tint=(225, 225, 230), transparency=0.6):
+    return emitter(
+        "Puff",
+        "Smoke",
+        {"EmitCount": count},
+        Size=ns(*size),
+        Lifetime=nr(0.35, 0.55),
+        Speed=nr(*speed),
+        SpreadAngle=[180, 180],
+        Drag=5,
+        Color=cs(tint),
+        LightEmission=0,
+        Transparency=ns(transparency, 1),
+        ZOffset=0.5,
+    )
+
+
+# Jab: a puff of displaced air and a few streaks shooting off the knuckles.
+punch_jab = anchor(
+    [
+        air_ring("Burst", (0.5, 4.5), 0.12),
+        streaks("Streaks", 5, (30, 45), 10, 1.4, (0.1, 0.14), brightness=2),
+        puff(1, (1, 2.5), (2, 4), transparency=0.75),
+    ]
+)
+
+# Finishing punch: a wider air burst with an echo ring and a longer spray of streaks.
+punch_finisher = anchor(
+    [
+        air_ring("Burst", (0.8, 7), 0.15),
+        air_ring("Echo", (0.5, 9), 0.18, delay=0.04, transparency=0.4),
+        streaks("Streaks", 9, (40, 60), 14, 1.8, (0.12, 0.18)),
+        puff(2, (1.5, 3.5), (3, 6), transparency=0.7),
+    ]
+)
+
+# Fist hit: a white starburst, a torn shock ring, air streaks bursting out and a few punching
+# through the target along the blow.
+punch_impact = anchor(
+    [
+        flash_star((7, 10), brightness=5, lifetime=0.08),
+        air_ring("Shock", (2, 9), 0.2, key="ShockRing", brightness=3, transparency=0),
+        air_ring("Ring", (0, 11), 0.16, delay=0.03, transparency=0.3),
+        streaks("Burst", 10, (28, 45), 180, 1.6, (0.12, 0.22)),
+        streaks("Pierce", 6, (45, 70), 18, 2.6, (0.1, 0.16), brightness=3),
+        puff(3, (2, 4), (4, 7)),
+    ]
+)
+
+# Finisher hit: the same shape scaled up, with an echo ring, energy strands, dust and a flash light.
+punch_impact_heavy = anchor(
+    [
+        flash_star((10, 14), brightness=7, lifetime=0.1),
+        air_ring("Shock", (3, 14), 0.26, key="ShockRing", brightness=3.5, transparency=0),
+        air_ring("Ring", (0, 15), 0.2, delay=0.04, transparency=0.25),
+        air_ring("Echo", (0, 19), 0.24, delay=0.09, transparency=0.5),
+        streaks("Burst", 16, (32, 55), 180, 2, (0.14, 0.26)),
+        streaks("Pierce", 10, (55, 85), 22, 3.2, (0.12, 0.2), brightness=3.5),
+        emitter(
+            "Strands",
+            "EnergyStrands",
+            {"EmitCount": 2},
+            Size=ns(8, 10),
+            Lifetime=nr(0.12, 0.18),
+            Color=cs(WHITE, AIR),
+            LightEmission=1,
+            Brightness=3,
+            FlipbookLayout="Grid4x4",
+            FlipbookMode="Random",
+            ZOffset=1.7,
+        ),
+        dust(5, (2.5, 5.5), (5, 9), DUST, 0.35),
+        light((235, 240, 255), 4, 14, 0.15),
+    ]
+)
+
+# Parry: a gold clang at the guard: a hard flash, a glint, a gold shock ring and sparks thrown back
+# toward the attacker.
+parry_clash = anchor(
+    [
+        flash_star((11, 15), brightness=7, tint=PARRY_HOT, lifetime=0.11),
+        emitter(
+            "Glint",
+            "Glint",
+            Size=ns((0, 3), (0.3, 10), (1, 0)),
+            Lifetime=nr(0.24),
+            Rotation=nr(45),
+            Color=cs(PARRY_HOT),
+            LightEmission=1,
+            Brightness=5,
+            ZOffset=2.2,
+        ),
+        air_ring("Shock", (2, 13), 0.25, tint=PARRY, key="ShockRing", brightness=3.5, transparency=0),
+        air_ring("Echo", (0, 16), 0.22, tint=PARRY_D, delay=0.05, transparency=0.3),
+        streaks(
+            "Sparks",
+            20,
+            (35, 65),
+            70,
+            2,
+            (0.2, 0.4),
+            colors=(WHITE, PARRY, PARRY_D),
+            brightness=4,
+            Acceleration=[0, -35, 0],
+            drag=5,
+        ),
+        emitter(
+            "Strands",
+            "EnergyStrands",
+            {"EmitCount": 2},
+            Size=ns(7, 9),
+            Lifetime=nr(0.12, 0.18),
+            Color=cs(PARRY_HOT, PARRY),
+            LightEmission=1,
+            Brightness=3,
+            FlipbookLayout="Grid4x4",
+            FlipbookMode="Random",
+            ZOffset=1.7,
+        ),
+        light(PARRY, 6, 16, 0.25),
+    ]
+)
+
+# Blocked hit: a small flash and a short spray of sparks off the guard.
+block_spark = anchor(
+    [
+        flash_star((4, 6), brightness=3, tint=(255, 235, 200), lifetime=0.07),
+        air_ring("Ring", (0, 5), 0.14, tint=STEEL),
+        streaks(
+            "Sparks",
+            9,
+            (22, 40),
+            60,
+            1.5,
+            (0.15, 0.3),
+            colors=(WHITE, (255, 170, 80)),
+            brightness=3,
+            Acceleration=[0, -30, 0],
+            drag=6,
+        ),
+        puff(2, (1.5, 3), (2, 4), transparency=0.7),
+    ]
+)
+
 TEMPLATES = {
-    "StrikeSwipe": strike_swipe,
     "HitImpact": hit_impact,
     "HitShake": hit_shake,
     "HeavySwipe": heavy_swipe,
@@ -2183,6 +2329,12 @@ TEMPLATES = {
     "HexBody": hex_curse_body,
     "VenomBurst": venom_burst,
     "HexBurst": hex_curse_burst,
+    "PunchJab": punch_jab,
+    "PunchFinisher": punch_finisher,
+    "PunchImpact": punch_impact,
+    "PunchImpactHeavy": punch_impact_heavy,
+    "ParryClash": parry_clash,
+    "BlockSpark": block_spark,
 }
 
 

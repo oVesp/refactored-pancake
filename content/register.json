@@ -1957,9 +1957,59 @@
 			"assetId": "108429372505182"
 		},
 		{
-			"id": "vfx:StrikeSwipe",
+			"id": "vfx:PunchJab",
 			"type": "vfx",
-			"path": "src/ReplicatedStorage/Vfx/StrikeSwipe.model.json",
+			"path": "src/ReplicatedStorage/Vfx/PunchJab.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Effect template played through ForgeVFX; textures by TextureKey attribute (docs/systems/vfx.md)."
+		},
+		{
+			"id": "vfx:PunchFinisher",
+			"type": "vfx",
+			"path": "src/ReplicatedStorage/Vfx/PunchFinisher.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Effect template played through ForgeVFX; textures by TextureKey attribute (docs/systems/vfx.md)."
+		},
+		{
+			"id": "vfx:PunchImpact",
+			"type": "vfx",
+			"path": "src/ReplicatedStorage/Vfx/PunchImpact.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Effect template played through ForgeVFX; textures by TextureKey attribute (docs/systems/vfx.md)."
+		},
+		{
+			"id": "vfx:PunchImpactHeavy",
+			"type": "vfx",
+			"path": "src/ReplicatedStorage/Vfx/PunchImpactHeavy.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Effect template played through ForgeVFX; textures by TextureKey attribute (docs/systems/vfx.md)."
+		},
+		{
+			"id": "vfx:ParryClash",
+			"type": "vfx",
+			"path": "src/ReplicatedStorage/Vfx/ParryClash.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Effect template played through ForgeVFX; textures by TextureKey attribute (docs/systems/vfx.md)."
+		},
+		{
+			"id": "vfx:BlockSpark",
+			"type": "vfx",
+			"path": "src/ReplicatedStorage/Vfx/BlockSpark.model.json",
 			"origin": "original",
 			"license": "project",
 			"owner": "dev",

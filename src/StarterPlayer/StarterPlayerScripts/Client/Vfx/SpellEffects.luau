@@ -27,6 +27,10 @@ export type Recipe = {
 	resolve: ((info: ResolveInfo) -> ())?,
 	--[=[ Melee swing; also used as the local player's prediction. ]=]
 	swing: ((origin: Vector3, aim: Vector3, range: number, angle: number) -> ())?,
+	--[=[ Template played where the melee hit lands, in place of the default `HitImpact`. ]=]
+	hit: string?,
+	--[=[ Hit pause in seconds when the local player lands or takes the hit. ]=]
+	hitstop: number?,
 }
 
 local N = Particles.Numbers
@@ -182,17 +186,25 @@ local function groundTarget(info: ResolveInfo): Vector3
 	return Particles.Ground(center)
 end
 
--- Light attack: a flat, level crescent swept around the front of the attacker at chest height.
-SpellEffects.strike = {
-	swing = function(origin, aim)
+-- Turns a CFrame so its top face, which fist and guard templates emit from, points along `look`.
+local TOP_ALONG_LOOK = CFrame.Angles(-math.pi / 2, 0, 0)
+
+-- Fist chain (light attacks 1-3): a puff of displaced air off the knuckles; the hit lands as an air
+-- burst rather than a blade's cut. The third punch finishes the chain with a bigger burst.
+local function punch(template: string): (origin: Vector3, aim: Vector3) -> ()
+	return function(origin, aim)
 		local look = flatLook(origin, aim)
 		if not look then
 			return
 		end
-		local at = origin + look * 0.8 + Vector3.new(0, 0.5, 0)
-		Effects.Play("StrikeSwipe", CFrame.lookAt(at, at + look))
-	end,
-}
+		local at = origin + look * 1.8 + Vector3.new(0, 0.5, 0)
+		Effects.Play(template, CFrame.lookAt(at, at + look) * TOP_ALONG_LOOK)
+	end
+end
+
+SpellEffects.strike = { swing = punch("PunchJab"), hit = "PunchImpact" }
+SpellEffects.strike_2 = { swing = punch("PunchJab"), hit = "PunchImpact" }
+SpellEffects.strike_3 = { swing = punch("PunchFinisher"), hit = "PunchImpactHeavy", hitstop = 0.085 }
 
 local function scatter(center: Vector3, radius: number): Vector3
 	local angle = math.random() * math.pi * 2

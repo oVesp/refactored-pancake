@@ -32,7 +32,10 @@ local DAMAGE_COLORS: { [string]: Color3 } = {
 	immune = Color3.fromRGB(200, 200, 200),
 	dodged = Color3.fromRGB(200, 200, 200),
 	parried = Color3.fromRGB(255, 220, 120),
+	blocked = Color3.fromRGB(190, 200, 220),
 }
+
+local PARRY_COLOR = Color3.fromRGB(255, 210, 110)
 
 local TELEGRAPH_COLOR = Color3.fromRGB(255, 70, 50)
 
@@ -301,23 +304,68 @@ end
 
 local MELEE_DELIVERIES = { Melee = true, Cone = true, Dash = true }
 
--- Weapon hit on a body: authored impact, white flash and light; hitstop and shake when the local
--- player gives or takes it.
-local function meleeImpact(model: Model, root: BasePart, source: Model?, crit: boolean)
-	local at = root.Position + Vector3.new(0, 0.5, 0)
-	local sourceRoot = source and source:FindFirstChild("HumanoidRootPart")
-	if sourceRoot and sourceRoot:IsA("BasePart") then
-		local toward = (sourceRoot.Position - root.Position) * Vector3.new(1, 0, 1)
-		if toward.Magnitude > 1e-3 then
-			at += toward.Unit * 0.8
-		end
-	end
-	Effects.Play("HitImpact", CFrame.new(at))
+-- Turns a CFrame so its top face, which hit templates emit from, points along `look`.
+local TOP_ALONG_LOOK = CFrame.Angles(-math.pi / 2, 0, 0)
+
+local function rootOf(model: Model?): BasePart?
+	local root = model and (model:FindFirstChild("HumanoidRootPart") or model.PrimaryPart)
+	return if root and root:IsA("BasePart") then root else nil
+end
+
+-- Level unit vector from `root` toward `source`'s root, or nil when there is none.
+local function towardSource(root: BasePart, source: Model?): Vector3?
+	local sourceRoot = rootOf(source)
+	local toward = sourceRoot and (sourceRoot.Position - root.Position) * Vector3.new(1, 0, 1)
+	return if toward and toward.Magnitude > 1e-3 then toward.Unit else nil
+end
+
+-- Template frame at `at` with its top face along `look`; plain position without a direction.
+local function facing(at: Vector3, look: Vector3?): CFrame
+	return if look then CFrame.lookAt(at, at + look) * TOP_ALONG_LOOK else CFrame.new(at)
+end
+
+local function involvesLocal(a: Model?, b: Model?): boolean
+	local character = Players.LocalPlayer.Character
+	return character ~= nil and (a == character or b == character)
+end
+
+-- Melee hit on a body: the recipe's impact (default `HitImpact`) along the blow, white flash and
+-- light; hitstop and shake when the local player gives or takes it.
+local function meleeImpact(model: Model, root: BasePart, source: Model?, crit: boolean, recipe: SpellEffects.Recipe?)
+	local toward = towardSource(root, source)
+	local at = root.Position + Vector3.new(0, 0.5, 0) + (if toward then toward * 0.8 else Vector3.zero)
+	Effects.Play(recipe and recipe.hit or "HitImpact", facing(at, toward and -toward))
 	Effects.BodyFlash(model, Color3.new(1, 1, 1), if crit then 0.22 else 0.14)
 	Particles.Flash(at, Color3.fromRGB(220, 230, 255), 14, 0.15)
-	local character = Players.LocalPlayer.Character
-	if character and (source == character or model == character) then
-		Effects.Hitstop({ model, source }, if crit then 0.09 else 0.055)
+	if involvesLocal(model, source) then
+		local hitstop = recipe and recipe.hitstop or 0.055
+		Effects.Hitstop({ model, source }, if crit then hitstop + 0.035 else hitstop)
+		Effects.Play("HitShake", CFrame.new(at))
+	end
+end
+
+-- Hit taken on a guard: sparks off the front of the defender, toward the attacker.
+local function blockImpact(root: BasePart, source: Model?)
+	local toward = towardSource(root, source)
+	local at = root.Position + Vector3.new(0, 0.8, 0) + (if toward then toward * 1.1 else Vector3.zero)
+	Effects.Play("BlockSpark", facing(at, toward))
+end
+
+-- Parry: a gold clang at the defender's guard facing the attacker, a gold body flash, and hitstop
+-- and shake when the local player is either side of it.
+local function onParry(defender: Model?, attacker: Model?)
+	local root = rootOf(defender)
+	if not root or not defender then
+		return
+	end
+	local toward = towardSource(root, attacker)
+	local at = root.Position + Vector3.new(0, 0.8, 0) + (if toward then toward * 1.3 else Vector3.zero)
+	Effects.Play("ParryClash", facing(at, toward))
+	Effects.BodyFlash(defender, PARRY_COLOR, 0.2)
+	Particles.Flash(at, PARRY_COLOR, 18, 0.2)
+	AudioController.PlayAt("Hit", at)
+	if involvesLocal(defender, attacker) then
+		Effects.Hitstop({ defender, attacker }, 0.12)
 		Effects.Play("HitShake", CFrame.new(at))
 	end
 end
@@ -329,7 +377,9 @@ local function onDamage(model: Model, amount: number, kind: string, crit: boolea
 	end
 	local skill = skillId and Skills.ById[skillId]
 	if (kind == "damage" or kind == "shielded") and skill and MELEE_DELIVERIES[skill.delivery] then
-		meleeImpact(model, root, source, crit)
+		meleeImpact(model, root, source, crit, SpellEffects[skill.id])
+	elseif kind == "blocked" then
+		blockImpact(root, source)
 	end
 	local gui = UIController.Clone("DamageNumber") :: BillboardGui
 	local text = gui:FindFirstChild("Bind_Text", true) :: TextLabel
@@ -348,7 +398,7 @@ local function onDamage(model: Model, amount: number, kind: string, crit: boolea
 		:Create(text, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { TextTransparency = 1 })
 		:Play()
 	Debris:AddItem(gui, 1)
-	if kind == "damage" or kind == "shielded" then
+	if kind == "damage" or kind == "shielded" or kind == "blocked" then
 		AudioController.PlayAt("Hit", root.Position)
 	end
 end
@@ -414,6 +464,7 @@ function VfxController.Start()
 	NetClient.Connect("ShowCast", onCast)
 	NetClient.Connect("ShowImpact", onImpact)
 	NetClient.Connect("ShowDamage", onDamage)
+	NetClient.Connect("ShowParry", onParry)
 	CombatController.Used:Connect(onUsed)
 	CombatController.Rejected:Connect(function(skillId: string)
 		local track = skillTracks[skillId]
