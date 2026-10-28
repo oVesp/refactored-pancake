@@ -419,6 +419,7 @@ Dark-navy panels, gold trim, serif headings; palette, fonts, frame recipes and H
 
 ### 8.1 Encouraged automation (agent-friendly)
 - **Blender (headless/bpy)** for: 2D icon renders from simple 3D meshes, turntable thumbnails, texture bakes, UV/atlas packing, spritesheets, batch re-export, scripted material variants, mesh cleanup/decimation and format conversion. All driven by checked-in scripts in `tools/blender/`.
+- **Procedural houses**: `tools/blender/house_generator.py` assembles medieval houses from the Quaternius Medieval Village MegaKit (CC0, `assets/third_party/Medieval Village MegaKit[Standard]/`, not committed): footprint 4-8 m wide by 4-14 m deep from the kit's roof sizes, 1-3 stories, brick or plaster ground floor, half-timbered upper floors, seeded doors, windows, shutters, chimney and vines. Same seed, same house. Runs headless (`--seed --count --width --depth --stories --out --glb --render`) or as a Blender sidebar panel (House tab). Built houses that ship get register rows (§7.1) for the kit files they use.
 - **Python/Node/Lune** for: data pipelines (spreadsheet → `Content/` modules), asset manifests, validation (naming, sizes, missing refs), localization table builds, balance simulations.
 - **Open Cloud** for uploading assets/places from CI with scoped keys.
 - **Studio generators** (mesh/material/texture/procedural model tools) for props and blockouts, followed by a human art pass.
