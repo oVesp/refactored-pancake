@@ -6,9 +6,9 @@
 	"outDir": "src/ReplicatedStorage/Animations/Goblin",
 	"rig": {
 		"status": "pending-import",
-		"note": "Import Export/Goblin_Scout.fbx in Studio, save the raw import and write the bone list and studsPerMetre (docs/art/animation-pipeline.md, Rig import). Until then the live ids and KeyframeSequences are the retired goblin.blend clips.",
+		"note": "Import Export/Goblin_Scout.fbx in Studio, rebuild the Goblin template from the raw import, then write the bone list (docs/art/animation-pipeline.md, Rig import). Until then the live ids and KeyframeSequences are the retired goblin.blend clips.",
 		"bones": "tools/world/goblin_scout_bones.json",
-		"studsPerMetre": null,
+		"studsPerMetre": "auto",
 		"poseRoot": [],
 		"lockedBones": [],
 		"frameStep": 2

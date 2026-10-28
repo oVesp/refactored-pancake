@@ -77,7 +77,8 @@ return {
 			Expect.truthy(manifest.rig and manifest.rig.status, `{manifest.set}: fbx sets need a rig block`)
 			if manifest.rig.status == "ready" then
 				Expect.truthy(fs.isFile(manifest.rig.bones), `{manifest.set}: rig bone list missing`)
-				Expect.truthy(type(manifest.rig.studsPerMetre) == "number", `{manifest.set}: studsPerMetre`)
+				local scale = manifest.rig.studsPerMetre
+				Expect.truthy(type(scale) == "number" or scale == "auto", `{manifest.set}: studsPerMetre`)
 			end
 			for key, clip in manifest.clips do
 				Expect.truthy(clip.source, `{key}: no source`)

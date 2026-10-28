@@ -10,6 +10,7 @@ tables, and a spec that keeps them in step. Mechanics reference for `docs/game-d
 | `src/ReplicatedStorage/Content/AnimRoles.luau` | Enemy role contract: `Idle`, `Walk`, `Attack`, `Death` required; `Run`, `Throw`, `Hit` optional. Priority and looping per role. `EnemyAnimationController` loads every role a set has. |
 | `content/animations/<set>.json` | Manifest per set: exporter, source folder, rig, and per clip its role, source file, looping, markers, tier, notes, hashes, live asset id and id history. Source of truth for everything below. |
 | `tools/anim/anim.py` | `scan`, `status`, `export`, `upload`, `sync` (below). |
+| `tools/anim/rig_from_import.luau` | Bone list with rest offsets from a raw Studio import (Rig import). |
 | `tools/blender/export_clips.py` | Exporter `fbx`: one FBX per clip → KeyframeSequence, headless Blender 5.2. |
 | `tools/blender/rbxanim_to_keyframes.py` | Exporter `rbxanim`: `.rbxanim` bakes of the R15 combat rig → KeyframeSequence. |
 | Exporter `studio` | Clips animated and uploaded in Studio; the committed KeyframeSequence is an export of the uploaded clip (Skeleton). The tool only tracks them. |
@@ -21,7 +22,7 @@ tables, and a spec that keeps them in step. Mechanics reference for `docs/game-d
 - **placeholder**: any clip not authored by the owner for this game. Action Forge (Quaternius, CC0) clips and agent-made clips are placeholders.
 - **final**: an owner-authored replacement. A clip becomes final only when the owner says so when handing it over.
 
-Replacing a placeholder with a final: point the clip's `source` at the new file, set `tier` to `final`, then `scan`, `export`, `upload`. The old asset id moves to the clip's `history`; nothing else changes, so gameplay code never notices the swap.
+Replacing a placeholder with a final: point the clip's `source` at the new file, set `tier` to `final`, then `scan`, `export`, `upload`. The old asset id moves to the clip's `history` with the tier and source it was uploaded from; nothing else changes, so gameplay code never notices the swap.
 
 ## Clip states
 
@@ -62,18 +63,19 @@ Raw clip folders under `assets/original/characters/**/Export/Animations/` are gi
 
 ## Rig import (exporter `fbx`)
 
-A set's rig block stays `pending-import` until the mesh is in Studio, and `export` refuses to run before that, because KeyframeSequence pose names must match the bones the importer keeps.
+A set's rig block stays `pending-import` until the mesh is in Studio and the set's template uses it, and `export` refuses to run before that, because KeyframeSequence pose names must match the bones the importer keeps. Uploading clips for a new skeleton while the template still has the old one breaks every enemy of that set, so steps 2 to 5 land in one commit.
 
-1. Import the character FBX (for the Goblin Scout, `Export/Goblin_Scout.fbx`) with the Studio 3D importer and save the raw import as `tools/world/<set>_import.rbxm` (the Skeleton path in `tools/world/build.luau`).
-2. From Studio, write the importer's bone tree to `rig.bones` as `{"bones": [{"name", "parent"}]}`, with `parent` null for bones directly under the mesh.
-3. Set `rig.studsPerMetre` to `MeshPart.Size / MeshPart.InitialSize` of the import, `rig.poseRoot` to the pose wrappers above the root bone (empty for raw imports such as the Skeleton), and `rig.status` to `ready`.
-4. Export one clip, play it in Studio on the imported rig, and check it against the Blender playback before uploading the rest.
+1. Import the character FBX (for the Goblin Scout, `Export/Goblin_Scout.fbx`) with the Studio 3D importer and save the raw import as `tools/world/<set>_import.rbxm`.
+2. Rebuild the set's template from the raw import in `tools/world/build.luau` (the Skeleton path) and register the mesh ids in `Assets.Meshes`.
+3. Write the bone list: `lune run tools/anim/rig_from_import tools/world/<set>_import.rbxm tools/world/<set>_bones.json`, and point `rig.bones` at it. Each bone records its rest offset in studs.
+4. Keep `rig.studsPerMetre` at `"auto"` (the exporter compares those offsets with the FBX rest pose and prints the median ratio) or set a number; set `rig.poseRoot` to the pose wrappers above the root bone (empty for raw imports such as the Skeleton) and `rig.status` to `ready`.
+5. `export` one clip, play it in Studio on the new template and check it against the Blender playback, then `export` and `upload` the rest.
 
 ## Sets
 
 | Set | Exporter | Source | Rig |
 |---|---|---|---|
-| Goblin | fbx | Goblin Scout, `assets/original/characters/mobs/Goblin Scout/Export/Animations` (Action Forge clips remapped by the owner) | pending import; the live ids are the retired `goblin.blend` clips until the Scout clips are exported |
+| Goblin | fbx | Goblin Scout, `assets/original/characters/mobs/Goblin Scout/Export/Animations` (Action Forge clips remapped by the owner) | pending import; the template and live ids are the retired `goblin.blend` goblin until the Scout template and clips land together |
 | Skeleton | studio | Uploaded from Studio by the owner | n/a |
 | Combat | rbxanim | `assets/blender/combat_r15/*.rbxanim` | stock R15 |
 

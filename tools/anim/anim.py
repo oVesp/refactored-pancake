@@ -285,12 +285,13 @@ def cmd_upload(args):
             if clip.get("assetId"):
                 clip.setdefault("history", []).append({
                     "assetId": clip["assetId"], "tier": clip.get("uploadedTier", clip["tier"]),
-                    "source": clip.pop("liveSource", clip.get("source")),
+                    "source": clip.pop("liveSource", clip.get("uploadedSource")),
                     "uploaded": clip.get("uploaded"), "retired": today,
                 })
             clip["assetId"] = str(asset_id)
             clip["uploadedSha"] = sha256(output)
             clip["uploadedTier"] = clip["tier"]
+            clip["uploadedSource"] = clip.get("source")
             clip["uploaded"] = today
             save(manifest)
             print(key, asset_id)

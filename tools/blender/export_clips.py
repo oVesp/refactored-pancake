@@ -10,7 +10,8 @@ Each clip's FBX is imported into an empty scene and its armature action is sampl
 (`rig.bones`, taken from the Studio import), nested as in that list and wrapped in the
 `rig.poseRoot` pose names. Blender bone space maps to Roblox bone space by conjugating with a
 180 degree turn about Y; translations scale by `rig.studsPerMetre` times the armature's world
-scale. Bones in `rig.lockedBones` stay at rest.
+scale. `"auto"` takes the median ratio of each bone's rest offset in the import (`offset`, studs)
+to its offset in the FBX rest pose (metres). Bones in `rig.lockedBones` stay at rest.
 """
 
 import json
@@ -75,16 +76,36 @@ def import_clip(path):
     return rig, rig.animation_data.action
 
 
+def calibrate(rig, bones, world):
+    ratios = []
+    for name, (parent, offset) in bones.items():
+        bone = rig.data.bones[name]
+        if parent and offset and bone.parent:
+            metres = (bone.parent.matrix_local.inverted() @ bone.matrix_local).translation.length * world
+            if metres > 1e-4:
+                ratios.append(offset / metres)
+    if not ratios:
+        sys.exit("no bone offsets to calibrate studsPerMetre; set it in the manifest")
+    ratios.sort()
+    median = ratios[len(ratios) // 2]
+    print("studsPerMetre auto: %.5f (%d bones, %.5f to %.5f)" % (median, len(ratios), ratios[0], ratios[-1]))
+    return median
+
+
 def export_clip(manifest, key, clip, bones):
     rig_spec = manifest["rig"]
     rig, action = import_clip(os.path.join(REPO, manifest["sourceDir"], clip["source"]))
     missing = [name for name in bones if name not in rig.data.bones]
     if missing:
         sys.exit("%s: Roblox bones missing from the FBX armature: %s" % (key, ", ".join(missing[:10])))
-    scale = rig_spec["studsPerMetre"] * rig.matrix_world.to_scale().x
+    world = rig.matrix_world.to_scale().x
+    studs_per_metre = rig_spec["studsPerMetre"]
+    if studs_per_metre == "auto":
+        studs_per_metre = calibrate(rig, bones, world)
+    scale = studs_per_metre * world
     locked = set(rig_spec.get("lockedBones", []))
     children = {}
-    for name, parent in bones.items():
+    for name, (parent, _) in bones.items():
         children.setdefault(parent, []).append(name)
 
     scene = bpy.context.scene
@@ -129,7 +150,7 @@ def main():
     with open(args[0], encoding="utf8") as f:
         manifest = json.load(f)
     with open(os.path.join(REPO, manifest["rig"]["bones"]), encoding="utf8") as f:
-        bones = {bone["name"]: bone["parent"] for bone in json.load(f)["bones"]}
+        bones = {bone["name"]: (bone.get("parent"), bone.get("offset")) for bone in json.load(f)["bones"]}
     for key in args[1:]:
         export_clip(manifest, key, manifest["clips"][key], bones)
 

@@ -23,7 +23,8 @@
 			"uploadedTier": "placeholder",
 			"uploaded": "2026-10-25",
 			"history": [],
-			"sourceSha256": "3645c2d00d105395da2138e4d152ffd6076340f85ffd5546499a0e5321651f58"
+			"sourceSha256": "3645c2d00d105395da2138e4d152ffd6076340f85ffd5546499a0e5321651f58",
+			"uploadedSource": "Strike.rbxanim"
 		},
 		"BasicHeavyStrike": {
 			"source": "HeavyStrike.rbxanim",
@@ -40,7 +41,8 @@
 			"uploadedTier": "placeholder",
 			"uploaded": "2026-10-25",
 			"history": [],
-			"sourceSha256": "6d625e081d7b6b8cf0ecd3b001db5bf99b9543556699e94c0699e6f3b7836204"
+			"sourceSha256": "6d625e081d7b6b8cf0ecd3b001db5bf99b9543556699e94c0699e6f3b7836204",
+			"uploadedSource": "HeavyStrike.rbxanim"
 		},
 		"BasicStrike2": {
 			"source": "Strike2.rbxanim",
@@ -56,7 +58,8 @@
 			"uploadedTier": "placeholder",
 			"uploaded": "2026-10-27",
 			"history": [],
-			"sourceSha256": "fd497310bc089038687cd423ff22c12476ed101a4337a8b1b4f8a44af6829f7e"
+			"sourceSha256": "fd497310bc089038687cd423ff22c12476ed101a4337a8b1b4f8a44af6829f7e",
+			"uploadedSource": "Strike2.rbxanim"
 		},
 		"BasicStrike3": {
 			"source": "Strike3.rbxanim",
@@ -72,7 +75,8 @@
 			"uploadedTier": "placeholder",
 			"uploaded": "2026-10-27",
 			"history": [],
-			"sourceSha256": "d45a110383af52bfd1d0a2cadf6749884c71b5956f5ef139c086faff29c3c79f"
+			"sourceSha256": "d45a110383af52bfd1d0a2cadf6749884c71b5956f5ef139c086faff29c3c79f",
+			"uploadedSource": "Strike3.rbxanim"
 		},
 		"GuardHold": {
 			"source": "GuardHold.rbxanim",
@@ -86,7 +90,8 @@
 			"uploadedTier": "placeholder",
 			"uploaded": "2026-10-27",
 			"history": [],
-			"sourceSha256": "7d04867fbcb74a877118930e8b7f640d6fa1bd86ae29d6d5c18949c4d1198955"
+			"sourceSha256": "7d04867fbcb74a877118930e8b7f640d6fa1bd86ae29d6d5c18949c4d1198955",
+			"uploadedSource": "GuardHold.rbxanim"
 		},
 		"GuardParry": {
 			"source": "GuardParry.rbxanim",
@@ -102,7 +107,8 @@
 			"uploadedTier": "placeholder",
 			"uploaded": "2026-10-27",
 			"history": [],
-			"sourceSha256": "f8a9c207cbb5575fac8fc12ad4c18ae76fc331ff2f66ff144a02c6613e2e6a74"
+			"sourceSha256": "f8a9c207cbb5575fac8fc12ad4c18ae76fc331ff2f66ff144a02c6613e2e6a74",
+			"uploadedSource": "GuardParry.rbxanim"
 		}
 	}
 }
