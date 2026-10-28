@@ -1,13 +1,21 @@
 # AI and spawning
 
-Code: `Server/Services/AIService.luau`, `SpawnService.luau`, `Client/Controllers/EnemyAnimationController.luau`; template `src/ServerStorage/Templates/Goblin.rbxmx`.
+Code: `Server/Services/AIService.luau`, `SquadService.luau`, `SpawnService.luau`, `Shared/Swarm.luau`, `Client/Controllers/EnemyAnimationController.luau`; template `src/ServerStorage/Templates/Goblin.rbxmx`.
 
 Template: skinned `Body` MeshPart (bones from `tools/world/goblin_rig.json`) driven by a Humanoid and `HumanoidRootPart`, plus an invisible `Head` anchor for nameplates. Spawn scales it by `def.scale × BaseScale` (1.5) and tints `Body`; the SurfaceAppearance leaves the skin transparent so the colour shows. The model streams atomically.
 
 Animation: AIService sets `AnimCue = "<clip>:<seq>"` on attack (melee, dash and self-area skills) or throw (everything else), hit and death. The client plays locomotion from root speed (idle, walk, run above 10 studs/s) and one-shots from the cue. Clip ids come from `Assets.Animations`; entries without an uploaded id fall back to the KeyframeSequence in `ReplicatedStorage.Animations`, which only resolves in Studio.
 
 - **Spawners** are invisible parts tagged `Spawner` (`EnemyId`, `Count`, `LevelMin`, `LevelMax`, `RespawnSeconds`, `Radius`). Active cap per zone: `Tuning.Npc.ActivePerZone`. Dead goblins despawn after 3 s; their spawner refills after its timer.
-- **Brains** think every 0.25 s with jitter: Idle → Patrol (random point near home) → Aggro (taunt, then threat, then the nearest player in aggro radius) → Attack (first ready skill in data order whose conditions hold) → Return (beyond the leash: clear threat, walk home, regenerate, reset). Players in safe zones are never targeted. Damage alerts nearby idle goblins.
+- **Brains** think every 0.25 s with jitter: Idle → Patrol (random point near home) → Aggro (taunt, then threat, then the nearest player in aggro radius) → Position (waiting for an attack token) → Attack (first ready skill in data order whose conditions hold and whose budget grants a token) → Return (beyond the leash: clear threat, walk home, regenerate, reset). Players in safe zones are never targeted. Damage alerts nearby idle enemies of the same team.
 - **Behaviors** come from data: `keepDistance` makes ranged units kite; Ally skills heal the most wounded goblin; Dash skills open from range. The Chieftain enters phase 2 at 50% HP (Rally plus two Raiders).
 - **Movement** uses `Humanoid:MoveTo` on clear lines and `PathfindingService` (pcall, staggered recompute) when blocked.
 - `AiState` is replicated as an attribute for the debug overlay.
+
+## Group combat
+
+One general system for every enemy, configured per enemy in `EnemyDef.combat` (`Content/Types`) with defaults in `Tuning.Swarm`. Pure logic lives in `Shared/Swarm.luau` (unit-tested under Lune); `SquadService` owns the live state; `AIService` asks it before acting.
+
+- **Squads.** Enemies attacking the same player form that player's squad. The attack budget belongs to the player, so goblins and undead on one player share it without cooperating.
+- **Attack tokens.** Each player target carries its own budget, `Tuning.Swarm.Budget` (2 Melee + 1 Ranged, plus 1 Support for ally skills), so the total grows with the number of players in a fight. A skill draws from the budget of its kind (`Swarm.TokenKind`: ally skills Support; Melee, Dash and SelfArea Melee; the rest Ranged), not from the enemy's slot, so an enemy with a heal and a strike uses both. `combat.tokenCost` (default 1, large enemies 2) is the share one attack takes. Slot `"None"` never waits (training dummy).
+- **Token lifecycle.** A melee enemy queues for a token as soon as an attack skill is ready, before walking into reach; without one it holds `WaitDistance` studs beyond its reach in the `Position` state, facing the target (ranged enemies wait at their own distance). Queues are per kind and FIFO by when waiting began, so the enemy that just attacked goes to the back. Spending a token sets its release to the end of the windup or cast plus `RecoveryHold`; an unused grant is taken back after `TokenTimeout`; a waiter that stops asking for `WaitStale` loses its place. Interrupts, death, leaving the target and returning home give the token back at once.

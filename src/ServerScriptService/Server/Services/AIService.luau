@@ -6,12 +6,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Enemies = require(ReplicatedStorage.Content.Enemies)
 local Logger = require(ReplicatedStorage.Shared.Logger)
 local Skills = require(ReplicatedStorage.Content.Skills)
+local Swarm = require(ReplicatedStorage.Shared.Swarm)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 local Types = require(script.Parent.Parent.Types)
 
 type Entity = Types.Entity
+type Member = Types.SquadMember
 
-type State = "Idle" | "Patrol" | "Aggro" | "Attack" | "Return"
+type State = "Idle" | "Patrol" | "Aggro" | "Position" | "Attack" | "Return"
 
 type Brain = {
 	entity: Entity,
@@ -27,6 +29,7 @@ type Brain = {
 	pathTarget: Vector3?,
 	nextPathAt: number,
 	summoned: boolean,
+	member: Member,
 }
 
 local AGGRO_ON_HIT_RADIUS = 60
@@ -42,6 +45,7 @@ local StatService: any
 local StatusService: any
 local ZoneService: any
 local SpawnService: any
+local SquadService: any
 
 local brains: { [Entity]: Brain } = {}
 local cueSequence = 0
@@ -50,9 +54,10 @@ local blockParams = RaycastParams.new()
 blockParams.FilterType = Enum.RaycastFilterType.Exclude
 
 --[=[
-	Server-only goblin brains (game-design.md 5.6): idle, patrol, aggro, attack, return. Each
-	thinks on a jittered interval; detection is a distance check over living players;
-	PathfindingService only runs when the straight line is blocked.
+	Server-only enemy brains (game-design.md 5.6): idle, patrol, aggro, position, attack, return.
+	Each thinks on a jittered interval; detection is a distance check over living players;
+	PathfindingService only runs when the straight line is blocked. Attacks need a token from
+	SquadService; without one the enemy waits in position.
 ]=]
 local AIService = {}
 
@@ -221,35 +226,55 @@ local function alliesNear(brain: Brain, radius: number): number
 	return count
 end
 
--- Picks the first ready skill in data order whose conditions hold. Returns skill id, aim and the
--- entity it is aimed at.
-local function chooseSkill(brain: Brain, target: Entity, distance: number): (string?, Vector3?, Entity?)
+-- Aim and aimed-at entity for a ready skill whose conditions hold, or nil.
+local function usable(brain: Brain, skill: any, target: Entity, distance: number): (Vector3?, Entity?)
 	local entity = brain.entity
+	if skill.targets == "Ally" then
+		if skill.delivery == "SelfArea" then
+			if alliesNear(brain, skill.radius or 20) > 0 then
+				return entity.root.Position, nil
+			end
+		else
+			local ally = woundedAlly(brain, skill.range or 30)
+			if ally then
+				return ally.root.Position, ally
+			end
+		end
+	elseif skill.delivery == "Dash" then
+		if distance > 8 and distance <= (skill.range or 20) then
+			return target.root.Position, target
+		end
+	elseif distance <= skillReach(skill) then
+		return target.root.Position, target
+	end
+	return nil, nil
+end
+
+-- Picks the first ready skill in data order whose conditions hold and whose budget grants a
+-- token. Returns skill id, aim and the entity it is aimed at.
+local function chooseSkill(brain: Brain, target: Entity, distance: number, now: number): (string?, Vector3?, Entity?)
 	for _, skillId in brain.def.skills do
 		local skill = Skills.ById[skillId]
-		if not skill or SkillService.CooldownRemaining(entity, skillId) > 0 then
+		if not skill or SkillService.CooldownRemaining(brain.entity, skillId) > 0 then
 			continue
 		end
-		if skill.targets == "Ally" then
-			if skill.delivery == "SelfArea" then
-				if alliesNear(brain, skill.radius or 20) > 0 then
-					return skillId, entity.root.Position, nil
-				end
-			else
-				local ally = woundedAlly(brain, skill.range or 30)
-				if ally then
-					return skillId, ally.root.Position, ally
-				end
-			end
-		elseif skill.delivery == "Dash" then
-			if distance > 8 and distance <= (skill.range or 20) then
-				return skillId, target.root.Position, target
-			end
-		elseif distance <= skillReach(skill) then
-			return skillId, target.root.Position, target
+		local aim, aimedAt = usable(brain, skill, target, distance)
+		if aim and SquadService.RequestToken(brain.member, Swarm.TokenKind(skill), now) then
+			return skillId, aim, aimedAt
 		end
 	end
 	return nil, nil, nil
+end
+
+-- Budget of the first ready attack skill, used to queue for a token before walking into reach.
+local function readyAttackKind(brain: Brain): Swarm.TokenKind?
+	for _, skillId in brain.def.skills do
+		local skill = Skills.ById[skillId]
+		if skill and skill.targets ~= "Ally" and SkillService.CooldownRemaining(brain.entity, skillId) <= 0 then
+			return Swarm.TokenKind(skill)
+		end
+	end
+	return nil
 end
 
 local function preferredRange(brain: Brain): number
@@ -267,6 +292,7 @@ local function preferredRange(brain: Brain): number
 end
 
 local function startReturn(brain: Brain)
+	SquadService.Leave(brain.member)
 	setState(brain, "Return")
 	brain.target = nil
 	table.clear(brain.entity.threat)
@@ -329,8 +355,13 @@ local function think(brain: Brain, now: number)
 
 	local target = pickTarget(brain)
 	brain.target = target
+	if target then
+		SquadService.Join(brain.member, target)
+	else
+		SquadService.Leave(brain.member)
+	end
 	if not target then
-		if brain.state == "Aggro" or brain.state == "Attack" then
+		if brain.state == "Aggro" or brain.state == "Position" or brain.state == "Attack" then
 			startReturn(brain)
 			return
 		end
@@ -351,18 +382,42 @@ local function think(brain: Brain, now: number)
 
 	bossPhase(brain)
 	local distance = (target.root.Position - root.Position).Magnitude
-	local skillId, aim, aimedAt = chooseSkill(brain, target, distance)
+	local skillId, aim, aimedAt = chooseSkill(brain, target, distance, now)
 	if skillId and aim then
+		local skill = Skills.ById[skillId]
 		setState(brain, "Attack")
 		stop(brain)
 		face(brain, aim)
+		SquadService.Commit(brain.member, now + (skill.castTime or skill.windup or 0) + Tuning.Swarm.RecoveryHold)
 		SkillService.Cast(entity, skillId, aim, aimedAt)
-		local delivery = Skills.ById[skillId].delivery
+		local delivery = skill.delivery
 		cue(entity, if delivery == "Melee" or delivery == "Dash" or delivery == "SelfArea" then "Attack" else "Throw")
 		return
 	end
 
-	setState(brain, "Aggro")
+	local member = brain.member
+	local attackKind = readyAttackKind(brain)
+	local cleared = SquadService.HasToken(member)
+		or (attackKind ~= nil and SquadService.RequestToken(member, attackKind, now))
+	setState(brain, if cleared then "Aggro" else "Position")
+	if not cleared and member.profile.slot == "Melee" then
+		-- No token: hold just outside reach and let the token holders fight. Ranged enemies
+		-- already wait at their own distance.
+		local hold = preferredRange(brain) + Tuning.Swarm.WaitDistance
+		local offset = flat(root.Position - target.root.Position)
+		if math.abs(offset.Magnitude - hold) > 2 then
+			local direction = if offset.Magnitude > 0.1 then offset.Unit else Vector3.new(1, 0, 0)
+			local spot = target.root.Position + direction * hold
+			if not ZoneService.IsSafe(spot) then
+				moveTo(brain, spot, now)
+				return
+			end
+		end
+		stop(brain)
+		face(brain, target.root.Position)
+		return
+	end
+
 	local keep = brain.def.keepDistance
 	if keep and distance < keep then
 		local away = flat(root.Position - target.root.Position)
@@ -401,6 +456,7 @@ function AIService.Attach(entity: Entity, home: Vector3, leash: number)
 		pathTarget = nil,
 		nextPathAt = 0,
 		summoned = false,
+		member = SquadService.NewMember(entity, def),
 	}
 	entity.model:SetAttribute("AiState", "Idle")
 end
@@ -423,6 +479,7 @@ function AIService.Init(deps: { [string]: any })
 	EntityService = deps.EntityService
 	SkillService = deps.SkillService
 	StatService = deps.StatService
+	SquadService = deps.SquadService
 	StatusService = deps.StatusService
 	ZoneService = deps.ZoneService
 end
@@ -453,7 +510,11 @@ function AIService.Start()
 		end
 		if brain.state == "Idle" or brain.state == "Patrol" then
 			for _, other in brains do
-				if other ~= brain and (other.state == "Idle" or other.state == "Patrol") then
+				if
+					other ~= brain
+					and other.entity.team == target.team
+					and (other.state == "Idle" or other.state == "Patrol")
+				then
 					if (other.entity.root.Position - target.root.Position).Magnitude <= AGGRO_ON_HIT_RADIUS / 3 then
 						other.entity.threat[source] = (other.entity.threat[source] or 0) + 1
 					end

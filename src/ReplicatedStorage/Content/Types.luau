@@ -106,6 +106,14 @@ export type StatusDef = {
 	modifiers: StatBlock?,
 }
 
+--[=[ Group-combat data for an enemy (docs/systems/ai-and-spawning.md, Group combat). ]=]
+export type CombatDef = {
+	--[=[ Ring and stand-off distance the enemy uses; "None" never waits for a token. Default Melee. ]=]
+	slot: ("Melee" | "Ranged" | "Support" | "None")?,
+	--[=[ Share of the target's attack budget one attack takes. Default Tuning.Swarm.TokenCost. ]=]
+	tokenCost: number?,
+}
+
 export type EnemyDef = {
 	id: string,
 	name: string,
@@ -129,6 +137,7 @@ export type EnemyDef = {
 	template: string?,
 	-- Defaults to "Goblins". Enemies of one team call each other for help.
 	team: ("Goblins" | "Undead")?,
+	combat: CombatDef?,
 }
 
 export type ItemDef = {

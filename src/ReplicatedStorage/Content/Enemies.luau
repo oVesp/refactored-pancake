@@ -25,6 +25,7 @@ local list: { Types.EnemyDef } = {
 		xp = 12,
 		scale = 0.75,
 		color = Color3.fromRGB(110, 150, 70),
+		combat = { slot = "Melee" },
 	},
 	{
 		id = "goblin_slinger",
@@ -44,6 +45,7 @@ local list: { Types.EnemyDef } = {
 		xp = 13,
 		scale = 0.7,
 		color = Color3.fromRGB(130, 160, 80),
+		combat = { slot = "Ranged" },
 	},
 	{
 		id = "goblin_trapper",
@@ -63,6 +65,7 @@ local list: { Types.EnemyDef } = {
 		xp = 15,
 		scale = 0.72,
 		color = Color3.fromRGB(95, 125, 60),
+		combat = { slot = "Ranged" },
 	},
 	{
 		id = "goblin_brute",
@@ -81,6 +84,7 @@ local list: { Types.EnemyDef } = {
 		xp = 30,
 		scale = 1.15,
 		color = Color3.fromRGB(85, 110, 55),
+		combat = { slot = "Melee" },
 	},
 	{
 		id = "goblin_chieftain",
@@ -100,6 +104,7 @@ local list: { Types.EnemyDef } = {
 		scale = 1.4,
 		color = Color3.fromRGB(120, 90, 50),
 		elite = true,
+		combat = { slot = "Melee", tokenCost = 2 },
 	},
 	{
 		id = "skeleton",
@@ -120,6 +125,7 @@ local list: { Types.EnemyDef } = {
 		color = Color3.fromRGB(99, 95, 98),
 		template = "Skeleton",
 		team = "Undead",
+		combat = { slot = "Melee" },
 	},
 	{
 		id = "training_dummy",
@@ -138,6 +144,7 @@ local list: { Types.EnemyDef } = {
 		xp = 0,
 		scale = 1,
 		color = Color3.fromRGB(170, 140, 100),
+		combat = { slot = "None" },
 	},
 
 	-- Goblin Warband (Lv 7+)
@@ -158,6 +165,7 @@ local list: { Types.EnemyDef } = {
 		xp = 40,
 		scale = 0.9,
 		color = Color3.fromRGB(70, 100, 60),
+		combat = { slot = "Melee" },
 	},
 	{
 		id = "warband_archer",
@@ -177,6 +185,7 @@ local list: { Types.EnemyDef } = {
 		xp = 40,
 		scale = 0.85,
 		color = Color3.fromRGB(80, 115, 65),
+		combat = { slot = "Ranged" },
 	},
 	{
 		id = "goblin_hexer",
@@ -196,6 +205,7 @@ local list: { Types.EnemyDef } = {
 		xp = 45,
 		scale = 0.8,
 		color = Color3.fromRGB(90, 70, 120),
+		combat = { slot = "Ranged" },
 	},
 	{
 		id = "warband_shaman",
@@ -215,6 +225,7 @@ local list: { Types.EnemyDef } = {
 		xp = 45,
 		scale = 0.8,
 		color = Color3.fromRGB(150, 130, 60),
+		combat = { slot = "Support" },
 	},
 	{
 		id = "wolf_rider",
@@ -233,6 +244,7 @@ local list: { Types.EnemyDef } = {
 		xp = 50,
 		scale = 1.0,
 		color = Color3.fromRGB(100, 90, 80),
+		combat = { slot = "Melee" },
 	},
 	{
 		id = "warband_captain",
@@ -252,6 +264,7 @@ local list: { Types.EnemyDef } = {
 		scale = 1.3,
 		color = Color3.fromRGB(110, 60, 50),
 		elite = true,
+		combat = { slot = "Melee", tokenCost = 2 },
 	},
 }
 

@@ -129,4 +129,24 @@ return table.freeze({
 		ReturnRegenPerSecond = 0.25,
 		ActivePerZone = 20,
 	}),
+
+	--[=[
+		Group combat (docs/systems/ai-and-spawning.md, Group combat). Every player target carries its
+		own attack budget, shared by all teams attacking that player, so the total grows with the
+		number of players in a fight.
+	]=]
+	Swarm = table.freeze({
+		--[=[ Token budget per player target, by kind. Ally skills use Support, never the attack budget. ]=]
+		Budget = table.freeze({ Melee = 2, Ranged = 1, Support = 1 }),
+		--[=[ Default `combat.tokenCost`; large enemies set 2. ]=]
+		TokenCost = 1,
+		--[=[ Seconds a token stays taken after the attack's windup or cast ends. ]=]
+		RecoveryHold = 0.6,
+		--[=[ Seconds a granted token may go unused (walking into reach) before it is taken back. ]=]
+		TokenTimeout = 4,
+		--[=[ A waiter that has not asked again for this long loses its place in the queue. ]=]
+		WaitStale = 0.75,
+		--[=[ Studs beyond its reach where an enemy without a token waits. ]=]
+		WaitDistance = 6,
+	}),
 })

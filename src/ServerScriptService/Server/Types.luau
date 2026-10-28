@@ -1,5 +1,9 @@
 --!strict
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Swarm = require(ReplicatedStorage.Shared.Swarm)
+
 export type Tags = {
 	resist: { string }?,
 	immune: { string }?,
@@ -66,6 +70,13 @@ export type Entity = {
 	threat: { [Entity]: number },
 	tauntedBy: Entity?,
 	lastHitBy: Entity?,
+}
+
+--[=[ An enemy's place in group combat, owned by SquadService and held by its AI brain. ]=]
+export type SquadMember = {
+	entity: Entity,
+	profile: Swarm.Profile,
+	target: Entity?,
 }
 
 return nil

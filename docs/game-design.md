@@ -245,7 +245,7 @@ tests/                        Lune runner + specs/*.spec.luau
 6. Skills are **data**: id, class requirement, cost, GCD flag, cooldown, cast time, delivery, hit shape, effects list, animation id, VFX id, sound id.
 
 ### 5.6 Enemies and AI
-- Server-only AI: state machine (idle, patrol, aggro, attack, return, flee).
+- Server-only AI: state machine (idle, patrol, aggro, position, attack, return, flee), coordinated per target by `SquadService` (attack tokens; docs/systems/ai-and-spawning.md, Group combat).
 - `PathfindingService` with **staggered** recompute (per-NPC jitter), cached agent params, `pcall` around compute, explicit timeouts, blocked-path handling.
 - Detection by spatial queries, not per-frame player scans.
 - Spawning via `SpawnService` with CollectionService tags (`Spawner`), leash radius, respawn timers, global and per-zone active caps.
@@ -538,6 +538,7 @@ Define target concurrency per place, server count per realm, and what happens wh
 | Circle → Tier | Spell power was called "Circle" to avoid the source term | Renamed to **Tier** everywhere: skill field `tier`, `Tuning.Magic.TierStep`/`MaxTier`, `Formulas.TierUnlockLevel`/`TierCeilings`, refusal reason `TierLocked`, UI text | Owner decision (2026-10-28), allowed by the new naming rule |
 | Spell picks | Target 3 per caster level, M0.5 at 1 | 1 pick per caster level is the target (`SpellPicksPerLevel = 1`); resolves §12 Q8 | Owner methodology (2026-10-28) |
 | Tier step | Circle *n* at line level `6 × (n − 1)`, 10 Circles | Tier *n* ≥ 2 at line level `7 × (n − 1) + 1` (T2 8, T3 15, T4 22, T5 29), `MaxTier = 5` for levels 1–30; Arcane, Divine, Spiritual and Alternative lines counted independently, never summed; incompatible-line penalty kept because the anti-hybrid rule (§3.2) still stands | Owner methodology (2026-10-28); one Tier per 7 line levels across the 1–30 scope |
+| Group combat AI | Owner asked for a general, data-driven group AI for every enemy (2026-10-28), plan "IA de combate em grupo" | Attack tokens per player target shared across teams: 2 Melee + 1 Ranged per player (separate Support budget for ally skills); the budget is chosen per skill, not per enemy; FIFO queue per kind with a recovery hold, grant timeout and stale-waiter drop; waiting melee enemies hold outside reach in a new `Position` state; pull-on-damage now only alerts the same team | Budgeting attackers does more for group fights than tuning damage or HP; a per-skill budget keeps mixed kits (Captain: rally + strike) correct; FIFO with a hold stops the last attacker from re-grabbing the token |
 
 ---
 
