@@ -122,21 +122,22 @@ local Textures: { [string]: TextureAsset } = {
 	stands in for any entry without an uploaded `id`; runtime registration of a KeyframeSequence only
 	works in Studio and is not seen by other clients.
 	- Enemy clips, keyed `<AnimSet><Clip>` (game-design.md 7.3): assets/blender/goblin/goblin.blend,
-	  retargeted from the reference armature. Skeleton clips were animated on the imported rig and
-	  uploaded from Studio; their KeyframeSequences are exports of the uploaded clips, and Attack
-	  and Death play the Scratch and Defeat sequences.
+	  retargeted from the reference armature and uploaded through tools/upload/animations.py.
+	  Skeleton clips were animated on the imported rig and uploaded from Studio; their
+	  KeyframeSequences are exports of the uploaded clips, and Attack and Death play the Scratch
+	  and Defeat sequences.
 	- Basic attack and guard clips (light chain BasicStrike/2/3, GuardHold, GuardParry), named by
 	  `SkillDef.animation` or GuardClips: R15 placeholders from
 	  assets/blender/combat_r15/combat_r15.blend, uploaded through tools/upload/animations.py.
 ]=]
 local Animations: { [string]: AnimationAsset } = {
-	GoblinIdle = { keyframes = "GoblinIdle" },
-	GoblinWalk = { keyframes = "GoblinWalk" },
-	GoblinRun = { keyframes = "GoblinRun" },
-	GoblinAttack = { keyframes = "GoblinAttack" },
-	GoblinThrow = { keyframes = "GoblinThrow" },
-	GoblinHit = { keyframes = "GoblinHit" },
-	GoblinDeath = { keyframes = "GoblinDeath" },
+	GoblinIdle = { id = "rbxassetid://90357216124611", keyframes = "GoblinIdle" },
+	GoblinWalk = { id = "rbxassetid://79496707204604", keyframes = "GoblinWalk" },
+	GoblinRun = { id = "rbxassetid://71567572512919", keyframes = "GoblinRun" },
+	GoblinAttack = { id = "rbxassetid://110563196893852", keyframes = "GoblinAttack" },
+	GoblinThrow = { id = "rbxassetid://72380534780247", keyframes = "GoblinThrow" },
+	GoblinHit = { id = "rbxassetid://114573933190100", keyframes = "GoblinHit" },
+	GoblinDeath = { id = "rbxassetid://122683815689784", keyframes = "GoblinDeath" },
 	SkeletonIdle = { id = "rbxassetid://86495569494152", keyframes = "SkeletonIdle" },
 	SkeletonWalk = { id = "rbxassetid://88182025210616", keyframes = "SkeletonWalk" },
 	SkeletonAttack = { id = "rbxassetid://78738563687931", keyframes = "SkeletonScratch" },

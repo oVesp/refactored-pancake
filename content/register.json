@@ -825,78 +825,85 @@
 			"id": "animation:GoblinIdle",
 			"type": "animation",
 			"name": "GoblinIdle",
+			"assetId": "90357216124611",
 			"path": "src/ReplicatedStorage/Animations/Goblin/GoblinIdle.rbxmx",
 			"origin": "Retargeted from the reference armature's clip library in goblin.blend",
 			"license": "project",
 			"owner": "dev",
 			"status": "draft",
-			"notes": "KeyframeSequence written by tools/blender/export_goblin.py; Studio-only until uploaded."
+			"notes": "KeyframeSequence written by tools/blender/export_goblin.py; uploaded 2026-10-28 to user 82401475 by tools/upload/animations.py."
 		},
 		{
 			"id": "animation:GoblinWalk",
 			"type": "animation",
 			"name": "GoblinWalk",
+			"assetId": "79496707204604",
 			"path": "src/ReplicatedStorage/Animations/Goblin/GoblinWalk.rbxmx",
 			"origin": "Retargeted from the reference armature's clip library in goblin.blend",
 			"license": "project",
 			"owner": "dev",
 			"status": "draft",
-			"notes": "KeyframeSequence written by tools/blender/export_goblin.py; Studio-only until uploaded."
+			"notes": "KeyframeSequence written by tools/blender/export_goblin.py; uploaded 2026-10-28 to user 82401475 by tools/upload/animations.py."
 		},
 		{
 			"id": "animation:GoblinRun",
 			"type": "animation",
 			"name": "GoblinRun",
+			"assetId": "71567572512919",
 			"path": "src/ReplicatedStorage/Animations/Goblin/GoblinRun.rbxmx",
 			"origin": "Retargeted from the reference armature's clip library in goblin.blend",
 			"license": "project",
 			"owner": "dev",
 			"status": "draft",
-			"notes": "KeyframeSequence written by tools/blender/export_goblin.py; Studio-only until uploaded."
+			"notes": "KeyframeSequence written by tools/blender/export_goblin.py; uploaded 2026-10-28 to user 82401475 by tools/upload/animations.py."
 		},
 		{
 			"id": "animation:GoblinAttack",
 			"type": "animation",
 			"name": "GoblinAttack",
+			"assetId": "110563196893852",
 			"path": "src/ReplicatedStorage/Animations/Goblin/GoblinAttack.rbxmx",
 			"origin": "Retargeted from the reference armature's clip library in goblin.blend",
 			"license": "project",
 			"owner": "dev",
 			"status": "draft",
-			"notes": "KeyframeSequence written by tools/blender/export_goblin.py; Studio-only until uploaded."
+			"notes": "KeyframeSequence written by tools/blender/export_goblin.py; uploaded 2026-10-28 to user 82401475 by tools/upload/animations.py."
 		},
 		{
 			"id": "animation:GoblinThrow",
 			"type": "animation",
 			"name": "GoblinThrow",
+			"assetId": "72380534780247",
 			"path": "src/ReplicatedStorage/Animations/Goblin/GoblinThrow.rbxmx",
 			"origin": "Retargeted from the reference armature's clip library in goblin.blend",
 			"license": "project",
 			"owner": "dev",
 			"status": "draft",
-			"notes": "KeyframeSequence written by tools/blender/export_goblin.py; Studio-only until uploaded."
+			"notes": "KeyframeSequence written by tools/blender/export_goblin.py; uploaded 2026-10-28 to user 82401475 by tools/upload/animations.py."
 		},
 		{
 			"id": "animation:GoblinHit",
 			"type": "animation",
 			"name": "GoblinHit",
+			"assetId": "114573933190100",
 			"path": "src/ReplicatedStorage/Animations/Goblin/GoblinHit.rbxmx",
 			"origin": "Retargeted from the reference armature's clip library in goblin.blend",
 			"license": "project",
 			"owner": "dev",
 			"status": "draft",
-			"notes": "KeyframeSequence written by tools/blender/export_goblin.py; Studio-only until uploaded."
+			"notes": "KeyframeSequence written by tools/blender/export_goblin.py; uploaded 2026-10-28 to user 82401475 by tools/upload/animations.py."
 		},
 		{
 			"id": "animation:GoblinDeath",
 			"type": "animation",
 			"name": "GoblinDeath",
+			"assetId": "122683815689784",
 			"path": "src/ReplicatedStorage/Animations/Goblin/GoblinDeath.rbxmx",
 			"origin": "Retargeted from the reference armature's clip library in goblin.blend",
 			"license": "project",
 			"owner": "dev",
 			"status": "draft",
-			"notes": "KeyframeSequence written by tools/blender/export_goblin.py; Studio-only until uploaded."
+			"notes": "KeyframeSequence written by tools/blender/export_goblin.py; uploaded 2026-10-28 to user 82401475 by tools/upload/animations.py."
 		},
 		{
 			"id": "animation:SkeletonIdle",
