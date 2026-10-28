@@ -971,6 +971,54 @@
 			"notes": "Heavy attack (heavy_strike): 1.0 s, markers Windup at 0 s and Hit at 0.5 s. Upper body only. Baked to .rbxanim by the Roblox Animations add-on (3.0.1 bake, re-verified identical with 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-25 to user 82401475 by tools/upload/animations.py."
 		},
 		{
+			"id": "animation:BasicStrike2",
+			"type": "animation",
+			"name": "BasicStrike2",
+			"assetId": "111687911389983",
+			"path": "src/ReplicatedStorage/Animations/Combat/BasicStrike2.rbxmx",
+			"origin": "Agent-authored placeholder on the stock Studio R15 rig in assets/blender/combat_r15/combat_r15.blend (owner exception 2026-10-25)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Light chain hit 2 (strike_2): 0.4 s left cross, marker Hit at 0.133 s. Upper body only. Posed by tools/blender/combat_poses.py, baked by tools/blender/combat_bake.py (Roblox Animations add-on 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-27 to user 82401475 by tools/upload/animations.py."
+		},
+		{
+			"id": "animation:BasicStrike3",
+			"type": "animation",
+			"name": "BasicStrike3",
+			"assetId": "131814313813160",
+			"path": "src/ReplicatedStorage/Animations/Combat/BasicStrike3.rbxmx",
+			"origin": "Agent-authored placeholder on the stock Studio R15 rig in assets/blender/combat_r15/combat_r15.blend (owner exception 2026-10-25)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Light chain finisher (strike_3): 0.6 s rising right hook with torso turn, marker Hit at 0.233 s, recovery to rest by 0.6 s. Upper body only. Posed by tools/blender/combat_poses.py, baked by tools/blender/combat_bake.py (Roblox Animations add-on 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-27 to user 82401475 by tools/upload/animations.py."
+		},
+		{
+			"id": "animation:GuardHold",
+			"type": "animation",
+			"name": "GuardHold",
+			"assetId": "109555153765403",
+			"path": "src/ReplicatedStorage/Animations/Combat/GuardHold.rbxmx",
+			"origin": "Agent-authored placeholder on the stock Studio R15 rig in assets/blender/combat_r15/combat_r15.blend (owner exception 2026-10-25)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Guard pose, forearms upright in front of the face; 1 s loop, played by GuardClips while Guarding. Upper body only. Posed by tools/blender/combat_poses.py, baked by tools/blender/combat_bake.py (Roblox Animations add-on 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-27 to user 82401475 by tools/upload/animations.py."
+		},
+		{
+			"id": "animation:GuardParry",
+			"type": "animation",
+			"name": "GuardParry",
+			"assetId": "77764665687591",
+			"path": "src/ReplicatedStorage/Animations/Combat/GuardParry.rbxmx",
+			"origin": "Agent-authored placeholder on the stock Studio R15 rig in assets/blender/combat_r15/combat_r15.blend (owner exception 2026-10-25)",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Parry deflection: 0.333 s, left forearm sweeps outward and back to guard, marker Parry at 0.033 s; played by GuardClips on ShowParry. Upper body only. Posed by tools/blender/combat_poses.py, baked by tools/blender/combat_bake.py (Roblox Animations add-on 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-27 to user 82401475 by tools/upload/animations.py."
+		},
+		{
 			"id": "worldgen:Apply",
 			"type": "tool",
 			"path": "src/ServerStorage/WorldGen/Apply.luau",

@@ -125,7 +125,8 @@ local Textures: { [string]: TextureAsset } = {
 	  retargeted from the reference armature. Skeleton clips were animated on the imported rig and
 	  uploaded from Studio; their KeyframeSequences are exports of the uploaded clips, and Attack
 	  and Death play the Scratch and Defeat sequences.
-	- Basic attack clips, named by `SkillDef.animation`: R15 placeholders from
+	- Basic attack and guard clips (light chain BasicStrike/2/3, GuardHold, GuardParry), named by
+	  `SkillDef.animation` or GuardClips: R15 placeholders from
 	  assets/blender/combat_r15/combat_r15.blend, uploaded through tools/upload/animations.py.
 ]=]
 local Animations: { [string]: AnimationAsset } = {
@@ -142,6 +143,10 @@ local Animations: { [string]: AnimationAsset } = {
 	SkeletonDeath = { id = "rbxassetid://96632426840141", keyframes = "SkeletonDefeat" },
 	BasicStrike = { id = "rbxassetid://75972502304014", keyframes = "BasicStrike" },
 	BasicHeavyStrike = { id = "rbxassetid://73823663489909", keyframes = "BasicHeavyStrike" },
+	BasicStrike2 = { id = "rbxassetid://111687911389983", keyframes = "BasicStrike2" },
+	BasicStrike3 = { id = "rbxassetid://131814313813160", keyframes = "BasicStrike3" },
+	GuardHold = { id = "rbxassetid://109555153765403", keyframes = "GuardHold" },
+	GuardParry = { id = "rbxassetid://77764665687591", keyframes = "GuardParry" },
 }
 
 --[=[

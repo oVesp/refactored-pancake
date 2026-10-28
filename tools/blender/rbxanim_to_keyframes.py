@@ -1,7 +1,7 @@
 """Converts Motor6D .rbxanim bakes from assets/blender/combat_r15/ into KeyframeSequences.
 
 The .rbxanim files come from combat_r15.blend through the Roblox Animations add-on
-(object.rbxanims_bake_file, Motor6D mode). Run with plain Python from the repo root:
+(object.rbxanims_bake_file, Motor6D mode); tools/blender/combat_bake.py bakes them headless. Run with plain Python from the repo root:
     python tools/blender/rbxanim_to_keyframes.py
 
 Outputs src/ReplicatedStorage/Animations/Combat/*.rbxmx, used until the clips are uploaded.
@@ -24,7 +24,13 @@ PRIORITY_ACTION = 2
 CLIPS = {
     "BasicStrike": ("Strike", {"Hit": 0.13333}),
     "BasicHeavyStrike": ("HeavyStrike", {"Windup": 0.0, "Hit": 0.5}),
+    "BasicStrike2": ("Strike2", {"Hit": 0.13333}),
+    "BasicStrike3": ("Strike3", {"Hit": 0.23333}),
+    "GuardHold": ("GuardHold", {}),
+    "GuardParry": ("GuardParry", {"Parry": 0.03333}),
 }
+# Clips that loop; GuardClips also sets AnimationTrack.Looped.
+LOOPED = {"GuardHold"}
 
 # R15 Motor6D tree by Part1 name.
 R15_PARENT = {
@@ -114,8 +120,9 @@ def write_clip(name, source, markers):
         raise ValueError("%s has no keyframe at markers %s" % (source, sorted(missing)))
 
     xml = ('<roblox version="4"><Item class="KeyframeSequence" referent="%s"><Properties>'
-           '<string name="Name">%s</string><bool name="Loop">false</bool><token name="Priority">%d</token>'
-           '</Properties>%s</Item></roblox>\n') % (ref(), name, PRIORITY_ACTION, "".join(keyframes))
+           '<string name="Name">%s</string><bool name="Loop">%s</bool><token name="Priority">%d</token>'
+           '</Properties>%s</Item></roblox>\n') % (
+               ref(), name, "true" if name in LOOPED else "false", PRIORITY_ACTION, "".join(keyframes))
     with open(os.path.join(OUT, name + ".rbxmx"), "w", encoding="utf8", newline="\n") as f:
         f.write(xml)
 
