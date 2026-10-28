@@ -12,7 +12,7 @@ return table.freeze({
 	UnknownClass = "Unknown class.",
 	LearnedSpell = "Learned %s.",
 	SpellPickReady = "You can learn %d new spell(s). Open the spellbook (B).",
-	CircleLocked = "That spell's Circle is still locked.",
+	TierLocked = "That spell's Tier is still locked.",
 	NoPick = "No spell pick left for that class.",
 	NotOnClassList = "None of your classes teaches that spell.",
 	AlreadyKnown = "Already known.",

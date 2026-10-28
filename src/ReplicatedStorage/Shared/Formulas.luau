@@ -159,12 +159,12 @@ function Formulas.GainXp(xp: number, debt: number, gain: number): (number, numbe
 	return xp + gain - repaid, debt - repaid
 end
 
---[=[ Casting-line level needed for a Circle: 1 for Circles 0-1, else step * (circle - 1). ]=]
-function Formulas.CircleUnlockLevel(circle: number, step: number): number
-	if circle <= 1 then
+--[=[ Casting-line level needed for a Tier: 1 for Tiers 0-1, else step * (tier - 1) + 1. ]=]
+function Formulas.TierUnlockLevel(tier: number, step: number): number
+	if tier <= 1 then
 		return 1
 	end
-	return step * (circle - 1)
+	return step * (tier - 1) + 1
 end
 
 --[=[ Sum of class levels. ]=]
@@ -189,19 +189,19 @@ function Formulas.LineLevels(classes: { ClassEntry }, classDefs: { [string]: any
 end
 
 export type MagicConfig = {
-	CircleStep: number,
-	MaxCircle: number,
+	TierStep: number,
+	MaxTier: number,
 	MixedLinePenalty: number,
 	Compatible: { [string]: { [string]: boolean } },
 	SpellPicksPerLevel: number,
 }
 
 --[=[
-	Highest Circle castable per line (game-design.md 3.2). The ceiling follows levels in the
-	deepest compatible line; having levels in an incompatible line costs MixedLinePenalty Circles,
-	never below Circle 1.
+	Highest Tier castable per casting line (game-design.md 3.2). The ceiling follows levels in that
+	line only, since lines never sum; having levels in an incompatible line costs MixedLinePenalty
+	Tiers, never below Tier 1.
 ]=]
-function Formulas.CircleCeilings(
+function Formulas.TierCeilings(
 	classes: { ClassEntry },
 	classDefs: { [string]: any },
 	config: MagicConfig
@@ -222,9 +222,9 @@ function Formulas.CircleCeilings(
 		end
 
 		local ceiling = 0
-		for circle = 1, config.MaxCircle do
-			if compatibleLevels >= Formulas.CircleUnlockLevel(circle, config.CircleStep) then
-				ceiling = circle
+		for tier = 1, config.MaxTier do
+			if compatibleLevels >= Formulas.TierUnlockLevel(tier, config.TierStep) then
+				ceiling = tier
 			end
 		end
 		if mixed and ceiling > 1 then
@@ -305,7 +305,7 @@ end
 
 --[=[
 	Whether a spell may be learned now: unknown, on the list of a class with a free pick, and at or
-	below that line's Circle ceiling. Returns ok, a reason code and the class that pays the pick.
+	below that line's Tier ceiling. Returns ok, a reason code and the class that pays the pick.
 ]=]
 function Formulas.CanLearnSpell(
 	classes: { ClassEntry },
@@ -323,14 +323,14 @@ function Formulas.CanLearnSpell(
 		return false, "AlreadyKnown", nil
 	end
 
-	local ceilings = Formulas.CircleCeilings(classes, classDefs, config)
+	local ceilings = Formulas.TierCeilings(classes, classDefs, config)
 	local picks = Formulas.SpellPicks(classes, knownSpells, classDefs, config.SpellPicksPerLevel)
 	local reason = "NotOnClassList"
 	for _, entry in classes do
 		local def = classDefs[entry.id]
 		if def and table.find(def.spellList, spellId) then
-			if (ceilings[def.line] or -1) < (spell.circle or 0) then
-				reason = "CircleLocked"
+			if (ceilings[def.line] or -1) < (spell.tier or 0) then
+				reason = "TierLocked"
 			elseif (picks[entry.id] or 0) <= 0 then
 				reason = "NoPick"
 			else

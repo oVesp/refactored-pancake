@@ -45,7 +45,7 @@ return {
 				local spell = Skills[spellId]
 				Expect.truthy(spell and spell.source == "Spell", `{id}: spell {spellId}`)
 				Expect.equal(spell.line, class.line, `{spellId} line`)
-				Expect.truthy(spell.circle <= 1, `{spellId} must be Circle 0-1 in M0.5`)
+				Expect.truthy(spell.tier <= 1, `{spellId} must be Tier 0-1 in M0.5`)
 			end
 		end
 	end,

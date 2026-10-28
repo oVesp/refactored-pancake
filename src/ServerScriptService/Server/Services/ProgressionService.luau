@@ -85,7 +85,7 @@ function ProgressionService.Snapshot(player: Player): { [string]: any }?
 		spells = profile.spells,
 		disciplines = profile.disciplines,
 		picks = Formulas.SpellPicks(profile.classes, profile.spells, Classes.ById, Tuning.Magic.SpellPicksPerLevel),
-		ceilings = Formulas.CircleCeilings(profile.classes, Classes.ById, Tuning.Magic),
+		ceilings = Formulas.TierCeilings(profile.classes, Classes.ById, Tuning.Magic),
 		actives = SkillService.KnownActives(profile),
 		granted = Formulas.GrantedSkills(profile.classes, Classes.ById),
 		hotbar = prunedHotbar(profile),

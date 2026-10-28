@@ -16,15 +16,19 @@ return table.freeze({
 	}),
 
 	Magic = table.freeze({
+		--[=[ Spells learned per caster class level, from that class's list. ]=]
 		SpellPicksPerLevel = 1,
-		--[=[ Circle n >= 2 unlocks at line level CircleStep * (n - 1); Circles 0 and 1 at line level 1. ]=]
-		CircleStep = 6,
-		MaxCircle = 10,
-		--[=[ Circles lost when a character also has levels in an incompatible line; never below 1. ]=]
+		--[=[ Tiers 0 and 1 unlock at line level 1; Tier n >= 2 at line level TierStep * (n - 1) + 1. ]=]
+		TierStep = 7,
+		MaxTier = 5,
+		--[=[ Tiers lost when a character also has levels in an incompatible line; never below 1. ]=]
 		MixedLinePenalty = 1,
+		--[=[ Casting lines (magic systems). Each counts only its own levels; lines never sum. ]=]
 		Compatible = table.freeze({
 			arcane = table.freeze({ arcane = true }),
 			divine = table.freeze({ divine = true }),
+			spiritual = table.freeze({ spiritual = true }),
+			alternative = table.freeze({ alternative = true }),
 		}),
 	}),
 

@@ -71,40 +71,55 @@ return {
 		Expect.equal(xp, 65)
 		Expect.equal(debt, 0)
 	end,
-	["circle 2 unlocks at line level 6, levels 1-5 cap at circle 1"] = function()
+	["tier n unlocks at line level 7 * (n - 1) + 1, levels 1-7 cap at tier 1"] = function()
 		local magic = Tuning.Magic
-		Expect.equal(Formulas.CircleUnlockLevel(2, magic.CircleStep), 6)
-		Expect.equal(Formulas.CircleUnlockLevel(3, magic.CircleStep), 12)
-		Expect.equal(Formulas.CircleUnlockLevel(10, magic.CircleStep), 54)
-		local ceilings = Formulas.CircleCeilings({ { id = "mage", level = 5 } }, Classes, magic)
+		Expect.equal(Formulas.TierUnlockLevel(0, magic.TierStep), 1)
+		Expect.equal(Formulas.TierUnlockLevel(1, magic.TierStep), 1)
+		Expect.equal(Formulas.TierUnlockLevel(2, magic.TierStep), 8)
+		Expect.equal(Formulas.TierUnlockLevel(3, magic.TierStep), 15)
+		Expect.equal(Formulas.TierUnlockLevel(4, magic.TierStep), 22)
+		Expect.equal(Formulas.TierUnlockLevel(5, magic.TierStep), 29)
+		Expect.equal(magic.MaxTier, 5)
+		local ceilings = Formulas.TierCeilings({ { id = "mage", level = 7 } }, Classes, magic)
 		Expect.equal(ceilings.arcane, 1)
-		ceilings = Formulas.CircleCeilings({ { id = "mage", level = 6 } }, Classes, magic)
+		ceilings = Formulas.TierCeilings({ { id = "mage", level = 8 } }, Classes, magic)
 		Expect.equal(ceilings.arcane, 2)
+		ceilings = Formulas.TierCeilings({ { id = "mage", level = 30 } }, Classes, magic)
+		Expect.equal(ceilings.arcane, 5)
 	end,
-	["mixed incompatible lines lose a circle but keep circle 1"] = function()
-		local mixed = { { id = "mage", level = 12 }, { id = "healer", level = 1 } }
-		local ceilings = Formulas.CircleCeilings(mixed, Classes, Tuning.Magic)
+	["lines never sum and mixed incompatible lines lose a tier but keep tier 1"] = function()
+		local mixed = { { id = "mage", level = 15 }, { id = "healer", level = 7 } }
+		local ceilings = Formulas.TierCeilings(mixed, Classes, Tuning.Magic)
 		Expect.equal(ceilings.arcane, 2)
 		Expect.equal(ceilings.divine, 1)
 	end,
-	["circle 2 spell refused at line level 5"] = function()
+	["tier 2 spell refused at line level 7, allowed at 8"] = function()
 		local fakeSkills = table.clone(Skills)
-		fakeSkills.test_c2 = { id = "test_c2", source = "Spell", circle = 2, line = "arcane" }
+		fakeSkills.test_t2 = { id = "test_t2", source = "Spell", tier = 2, line = "arcane" }
 		local fakeClasses = table.clone(Classes)
 		local mage = table.clone(Classes.mage)
 		mage.spellList = table.clone(mage.spellList)
-		table.insert(mage.spellList, "test_c2")
+		table.insert(mage.spellList, "test_t2")
 		fakeClasses.mage = mage
 		local ok, reason = Formulas.CanLearnSpell(
-			{ { id = "mage", level = 5 } },
+			{ { id = "mage", level = 7 } },
 			{},
-			"test_c2",
+			"test_t2",
 			fakeClasses,
 			fakeSkills,
 			Tuning.Magic
 		)
 		Expect.equal(ok, false)
-		Expect.equal(reason, "CircleLocked")
+		Expect.equal(reason, "TierLocked")
+		local okAt8 = Formulas.CanLearnSpell(
+			{ { id = "mage", level = 8 } },
+			{},
+			"test_t2",
+			fakeClasses,
+			fakeSkills,
+			Tuning.Magic
+		)
+		Expect.truthy(okAt8)
 	end,
 	["spell picks: one per level, only from own list"] = function()
 		local classes = { { id = "mage", level = 2 }, { id = "warrior", level = 1 } }

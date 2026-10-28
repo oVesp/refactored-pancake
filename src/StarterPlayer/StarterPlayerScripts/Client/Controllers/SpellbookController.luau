@@ -16,7 +16,7 @@ local PAGE_SIZE = 16
 local GENERAL = "General"
 
 local REASON_TEXT: { [string]: string } = {
-	CircleLocked = "Your Circle is too low",
+	TierLocked = "Your Tier is too low",
 	NoPick = "No spell pick left",
 	NotOnClassList = "Not on your classes' lists",
 }
@@ -233,7 +233,7 @@ local function renderDetail()
 	elseif entry.grantLevel then
 		sub = string.format("%s skill · level %d", groupName(entry.group), entry.grantLevel)
 	else
-		sub = string.format("Circle %d · %s", Skills.ById[entry.id].circle or 0, groupName(entry.group))
+		sub = string.format("Tier %d · %s", Skills.ById[entry.id].tier or 0, groupName(entry.group))
 	end
 	UIController.SetText(bound.Bind_DetailSub, sub)
 
@@ -287,10 +287,7 @@ local function renderSummary()
 		local class = Classes.ById[classId]
 		local ceiling = class.line and snap.ceilings[class.line]
 		if ceiling then
-			table.insert(
-				parts,
-				string.format("%s: Circle %d, %d pick(s)", class.name, ceiling, snap.picks[classId] or 0)
-			)
+			table.insert(parts, string.format("%s: Tier %d, %d pick(s)", class.name, ceiling, snap.picks[classId] or 0))
 		end
 	end
 	local summary = if #parts == 0
@@ -314,7 +311,7 @@ local function addCell(entry: Entry, order: number)
 	local tag = if entry.kind == "Discipline"
 		then "Discipline"
 		elseif entry.grantLevel then string.format("%s %d", groupName(entry.group), entry.grantLevel)
-		else string.format("Circle %d", Skills.ById[entry.id].circle or 0)
+		else string.format("Tier %d", Skills.ById[entry.id].tier or 0)
 	UIController.SetText(parts.Bind_Tag, tag)
 	local slot = if state == "Known" then slotOf(entry) else nil
 	parts.Bind_Slot.Visible = slot ~= nil
