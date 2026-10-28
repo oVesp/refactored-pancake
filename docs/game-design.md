@@ -27,7 +27,7 @@ Faithful = **systems and structure**, never content:
 | 1 spell pick per caster level; spell power in Tiers gated per magic system (§3.2) | Spell/skill names that point at a unique character |
 | Items graded by *data capacity* filled with crystals | Every named item, set, artifact |
 | Guild strongholds with an NPC level budget | Every named location, faction, character, event |
-| A native warrior-skill layer powered by *focus* | Every named technique |
+| A native warrior-skill layer powered by *focus* | Technique names that point at a unique character |
 | Nine realms as top-level world structure | The source's realm-to-theme pairings (public-domain realm names are fine, §2) |
 | Penalty-bearing death, PK flags, tournaments | Any story beats |
 
