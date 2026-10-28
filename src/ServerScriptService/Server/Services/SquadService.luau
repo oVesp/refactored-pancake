@@ -3,6 +3,8 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Logger = require(ReplicatedStorage.Shared.Logger)
+local Skills = require(ReplicatedStorage.Content.Skills)
+local Statuses = require(ReplicatedStorage.Content.Statuses)
 local Swarm = require(ReplicatedStorage.Shared.Swarm)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 local Types = require(script.Parent.Parent.Types)
@@ -14,6 +16,11 @@ type TargetState = {
 	ledger: Swarm.Ledger,
 	members: { [Member]: true },
 	nextTactic: number,
+	--[=[ Director's change to the attack budget and whether a window is open, per update. ]=]
+	bonus: number,
+	window: boolean,
+	--[=[ os.clock() when any enemy may try to interrupt this player again. ]=]
+	nextDisruptAt: number,
 }
 
 local log = Logger.new("SquadService")
@@ -42,11 +49,12 @@ function SquadService.NewMember(entity: Entity, def: any): Member
 	memberSeq += 1
 	local member: Member = {
 		entity = entity,
-		profile = Swarm.Profile(def, Tuning.Swarm.TokenCost),
+		profile = Swarm.Profile(def, Tuning.Swarm.TokenCost, Skills.ById, Statuses.ById),
 		target = nil,
 		seq = memberSeq,
 		reach = 6,
 		slot = nil,
+		role = "Pressure",
 	}
 	members[entity] = member
 	return member
@@ -82,6 +90,9 @@ function SquadService.Join(member: Member, target: Entity)
 			ledger = Swarm.NewLedger(),
 			members = {},
 			nextTactic = os.clock() + random:NextNumber(0, Tuning.Swarm.TacticInterval / 2),
+			bonus = 0,
+			window = false,
+			nextDisruptAt = 0,
 		}
 		targets[target] = state
 	end
@@ -108,10 +119,40 @@ function SquadService.RequestToken(member: Member, kind: Swarm.TokenKind, now: n
 	if not ledger then
 		return false
 	end
+	local state = targets[member.target :: Entity]
 	local swarm = Tuning.Swarm
 	Swarm.Sweep(ledger, now, swarm.TokenTimeout, swarm.WaitStale)
 	local cost = member.profile.tokenCost
-	return Swarm.Request(ledger, member, kind, cost, math.max(swarm.Budget[kind], cost), 1, now)
+	local capacity = math.max(Swarm.Capacity(swarm.Budget[kind], kind, state.bonus), cost)
+	-- Reserve waits behind everyone; Opportunists jump the queue while a window is open.
+	local priority = if member.role == "Reserve"
+		then 0
+		elseif member.role == "Opportunist" and state.window then 2
+		else 1
+	return Swarm.Request(ledger, member, kind, cost, capacity, priority, now)
+end
+
+--[=[
+	True when the member is its squad's Disruptor, its target is casting and nobody has tried to
+	interrupt that player within Tuning.Swarm.DisruptCooldown.
+]=]
+function SquadService.MayDisrupt(member: Member, now: number): boolean
+	local target = member.target
+	local state = target and targets[target]
+	return member.role == "Disruptor"
+		and state ~= nil
+		and target ~= nil
+		and target.casting ~= nil
+		and now >= state.nextDisruptAt
+end
+
+--[=[ Starts the target's interrupt cooldown; call when the interrupt skill is cast. ]=]
+function SquadService.MarkDisrupt(member: Member, now: number)
+	local target = member.target
+	local state = target and targets[target]
+	if state then
+		state.nextDisruptAt = now + Tuning.Swarm.DisruptCooldown
+	end
 end
 
 --[=[ True while the member holds a granted token it has not spent yet. ]=]
@@ -164,9 +205,41 @@ local function blockedSlots(center: Vector3, radii: { [Swarm.Ring]: number }): {
 	return blocked
 end
 
--- Re-assigns engagement slots around one target.
+-- Roles per team: each team on a target is its own squad.
+local function assignRoles(state: TargetState)
+	local byTeam: { [string]: { Swarm.RoleCandidate } } = {}
+	for member in state.members do
+		local team = member.entity.team
+		byTeam[team] = byTeam[team] or {}
+		table.insert(byTeam[team], {
+			key = member,
+			seq = member.seq,
+			roles = member.profile.roles,
+			canDisrupt = #member.profile.interrupts > 0,
+			current = member.role,
+		})
+	end
+	for _, candidates in byTeam do
+		local roles = Swarm.AssignRoles(candidates, Tuning.Swarm.RoleCaps, Tuning.Swarm.RoleStickiness)
+		for _, candidate in candidates do
+			local member = candidate.key :: Member
+			member.role = roles[member]
+		end
+	end
+end
+
+-- Director, roles and engagement slots for one target.
 local function tactic(target: Entity, state: TargetState)
 	local swarm = Tuning.Swarm
+	local now = os.clock()
+	state.bonus, state.window = Swarm.Director({
+		casting = target.casting ~= nil,
+		locked = target.lockedUntil > now,
+		gcdRemaining = target.gcdReadyAt - now,
+		hpRatio = target.hp / math.max(target.stats.MaxHp, 1),
+	}, swarm.Director)
+	assignRoles(state)
+
 	local center = target.root.Position
 	local seekers: { Swarm.Seeker } = {}
 	local radii: { [Swarm.Ring]: number } = {}
@@ -182,6 +255,10 @@ local function tactic(target: Entity, state: TargetState)
 				ring = ring,
 				radius = member.reach,
 				current = member.slot,
+				flank = if member.role == "Flanker"
+					then swarm.FlankWeight
+					elseif member.role == "Pressure" then -swarm.PressureFrontWeight
+					else nil,
 			})
 		end
 	end
@@ -190,6 +267,7 @@ local function tactic(target: Entity, state: TargetState)
 		blocked = blockedSlots(center, radii),
 		switchCost = swarm.SlotSwitchCost,
 		congestion = swarm.SlotCongestion,
+		facing = target.root.CFrame.LookVector,
 	})
 	for member in state.members do
 		member.slot = assigned[member]

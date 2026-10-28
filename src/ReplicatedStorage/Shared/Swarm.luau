@@ -33,18 +33,171 @@ export type Ledger = {
 	seq: number,
 }
 
+export type Role = "Pressure" | "Flanker" | "Opportunist" | "Disruptor" | "Support" | "Reserve"
+
+--[=[ Fixed role order, used to break weight ties. ]=]
+Swarm.Roles = table.freeze({ "Pressure", "Flanker", "Opportunist", "Disruptor", "Support", "Reserve" })
+
 export type Profile = {
 	slot: SlotKind,
 	tokenCost: number,
+	roles: { [string]: number },
+	--[=[ Skills that can interrupt a player's cast: a Stun-kind effect behind a telegraphed windup. ]=]
+	interrupts: { string },
 }
 
---[=[ Combat profile of an enemy with defaults filled in. `def` is a Content EnemyDef. ]=]
-function Swarm.Profile(def: any, defaultCost: number): Profile
+--[=[ True when a skill can interrupt a player's cast and is telegraphed: an enemy-targeted skill
+	with a windup and an effect whose status is of kind Stun. ]=]
+function Swarm.Interrupts(skill: any, statuses: { [string]: any }): boolean
+	if skill.targets ~= "Enemy" or not skill.windup or skill.windup <= 0 then
+		return false
+	end
+	for _, effect in skill.effects or {} do
+		local status = statuses[effect.status]
+		if status and status.kind == "Stun" then
+			return true
+		end
+	end
+	return false
+end
+
+--[=[
+	Combat profile of an enemy with defaults filled in. `def` is a Content EnemyDef; `skills` and
+	`statuses` are the Content ById tables.
+]=]
+function Swarm.Profile(def: any, defaultCost: number, skills: { [string]: any }, statuses: { [string]: any }): Profile
 	local combat = def.combat or {}
+	local interrupts = {}
+	for _, skillId in def.skills do
+		local skill = skills[skillId]
+		if skill and Swarm.Interrupts(skill, statuses) then
+			table.insert(interrupts, skillId)
+		end
+	end
 	return {
 		slot = combat.slot or "Melee",
 		tokenCost = combat.tokenCost or defaultCost,
+		roles = combat.roles or { Pressure = 1 },
+		interrupts = interrupts,
 	}
+end
+
+export type RoleCandidate = {
+	key: any,
+	seq: number,
+	roles: { [string]: number },
+	canDisrupt: boolean,
+	current: Role?,
+}
+
+--[=[
+	Gives each squad member one role: its highest-weighted role that is still under `caps`
+	(missing cap = unlimited), Disruptor only for members that can interrupt. The current role gets
+	`stickiness` added to its weight so roles do not flip every update. Falls back to Pressure.
+]=]
+function Swarm.AssignRoles(
+	candidates: { RoleCandidate },
+	caps: { [string]: number },
+	stickiness: number
+): { [any]: Role }
+	local ordered = table.clone(candidates)
+	table.sort(ordered, function(a, b)
+		return a.seq < b.seq
+	end)
+	local counts: { [string]: number } = {}
+	local result: { [any]: Role } = {}
+	for _, candidate in ordered do
+		local best: Role, bestWeight = "Pressure", -math.huge
+		for _, role in Swarm.Roles do
+			local weight = candidate.roles[role]
+			if not weight or (role == "Disruptor" and not candidate.canDisrupt) then
+				continue
+			end
+			local cap = caps[role]
+			if cap and (counts[role] or 0) >= cap then
+				continue
+			end
+			if role == candidate.current then
+				weight += stickiness
+			end
+			if weight > bestWeight then
+				best, bestWeight = role :: Role, weight
+			end
+		end
+		counts[best] = (counts[best] or 0) + 1
+		result[candidate.key] = best
+	end
+	return result
+end
+
+--[=[ Where a bearing from the target sits against its facing: Front, Side or Rear (45° cones). ]=]
+function Swarm.Flank(direction: Vector3, facing: Vector3): "Front" | "Side" | "Rear"
+	local flatFacing = Vector3.new(facing.X, 0, facing.Z)
+	if flatFacing.Magnitude < 1e-3 then
+		return "Side"
+	end
+	local dot = direction:Dot(flatFacing.Unit)
+	if dot > math.cos(math.rad(45)) then
+		return "Front"
+	elseif dot < -math.cos(math.rad(45)) then
+		return "Rear"
+	end
+	return "Side"
+end
+
+export type PlayerState = {
+	casting: boolean,
+	locked: boolean,
+	--[=[ Seconds until the player's global cooldown is ready. ]=]
+	gcdRemaining: number,
+	hpRatio: number,
+}
+
+export type DirectorSettings = {
+	--[=[ Extra attack tokens while the player is casting, locked or deep in a GCD. ]=]
+	WindowBonus: number,
+	--[=[ A GCD with more than this many seconds left counts as a window. ]=]
+	WindowGcd: number,
+	--[=[ Below this HP ratio the budget shrinks by MercyPenalty (never below 1). ]=]
+	MercyBelow: number,
+	MercyPenalty: number,
+}
+
+--[=[
+	Combat director: reads the player's state and returns the change to the attack budget and
+	whether a vulnerability window is open (casting, animation lock or a long GCD).
+]=]
+function Swarm.Director(state: PlayerState, settings: DirectorSettings): (number, boolean)
+	local window = state.casting or state.locked or state.gcdRemaining > settings.WindowGcd
+	local bonus = if window then settings.WindowBonus else 0
+	if state.hpRatio < settings.MercyBelow then
+		bonus -= settings.MercyPenalty
+	end
+	return bonus, window
+end
+
+--[=[ Attack budget for one kind after the director's change; Support is never changed. ]=]
+function Swarm.Capacity(base: number, kind: TokenKind, bonus: number): number
+	if kind == "Support" then
+		return base
+	end
+	return math.max(1, base + bonus)
+end
+
+--[=[
+	True when an interrupt started now would land before the player's cast ends: the cast has
+	more time left than walking into reach, the windup and `margin`.
+]=]
+function Swarm.CanInterruptInTime(
+	castRemaining: number,
+	distance: number,
+	reach: number,
+	moveSpeed: number,
+	windup: number,
+	margin: number
+): boolean
+	local walk = math.max(0, distance - reach) / math.max(moveSpeed, 1)
+	return castRemaining > walk + windup + margin
 end
 
 --[=[ Budget a skill draws from: ally skills use Support, close-range deliveries Melee, the rest Ranged. ]=]
@@ -185,6 +338,12 @@ export type Seeker = {
 	radius: number,
 	--[=[ Slot index held since the last assignment, if any. ]=]
 	current: number?,
+	--[=[
+		Facing preference: positive weights push toward the target's sides and back (Flanker),
+		negative toward its front (Pressure). Cost added is |flank| times the share of the way
+		toward the unwanted side.
+	]=]
+	flank: number?,
 }
 
 export type SlotOptions = {
@@ -196,6 +355,8 @@ export type SlotOptions = {
 	switchCost: number,
 	--[=[ Cost per already-taken slot next to this one, in any ring. ]=]
 	congestion: number,
+	--[=[ Flat direction the target faces, for seekers with a `flank` weight. ]=]
+	facing: Vector3?,
 }
 
 --[=[ Ring an enemy stands in: melee in close, everyone else out at range. ]=]
@@ -226,8 +387,8 @@ end
 --[=[
 	Greedy slot assignment around one target at `center`. Repeatedly takes the cheapest
 	(seeker, free slot) pair, where cost is the walk to the slot plus `switchCost` for leaving the
-	current slot plus `congestion` for each taken neighbour within one slot width in any ring.
-	Never gives two seekers the same slot; seekers left over get none. Returns key to index.
+	current slot plus `congestion` for each taken neighbour within one slot width in any ring, plus
+	the seeker's facing preference against `facing`. Never gives two seekers the same slot; seekers left over get none. Returns key to index.
 ]=]
 function Swarm.AssignSlots(seekers: { Seeker }, center: Vector3, options: SlotOptions): { [any]: number }
 	local ordered = table.clone(seekers)
@@ -238,6 +399,11 @@ function Swarm.AssignSlots(seekers: { Seeker }, center: Vector3, options: SlotOp
 	local takenAngles: { { angle: number, width: number } } = {}
 	local result: { [any]: number } = {}
 	local blocked = options.blocked or {}
+	local facing = options.facing
+	if facing then
+		local flatFacing = Vector3.new(facing.X, 0, facing.Z)
+		facing = if flatFacing.Magnitude > 1e-3 then flatFacing.Unit else nil
+	end
 
 	local remaining = #ordered
 	while remaining > 0 do
@@ -252,9 +418,15 @@ function Swarm.AssignSlots(seekers: { Seeker }, center: Vector3, options: SlotOp
 				if taken[seeker.ring][index] or ringBlocked[index] then
 					continue
 				end
-				local point = center + Swarm.SlotDirection(index, count) * seeker.radius
-				local offset = point - seeker.position
+				local direction = Swarm.SlotDirection(index, count)
+				local offset = center + direction * seeker.radius - seeker.position
 				local cost = Vector3.new(offset.X, 0, offset.Z).Magnitude
+				local flank = seeker.flank
+				if flank and facing then
+					-- front is 1 straight ahead of the target and 0 straight behind it.
+					local front = (direction:Dot(facing) + 1) / 2
+					cost += if flank > 0 then flank * front else -flank * (1 - front)
+				end
 				if seeker.current ~= index then
 					cost += options.switchCost
 				end

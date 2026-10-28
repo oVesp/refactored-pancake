@@ -83,6 +83,8 @@ export type SquadMember = {
 	reach: number,
 	--[=[ Engagement slot index in the member's ring, from the last tactical update. ]=]
 	slot: number?,
+	--[=[ Squad role from the last tactical update. ]=]
+	role: Swarm.Role,
 }
 
 return nil

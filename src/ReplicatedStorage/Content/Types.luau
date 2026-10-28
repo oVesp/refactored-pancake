@@ -112,6 +112,11 @@ export type CombatDef = {
 	slot: ("Melee" | "Ranged" | "Support" | "None")?,
 	--[=[ Share of the target's attack budget one attack takes. Default Tuning.Swarm.TokenCost. ]=]
 	tokenCost: number?,
+	--[=[
+		Preferred squad roles with weights (Pressure, Flanker, Opportunist, Disruptor, Support,
+		Reserve). Disruptor needs a telegraphed stun skill. Default { Pressure = 1 }.
+	]=]
+	roles: { [string]: number }?,
 }
 
 export type EnemyDef = {

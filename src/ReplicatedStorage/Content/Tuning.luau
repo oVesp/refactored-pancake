@@ -157,5 +157,18 @@ return table.freeze({
 		SlotCongestion = 3,
 		--[=[ Allies closer than Radius studs push each other apart, up to Strength studs. ]=]
 		Separation = table.freeze({ Radius = 4, Strength = 3 }),
+		--[=[ Most squad members (per target and team) that may hold a role at once; others unlimited. ]=]
+		RoleCaps = table.freeze({ Disruptor = 1, Flanker = 2 }),
+		--[=[ Weight added to a member's current role so roles do not flip every update. ]=]
+		RoleStickiness = 0.5,
+		--[=[ Slot cost a Flanker pays for standing in front of the target, and Pressure for behind. ]=]
+		FlankWeight = 12,
+		PressureFrontWeight = 4,
+		--[=[ Reads the player: windows (cast, lock, long GCD) open extra tokens; low HP closes one. ]=]
+		Director = table.freeze({ WindowBonus = 1, WindowGcd = 1, MercyBelow = 0.25, MercyPenalty = 1 }),
+		--[=[ Seconds between interrupt attempts on one player, across all disruptors. ]=]
+		DisruptCooldown = 8,
+		--[=[ Seconds of slack an interrupt must have before the player's cast would end. ]=]
+		DisruptMargin = 0.2,
 	}),
 })

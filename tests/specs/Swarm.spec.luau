@@ -9,6 +9,11 @@ local Swarm = Loader.load("src/ReplicatedStorage/Shared/Swarm")
 local Tuning = Loader.load("src/ReplicatedStorage/Content/Tuning")
 local Enemies = Loader.load("src/ReplicatedStorage/Content/Enemies").ById
 local Skills = Loader.load("src/ReplicatedStorage/Content/Skills").ById
+local Statuses = Loader.load("src/ReplicatedStorage/Content/Statuses").ById
+
+local function profile(id: string): any
+	return Swarm.Profile(Enemies[id], Tuning.Swarm.TokenCost, Skills, Statuses)
+end
 
 local TIMEOUT = 4
 local STALE = 0.75
@@ -179,12 +184,90 @@ return {
 		Expect.equal(Swarm.TokenKind(Skills.captain_rally), "Support", "rally")
 	end,
 	["every enemy resolves a combat profile"] = function()
-		for id, def in Enemies do
-			local profile = Swarm.Profile(def, Tuning.Swarm.TokenCost)
-			Expect.truthy(profile.tokenCost >= 1, `{id} token cost`)
-			Expect.truthy(Tuning.Swarm.Budget[profile.slot] or profile.slot == "None", `{id} slot`)
+		for id in Enemies do
+			local resolved = profile(id)
+			Expect.truthy(resolved.tokenCost >= 1, `{id} token cost`)
+			Expect.truthy(Tuning.Swarm.Budget[resolved.slot] or resolved.slot == "None", `{id} slot`)
+			for role in resolved.roles do
+				Expect.truthy(table.find(Swarm.Roles, role), `{id}: unknown role {role}`)
+			end
+			if resolved.roles.Disruptor then
+				Expect.truthy(#resolved.interrupts > 0, `{id}: Disruptor needs a telegraphed stun skill`)
+			end
 		end
-		Expect.equal(Swarm.Profile(Enemies.goblin_chieftain, 1).tokenCost, 2, "chieftain is large")
-		Expect.equal(Swarm.Profile(Enemies.training_dummy, 1).slot, "None", "dummy")
+		Expect.equal(profile("goblin_chieftain").tokenCost, 2, "chieftain is large")
+		Expect.equal(profile("training_dummy").slot, "None", "dummy")
+	end,
+	["only telegraphed stuns interrupt"] = function()
+		Expect.truthy(Swarm.Interrupts(Skills.brute_slam, Statuses), "brute slam")
+		Expect.truthy(Swarm.Interrupts(Skills.wolf_charge, Statuses), "wolf charge")
+		Expect.equal(Swarm.Interrupts(Skills.sling_shot, Statuses), false, "sling")
+		Expect.equal(Swarm.Interrupts(Skills.poison_snare, Statuses), false, "root is not a stun")
+	end,
+	["roles respect caps, eligibility and stickiness"] = function()
+		local caps = { Disruptor = 1, Flanker = 1 }
+		local roles = Swarm.AssignRoles({
+			{ key = "a", seq = 1, roles = { Disruptor = 2, Pressure = 1 }, canDisrupt = true },
+			{ key = "b", seq = 2, roles = { Disruptor = 2, Pressure = 1 }, canDisrupt = true },
+			{ key = "c", seq = 3, roles = { Disruptor = 3 }, canDisrupt = false },
+			{ key = "d", seq = 4, roles = { Flanker = 2, Pressure = 1 }, canDisrupt = false },
+			{ key = "e", seq = 5, roles = { Flanker = 2, Pressure = 1 }, canDisrupt = false },
+		}, caps, 0.5)
+		Expect.equal(roles.a, "Disruptor", "a")
+		Expect.equal(roles.b, "Pressure", "b: disruptor cap")
+		Expect.equal(roles.c, "Pressure", "c cannot interrupt")
+		Expect.equal(roles.d, "Flanker", "d")
+		Expect.equal(roles.e, "Pressure", "e: flanker cap")
+		local sticky = Swarm.AssignRoles({
+			{
+				key = "x",
+				seq = 1,
+				roles = { Pressure = 1, Opportunist = 1.2 },
+				canDisrupt = false,
+				current = "Pressure",
+			},
+		}, {}, 0.5)
+		Expect.equal(sticky.x, "Pressure", "keeps its role within the stickiness")
+	end,
+	["flank classifies bearings against facing"] = function()
+		local facing = Vector3.new(0, 0, -1)
+		Expect.equal(Swarm.Flank(Vector3.new(0, 0, -1), facing), "Front", "front")
+		Expect.equal(Swarm.Flank(Vector3.new(1, 0, 0), facing), "Side", "side")
+		Expect.equal(Swarm.Flank(Vector3.new(0, 0, 1), facing), "Rear", "rear")
+	end,
+	["flankers take the back, pressure the front"] = function()
+		local options = table.clone(OPTIONS)
+		options.facing = Vector3.new(1, 0, 0)
+		local flanker = seeker("flanker", 1, 0, 6)
+		flanker.flank = 20
+		local pressure = seeker("pressure", 2, 0, -6)
+		pressure.flank = -20
+		local result = Swarm.AssignSlots({ flanker, pressure }, CENTER, options)
+		local facing = options.facing
+		Expect.equal(Swarm.Flank(Swarm.SlotDirection(result.flanker, 6), facing), "Rear", "flanker")
+		Expect.equal(Swarm.Flank(Swarm.SlotDirection(result.pressure, 6), facing), "Front", "pressure")
+	end,
+	["director opens windows and shows mercy"] = function()
+		local settings = Tuning.Swarm.Director
+		local calm = { casting = false, locked = false, gcdRemaining = 0, hpRatio = 1 }
+		local bonus, window = Swarm.Director(calm, settings)
+		Expect.equal(bonus, 0, "calm bonus")
+		Expect.equal(window, false, "calm window")
+		local casting = table.clone(calm)
+		casting.casting = true
+		bonus, window = Swarm.Director(casting, settings)
+		Expect.equal(bonus, settings.WindowBonus, "window bonus")
+		Expect.truthy(window, "window")
+		local low = table.clone(calm)
+		low.hpRatio = 0.1
+		bonus = Swarm.Director(low, settings)
+		Expect.equal(Swarm.Capacity(2, "Melee", bonus), 1, "mercy")
+		Expect.equal(Swarm.Capacity(1, "Ranged", bonus), 1, "never below one")
+		Expect.equal(Swarm.Capacity(1, "Support", 5), 1, "support unchanged")
+	end,
+	["interrupts only start when they can land"] = function()
+		Expect.truthy(Swarm.CanInterruptInTime(2.5, 6, 10, 11, 1.2, 0.2), "in reach")
+		Expect.equal(Swarm.CanInterruptInTime(1.2, 6, 10, 11, 1.2, 0.2), false, "cast ends first")
+		Expect.equal(Swarm.CanInterruptInTime(2.5, 40, 10, 11, 1.2, 0.2), false, "too far")
 	end,
 }

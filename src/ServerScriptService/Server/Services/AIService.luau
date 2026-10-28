@@ -13,7 +13,7 @@ local Types = require(script.Parent.Parent.Types)
 type Entity = Types.Entity
 type Member = Types.SquadMember
 
-type State = "Idle" | "Patrol" | "Aggro" | "Position" | "Attack" | "Return"
+type State = "Idle" | "Patrol" | "Aggro" | "Position" | "Attack" | "Disrupt" | "Return"
 
 type Brain = {
 	entity: Entity,
@@ -292,6 +292,58 @@ local function preferredRange(brain: Brain): number
 	return reach
 end
 
+local function attackCue(entity: Entity, skill: any)
+	local delivery = skill.delivery
+	cue(entity, if delivery == "Melee" or delivery == "Dash" or delivery == "SelfArea" then "Attack" else "Throw")
+end
+
+-- Disruptor: when the target starts a cast that an interrupt skill can still beat, run at it and
+-- fire the (telegraphed) interrupt without waiting for a token. Returns true when it acted.
+local function disrupt(brain: Brain, target: Entity, distance: number, now: number): boolean
+	local member = brain.member
+	local cast = target.casting
+	if not cast or not SquadService.MayDisrupt(member, now) then
+		return false
+	end
+	local entity = brain.entity
+	local speed = if entity.humanoid then entity.humanoid.WalkSpeed else 0
+	for _, skillId in member.profile.interrupts do
+		local skill = Skills.ById[skillId]
+		if SkillService.CooldownRemaining(entity, skillId) > 0 then
+			continue
+		end
+		local reach = if skill.delivery == "Dash" then skill.range or 20 else skillReach(skill)
+		local remaining = cast.endsAt - now
+		if
+			not Swarm.CanInterruptInTime(
+				remaining,
+				distance,
+				reach,
+				speed,
+				skill.windup or 0,
+				Tuning.Swarm.DisruptMargin
+			)
+		then
+			continue
+		end
+		local aim, aimedAt = usable(brain, skill, target, distance)
+		if aim then
+			setState(brain, "Attack")
+			stop(brain)
+			face(brain, aim)
+			SquadService.MarkDisrupt(member, now)
+			SkillService.Cast(entity, skillId, aim, aimedAt)
+			attackCue(entity, skill)
+			log:Debug("%s interrupts %s with %s", entity.name, target.name, skillId)
+			return true
+		end
+		setState(brain, "Disrupt")
+		moveTo(brain, target.root.Position, now)
+		return true
+	end
+	return false
+end
+
 -- Push away from other enemies closer than the separation radius, in studs.
 local function separation(brain: Brain): Vector3
 	local settings = Tuning.Swarm.Separation
@@ -381,7 +433,7 @@ local function think(brain: Brain, now: number)
 		SquadService.Leave(brain.member)
 	end
 	if not target then
-		if brain.state == "Aggro" or brain.state == "Position" or brain.state == "Attack" then
+		if brain.state ~= "Idle" and brain.state ~= "Patrol" then
 			startReturn(brain)
 			return
 		end
@@ -402,6 +454,9 @@ local function think(brain: Brain, now: number)
 
 	bossPhase(brain)
 	local distance = (target.root.Position - root.Position).Magnitude
+	if disrupt(brain, target, distance, now) then
+		return
+	end
 	local skillId, aim, aimedAt = chooseSkill(brain, target, distance, now)
 	if skillId and aim then
 		local skill = Skills.ById[skillId]
@@ -410,8 +465,7 @@ local function think(brain: Brain, now: number)
 		face(brain, aim)
 		SquadService.Commit(brain.member, now + (skill.castTime or skill.windup or 0) + Tuning.Swarm.RecoveryHold)
 		SkillService.Cast(entity, skillId, aim, aimedAt)
-		local delivery = skill.delivery
-		cue(entity, if delivery == "Melee" or delivery == "Dash" or delivery == "SelfArea" then "Attack" else "Throw")
+		attackCue(entity, skill)
 		return
 	end
 
