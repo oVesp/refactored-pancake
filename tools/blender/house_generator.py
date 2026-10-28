@@ -235,7 +235,7 @@ def generate_house(seed=1, width=None, depth=None, stories=None, origin=(0.0, 0.
         z = story * STORY
         style = plan["ground"] if story == 0 else "plaster"
         walls = WALLS[style]
-        prev = (None, -2, None)  # side, index and shutter mode of the last window placed
+        last_open = {}  # side -> index of the last cell given open shutters
         for side, index, x, y, rot in wall_slots(width, depth):
             is_door = story == 0 and side == "front" and index == plan["door_cell"]
             if is_door:
@@ -251,11 +251,12 @@ def generate_house(seed=1, width=None, depth=None, stories=None, origin=(0.0, 0.
                 if mode == "mixed":
                     mode = rng.choice(("open", "closed", "none"))
                 # Open shutters are wider than a cell and would clip the neighbour's.
-                if mode == "open" and prev[:2] == (side, index - 1) and prev[2] == "open":
+                if mode == "open" and last_open.get(side) == index - 1:
                     mode = "closed"
+                if mode == "open":
+                    last_open[side] = index
                 if mode != "none":
                     b.place(open_ if mode == "open" else closed, x, y, z, rot)
-                prev = (side, index, mode)
             else:
                 plain = walls["grid"] if style == "plaster" and plan["upper_grid"] else walls["plain"]
                 b.place(plain, x, y, z, rot)
@@ -374,18 +375,33 @@ def export_glb(cols, path):
 
 # ---------------------------------------------------------------- Blender UI
 
+SETTINGS = ("seed", "width", "depth", "stories", "kit")
+
+
+def _settings(cls):
+    """Adds the generator settings to `cls` (shared by the scene settings and the operator)."""
+    cls.__annotations__ = {
+        "seed": bpy.props.IntProperty(name="Seed", default=1, min=0),
+        "width": bpy.props.EnumProperty(name="Width", items=[("0", "Random", ""), ("4", "4 m", ""), ("6", "6 m", ""), ("8", "8 m", "")]),
+        "depth": bpy.props.IntProperty(name="Depth", description="Metres; 0 = random", default=0, min=0, max=14),
+        "stories": bpy.props.IntProperty(name="Stories", description="0 = random", default=0, min=0, max=3),
+        "kit": bpy.props.StringProperty(name="Kit", subtype="DIR_PATH", default=DEFAULT_KIT),
+    }
+    return cls
+
+
+@_settings
+class HOUSEGEN_PG_settings(bpy.types.PropertyGroup):
+    pass
+
+
+@_settings
 class HOUSEGEN_OT_generate(bpy.types.Operator):
     """Generate a medieval house from the MegaKit"""
 
     bl_idname = "housegen.generate"
     bl_label = "Generate House"
     bl_options = {"REGISTER", "UNDO"}
-
-    seed: bpy.props.IntProperty(name="Seed", default=1, min=0)
-    width: bpy.props.EnumProperty(name="Width", items=[("0", "Random", ""), ("4", "4 m", ""), ("6", "6 m", ""), ("8", "8 m", "")])
-    depth: bpy.props.IntProperty(name="Depth", description="0 = random", default=0, min=0, max=14, step=2)
-    stories: bpy.props.IntProperty(name="Stories", description="0 = random", default=0, min=0, max=3)
-    kit: bpy.props.StringProperty(name="Kit", subtype="DIR_PATH", default=DEFAULT_KIT)
 
     def execute(self, context):
         try:
@@ -405,28 +421,34 @@ class HOUSEGEN_PT_panel(bpy.types.Panel):
     bl_category = "House"
 
     def draw(self, context):
-        settings = context.window_manager.operator_properties_last(HOUSEGEN_OT_generate.bl_idname)
+        settings = context.scene.housegen
         layout = self.layout
-        if settings:
-            for prop in ("seed", "width", "depth", "stories", "kit"):
-                layout.prop(settings, prop)
+        for prop in SETTINGS:
+            layout.prop(settings, prop)
         op = layout.operator(HOUSEGEN_OT_generate.bl_idname)
-        if settings:
-            for prop in ("seed", "width", "depth", "stories", "kit"):
-                setattr(op, prop, getattr(settings, prop))
+        for prop in SETTINGS:
+            setattr(op, prop, getattr(settings, prop))
 
 
-CLASSES = (HOUSEGEN_OT_generate, HOUSEGEN_PT_panel)
+CLASSES = (HOUSEGEN_PG_settings, HOUSEGEN_OT_generate, HOUSEGEN_PT_panel)
 
 
 def register():
+    # Running the file again from the Text Editor replaces the previous registration.
+    if hasattr(bpy.types.Scene, "housegen"):
+        unregister()
     for cls in CLASSES:
         bpy.utils.register_class(cls)
+    bpy.types.Scene.housegen = bpy.props.PointerProperty(type=HOUSEGEN_PG_settings)
 
 
 def unregister():
+    del bpy.types.Scene.housegen
+    # Look classes up by name: a re-run module holds new class objects, not the registered ones.
     for cls in reversed(CLASSES):
-        bpy.utils.unregister_class(cls)
+        registered = getattr(bpy.types, cls.__name__, None)
+        if registered:
+            bpy.utils.unregister_class(registered)
 
 
 # ---------------------------------------------------------------- CLI
