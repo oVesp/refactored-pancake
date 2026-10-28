@@ -18,6 +18,7 @@ local Avatar = {}
 
 export type Look = {
 	gender: string,
+	skinTone: string,
 	hair: string,
 	hairColor: string,
 	facialHair: string,
@@ -29,6 +30,7 @@ export type Creation = {
 	name: string,
 	heritage: string,
 	gender: string,
+	skinTone: string,
 	hair: string,
 	hairColor: string,
 	facialHair: string,
@@ -50,7 +52,7 @@ export type Fields = {
 	HeadScale: number,
 }
 
-local LOOK_KEYS = { "gender", "hair", "hairColor", "facialHair", "outfit" }
+local LOOK_KEYS = { "gender", "skinTone", "hair", "hairColor", "facialHair", "outfit" }
 local CREATION_KEYS = { "name", "heritage", "classId", "spellId" }
 local MAX_FIELD_LENGTH = 40
 
@@ -70,6 +72,7 @@ function Avatar.ValidateLook(look: any): (boolean, string?)
 	end
 	if
 		not Appearance.Genders.ById[look.gender]
+		or not Appearance.SkinTones.ById[look.skinTone]
 		or not Appearance.Hair.ById[look.hair]
 		or not Appearance.HairColors.ById[look.hairColor]
 		or not Appearance.FacialHair.ById[look.facialHair]
@@ -84,6 +87,7 @@ end
 function Avatar.LookOf(source: { [string]: any }): Look
 	return {
 		gender = source.gender,
+		skinTone = source.skinTone,
 		hair = source.hair,
 		hairColor = source.hairColor,
 		facialHair = source.facialHair,
@@ -113,13 +117,13 @@ function Avatar.Fields(look: Look): Fields
 	}
 end
 
---[=[ Builds a HumanoidDescription for a valid look, with the shared skin tone. ]=]
+--[=[ Builds a HumanoidDescription for a valid look, every limb in the look's skin tone. ]=]
 function Avatar.Build(look: Look): HumanoidDescription
 	local description = Instance.new("HumanoidDescription")
 	for key, value in Avatar.Fields(look) :: { [string]: any } do
 		(description :: any)[key] = value
 	end
-	local skin = Appearance.SkinColor
+	local skin = Appearance.SkinTones.ById[look.skinTone].color
 	description.HeadColor = skin
 	description.TorsoColor = skin
 	description.LeftArmColor = skin
@@ -198,6 +202,7 @@ function Avatar.DefaultCreation(classId: string?): Creation
 		name = names[1],
 		heritage = Heritages.Default,
 		gender = look.gender,
+		skinTone = look.skinTone,
 		hair = look.hair,
 		hairColor = look.hairColor,
 		facialHair = look.facialHair,

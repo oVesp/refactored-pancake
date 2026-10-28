@@ -1502,7 +1502,7 @@
 									},
 									"children": [
 										{
-											"name": "SwatchLabel",
+											"name": "Bind_SwatchLabel",
 											"className": "TextLabel",
 											"properties": {
 												"Text": "HAIR COLOUR",

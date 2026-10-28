@@ -39,6 +39,7 @@ return {
 			local outfit = Appearance.Outfits.ById[id]
 			Expect.truthy(outfit.shirt > 0 and outfit.pants > 0, id)
 		end
+		Expect.truthy(#Appearance.SkinTones.Order > 1, "skin tones")
 		for _, id in Appearance.Genders.Order do
 			Expect.truthy(Appearance.Genders.ById[id].face > 0, id)
 			Expect.truthy(#Names[id] > 0, `{id} names`)
@@ -54,6 +55,7 @@ return {
 	["fields resolve the hair colour for both hair and beard"] = function()
 		local fields = Avatar.Fields({
 			gender = "female",
+			skinTone = "deep",
 			hair = "ponytail",
 			hairColor = "red",
 			facialHair = "stubble",
@@ -89,6 +91,7 @@ return {
 		Expect.equal(select(2, Avatar.ValidateCreation(with({ name = "Nobody" }))), "BadName")
 		Expect.equal(select(2, Avatar.ValidateCreation(with({ name = Names.female[1] }))), "BadName")
 		Expect.equal(select(2, Avatar.ValidateCreation(with({ hair = "mohawk" }))), "BadLook")
+		Expect.equal(select(2, Avatar.ValidateCreation(with({ skinTone = "green" }))), "BadLook")
 		Expect.equal(select(2, Avatar.ValidateCreation(with({ classId = "paladin" }))), "UnknownClass")
 		Expect.equal(select(2, Avatar.ValidateCreation(with({ spellId = "" }))), "NeedSpell")
 		Expect.equal(select(2, Avatar.ValidateCreation(with({ spellId = "mend" }))), "NeedSpell")

@@ -295,7 +295,7 @@ local function detailFor(id: string): Detail
 		return {
 			title = Appearance.Genders.ById[id].name,
 			subtitle = "Body",
-			body = "Sets the face and build. Every hair style, beard and outfit fits both.",
+			body = `Sets the face and build. Every hair style, beard and outfit fits both.\n\nSkin tone: {Appearance.SkinTones.ById[creation.skinTone].name}.`,
 		}
 	elseif step == "Hair" or step == "Facial" then
 		local list = if step == "Hair" then Appearance.Hair else Appearance.FacialHair
@@ -386,21 +386,27 @@ local function setName(index: number)
 	UIController.SetText(bound.Bind_Name, creation.name)
 end
 
+-- Body shows skin tones; Hair and Facial Hair show the shared hair colour.
 local function renderSwatches()
+	local skin = step == "Body"
+	local field = if skin then "skinTone" else "hairColor"
 	local container = bound.Bind_Swatches
+	UIController.SetText(bound.Bind_SwatchLabel, if skin then "SKIN TONE" else "HAIR COLOUR")
 	UIController.ClearRows(container)
-	for order, id in Appearance.HairColors.Order do
-		local def = Appearance.HairColors.ById[id]
+	local order = if skin then Appearance.SkinTones.Order else Appearance.HairColors.Order
+	for index, id in order do
 		local swatch = UIController.Clone("CreatorSwatch") :: TextButton
 		swatch.Name = id
-		swatch.LayoutOrder = order
-		swatch.BackgroundColor3 = def.swatch
+		swatch.LayoutOrder = index
+		swatch.BackgroundColor3 = if skin
+			then Appearance.SkinTones.ById[id].color
+			else Appearance.HairColors.ById[id].swatch
 		local stroke = swatch:FindFirstChild("Bind_Stroke") :: UIStroke
-		local chosen = creation.hairColor == id
+		local chosen = (creation :: any)[field] == id
 		stroke.Color = if chosen then Theme.GoldBright else Theme.GoldDim
 		stroke.Thickness = if chosen then 3 else 2
 		swatch.Activated:Connect(function()
-			creation.hairColor = id
+			(creation :: any)[field] = id
 			refreshPreview()
 			render()
 		end)
@@ -444,7 +450,7 @@ render = function()
 		row.Parent = list
 	end
 
-	local showSwatches = HEAD_STEPS[step] == true
+	local showSwatches = HEAD_STEPS[step] == true or step == "Body"
 	bound.Bind_SwatchPanel.Visible = showSwatches
 	if showSwatches then
 		renderSwatches()
@@ -540,6 +546,7 @@ function CreatorController.Start()
 		"Bind_ListTitle",
 		"Bind_Options",
 		"Bind_SwatchPanel",
+		"Bind_SwatchLabel",
 		"Bind_Swatches",
 		"Bind_DetailTitle",
 		"Bind_DetailSubtitle",

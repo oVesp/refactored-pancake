@@ -18,6 +18,7 @@ Code: `Server/Services/AvatarService.luau`, `Shared/Avatar.luau`, client `Creato
 |---|---|---|
 | Race | `Content/Heritages` | Families Human, Demi-Human, Heteromorph. Only Human is playable; the rest are listed as locked (detail visible, cannot be picked). Stored in the existing `heritage` field. |
 | Body | `Appearance.Genders` | Male / Female on the blocky R15 body: sets the classic face decal and small height/width/depth/head scales. Every hair, beard and outfit is open to both. |
+| Skin tone | `Appearance.SkinTones` | Pale, Fair, Tan, Olive, Brown, Deep, picked from swatches on the Body step; colours every limb. Default Fair. |
 | Hair | `Appearance.Hair` | 11 free Roblox styles plus Shaved. |
 | Facial hair | `Appearance.FacialHair` | 4 styles plus Clean Shaven. |
 | Hair colour | `Appearance.HairColors` | Black, Brown, Blonde, Red; one colour for hair and beard. |
@@ -25,8 +26,6 @@ Code: `Server/Services/AvatarService.luau`, `Shared/Avatar.luau`, client `Creato
 | Name | `Content/Names` | Placeholder list per gender until the name library exists; the server accepts only names in the list for the chosen gender. |
 | Class | `Classes.Order` | Any starter class (Warrior, Mage, Healer). |
 | Spell | `Avatar.StarterSpells` | Casters pick exactly one spell (the level-1 pick, §3.2): the class list filtered by `Formulas.CanLearnSpell` on a level-1 build path, so Tiers 0–1. Martial classes send `""`. |
-
-Skin tone is one fixed colour (`Appearance.SkinColor`) until a skin option is added.
 
 ## Preview
 

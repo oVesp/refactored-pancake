@@ -20,6 +20,13 @@ export type GenderDef = {
 	headScale: number,
 }
 
+export type SkinToneDef = {
+	id: string,
+	name: string,
+	--[=[ Body colour of every limb; also the creator swatch. ]=]
+	color: Color3,
+}
+
 export type HairColorDef = {
 	id: string,
 	name: string,
@@ -60,6 +67,15 @@ local GENDERS: { GenderDef } = {
 		depthScale = 0.92,
 		headScale = 0.98,
 	},
+}
+
+local SKIN_TONES: { SkinToneDef } = {
+	{ id = "pale", name = "Pale", color = Color3.fromRGB(245, 218, 196) },
+	{ id = "fair", name = "Fair", color = Color3.fromRGB(234, 184, 146) },
+	{ id = "tan", name = "Tan", color = Color3.fromRGB(204, 148, 104) },
+	{ id = "olive", name = "Olive", color = Color3.fromRGB(176, 128, 86) },
+	{ id = "brown", name = "Brown", color = Color3.fromRGB(130, 87, 58) },
+	{ id = "deep", name = "Deep", color = Color3.fromRGB(86, 58, 40) },
 }
 
 local HAIR_COLORS: { HairColorDef } = {
@@ -178,6 +194,7 @@ local function index(list: { any }): ({ [string]: any }, { string })
 end
 
 local gendersById: { [string]: GenderDef }, genderOrder = index(GENDERS)
+local skinById: { [string]: SkinToneDef }, skinOrder = index(SKIN_TONES)
 local colorsById: { [string]: HairColorDef }, colorOrder = index(HAIR_COLORS)
 local hairById: { [string]: StyleDef }, hairOrder = index(HAIR)
 local facialById: { [string]: StyleDef }, facialOrder = index(FACIAL_HAIR)
@@ -185,14 +202,14 @@ local outfitsById: { [string]: OutfitDef }, outfitOrder = index(OUTFITS)
 
 return table.freeze({
 	Genders = table.freeze({ ById = gendersById, Order = genderOrder }),
+	SkinTones = table.freeze({ ById = skinById, Order = skinOrder }),
 	HairColors = table.freeze({ ById = colorsById, Order = colorOrder }),
 	Hair = table.freeze({ ById = hairById, Order = hairOrder }),
 	FacialHair = table.freeze({ ById = facialById, Order = facialOrder }),
 	Outfits = table.freeze({ ById = outfitsById, Order = outfitOrder }),
-	--[=[ One skin tone for every character until a skin option exists. ]=]
-	SkinColor = Color3.fromRGB(234, 184, 146),
 	Default = table.freeze({
 		gender = "male",
+		skinTone = "fair",
 		hair = "short_fringe",
 		hairColor = "brown",
 		facialHair = "none",
