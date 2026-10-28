@@ -5,6 +5,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Chain = require(ReplicatedStorage.Shared.Chain)
 local Classes = require(ReplicatedStorage.Content.Classes)
 local Formulas = require(ReplicatedStorage.Shared.Formulas)
 local Logger = require(ReplicatedStorage.Shared.Logger)
@@ -24,6 +25,10 @@ local CAST_ORIGIN_HEIGHT = 1.5
 local MAX_AIM_DISTANCE = 300
 -- Seconds a use may arrive early for its cooldown, GCD or lock (network jitter).
 local LATENCY_SLACK = 0.05
+-- Seconds a chain hit may arrive past Tuning.Combat.Chain.Window (network jitter).
+local CHAIN_SLACK = 0.15
+-- Light attack chain, entry first (Shared/Chain).
+local LIGHT_CHAIN = Chain.Members(Skills.ById, Skills.Basic.Light)
 
 local log = Logger.new("SkillService")
 
@@ -72,7 +77,8 @@ end
 
 --[=[ Active skills a player may use: basic attacks, granted class actives and known spells. ]=]
 function SkillService.KnownActives(profile: any): { string }
-	local known = { Skills.Basic.Light, Skills.Basic.Heavy }
+	local known = table.clone(LIGHT_CHAIN)
+	table.insert(known, Skills.Basic.Heavy)
 	for _, skillId in Formulas.GrantedSkills(profile.classes, Classes.ById) do
 		local skill = Skills.ById[skillId]
 		if skill and skill.kind == "Active" then
@@ -607,6 +613,20 @@ local function handleUseSkill(player: Player, skillId: string, aim: Vector3, seq
 		reject(player, seq, "Cooldown")
 		return
 	end
+	-- Light chain: each hit waits out the previous hit's cooldown and must follow it in order.
+	local chained = table.find(LIGHT_CHAIN, skillId) ~= nil
+	if chained then
+		local last = caster.chainLast
+		if last and SkillService.CooldownRemaining(caster, last) > LATENCY_SLACK then
+			reject(player, seq, "Cooldown")
+			return
+		end
+		local window = Tuning.Combat.Chain.Window + CHAIN_SLACK
+		if not Chain.Allowed(Skills.ById, Skills.Basic.Light, last, caster.chainAt, skillId, os.clock(), window) then
+			reject(player, seq, "Chain")
+			return
+		end
+	end
 	if (aim - caster.root.Position).Magnitude > MAX_AIM_DISTANCE then
 		reject(player, seq, "Range")
 		return
@@ -651,6 +671,10 @@ local function handleUseSkill(player: Player, skillId: string, aim: Vector3, seq
 	if caster.guardSince then
 		caster.guardSince = nil
 		caster.model:SetAttribute("Guarding", false)
+	end
+	if chained then
+		caster.chainLast = skillId
+		caster.chainAt = os.clock()
 	end
 	SkillService.Cast(caster, skillId, aim, target, cost)
 end

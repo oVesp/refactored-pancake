@@ -83,6 +83,11 @@ export type SkillDef = {
 	modifiers: StatBlock?,
 	--[=[ Key in `Assets.Animations` for the caster's clip; markers `Windup`/`Hit` are cosmetic cues. ]=]
 	animation: string?,
+	--[=[
+		Basic chain only: the hit a light attack press uses next when it comes within
+		Tuning.Combat.Chain.Window of this one (Shared/Chain).
+	]=]
+	chainNext: string?,
 	description: string,
 }
 

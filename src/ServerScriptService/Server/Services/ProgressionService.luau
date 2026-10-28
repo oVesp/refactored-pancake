@@ -4,6 +4,7 @@ local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Chain = require(ReplicatedStorage.Shared.Chain)
 local Classes = require(ReplicatedStorage.Content.Classes)
 local Enemies = require(ReplicatedStorage.Content.Enemies)
 local Disciplines = require(ReplicatedStorage.Content.Disciplines)
@@ -55,7 +56,7 @@ local function canSlot(profile: any, kind: string, id: string): boolean
 	if kind == "Discipline" then
 		return Disciplines.ById[id] ~= nil and table.find(profile.disciplines, id) ~= nil
 	end
-	if id == Skills.Basic.Light or id == Skills.Basic.Heavy then
+	if Chain.Contains(Skills.ById, Skills.Basic.Light, id) or id == Skills.Basic.Heavy then
 		return false
 	end
 	return table.find(SkillService.KnownActives(profile), id) ~= nil

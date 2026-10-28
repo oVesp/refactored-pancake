@@ -13,6 +13,8 @@ local Items = Loader.load(Content .. "Items")
 local Disciplines = Loader.load(Content .. "Disciplines").ById
 local Loot = Loader.load("src/ServerStorage/ContentServerOnly/Loot")
 local Animations = Loader.load(Content .. "Assets").Animations
+local Basic = Loader.load(Content .. "Skills").Basic
+local Chain = Loader.load("src/ReplicatedStorage/Shared/Chain")
 
 local function checkEffects(owner: string, effects: { any }?)
 	for _, effect in effects or {} do
@@ -100,6 +102,30 @@ return {
 				Expect.truthy(Animations[skill.animation], `{id}: unknown animation {skill.animation}`)
 			end
 		end
+	end,
+	["light chain is three basic melee hits with clips, ending heavier"] = function()
+		local members = Chain.Members(Skills, Basic.Light)
+		Expect.equal(#members, 3, "chain length")
+		for _, id in members do
+			local skill = Skills[id]
+			Expect.truthy(skill, `{id} exists`)
+			Expect.equal(skill.source, "Basic", `{id} source`)
+			Expect.equal(skill.delivery, "Melee", `{id} delivery`)
+			Expect.equal(skill.gcd, nil, `{id} off the GCD`)
+			Expect.truthy(skill.animation and Animations[skill.animation], `{id} clip`)
+		end
+		local first, last = Skills[members[1]], Skills[members[3]]
+		Expect.truthy(last.damage.base > first.damage.base, "finisher hits harder")
+		Expect.truthy(last.cooldown > first.cooldown, "finisher recovers longer")
+		for id, skill in Skills do
+			if skill.chainNext then
+				Expect.truthy(table.find(members, id), `{id}: chainNext outside the light chain`)
+			end
+		end
+	end,
+	["guard clips are in the manifest"] = function()
+		Expect.truthy(Animations.GuardHold, "GuardHold")
+		Expect.truthy(Animations.GuardParry, "GuardParry")
 	end,
 	["enemies reference known skills and have loot"] = function()
 		for id, enemy in Enemies do

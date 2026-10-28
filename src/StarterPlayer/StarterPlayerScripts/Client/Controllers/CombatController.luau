@@ -5,8 +5,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
+local Chain = require(ReplicatedStorage.Shared.Chain)
 local Formulas = require(ReplicatedStorage.Shared.Formulas)
 local Hotbar = require(ReplicatedStorage.Shared.Hotbar)
+local GuardClips = require(script.Parent.Parent.Animation.GuardClips)
 local NetClient = require(ReplicatedStorage.Shared.Net.Client)
 local Signal = require(ReplicatedStorage.Shared.Signal)
 local Skills = require(ReplicatedStorage.Content.Skills)
@@ -20,6 +22,8 @@ local DODGE_SECONDS = 0.2
 local QUEUE_GRACE = 0.5
 
 local player = Players.LocalPlayer
+-- Light attack chain, entry first (Shared/Chain).
+local LIGHT_CHAIN = Chain.Members(Skills.ById, Skills.Basic.Light)
 
 export type Slot = {
 	kind: "Skill" | "Discipline",
@@ -29,7 +33,7 @@ export type Slot = {
 --[=[
 	Client side of combat: aim, predicted cooldowns, GCD and animation lock, a one-action input
 	queue, `UseSkill` with sequence numbers and rollback on `RejectSkill` or an interrupted cast,
-	guard and dodge. Each delivery reads the target from TargetController its own
+	the light attack chain, guard and dodge. Each delivery reads the target from TargetController its own
 	way (docs/systems/combat.md, Targeting). The server decides every outcome (game-design.md 5.5).
 ]=]
 local CombatController = {}
@@ -53,6 +57,8 @@ local lockedUntil = 0
 local queued: string? = nil
 local queuedUntil = 0
 local hotbar: { [number]: Slot } = {}
+local chainLast: string? = nil
+local chainAt = 0
 
 local function character(): (Model?, BasePart?, Humanoid?)
 	local model = player.Character
@@ -164,9 +170,14 @@ function CombatController.Remaining(skillId: string): number
 	return (CombatController.Cooldown(skillId))
 end
 
--- Seconds until this skill could be sent: its timers and the animation lock.
+-- Seconds until this skill could be sent: its timers, the animation lock and, for a light chain
+-- hit, the previous hit's cooldown.
 local function waitFor(skillId: string): number
-	return math.max(CombatController.Remaining(skillId), lockedUntil - os.clock())
+	local wait = math.max(CombatController.Remaining(skillId), lockedUntil - os.clock())
+	if chainLast and table.find(LIGHT_CHAIN, skillId) then
+		wait = math.max(wait, CombatController.Remaining(chainLast))
+	end
+	return wait
 end
 
 -- Sends the use now. Returns false while the character is stunned or still casting.
@@ -194,6 +205,10 @@ local function send(skillId: string): boolean
 		gcdStartedAt = now
 		gcdReadyAt = now + hasted(Tuning.Combat.Gcd.Base)
 	end
+	if table.find(LIGHT_CHAIN, skillId) then
+		chainLast = skillId
+		chainAt = now
+	end
 	if skill.source ~= "Basic" then
 		local cast = if skill.castTime then hasted(skill.castTime) else 0
 		lockedUntil = now + math.max(cast, Tuning.Combat.Gcd.AnimationLock)
@@ -206,9 +221,13 @@ end
 --[=[
 	Sends a skill use if the local prediction allows it. A hotbar skill pressed within
 	`QueueWindow` of becoming ready is queued (one at a time, the latest press wins) and sent the
-	moment it is; basic attacks are never queued.
+	moment it is; basic attacks are never queued. The light attack entry continues the chain: it
+	uses the last hit's `chainNext` within Tuning.Combat.Chain.Window, else starts over.
 ]=]
 function CombatController.UseSkill(skillId: string)
+	if skillId == Skills.Basic.Light then
+		skillId = Chain.Next(Skills.ById, skillId, chainLast, chainAt, os.clock(), Tuning.Combat.Chain.Window)
+	end
 	local skill = Skills.ById[skillId]
 	if not skill then
 		return
@@ -229,6 +248,9 @@ local function rollback(skillId: string)
 	predictedReady[skillId] = nil
 	if skill and skill.gcd then
 		gcdReadyAt = 0
+	end
+	if table.find(LIGHT_CHAIN, skillId) then
+		chainLast = nil
 	end
 	lockedUntil = 0
 end
@@ -340,6 +362,7 @@ function CombatController.Start()
 		end
 	end)
 	ProfileController.Changed:Connect(rebuildHotbar)
+	GuardClips.Start()
 	-- Old sequence numbers never resolve on success; trim them so the table stays small.
 	task.spawn(function()
 		while true do

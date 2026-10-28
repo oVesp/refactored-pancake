@@ -64,6 +64,9 @@ export type Entity = {
 	casting: Cast?,
 	castToken: number,
 	guardSince: number?,
+	--[=[ Last light chain hit this entity used and its os.clock() (Shared/Chain). ]=]
+	chainLast: string?,
+	chainAt: number,
 	invulnerableUntil: number,
 	statuses: { [string]: StatusInstance },
 	history: { Sample },

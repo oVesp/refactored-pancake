@@ -8,7 +8,7 @@ local Types = require(script.Parent.Types)
 	`damage`/`heal`/`shield` amount = base + stat * ratio. Timing (docs/systems/combat.md): spells
 	and Cleave are `gcd` (shared global cooldown, plus `cooldown` when they have their own); other
 	class actives are off-GCD with their own `cooldown`; basic attacks and enemy skills sit outside
-	the GCD.
+	the GCD. The light attack is a three-hit chain (strike, strike_2, strike_3) linked by `chainNext`.
 ]=]
 local list: { Types.SkillDef } = {
 	-- Basic attacks, known by everyone
@@ -24,7 +24,38 @@ local list: { Types.SkillDef } = {
 		angle = 100,
 		damage = { type = "physical", base = 6, stat = "PhysAtk", ratio = 0.6 },
 		animation = "BasicStrike",
-		description = "Light attack.",
+		chainNext = "strike_2",
+		description = "Light attack: first hit of the chain.",
+	},
+	{
+		id = "strike_2",
+		name = "Strike",
+		kind = "Active",
+		source = "Basic",
+		delivery = "Melee",
+		targets = "Enemy",
+		cooldown = 0.4,
+		range = 7,
+		angle = 100,
+		damage = { type = "physical", base = 6, stat = "PhysAtk", ratio = 0.6 },
+		chainNext = "strike_3",
+		animation = "BasicStrike2",
+		description = "Light attack: second hit of the chain.",
+	},
+	{
+		id = "strike_3",
+		name = "Strike",
+		kind = "Active",
+		source = "Basic",
+		delivery = "Melee",
+		targets = "Enemy",
+		-- Hit at 0.22 s, then about 0.6 s of recovery before the chain starts again.
+		cooldown = 0.8,
+		range = 7,
+		angle = 100,
+		damage = { type = "physical", base = 9, stat = "PhysAtk", ratio = 0.9 },
+		animation = "BasicStrike3",
+		description = "Light attack: heavier last hit of the chain.",
 	},
 	{
 		id = "heavy_strike",
@@ -717,6 +748,9 @@ end
 
 return table.freeze({
 	ById = table.freeze(byId),
-	--[=[ Basic attacks every character knows, bound to light and heavy attack. ]=]
+	--[=[
+		Basic attacks every character knows, bound to light and heavy attack. `Light` is the entry
+		of the light chain (`chainNext`, Shared/Chain).
+	]=]
 	Basic = table.freeze({ Light = "strike", Heavy = "heavy_strike" }),
 })

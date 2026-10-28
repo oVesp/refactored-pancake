@@ -81,6 +81,8 @@ return table.freeze({
 			--[=[ Flat studs a caster may drift before the slidecast window without cancelling. ]=]
 			MoveTolerance = 1.5,
 		}),
+		--[=[ Light attack chain: max seconds between hits for the next press to continue it. ]=]
+		Chain = table.freeze({ Window = 0.8 }),
 		Guard = table.freeze({ DamageMultiplier = 0.4, ParryWindow = 0.25, StaminaPerHit = 10, Arc = 120 }),
 		Dodge = table.freeze({ Invulnerable = 0.3, Cooldown = 1, StaminaCost = 20, Distance = 14 }),
 		--[=[ Max seconds a player's hit check may rewind target positions (lag compensation). ]=]
