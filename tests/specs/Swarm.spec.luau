@@ -300,6 +300,10 @@ return {
 		Expect.equal(fleeing, false, "a leader nearby holds the line")
 		morale = Swarm.MoraleStep(99, false, 10, config, false, false, settings)
 		Expect.equal(morale, 100, "regen caps at base")
+		local delay = settings.RegenDelay
+		Expect.equal(Swarm.RegenSeconds(0, delay - 1, 0, settings), 0, "no regen right after a loss")
+		Expect.equal(Swarm.RegenSeconds(0, delay + 2, 0, settings), 2, "regen after the delay")
+		Expect.equal(Swarm.RegenSeconds(delay + 5, delay + 7, 0, settings), 2, "only the new interval")
 	end,
 	["poise breaks on enough damage inside the window"] = function()
 		local total, staggered = Swarm.PoiseHit(0, 0, 10, 100, 0.2, 3, 1)

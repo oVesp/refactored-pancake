@@ -445,8 +445,16 @@ local function fleeOrRegroup(brain: Brain, target: Entity, now: number): boolean
 		end
 	else
 		setState(brain, "Flee")
-		if (flat(brain.home) - flat(root.Position)).Magnitude > ARRIVE_DISTANCE then
-			moveTo(brain, brain.home, now)
+		-- Run home, unless home is too close to the attacker; then run straight away from it.
+		local fleeDistance = Tuning.Swarm.Morale.FleeDistance
+		local refuge = brain.home
+		if (flat(refuge) - flat(target.root.Position)).Magnitude < fleeDistance then
+			local away = flat(root.Position - target.root.Position)
+			local direction = if away.Magnitude > 0.1 then away.Unit else Vector3.new(1, 0, 0)
+			refuge = target.root.Position + direction * fleeDistance
+		end
+		if (flat(refuge) - flat(root.Position)).Magnitude > ARRIVE_DISTANCE and not ZoneService.IsSafe(refuge) then
+			moveTo(brain, refuge, now)
 		else
 			stop(brain)
 		end
@@ -615,7 +623,7 @@ end
 local function poiseHit(brain: Brain, amount: number)
 	local entity = brain.entity
 	local now = os.clock()
-	if now < brain.staggerReadyAt then
+	if entity.hp <= 0 or now < brain.staggerReadyAt then
 		return
 	end
 	local settings = Tuning.Swarm.Stagger

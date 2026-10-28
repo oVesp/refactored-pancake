@@ -90,6 +90,8 @@ export type SquadMember = {
 	fleeing: boolean,
 	--[=[ os.clock() of the last morale update. ]=]
 	moraleAt: number,
+	--[=[ os.clock() of the last morale loss; regeneration waits Morale.RegenDelay after it. ]=]
+	moraleLostAt: number,
 }
 
 return nil

@@ -66,6 +66,7 @@ function SquadService.NewMember(entity: Entity, def: any): Member
 		morale = if profile.morale then profile.morale.base else 0,
 		fleeing = false,
 		moraleAt = os.clock(),
+		moraleLostAt = 0,
 	}
 	members[entity] = member
 	return member
@@ -95,7 +96,7 @@ function SquadService.UpdateMorale(member: Member, now: number): boolean
 	if not config then
 		return false
 	end
-	local dt = now - member.moraleAt
+	local dt = Swarm.RegenSeconds(member.moraleAt, now, member.moraleLostAt, Tuning.Swarm.Morale)
 	member.moraleAt = now
 	local wasFleeing = member.fleeing
 	member.morale, member.fleeing = Swarm.MoraleStep(
@@ -130,9 +131,11 @@ local function moraleOnDeath(victim: Member)
 			local distance = (entity.root.Position - position).Magnitude
 			if distance <= settings.Radius then
 				other.morale -= settings.AllyDeath
+				other.moraleLostAt = os.clock()
 			end
 			if victim.profile.leader and distance <= settings.LeaderRadius then
 				other.morale -= settings.LeaderDeath
+				other.moraleLostAt = os.clock()
 			end
 		end
 	end
@@ -410,6 +413,7 @@ function SquadService.Start()
 		local member = members[target]
 		if member and member.profile.morale and amount > 0 then
 			member.morale = Swarm.DamageMorale(member.morale, amount, target.stats.MaxHp, Tuning.Swarm.Morale)
+			member.moraleLostAt = os.clock()
 		end
 	end)
 	EntityService.Removing:Connect(function(entity: Entity)

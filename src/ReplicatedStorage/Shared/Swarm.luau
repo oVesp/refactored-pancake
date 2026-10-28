@@ -100,8 +100,9 @@ end
 export type MoraleSettings = {
 	--[=[ Morale lost when taking damage equal to max HP. ]=]
 	DamageWeight: number,
-	--[=[ Morale regained per second, up to the enemy's base. ]=]
+	--[=[ Morale regained per second, up to the enemy's base, once RegenDelay passes without a loss. ]=]
 	Regen: number,
+	RegenDelay: number,
 	--[=[ Added while a living leader of the team is near, and while rallied. ]=]
 	LeaderBonus: number,
 	RallyBonus: number,
@@ -132,13 +133,22 @@ function Swarm.PoiseHit(
 	return total, false
 end
 
+--[=[
+	Seconds of morale regeneration between `from` and `now` when the last loss was at `lostAt`:
+	only time after `lostAt + RegenDelay` counts.
+]=]
+function Swarm.RegenSeconds(from: number, now: number, lostAt: number, settings: MoraleSettings): number
+	return math.max(0, now - math.max(from, lostAt + settings.RegenDelay))
+end
+
 --[=[ Morale after taking `amount` damage out of `maxHp`. ]=]
 function Swarm.DamageMorale(morale: number, amount: number, maxHp: number, settings: MoraleSettings): number
 	return morale - amount / math.max(maxHp, 1) * settings.DamageWeight
 end
 
 --[=[
-	Advances morale by `dt` seconds of regeneration and decides whether the enemy flees. Leader and
+	Advances morale by `dt` seconds of regeneration (time past RegenDelay since the last loss;
+	see Swarm.RegenSeconds) and decides whether the enemy flees. Leader and
 	rally bonuses count toward the decision but are not stored. Returns morale and fleeing.
 ]=]
 function Swarm.MoraleStep(

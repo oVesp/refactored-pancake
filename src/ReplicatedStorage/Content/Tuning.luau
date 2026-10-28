@@ -177,11 +177,14 @@ return table.freeze({
 			AllyDeath = 15,
 			LeaderDeath = 40,
 			Regen = 3,
+			RegenDelay = 6,
 			LeaderBonus = 20,
 			RallyBonus = 20,
 			Hysteresis = 25,
 			Radius = 30,
 			LeaderRadius = 60,
+			--[=[ A fleeing enemy whose home is closer than this to the attacker runs this far from it instead. ]=]
+			FleeDistance = 30,
 		}),
 		--[=[
 			Stagger: damage of `combat.poise` x max HP (default DefaultPoise) within Window seconds

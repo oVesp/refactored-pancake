@@ -245,7 +245,7 @@ tests/                        Lune runner + specs/*.spec.luau
 6. Skills are **data**: id, class requirement, cost, GCD flag, cooldown, cast time, delivery, hit shape, effects list, animation id, VFX id, sound id.
 
 ### 5.6 Enemies and AI
-- Server-only AI: state machine (idle, patrol, aggro, position, attack, return, flee), coordinated per target by `SquadService` (attack tokens; docs/systems/ai-and-spawning.md, Group combat).
+- Server-only AI: state machine (idle, patrol, aggro, position, attack, disrupt, flee, regroup, stagger, return), coordinated per target by `SquadService` (attack tokens; docs/systems/ai-and-spawning.md, Group combat).
 - `PathfindingService` with **staggered** recompute (per-NPC jitter), cached agent params, `pcall` around compute, explicit timeouts, blocked-path handling.
 - Detection by spatial queries, not per-frame player scans.
 - Spawning via `SpawnService` with CollectionService tags (`Spawner`), leash radius, respawn timers, global and per-zone active caps.
