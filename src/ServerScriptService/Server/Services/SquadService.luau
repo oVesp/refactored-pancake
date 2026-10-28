@@ -47,7 +47,14 @@ local SquadService = {}
 --[=[ Creates the squad record for an enemy; AIService keeps it on the brain. ]=]
 function SquadService.NewMember(entity: Entity, def: any): Member
 	memberSeq += 1
-	local profile = Swarm.Profile(def, Tuning.Swarm.TokenCost, Tuning.Swarm.Morale.Default, Skills.ById, Statuses.ById)
+	local profile = Swarm.Profile(
+		def,
+		Tuning.Swarm.TokenCost,
+		Tuning.Swarm.Morale.Default,
+		Tuning.Swarm.Stagger.DefaultPoise,
+		Skills.ById,
+		Statuses.ById
+	)
 	local member: Member = {
 		entity = entity,
 		profile = profile,
@@ -234,6 +241,16 @@ function SquadService.HasToken(member: Member): boolean
 	local ledger = ledgerOf(member)
 	local token = ledger and Swarm.Held(ledger, member)
 	return token ~= nil and token.releaseAt == nil
+end
+
+--[=[ "Held" (granted, unused), "Spent" (in its recovery hold) or nil, for debugging. ]=]
+function SquadService.TokenState(member: Member): string?
+	local ledger = ledgerOf(member)
+	local token = ledger and Swarm.Held(ledger, member)
+	if not token then
+		return nil
+	end
+	return if token.releaseAt then "Spent" else "Held"
 end
 
 --[=[ Spends the member's token on an attack; it frees itself at `releaseAt`. ]=]

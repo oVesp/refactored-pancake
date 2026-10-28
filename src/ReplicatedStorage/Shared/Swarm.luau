@@ -47,6 +47,8 @@ export type Profile = {
 	--[=[ Nil for enemies that never flee. ]=]
 	morale: { base: number, fleeBelow: number }?,
 	leader: boolean,
+	--[=[ Share of max HP that staggers the enemy when taken within Tuning.Swarm.Stagger.Window. ]=]
+	poise: number,
 }
 
 --[=[ True when a skill can interrupt a player's cast and is telegraphed: an enemy-targeted skill
@@ -72,6 +74,7 @@ function Swarm.Profile(
 	def: any,
 	defaultCost: number,
 	defaultMorale: { base: number, fleeBelow: number },
+	defaultPoise: number,
 	skills: { [string]: any },
 	statuses: { [string]: any }
 ): Profile
@@ -90,6 +93,7 @@ function Swarm.Profile(
 		interrupts = interrupts,
 		morale = if combat.morale == false then nil else combat.morale or defaultMorale,
 		leader = combat.leader == true,
+		poise = combat.poise or defaultPoise,
 	}
 end
 
@@ -104,6 +108,29 @@ export type MoraleSettings = {
 	--[=[ A fleeing enemy returns only above fleeBelow + Hysteresis. ]=]
 	Hysteresis: number,
 }
+
+--[=[
+	Adds a hit to the poise damage taken within `window` seconds (older damage is dropped first).
+	Returns the new total and true when it reaches `poise` x `maxHp`, which also resets it.
+]=]
+function Swarm.PoiseHit(
+	total: number,
+	lastAt: number,
+	amount: number,
+	maxHp: number,
+	poise: number,
+	window: number,
+	now: number
+): (number, boolean)
+	if now - lastAt > window then
+		total = 0
+	end
+	total += amount
+	if total >= poise * maxHp then
+		return 0, true
+	end
+	return total, false
+end
 
 --[=[ Morale after taking `amount` damage out of `maxHp`. ]=]
 function Swarm.DamageMorale(morale: number, amount: number, maxHp: number, settings: MoraleSettings): number

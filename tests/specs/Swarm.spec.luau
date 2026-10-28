@@ -12,7 +12,14 @@ local Skills = Loader.load("src/ReplicatedStorage/Content/Skills").ById
 local Statuses = Loader.load("src/ReplicatedStorage/Content/Statuses").ById
 
 local function profile(id: string): any
-	return Swarm.Profile(Enemies[id], Tuning.Swarm.TokenCost, Tuning.Swarm.Morale.Default, Skills, Statuses)
+	return Swarm.Profile(
+		Enemies[id],
+		Tuning.Swarm.TokenCost,
+		Tuning.Swarm.Morale.Default,
+		Tuning.Swarm.Stagger.DefaultPoise,
+		Skills,
+		Statuses
+	)
 end
 
 local TIMEOUT = 4
@@ -293,5 +300,16 @@ return {
 		Expect.equal(fleeing, false, "a leader nearby holds the line")
 		morale = Swarm.MoraleStep(99, false, 10, config, false, false, settings)
 		Expect.equal(morale, 100, "regen caps at base")
+	end,
+	["poise breaks on enough damage inside the window"] = function()
+		local total, staggered = Swarm.PoiseHit(0, 0, 10, 100, 0.2, 3, 1)
+		Expect.equal(staggered, false, "one light hit")
+		total, staggered = Swarm.PoiseHit(total, 1, 10, 100, 0.2, 3, 2)
+		Expect.truthy(staggered, "two hits inside the window")
+		Expect.equal(total, 0, "reset after a stagger")
+		total, staggered = Swarm.PoiseHit(15, 0, 10, 100, 0.2, 3, 5)
+		Expect.equal(staggered, false, "old damage dropped")
+		Expect.equal(total, 10, "only the new hit counts")
+		Expect.truthy(profile("goblin_chieftain").poise > profile("goblin_raider").poise, "boss is sturdier")
 	end,
 }

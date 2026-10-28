@@ -2,6 +2,7 @@
 
 local PathfindingService = game:GetService("PathfindingService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Enemies = require(ReplicatedStorage.Content.Enemies)
 local Logger = require(ReplicatedStorage.Shared.Logger)
@@ -13,7 +14,7 @@ local Types = require(script.Parent.Parent.Types)
 type Entity = Types.Entity
 type Member = Types.SquadMember
 
-type State = "Idle" | "Patrol" | "Aggro" | "Position" | "Attack" | "Disrupt" | "Flee" | "Regroup" | "Return"
+type State = "Idle" | "Patrol" | "Aggro" | "Position" | "Attack" | "Disrupt" | "Flee" | "Regroup" | "Stagger" | "Return"
 
 type Brain = {
 	entity: Entity,
@@ -31,6 +32,12 @@ type Brain = {
 	--[=[ Indices of `combat.summons` entries already spawned. ]=]
 	summoned: { [number]: boolean },
 	member: Member,
+	--[=[ Poise damage taken in the current stagger window and when it was last added to. ]=]
+	poiseDamage: number,
+	poiseAt: number,
+	--[=[ Decisions pause until this os.clock(); no new stagger before staggerReadyAt. ]=]
+	staggerUntil: number,
+	staggerReadyAt: number,
 }
 
 local AGGRO_ON_HIT_RADIUS = 60
@@ -51,6 +58,7 @@ local SpawnService: any
 local SquadService: any
 
 local brains: { [Entity]: Brain } = {}
+local debugAttributes = RunService:IsStudio()
 local cueSequence = 0
 local random = Random.new()
 local blockParams = RaycastParams.new()
@@ -58,8 +66,7 @@ blockParams.FilterType = Enum.RaycastFilterType.Exclude
 
 --[=[
 	Server-only enemy brains (game-design.md 5.6): idle, patrol, aggro, position, attack, disrupt,
-	flee, regroup, return.
-	Each thinks on a jittered interval; detection is a distance check over living players;
+	flee, regroup, stagger, return. Each thinks on a jittered interval; detection is a distance check over living players;
 	PathfindingService only runs when the straight line is blocked. Attacks need a token from
 	SquadService; without one the enemy waits in position.
 ]=]
@@ -230,6 +237,12 @@ local function alliesNear(brain: Brain, radius: number): number
 	return count
 end
 
+-- A Disruptor keeps its interrupt skills out of its rotation, ready for the player's next cast.
+local function reserved(brain: Brain, skillId: string): boolean
+	local member = brain.member
+	return member.role == "Disruptor" and table.find(member.profile.interrupts, skillId) ~= nil
+end
+
 -- Aim and aimed-at entity for a ready skill whose conditions hold, or nil.
 local function usable(brain: Brain, skill: any, target: Entity, distance: number): (Vector3?, Entity?)
 	local entity = brain.entity
@@ -259,7 +272,7 @@ end
 local function chooseSkill(brain: Brain, target: Entity, distance: number, now: number): (string?, Vector3?, Entity?)
 	for _, skillId in brain.def.skills do
 		local skill = Skills.ById[skillId]
-		if not skill or SkillService.CooldownRemaining(brain.entity, skillId) > 0 then
+		if not skill or reserved(brain, skillId) or SkillService.CooldownRemaining(brain.entity, skillId) > 0 then
 			continue
 		end
 		local aim, aimedAt = usable(brain, skill, target, distance)
@@ -274,7 +287,12 @@ end
 local function readyAttackKind(brain: Brain): Swarm.TokenKind?
 	for _, skillId in brain.def.skills do
 		local skill = Skills.ById[skillId]
-		if skill and skill.targets ~= "Ally" and SkillService.CooldownRemaining(brain.entity, skillId) <= 0 then
+		if
+			skill
+			and skill.targets ~= "Ally"
+			and not reserved(brain, skillId)
+			and SkillService.CooldownRemaining(brain.entity, skillId) <= 0
+		then
 			return Swarm.TokenKind(skill)
 		end
 	end
@@ -285,14 +303,15 @@ local function preferredRange(brain: Brain): number
 	if brain.def.keepDistance then
 		return brain.def.keepDistance + 6
 	end
-	local reach = 6
+	-- Melee stands at its shortest attack reach: closer never hurts, farther leaves skills unusable.
+	local reach = math.huge
 	for _, skillId in brain.def.skills do
 		local skill = Skills.ById[skillId]
 		if skill and skill.targets ~= "Ally" and skill.delivery ~= "Dash" then
-			reach = math.max(reach, math.min(skillReach(skill), 8))
+			reach = math.min(reach, skillReach(skill), 8)
 		end
 	end
-	return reach
+	return if reach == math.huge then 6 else reach
 end
 
 local function attackCue(entity: Entity, skill: any)
@@ -440,6 +459,13 @@ local function think(brain: Brain, now: number)
 	if not entity.alive or brain.def.behavior == "Dummy" then
 		return
 	end
+	if now < brain.staggerUntil then
+		stop(brain)
+		return
+	end
+	if brain.state == "Stagger" then
+		setState(brain, "Aggro")
+	end
 	if StatusService.IsDisabled(entity) or entity.casting then
 		stop(brain)
 		return
@@ -568,6 +594,53 @@ local function think(brain: Brain, now: number)
 	end
 end
 
+-- Studio-only overlay attributes: role, slot (ring, index, flank), token and morale.
+local function publishDebug(brain: Brain)
+	local member = brain.member
+	local model = brain.entity.model
+	model:SetAttribute("AiRole", if member.target then member.role else nil)
+	local slot: string? = nil
+	local direction = SquadService.SlotDirection(member)
+	local target = member.target
+	if direction and target and member.slot then
+		local ring = Swarm.RingOf(member.profile.slot) or ""
+		slot = `{ring}{member.slot} {Swarm.Flank(direction, target.root.CFrame.LookVector)}`
+	end
+	model:SetAttribute("AiSlot", slot)
+	model:SetAttribute("AiToken", SquadService.TokenState(member))
+	model:SetAttribute("AiMorale", if member.profile.morale then math.floor(member.morale) else nil)
+end
+
+-- Poise: enough damage in a short window cancels the windup, gives back the token and pauses.
+local function poiseHit(brain: Brain, amount: number)
+	local entity = brain.entity
+	local now = os.clock()
+	if now < brain.staggerReadyAt then
+		return
+	end
+	local settings = Tuning.Swarm.Stagger
+	local staggered
+	brain.poiseDamage, staggered = Swarm.PoiseHit(
+		brain.poiseDamage,
+		brain.poiseAt,
+		amount,
+		entity.stats.MaxHp,
+		brain.member.profile.poise,
+		settings.Window,
+		now
+	)
+	brain.poiseAt = now
+	if not staggered then
+		return
+	end
+	brain.staggerUntil = now + settings.Seconds
+	brain.staggerReadyAt = now + settings.Cooldown
+	SkillService.Interrupt(entity)
+	SquadService.DropToken(brain.member)
+	stop(brain)
+	setState(brain, "Stagger")
+end
+
 --[=[ Gives a spawned enemy a brain anchored at `home` with a leash radius. ]=]
 function AIService.Attach(entity: Entity, home: Vector3, leash: number)
 	local def = Enemies.ById[entity.defId]
@@ -588,6 +661,10 @@ function AIService.Attach(entity: Entity, home: Vector3, leash: number)
 		pathTarget = nil,
 		nextPathAt = 0,
 		summoned = {},
+		poiseDamage = 0,
+		poiseAt = 0,
+		staggerUntil = 0,
+		staggerReadyAt = 0,
 		member = SquadService.NewMember(entity, def),
 	}
 	entity.model:SetAttribute("AiState", "Idle")
@@ -624,8 +701,10 @@ function AIService.Start()
 	EntityService.Added:Connect(refreshFilter)
 
 	CombatService.Damaged:Connect(function(target: Entity, amount: number)
-		if brains[target] and target.alive and amount > 0 then
+		local brain = brains[target]
+		if brain and target.alive and amount > 0 then
 			cue(target, "Hit")
+			poiseHit(brain, amount)
 		end
 	end)
 	CombatService.Died:Connect(function(target: Entity)
@@ -664,6 +743,9 @@ function AIService.Start()
 					brain.nextThink = now + Tuning.Npc.ThinkInterval
 					local ok, err = pcall(function()
 						think(brain, now)
+						if debugAttributes then
+							publishDebug(brain)
+						end
 					end)
 					if not ok then
 						log:Throttled("think", 5, "error", "Brain error for %s: %s", brain.entity.name, tostring(err))

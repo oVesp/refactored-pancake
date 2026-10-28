@@ -183,5 +183,11 @@ return table.freeze({
 			Radius = 30,
 			LeaderRadius = 60,
 		}),
+		--[=[
+			Stagger: damage of `combat.poise` x max HP (default DefaultPoise) within Window seconds
+			cancels the enemy's windup, gives back its token and pauses its decisions for Seconds;
+			it cannot be staggered again for Cooldown seconds.
+		]=]
+		Stagger = table.freeze({ DefaultPoise = 0.2, Window = 3, Seconds = 0.6, Cooldown = 3 }),
 	}),
 })

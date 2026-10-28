@@ -132,6 +132,8 @@ export type CombatDef = {
 	morale: ({ base: number, fleeBelow: number } | false)?,
 	--[=[ Gives nearby allies of its team a morale bonus; its death costs them morale. ]=]
 	leader: boolean?,
+	--[=[ Share of max HP taken quickly that staggers the enemy. Default Tuning.Swarm.Stagger.DefaultPoise. ]=]
+	poise: number?,
 	--[=[ Adds spawned once the enemy's HP falls below `belowHp` (fraction), with optional self effects. ]=]
 	summons: { Summon }?,
 }

@@ -80,7 +80,12 @@ local list: { Types.EnemyDef } = {
 		xp = 30,
 		scale = 1.15,
 		color = Color3.fromRGB(85, 110, 55),
-		combat = { slot = "Melee", roles = { Disruptor = 2, Pressure = 1 }, morale = { base = 100, fleeBelow = 20 } },
+		combat = {
+			slot = "Melee",
+			roles = { Disruptor = 2, Pressure = 1 },
+			poise = 0.35,
+			morale = { base = 100, fleeBelow = 20 },
+		},
 	},
 	{
 		id = "goblin_chieftain",
@@ -104,6 +109,7 @@ local list: { Types.EnemyDef } = {
 			slot = "Melee",
 			tokenCost = 2,
 			roles = { Pressure = 1 },
+			poise = 0.6,
 			morale = false,
 			leader = true,
 			summons = {
@@ -174,7 +180,12 @@ local list: { Types.EnemyDef } = {
 		xp = 40,
 		scale = 0.9,
 		color = Color3.fromRGB(70, 100, 60),
-		combat = { slot = "Melee", roles = { Pressure = 2, Opportunist = 1 }, morale = { base = 100, fleeBelow = 20 } },
+		combat = {
+			slot = "Melee",
+			roles = { Pressure = 2, Opportunist = 1 },
+			poise = 0.3,
+			morale = { base = 100, fleeBelow = 20 },
+		},
 	},
 	{
 		id = "warband_archer",
@@ -249,7 +260,12 @@ local list: { Types.EnemyDef } = {
 		xp = 50,
 		scale = 1.0,
 		color = Color3.fromRGB(100, 90, 80),
-		combat = { slot = "Melee", roles = { Disruptor = 2, Flanker = 1 }, morale = { base = 100, fleeBelow = 25 } },
+		combat = {
+			slot = "Melee",
+			roles = { Disruptor = 2, Flanker = 1 },
+			poise = 0.3,
+			morale = { base = 100, fleeBelow = 25 },
+		},
 	},
 	{
 		id = "warband_captain",
@@ -268,7 +284,7 @@ local list: { Types.EnemyDef } = {
 		scale = 1.3,
 		color = Color3.fromRGB(110, 60, 50),
 		elite = true,
-		combat = { slot = "Melee", tokenCost = 2, roles = { Pressure = 1 }, morale = false, leader = true },
+		combat = { slot = "Melee", tokenCost = 2, roles = { Pressure = 1 }, poise = 0.5, morale = false, leader = true },
 	},
 }
 
