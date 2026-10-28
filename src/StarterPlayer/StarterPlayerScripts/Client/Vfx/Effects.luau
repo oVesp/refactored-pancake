@@ -315,9 +315,14 @@ end
 
 -- Tracks held by `Hitstop`: the speed to give back and when. Overlapping hitstops (a parry and
 -- its blocked hit, a multi-target swing) extend one hold, so the 0 of a held track is never
--- saved as the speed to restore and the clip is never left frozen mid-swing.
-type Hold = { speed: number, release: number }
+-- saved as the speed to restore and the clip is never left frozen mid-swing. A stream of hits
+-- (a swarm, a multi-hit) extends a hold to at most `MAX_HOLD` after its first freeze, and a
+-- released track plays freely for `THAW` before another hitstop can freeze it.
+type Hold = { speed: number, release: number, limit: number }
 local holds: { [AnimationTrack]: Hold } = {}
+local thawUntil: { [AnimationTrack]: number } = setmetatable({}, { __mode = "k" }) :: any
+local MAX_HOLD = 0.3
+local THAW = 0.15
 
 local function releaseHold(track: AnimationTrack)
 	local hold = holds[track]
@@ -330,6 +335,7 @@ local function releaseHold(track: AnimationTrack)
 		return
 	end
 	holds[track] = nil
+	thawUntil[track] = os.clock() + THAW
 	if track.IsPlaying and track.Speed == 0 then
 		track:AdjustSpeed(hold.speed)
 	end
@@ -337,7 +343,8 @@ end
 
 --[=[ Freezes every playing animation on the models for `duration` seconds (hit pause). ]=]
 function Effects.Hitstop(models: { Model? }, duration: number)
-	local release = os.clock() + duration
+	local now = os.clock()
+	local release = now + duration
 	for _, model in models do
 		local animator = model and model:FindFirstChildWhichIsA("Animator", true)
 		if not animator then
@@ -346,9 +353,9 @@ function Effects.Hitstop(models: { Model? }, duration: number)
 		for _, track in (animator :: Animator):GetPlayingAnimationTracks() do
 			local hold = holds[track]
 			if hold then
-				hold.release = math.max(hold.release, release)
-			elseif track.Speed ~= 0 then
-				holds[track] = { speed = track.Speed, release = release }
+				hold.release = math.min(math.max(hold.release, release), hold.limit)
+			elseif track.Speed ~= 0 and now >= (thawUntil[track] or 0) then
+				holds[track] = { speed = track.Speed, release = release, limit = now + MAX_HOLD }
 				track:AdjustSpeed(0)
 				task.delay(duration, releaseHold, track)
 			end
