@@ -94,7 +94,8 @@ local function landDamage(
 	damageType: string,
 	source: Entity?,
 	crit: boolean,
-	skillId: string?
+	skillId: string?,
+	blocked: boolean?
 )
 	local now = os.clock()
 	target.lastCombatAt = now
@@ -115,7 +116,8 @@ local function landDamage(
 	end
 
 	StatService.SetHp(target, target.hp - remaining)
-	show(target, amount, if remaining < amount then "shielded" else "damage", crit, skillId, source)
+	local kind = if blocked then "blocked" elseif remaining < amount then "shielded" else "damage"
+	show(target, amount, kind, crit, skillId, source)
 	CombatService.Damaged:Fire(target, amount, damageType, source, crit, skillId)
 	if target.hp <= 0 then
 		die(target, source)
@@ -192,21 +194,24 @@ function CombatService.DealDamage(
 	end
 
 	local guard = Tuning.Combat.Guard
+	local blocked = false
 	if target.guardSince and inFront(target, source, guard.Arc) then
 		if now - target.guardSince <= guard.ParryWindow then
 			show(target, 0, "parried", false)
+			NetServer.FireAll("ShowParry", target.model, source.model)
 			StatusService.Apply(source, "stun", PARRY_STAGGER, nil, target)
 			return 0
 		end
 		if StatService.Spend(target, "Stamina", guard.StaminaPerHit) then
 			amount = math.max(1, math.floor(amount * guard.DamageMultiplier + 0.5))
+			blocked = true
 		else
 			target.guardSince = nil
 			target.model:SetAttribute("Guarding", false)
 		end
 	end
 
-	landDamage(target, amount, spec.type, source, crit, skillId)
+	landDamage(target, amount, spec.type, source, crit, skillId, blocked)
 	return amount
 end
 

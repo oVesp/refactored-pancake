@@ -137,6 +137,8 @@ local Remotes: { [string]: RemoteSpec } = {
 	ShowCast = { direction = "ServerToClient" },
 	ShowImpact = { direction = "ServerToClient" },
 	ShowDamage = { direction = "ServerToClient" },
+	--[=[ `(defender, attacker)`: a guard parried a hit (cosmetic; the stun is a status). ]=]
+	ShowParry = { direction = "ServerToClient" },
 	Notify = { direction = "ServerToClient" },
 	SendDeathState = { direction = "ServerToClient" },
 	SendDevLog = { direction = "ServerToClient" },
