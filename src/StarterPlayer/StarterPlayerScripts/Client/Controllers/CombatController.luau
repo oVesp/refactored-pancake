@@ -20,6 +20,8 @@ local PAD_AIM_DISTANCE = 30
 local DODGE_SECONDS = 0.2
 -- Seconds a queued action may wait past its predicted ready time for the server's cast to end.
 local QUEUE_GRACE = 0.5
+-- Studs a melee lunge stops short of the aim point.
+local LUNGE_STOP_SHORT = 3
 
 local player = Players.LocalPlayer
 -- Light attack chain, entry first (Shared/Chain).
@@ -54,6 +56,9 @@ local predictedReady: { [string]: number } = {}
 local gcdStartedAt = 0
 local gcdReadyAt = 0
 local lockedUntil = 0
+-- Melee swing in progress (windup + recovery) and the skill that started it.
+local swingId: string? = nil
+local swingEndsAt = 0
 local queued: string? = nil
 local queuedUntil = 0
 local hotbar: { [number]: Slot } = {}
@@ -180,6 +185,43 @@ local function waitFor(skillId: string): number
 	return wait
 end
 
+-- Steps the character toward the aim at the start of a melee swing, stopping short of the aim.
+local function lunge(skill: any, root: BasePart, aim: Vector3)
+	local offset = Vector3.new(aim.X - root.Position.X, 0, aim.Z - root.Position.Z)
+	local distance = math.min(skill.lunge, offset.Magnitude - LUNGE_STOP_SHORT)
+	if distance <= 0.1 then
+		return
+	end
+	local seconds = Tuning.Combat.Commit.LungeSeconds
+	local direction = offset.Unit
+	local attachment = Instance.new("Attachment")
+	attachment.Name = "LungeAttachment"
+	local velocity = Instance.new("LinearVelocity")
+	velocity.Name = "LungeVelocity"
+	velocity.Attachment0 = attachment
+	velocity.VelocityConstraintMode = Enum.VelocityConstraintMode.Plane
+	velocity.PrimaryTangentAxis = Vector3.xAxis
+	velocity.SecondaryTangentAxis = Vector3.zAxis
+	velocity.PlaneVelocity = Vector2.new(direction.X, direction.Z) * (distance / seconds)
+	velocity.MaxForce = 1e6
+	attachment.Parent = root
+	velocity.Parent = root
+	task.delay(seconds, function()
+		velocity:Destroy()
+		attachment:Destroy()
+	end)
+end
+
+-- Heavy Strike windup as the server computes it (HeavySpeed shortens it).
+local function windupOf(skill: any): number
+	local windup = skill.windup or 0
+	if skill.id == Skills.Basic.Heavy then
+		local speed = player.Character and player.Character:GetAttribute("Extra_HeavySpeed")
+		windup *= math.max(0.1, 1 - (if type(speed) == "number" then speed else 0))
+	end
+	return windup
+end
+
 -- Sends the use now. Returns false while the character is stunned or still casting.
 local function send(skillId: string): boolean
 	local skill = Skills.ById[skillId]
@@ -209,7 +251,15 @@ local function send(skillId: string): boolean
 		chainLast = skillId
 		chainAt = now
 	end
-	if skill.source ~= "Basic" then
+	if skill.recovery then
+		-- A melee swing commits the character until its recovery ends.
+		swingId = skillId
+		swingEndsAt = now + windupOf(skill) + skill.recovery
+		lockedUntil = swingEndsAt
+		if skill.lunge then
+			lunge(skill, root, aim)
+		end
+	elseif skill.source ~= "Basic" then
 		local cast = if skill.castTime then hasted(skill.castTime) else 0
 		lockedUntil = now + math.max(cast, Tuning.Combat.Gcd.AnimationLock)
 	end
@@ -221,7 +271,7 @@ end
 --[=[
 	Sends a skill use if the local prediction allows it. A hotbar skill pressed within
 	`QueueWindow` of becoming ready is queued (one at a time, the latest press wins) and sent the
-	moment it is; basic attacks are never queued. The light attack entry continues the chain: it
+	moment it is, which buffers presses made during a swing's recovery. The light attack entry continues the chain: it
 	uses the last hit's `chainNext` within Tuning.Combat.Chain.Window, else starts over.
 ]=]
 function CombatController.UseSkill(skillId: string)
@@ -236,7 +286,7 @@ function CombatController.UseSkill(skillId: string)
 	if wait <= 0 then
 		queued = nil
 		send(skillId)
-	elseif skill.source ~= "Basic" and wait <= Tuning.Combat.Gcd.QueueWindow then
+	elseif wait <= Tuning.Combat.Gcd.QueueWindow then
 		queued = skillId
 		queuedUntil = os.clock() + wait + QUEUE_GRACE
 	end
@@ -253,6 +303,7 @@ local function rollback(skillId: string)
 		chainLast = nil
 	end
 	lockedUntil = 0
+	swingId = nil
 end
 
 --[=[ Toggles a Discipline. ]=]
@@ -290,6 +341,12 @@ function CombatController.Dodge()
 		return
 	end
 	queued = nil
+	-- Dodge cancels a swing in progress and its recovery.
+	if swingId and os.clock() < swingEndsAt then
+		CombatController.Rejected:Fire(swingId, "Dodge")
+	end
+	swingId = nil
+	lockedUntil = 0
 	local dodge = Tuning.Combat.Dodge
 	local direction = humanoid.MoveDirection
 	if direction.Magnitude < 0.1 then

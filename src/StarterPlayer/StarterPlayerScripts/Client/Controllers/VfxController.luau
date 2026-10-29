@@ -250,6 +250,11 @@ local function cancelCharge(caster: Instance?)
 	end
 end
 
+-- Light swings carry no telegraph: the owner's client draws them at the clip's `Hit` marker.
+local function predictsSwing(skill: any): boolean
+	return skill.telegraph == false or not skill.windup
+end
+
 local function onResolve(info: { [string]: any }, skill: any)
 	if info.caster then
 		charges[info.caster] = nil
@@ -260,8 +265,8 @@ local function onResolve(info: { [string]: any }, skill: any)
 	end
 	if recipe.resolve then
 		recipe.resolve(info :: any)
-	elseif recipe.swing and not (isLocalCaster(info.caster) and not skill.windup) then
-		-- The local player's instant swings were already predicted; wound-up ones were not.
+	elseif recipe.swing and not (isLocalCaster(info.caster) and predictsSwing(skill)) then
+		-- The local player's committed melee swings were already predicted at the clip's Hit marker.
 		recipe.swing(info.origin, info.aim, skill.range or 6, skill.angle or 90)
 	end
 end
@@ -424,8 +429,8 @@ local function loadSkillTracks(character: Model)
 	end
 end
 
--- Plays the local player's clip for a used skill. An instant melee swing waits for the clip's
--- `Hit` marker; without a clip it shows at once. Wound-up swings come from the server's Resolve.
+-- Plays the local player's clip for a used skill. A predicted melee swing waits for the clip's
+-- `Hit` marker; without a clip it shows at once. Telegraphed swings come from the server's Resolve.
 local function onUsed(skillId: string, aim: Vector3)
 	local track = skillTracks[skillId]
 	local skill = Skills.ById[skillId]
@@ -440,7 +445,7 @@ local function onUsed(skillId: string, aim: Vector3)
 		return
 	end
 	track:Play(CLIP_FADE_IN)
-	if skill and not skill.windup then
+	if skill and predictsSwing(skill) then
 		local hit = track:GetMarkerReachedSignal("Hit"):Once(swing)
 		track.Stopped:Once(function()
 			hit:Disconnect()

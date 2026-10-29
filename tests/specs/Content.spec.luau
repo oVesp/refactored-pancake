@@ -78,6 +78,13 @@ return {
 				else
 					Expect.truthy(skill.cooldown, `{id} off-GCD needs a cooldown`)
 				end
+				if skill.recovery then
+					Expect.truthy(skill.windup, `{id}: a swing with recovery has a windup`)
+					Expect.truthy(
+						(skill.cooldown or 0) >= (skill.windup or 0) + skill.recovery - 1e-6,
+						`{id}: cooldown covers windup + recovery`
+					)
+				end
 				if skill.source == "Spell" then
 					Expect.truthy(skill.gcd, `{id}: spells are on the GCD`)
 				end

@@ -68,7 +68,14 @@ export type SkillDef = {
 	--[=[ Seconds of casting; moving before the slidecast window cancels it. ]=]
 	castTime: number?,
 	interruptible: boolean?,
+	--[=[ Seconds from the press to the hit; the swing commits the player (Tuning.Combat.Commit). ]=]
 	windup: number?,
+	--[=[ Seconds after the hit during which the player stays committed: no actions, slowed. Players only. ]=]
+	recovery: number?,
+	--[=[ Studs the owner's client steps toward the aim when the swing starts. ]=]
+	lunge: number?,
+	--[=[ false: no ground telegraph; the owner's client predicts the swing at the clip `Hit` marker. ]=]
+	telegraph: boolean?,
 	range: number?,
 	radius: number?,
 	angle: number?,

@@ -432,6 +432,13 @@ local function hasted(caster: Entity, seconds: number): number
 	return Formulas.Hasted(seconds, caster.extras.Haste or 0, Tuning.Combat.Gcd.MaxHaste)
 end
 
+local function endCommit(caster: Entity)
+	if caster.commitUntil > 0 then
+		caster.commitUntil = 0
+		StatService.Recompute(caster)
+	end
+end
+
 local function castDuration(caster: Entity, skill: SkillDef): (number, boolean)
 	if skill.castTime then
 		return hasted(caster, skill.castTime), true
@@ -444,6 +451,17 @@ local function castDuration(caster: Entity, skill: SkillDef): (number, boolean)
 		return windup, false
 	end
 	return 0, false
+end
+
+-- Slows the caster until `endsAt` (a melee swing and its recovery) and restores speed after.
+local function commit(caster: Entity, endsAt: number)
+	caster.commitUntil = endsAt
+	StatService.Recompute(caster)
+	task.delay(endsAt - os.clock(), function()
+		if caster.commitUntil == endsAt then
+			endCommit(caster)
+		end
+	end)
 end
 
 -- Cancels the cast when the caster drifts more than MoveTolerance before the slidecast window.
@@ -492,7 +510,12 @@ function SkillService.Cast(
 	end
 
 	local duration, isCast = castDuration(caster, skill)
-	if caster.player and skill.source ~= "Basic" then
+	if caster.player and skill.recovery then
+		-- A melee swing commits the player until its recovery ends: no actions, slowed.
+		local endsAt = now + duration + skill.recovery
+		caster.lockedUntil = endsAt
+		commit(caster, endsAt)
+	elseif caster.player and skill.source ~= "Basic" then
 		caster.lockedUntil = now + math.max(duration, timing.AnimationLock)
 	end
 	if duration <= 0 then
@@ -511,18 +534,19 @@ function SkillService.Cast(
 		token = token,
 		cost = cost,
 	}
-	local id = castId()
-	broadcast({
-		id = id,
-		kind = if isCast then "Cast" else "Telegraph",
-		caster = caster.model,
-		skillId = skillId,
-		origin = caster.root.Position,
-		aim = aim,
-		target = if target then target.model else nil,
-		duration = duration,
-	})
-	caster.model:SetAttribute("Casting", skillId)
+	if skill.telegraph ~= false then
+		broadcast({
+			id = castId(),
+			kind = if isCast then "Cast" else "Telegraph",
+			caster = caster.model,
+			skillId = skillId,
+			origin = caster.root.Position,
+			aim = aim,
+			target = if target then target.model else nil,
+			duration = duration,
+		})
+		caster.model:SetAttribute("Casting", skillId)
+	end
 	if isCast and (caster.player or skill.interruptible) then
 		watchMovement(caster, token, now + duration - timing.SlidecastWindow)
 	end
@@ -562,6 +586,7 @@ function SkillService.Interrupt(caster: Entity): boolean
 	local now = os.clock()
 	caster.casting = nil
 	caster.lockedUntil = now
+	endCommit(caster)
 	if skill and skill.gcd then
 		caster.gcdReadyAt = now
 	end
@@ -720,7 +745,10 @@ local function handleDodge(player: Player, direction: Vector3, seq: number)
 	end
 	dodgeReadyAt[player] = now + dodge.Cooldown
 	entity.invulnerableUntil = now + dodge.Invulnerable
+	-- Dodge cancels a swing in its windup (Interrupt) or recovery.
 	SkillService.Interrupt(entity)
+	entity.lockedUntil = now
+	endCommit(entity)
 end
 
 function SkillService.Init(deps: { [string]: any })

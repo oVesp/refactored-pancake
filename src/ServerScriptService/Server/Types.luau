@@ -67,6 +67,8 @@ export type Entity = {
 	--[=[ Last light chain hit this entity used and its os.clock() (Shared/Chain). ]=]
 	chainLast: string?,
 	chainAt: number,
+	--[=[ os.clock() until which a melee swing keeps the player committed (slowed, no actions). ]=]
+	commitUntil: number,
 	invulnerableUntil: number,
 	statuses: { [string]: StatusInstance },
 	history: { Sample },

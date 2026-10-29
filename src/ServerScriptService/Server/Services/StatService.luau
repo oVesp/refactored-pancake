@@ -62,6 +62,9 @@ local function statusModifiers(entity: Entity): ({ Formulas.StatBlock }, number)
 			end
 		end
 	end
+	if entity.commitUntil > os.clock() then
+		moveMultiplier *= Tuning.Combat.Commit.MoveMultiplier
+	end
 	return blocks, moveMultiplier
 end
 

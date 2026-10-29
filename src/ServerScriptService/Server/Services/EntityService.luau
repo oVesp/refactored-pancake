@@ -78,6 +78,7 @@ function EntityService.Register(info: NewEntity): Entity
 		guardSince = nil,
 		chainLast = nil,
 		chainAt = 0,
+		commitUntil = 0,
 		invulnerableUntil = 0,
 		statuses = {},
 		history = {},

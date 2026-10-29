@@ -83,6 +83,12 @@ return table.freeze({
 		}),
 		--[=[ Light attack chain: max seconds between hits for the next press to continue it. ]=]
 		Chain = table.freeze({ Window = 0.8 }),
+		--[=[
+			Melee commitment (docs/systems/combat.md, Timing): from a swing's press until its recovery
+			ends the player moves at `MoveMultiplier` of normal speed and cannot act; the client steps
+			`lunge` studs over `LungeSeconds` at the start; a dodge cancels the swing and its recovery.
+		]=]
+		Commit = table.freeze({ MoveMultiplier = 0.3, LungeSeconds = 0.12 }),
 		Guard = table.freeze({ DamageMultiplier = 0.4, ParryWindow = 0.25, StaminaPerHit = 10, Arc = 120 }),
 		Dodge = table.freeze({ Invulnerable = 0.3, Cooldown = 1, StaminaCost = 20, Distance = 14 }),
 		--[=[ Max seconds a player's hit check may rewind target positions (lag compensation). ]=]
