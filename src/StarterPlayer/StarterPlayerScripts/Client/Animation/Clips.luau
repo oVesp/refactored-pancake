@@ -11,8 +11,9 @@ local log = Logger.new("Clips")
 local resolved: { [string]: string } = {}
 
 --[=[
-	Resolves `Assets.Animations` keys to playable animation ids: the uploaded id, else the
-	KeyframeSequence under ReplicatedStorage.Animations registered at runtime. Registration only
+	Resolves `Assets.Animations` keys to playable animation ids: an alias (`Assets.AnimAliases`), a
+	Roblox stock clip (`Assets.Stock`), the uploaded id, else the KeyframeSequence under
+	ReplicatedStorage.Animations registered at runtime. Registration only
 	works in Studio and its temporary id is local to this client.
 ]=]
 local Clips = {}
@@ -21,6 +22,14 @@ local Clips = {}
 function Clips.Id(key: string): string?
 	if resolved[key] then
 		return resolved[key]
+	end
+	local alias = Assets.AnimAliases[key]
+	if alias then
+		return Clips.Id(alias)
+	end
+	local stock = Assets.Stock[key]
+	if stock then
+		return stock
 	end
 	local asset = Assets.Animations[key]
 	if not asset then

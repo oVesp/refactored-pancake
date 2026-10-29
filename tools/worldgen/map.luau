@@ -124,7 +124,7 @@ end
 -- Settlements: kit assets as their footprints, crops and trees as dots, anchors as rings.
 local manifest = serde.decode("json", fs.readFile("content/world/village.json"))
 local mapModel = roblox.deserializeModel(fs.readFile("src/Workspace/Map.rbxmx"))[1]
-local anchors = Anchors.fromMap(mapModel)
+local anchors = Anchors.fromMap(mapModel, Loader.load("src/ServerStorage/ContentServerOnly/Population"))
 local scale = realm.settlements.scale
 for _, node in graph.nodes do
 	for _, spec in Settlement.forZone(field, manifest, anchors, node.id) do

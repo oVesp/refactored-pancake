@@ -197,6 +197,16 @@
 			"notes": "Generic faction names, plain descriptive (game-design.md 2)."
 		},
 		{
+			"id": "content:Npcs",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Npcs.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Generic role names (villager, guard, merchant, traveler), plain descriptive (game-design.md 2)."
+		},
+		{
 			"id": "content:Zones",
 			"type": "data",
 			"path": "src/ReplicatedStorage/Content/Zones.luau",
@@ -255,6 +265,16 @@
 			"owner": "dev",
 			"status": "draft",
 			"notes": "Placeholder names, plain descriptive (game-design.md 2)."
+		},
+		{
+			"id": "content:Population",
+			"type": "data",
+			"path": "src/ServerStorage/ContentServerOnly/Population.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Server-only. Open-world garrisons, patrols, caravans, travelers, residents and nests."
 		},
 		{
 			"id": "content:Loot",
@@ -2971,6 +2991,30 @@
 			"creator": "Roblox",
 			"license": "Roblox stock asset",
 			"notes": "Creator preview idle.",
+			"owner": "dev",
+			"status": "draft"
+		},
+		{
+			"id": "avatar:HumanWalk",
+			"type": "animation",
+			"assetId": "507777826",
+			"name": "R15 walk",
+			"origin": "Roblox stock Animate script",
+			"creator": "Roblox",
+			"license": "Roblox stock asset",
+			"notes": "Human NPC locomotion (AnimSet Human); idle reuses PreviewIdle.",
+			"owner": "dev",
+			"status": "draft"
+		},
+		{
+			"id": "avatar:HumanRun",
+			"type": "animation",
+			"assetId": "507767714",
+			"name": "R15 run",
+			"origin": "Roblox stock Animate script",
+			"creator": "Roblox",
+			"license": "Roblox stock asset",
+			"notes": "Human NPC locomotion (AnimSet Human); idle reuses PreviewIdle.",
 			"owner": "dev",
 			"status": "draft"
 		},

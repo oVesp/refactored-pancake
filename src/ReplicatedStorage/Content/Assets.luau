@@ -235,10 +235,21 @@ local Meshes: { [string]: MeshAsset } = {
 local Stock: { [string]: string } = {
 	-- Default R15 idle, played on the character creator preview.
 	PreviewIdle = "rbxassetid://507766388",
+	-- Human NPC locomotion (AnimSet "Human"): the default R15 idle, walk and run.
+	HumanIdle = "rbxassetid://507766388",
+	HumanWalk = "rbxassetid://507777826",
+	HumanRun = "rbxassetid://507767714",
+}
+
+--[=[ Clip keys that reuse another `Animations` key (Human NPCs swing the player's light attack). ]=]
+local AnimAliases: { [string]: string } = {
+	HumanAttack = "BasicStrike",
+	HumanThrow = "BasicStrike",
 }
 
 return table.freeze({
 	Stock = table.freeze(Stock),
+	AnimAliases = table.freeze(AnimAliases),
 	Audio = table.freeze(Audio),
 	Textures = table.freeze(Textures),
 	Animations = table.freeze(Animations),

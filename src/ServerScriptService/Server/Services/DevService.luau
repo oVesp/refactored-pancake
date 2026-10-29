@@ -13,6 +13,8 @@ local Enemies = require(ReplicatedStorage.Content.Enemies)
 local Items = require(ReplicatedStorage.Content.Items)
 local Logger = require(ReplicatedStorage.Shared.Logger)
 local NetServer = require(ReplicatedStorage.Shared.Net.Server)
+local NpcDefs = require(ReplicatedStorage.Shared.NpcDefs)
+local Npcs = require(ReplicatedStorage.Content.Npcs)
 local RateLimiter = require(ReplicatedStorage.Shared.RateLimiter)
 local Types = require(script.Parent.Parent.Types)
 
@@ -113,14 +115,16 @@ local commands: { [string]: Handler } = {
 	end,
 	spawn = function(player, args)
 		local enemyId = args[1] and string.lower(args[1])
-		local def = enemyId and Enemies.ById[enemyId]
+		local def = enemyId and NpcDefs.Get(enemyId)
 		if not enemyId or not def then
 			local ids = {}
-			for id in Enemies.ById do
-				table.insert(ids, id)
+			for _, source in { Enemies.ById, Npcs.ById } do
+				for id in source do
+					table.insert(ids, id)
+				end
 			end
 			table.sort(ids)
-			return "Usage: /spawn <enemy> [level] [count]. Enemies: " .. table.concat(ids, ", ")
+			return "Usage: /spawn <npc> [level] [count]. NPCs: " .. table.concat(ids, ", ")
 		end
 		local level = math.clamp(math.floor(tonumber(args[2]) or def.levelMin), 1, 20)
 		local count = math.clamp(math.floor(tonumber(args[3]) or 1), 1, MAX_SPAWN)

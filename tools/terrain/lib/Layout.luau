@@ -114,7 +114,7 @@ function Layout.build(cfg: any, map: any?, overridePads: { Rect }?): Layout
 			local p = part.CFrame.Position
 			table.insert(pads, { name = part.Name, cx = p.X, cz = p.Z, hx = part.Size.X / 2, hz = part.Size.Z / 2 })
 		end
-		for _, folderName in { "Props", "Npcs", "Spawners" } do
+		for _, folderName in { "Props", "Npcs" } do
 			for _, d in map:FindFirstChild(folderName):GetDescendants() do
 				if d:IsA("BasePart") then
 					local p = d.CFrame.Position

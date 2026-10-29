@@ -650,6 +650,36 @@ local list: { Types.SkillDef } = {
 		description = "Skeleton claw swipe.",
 	},
 
+	-- Guards, caravan guards and travelers (Content/Npcs)
+	{
+		id = "guard_strike",
+		name = "Sword Cut",
+		kind = "Active",
+		source = "Enemy",
+		delivery = "Melee",
+		targets = "Enemy",
+		cooldown = 1.6,
+		windup = 0.35,
+		range = 7,
+		angle = 90,
+		damage = { type = "physical", base = 8, stat = "PhysAtk", ratio = 0.7 },
+		description = "Trained sword cut.",
+	},
+	{
+		id = "guard_bolt",
+		name = "Crossbow Bolt",
+		kind = "Active",
+		source = "Enemy",
+		delivery = "Projectile",
+		targets = "Enemy",
+		cooldown = 2.6,
+		windup = 0.5,
+		range = 55,
+		speed = 110,
+		damage = { type = "physical", base = 7, stat = "PhysAtk", ratio = 0.6 },
+		description = "Crossbow bolt.",
+	},
+
 	-- Goblin Warband
 	{
 		id = "soldier_strike",

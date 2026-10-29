@@ -39,7 +39,7 @@ local maids: { [Instance]: Maid.Maid } = {}
 local rigs: { [Model]: Rig } = {}
 
 --[=[
-	Plays enemy animations locally (game-design.md 5.6 visuals are client-side). Locomotion follows
+	Plays NPC animations locally (game-design.md 5.6 visuals are client-side). Locomotion follows
 	the replicated root velocity through `Shared/Locomotion`, which smooths it and holds each clip
 	long enough that jitter never restarts one; one-shot clips follow the server's `AnimCue` attribute
 	("<clip>:<sequence>"). Roles come from `Content/AnimRoles`; clips resolve through `Animation/Clips`.
@@ -143,11 +143,14 @@ end
 function EnemyAnimationController.Init(_deps: { [string]: any }) end
 
 function EnemyAnimationController.Start()
-	for _, model in CollectionService:GetTagged("Enemy") do
-		task.spawn(attach, model)
+	-- Monsters are tagged Enemy, civilians and guards Npc (SpawnService); both animate here.
+	for _, tag in { "Enemy", "Npc" } do
+		for _, model in CollectionService:GetTagged(tag) do
+			task.spawn(attach, model)
+		end
+		CollectionService:GetInstanceAddedSignal(tag):Connect(attach)
+		CollectionService:GetInstanceRemovedSignal(tag):Connect(detach)
 	end
-	CollectionService:GetInstanceAddedSignal("Enemy"):Connect(attach)
-	CollectionService:GetInstanceRemovedSignal("Enemy"):Connect(detach)
 
 	RunService.Heartbeat:Connect(function(dt: number)
 		for _, rig in rigs do

@@ -24,7 +24,7 @@ local function world(): any
 		local field = Field.new(Graph.build(Realm))
 		local manifest = serde.decode("json", fs.readFile("content/world/village.json"))
 		local map = roblox.deserializeModel(fs.readFile("src/Workspace/Map.rbxmx"))[1]
-		local anchors = Anchors.fromMap(map)
+		local anchors = Anchors.fromMap(map, Loader.load("src/ServerStorage/ContentServerOnly/Population"))
 		local byZone = {}
 		for _, zone in ZONES do
 			byZone[zone] = Settlement.forZone(field, manifest, anchors, zone)

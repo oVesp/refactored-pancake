@@ -9,6 +9,9 @@ local Classes = Loader.load(Content .. "Classes").ById
 local Skills = Loader.load(Content .. "Skills").ById
 local Statuses = Loader.load(Content .. "Statuses").ById
 local Enemies = Loader.load(Content .. "Enemies").ById
+local Npcs = Loader.load(Content .. "Npcs").ById
+local Appearance = Loader.load(Content .. "Appearance")
+local Factions = Loader.load(Content .. "Factions").ById
 local Items = Loader.load(Content .. "Items")
 local Disciplines = Loader.load(Content .. "Disciplines").ById
 local Loot = Loader.load("src/ServerStorage/ContentServerOnly/Loot")
@@ -147,6 +150,22 @@ return {
 			end
 		end
 		Expect.truthy(Enemies.goblin_hexer.tier == "Warband", "Hexer is Warband")
+	end,
+	["npcs resolve and never share an enemy id"] = function()
+		for id, npc in Npcs do
+			Expect.truthy(not Enemies[id], `{id} is both an enemy and an npc`)
+			Expect.equal(npc.tier, "Civilian", id)
+			Expect.equal(npc.template, "Human", id)
+			Expect.truthy(npc.team and Factions[npc.team] and not Factions[npc.team].monster, `{id}: civilian faction`)
+			Expect.truthy(npc.outfits and #npc.outfits > 0, `{id}: outfits`)
+			for _, outfit in npc.outfits do
+				Expect.truthy(Appearance.Outfits.ById[outfit], `{id}: outfit {outfit}`)
+			end
+			for _, skillId in npc.skills do
+				Expect.truthy(Skills[skillId], `{id}: skill {skillId}`)
+			end
+			Expect.truthy(npc.combat, `{id}: combat data`)
+		end
 	end,
 	["enemy combat data resolves"] = function()
 		for id, enemy in Enemies do

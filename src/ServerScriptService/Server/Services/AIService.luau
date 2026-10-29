@@ -4,9 +4,11 @@ local PathfindingService = game:GetService("PathfindingService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local Enemies = require(ReplicatedStorage.Content.Enemies)
 local Logger = require(ReplicatedStorage.Shared.Logger)
+local NpcDefs = require(ReplicatedStorage.Shared.NpcDefs)
+local Relations = require(ReplicatedStorage.Shared.Relations)
 local Skills = require(ReplicatedStorage.Content.Skills)
+local SpatialHash = require(ReplicatedStorage.Shared.SpatialHash)
 local Swarm = require(ReplicatedStorage.Shared.Swarm)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 local Types = require(script.Parent.Parent.Types)
@@ -14,13 +16,30 @@ local Types = require(script.Parent.Parent.Types)
 type Entity = Types.Entity
 type Member = Types.SquadMember
 
-type State = "Idle" | "Patrol" | "Aggro" | "Position" | "Attack" | "Disrupt" | "Flee" | "Regroup" | "Stagger" | "Return"
+type State =
+	"Idle"
+	| "Patrol"
+	| "Travel"
+	| "Aggro"
+	| "Position"
+	| "Attack"
+	| "Disrupt"
+	| "Flee"
+	| "Regroup"
+	| "Stagger"
+	| "Return"
 
 type Brain = {
 	entity: Entity,
 	def: any,
 	home: Vector3,
 	leash: number,
+	--[=[ Patrol radius around home while idle; 0 holds the spot. ]=]
+	wander: number,
+	--[=[ Where to walk while there is no target (set by GroupService); nil idles at home. ]=]
+	goal: Vector3?,
+	--[=[ Hostile to players: never steps into a safe zone. ]=]
+	monster: boolean,
 	state: State,
 	target: Entity?,
 	nextThink: number,
@@ -45,6 +64,7 @@ local HEAL_THRESHOLD = 0.7
 local ARRIVE_DISTANCE = 4
 local SLOT_ARRIVE = 1.5
 local REGROUP_DISTANCE = 6
+local GRID_CELL = 32
 
 local log = Logger.new("AIService")
 
@@ -58,6 +78,8 @@ local SpawnService: any
 local SquadService: any
 
 local brains: { [Entity]: Brain } = {}
+-- Living entities by position, rebuilt every step (game-design.md 5.6: spatial queries).
+local grid = SpatialHash.new(GRID_CELL) :: SpatialHash.Hash<Entity>
 local debugAttributes = RunService:IsStudio()
 local cueSequence = 0
 local random = Random.new()
@@ -65,10 +87,11 @@ local blockParams = RaycastParams.new()
 blockParams.FilterType = Enum.RaycastFilterType.Exclude
 
 --[=[
-	Server-only enemy brains (game-design.md 5.6): idle, patrol, aggro, position, attack, disrupt,
-	flee, regroup, stagger, return. Each thinks on a jittered interval; detection is a distance check over living players;
-	PathfindingService only runs when the straight line is blocked. Attacks need a token from
-	SquadService; without one the enemy waits in position.
+	Server-only NPC brains (game-design.md 5.6): idle, patrol, travel, aggro, position, attack,
+	disrupt, flee, regroup, stagger, return. Each thinks on a jittered interval; detection queries a
+	spatial grid for entities of a hostile faction (Shared/Relations). PathfindingService only runs
+	when the straight line is blocked. Attacks need a token from SquadService; without one the NPC
+	waits in position. GroupService steers idle brains through `SetGoal` and `SetHome`.
 ]=]
 local AIService = {}
 
@@ -145,6 +168,15 @@ local function moveTo(brain: Brain, destination: Vector3, now: number)
 	end
 end
 
+-- Monsters never step into a safe zone; civilians and guards live there.
+local function forbidden(brain: Brain, point: Vector3): boolean
+	return brain.monster and ZoneService.IsSafe(point)
+end
+
+local function near(position: Vector3, radius: number): { Entity }
+	return SpatialHash.Query(grid, position, radius)
+end
+
 local function stop(brain: Brain)
 	local humanoid = brain.entity.humanoid
 	if humanoid then
@@ -163,10 +195,10 @@ local function face(brain: Brain, point: Vector3)
 end
 
 local function validTarget(brain: Brain, target: Entity?): boolean
-	if not target or not target.alive or target.kind ~= "Player" then
+	if not target or not target.alive or not EntityService.AreEnemies(brain.entity, target) then
 		return false
 	end
-	if ZoneService.IsSafe(target.root.Position) then
+	if target.kind == "Dummy" or forbidden(brain, target.root.Position) then
 		return false
 	end
 	return (flat(target.root.Position) - flat(brain.home)).Magnitude <= brain.leash + 10
@@ -193,8 +225,8 @@ local function pickTarget(brain: Brain): Entity?
 	end
 
 	local nearest, nearestDistance = nil, brain.def.aggroRadius
-	for _, other in EntityService.All() do
-		if other.kind == "Player" and validTarget(brain, other) then
+	for _, other in near(entity.root.Position, brain.def.aggroRadius) do
+		if validTarget(brain, other) then
 			local distance = (other.root.Position - entity.root.Position).Magnitude
 			if distance <= nearestDistance then
 				nearest, nearestDistance = other, distance
@@ -214,8 +246,8 @@ end
 local function woundedAlly(brain: Brain, range: number): Entity?
 	local entity = brain.entity
 	local best, lowest = nil, HEAL_THRESHOLD
-	for _, other in EntityService.All() do
-		if other.alive and other.team == entity.team and other.kind == "Npc" then
+	for _, other in near(entity.root.Position, range) do
+		if other.alive and other.kind == "Npc" and Relations.Allied(other.team, entity.team) then
 			local ratio = other.hp / math.max(other.stats.MaxHp, 1)
 			if ratio < lowest and (other.root.Position - entity.root.Position).Magnitude <= range then
 				best, lowest = other, ratio
@@ -227,8 +259,8 @@ end
 
 local function alliesNear(brain: Brain, radius: number): number
 	local count = 0
-	for _, other in EntityService.All() do
-		if other ~= brain.entity and other.alive and other.team == brain.entity.team then
+	for _, other in near(brain.entity.root.Position, radius) do
+		if other ~= brain.entity and other.alive and Relations.Allied(other.team, brain.entity.team) then
 			if (other.root.Position - brain.entity.root.Position).Magnitude <= radius then
 				count += 1
 			end
@@ -371,7 +403,7 @@ local function separation(brain: Brain): Vector3
 	local settings = Tuning.Swarm.Separation
 	local position = brain.entity.root.Position
 	local neighbours: { Vector3 } = {}
-	for _, other in EntityService.All() do
+	for _, other in near(position, settings.Radius) do
 		if other ~= brain.entity and other.alive and other.kind == "Npc" then
 			local at = other.root.Position
 			if (at - position).Magnitude < settings.Radius then
@@ -414,7 +446,7 @@ local function summon(brain: Brain)
 				entry.enemy,
 				entry.level,
 				Vector3.new(position.X, brain.home.Y, position.Z),
-				brain.home
+				{ home = brain.home }
 			)
 			if spawned then
 				SpawnService.TrackSummon(spawned)
@@ -453,7 +485,7 @@ local function fleeOrRegroup(brain: Brain, target: Entity, now: number): boolean
 			local direction = if away.Magnitude > 0.1 then away.Unit else Vector3.new(1, 0, 0)
 			refuge = target.root.Position + direction * fleeDistance
 		end
-		if (flat(refuge) - flat(root.Position)).Magnitude > ARRIVE_DISTANCE and not ZoneService.IsSafe(refuge) then
+		if (flat(refuge) - flat(root.Position)).Magnitude > ARRIVE_DISTANCE and not forbidden(brain, refuge) then
 			moveTo(brain, refuge, now)
 		else
 			stop(brain)
@@ -512,16 +544,30 @@ local function think(brain: Brain, now: number)
 		SquadService.Leave(brain.member)
 	end
 	if not target then
-		if brain.state ~= "Idle" and brain.state ~= "Patrol" then
+		if brain.state ~= "Idle" and brain.state ~= "Patrol" and brain.state ~= "Travel" then
 			startReturn(brain)
 			return
 		end
-		if now >= brain.nextPatrol then
+		local goal = brain.goal
+		if goal then
+			if (flat(goal) - flat(root.Position)).Magnitude > SLOT_ARRIVE then
+				setState(brain, "Travel")
+				moveTo(brain, goal, now)
+			else
+				stop(brain)
+				setState(brain, "Idle")
+			end
+			return
+		end
+		if brain.state == "Travel" then
+			setState(brain, "Idle")
+		end
+		if brain.wander > 0 and now >= brain.nextPatrol then
 			brain.nextPatrol = now + random:NextNumber(6, 10)
 			local angle = random:NextNumber(0, math.pi * 2)
-			local radius = random:NextNumber(2, Tuning.Npc.PatrolRadius)
+			local radius = random:NextNumber(math.min(2, brain.wander), brain.wander)
 			local point = brain.home + Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
-			if not ZoneService.IsSafe(point) then
+			if not forbidden(brain, point) then
 				setState(brain, "Patrol")
 				moveTo(brain, point, now)
 			end
@@ -574,9 +620,7 @@ local function think(brain: Brain, now: number)
 	end
 	if spot then
 		local destination = spot + separation(brain)
-		if
-			(flat(destination) - flat(root.Position)).Magnitude > SLOT_ARRIVE and not ZoneService.IsSafe(destination)
-		then
+		if (flat(destination) - flat(root.Position)).Magnitude > SLOT_ARRIVE and not forbidden(brain, destination) then
 			moveTo(brain, destination, now)
 		else
 			stop(brain)
@@ -589,7 +633,7 @@ local function think(brain: Brain, now: number)
 		local away = flat(root.Position - target.root.Position)
 		local direction = if away.Magnitude > 0.1 then away.Unit else Vector3.new(1, 0, 0)
 		local retreat = root.Position + direction * 10
-		if not ZoneService.IsSafe(retreat) then
+		if not forbidden(brain, retreat) then
 			moveTo(brain, retreat, now)
 		else
 			stop(brain)
@@ -649,9 +693,12 @@ local function poiseHit(brain: Brain, amount: number)
 	setState(brain, "Stagger")
 end
 
---[=[ Gives a spawned enemy a brain anchored at `home` with a leash radius. ]=]
-function AIService.Attach(entity: Entity, home: Vector3, leash: number)
-	local def = Enemies.ById[entity.defId]
+--[=[
+	Gives a spawned NPC a brain anchored at `home` with a leash radius. `wander` is the idle patrol
+	radius (default Tuning.Npc.PatrolRadius; 0 holds the spot).
+]=]
+function AIService.Attach(entity: Entity, home: Vector3, leash: number, wander: number?)
+	local def = NpcDefs.Get(entity.defId)
 	if not def then
 		return
 	end
@@ -660,6 +707,9 @@ function AIService.Attach(entity: Entity, home: Vector3, leash: number)
 		def = def,
 		home = home,
 		leash = leash,
+		wander = wander or Tuning.Npc.PatrolRadius,
+		goal = nil,
+		monster = Relations.IsMonster(entity.team),
 		state = "Idle",
 		target = nil,
 		nextThink = os.clock() + random:NextNumber(0, Tuning.Npc.ThinkInterval),
@@ -676,6 +726,32 @@ function AIService.Attach(entity: Entity, home: Vector3, leash: number)
 		member = SquadService.NewMember(entity, def),
 	}
 	entity.model:SetAttribute("AiState", "Idle")
+end
+
+--[=[ Where an idle NPC walks (formation slot, route point); nil stops it at home. ]=]
+function AIService.SetGoal(entity: Entity, goal: Vector3?)
+	local brain = brains[entity]
+	if brain then
+		brain.goal = goal
+	end
+end
+
+--[=[ Moves an NPC's home (and the centre of its leash and idle patrol). ]=]
+function AIService.SetHome(entity: Entity, home: Vector3)
+	local brain = brains[entity]
+	if brain then
+		brain.home = home
+	end
+end
+
+--[=[ True while an NPC is fighting, fleeing or walking back after a fight. ]=]
+function AIService.Busy(entity: Entity): boolean
+	local brain = brains[entity]
+	if not brain then
+		return false
+	end
+	local state = brain.state
+	return state ~= "Idle" and state ~= "Patrol" and state ~= "Travel"
 end
 
 --[=[ Late binding to avoid a dependency cycle: SpawnService calls this from Start. ]=]
@@ -721,23 +797,20 @@ function AIService.Start()
 		end
 	end)
 
-	-- Damage from far away still pulls the victim's pack into the fight.
+	-- Damage from far away still pulls the victim's allies into the fight: its pack, or the guards
+	-- near a villager or a caravan.
 	CombatService.Damaged:Connect(function(target: Entity, _amount: number, _type: string, source: Entity?)
-		local brain = brains[target]
-		if not brain or not source or source.kind ~= "Player" then
+		if not source or not EntityService.AreEnemies(target, source) then
 			return
 		end
-		if brain.state == "Idle" or brain.state == "Patrol" then
-			for _, other in brains do
-				if
-					other ~= brain
-					and other.entity.team == target.team
-					and (other.state == "Idle" or other.state == "Patrol")
-				then
-					if (other.entity.root.Position - target.root.Position).Magnitude <= AGGRO_ON_HIT_RADIUS / 3 then
-						other.entity.threat[source] = (other.entity.threat[source] or 0) + 1
-					end
-				end
+		for _, other in near(target.root.Position, AGGRO_ON_HIT_RADIUS / 3) do
+			if
+				brains[other]
+				and not AIService.Busy(other)
+				and Relations.Allied(other.team, target.team)
+				and EntityService.AreEnemies(other, source)
+			then
+				other.threat[source] = (other.threat[source] or 0) + 1
 			end
 		end
 	end)
@@ -746,6 +819,12 @@ function AIService.Start()
 		while true do
 			task.wait(Tuning.Npc.ThinkInterval / 2)
 			local now = os.clock()
+			SpatialHash.Clear(grid)
+			for _, entity in EntityService.All() do
+				if entity.alive then
+					SpatialHash.Insert(grid, entity, entity.root.Position)
+				end
+			end
 			for _, brain in brains do
 				if now >= brain.nextThink then
 					brain.nextThink = now + Tuning.Npc.ThinkInterval

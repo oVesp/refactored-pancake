@@ -34,6 +34,7 @@ local Graph = require(script.Parent.Gen.Graph)
 local Anchors = require(script.Parent.Gen.Anchors)
 local Props = require(script.Parent.Gen.Props)
 local Realm = require(script.Parent.Midgard)
+local Population = require(ServerStorage.ContentServerOnly.Population)
 
 local log = Logger.new("WorldGen")
 
@@ -270,7 +271,8 @@ local function context(): Context
 	local settlement: Bake.SettlementInput? = nil
 	local map = workspace:FindFirstChild("Map")
 	if script.Parent:FindFirstChild("VillageManifest") and map and ServerStorage:FindFirstChild(VILLAGE_KIT) then
-		settlement = { manifest = require(script.Parent.VillageManifest) :: any, anchors = Anchors.fromMap(map) }
+		settlement =
+			{ manifest = require(script.Parent.VillageManifest) :: any, anchors = Anchors.fromMap(map, Population) }
 	else
 		log:Warn("settlements skipped: run Sections.ImportVillage() first")
 	end

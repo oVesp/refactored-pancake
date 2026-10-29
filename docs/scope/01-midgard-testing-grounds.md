@@ -163,7 +163,7 @@ Loose raiding bands, no casters.
 
 ### 5.1a Skeleton (Lv 1–3, placed in this scope)
 
-Unarmed undead on the `Undead` team, so goblin packs do not call it for help. Skinned mesh from the Studio 3D importer, rebuilt on the goblin's Humanoid layout by `tools/world/build.luau`; clips (Idle, Walk, Scratch, Defeat) uploaded from Studio. Two spawners in the Wheat Fields, away from the goblin packs.
+Unarmed undead on the `Undead` team, so goblin packs do not call it for help. Skinned mesh from the Studio 3D importer, rebuilt on the goblin's Humanoid layout by `tools/world/build.luau`; clips (Idle, Walk, Scratch, Defeat) uploaded from Studio. On `exp/open-world` they come from the `field_barrow` nest at night (docs/systems/open-world.md).
 
 | Enemy | Lv | Role | Damage | Tags | Tests |
 |---|---|---|---|---|---|
@@ -182,7 +182,7 @@ An organized war company with specialist roles. Mechanical reference: the resear
 | Wolf Rider | 8–10 | Fast flanker, charge | Physical | — | Fast pathing, knockdown |
 | Warband Captain | 10–12 | Leader, buffs nearby Warband | Physical | Immune: fear | Leader aura, boss timeline |
 
-Spawning: `Spawner` tags per zone, leash radius, respawn timers, active cap per zone (start at 20, tune after profiling).
+Spawning (`exp/open-world`): nests and garrisons in `ContentServerOnly/Population`, squads roam a territory and the leash follows the group, garrisons replace their dead on timers, `Tuning.Population.MaxBodies` caps bodies (docs/systems/open-world.md).
 
 ---
 

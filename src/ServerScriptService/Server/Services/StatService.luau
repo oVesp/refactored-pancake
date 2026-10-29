@@ -5,8 +5,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Classes = require(ReplicatedStorage.Content.Classes)
 local Constants = require(ReplicatedStorage.Shared.Constants)
-local Enemies = require(ReplicatedStorage.Content.Enemies)
 local Formulas = require(ReplicatedStorage.Shared.Formulas)
+local NpcDefs = require(ReplicatedStorage.Shared.NpcDefs)
 local Items = require(ReplicatedStorage.Content.Items)
 local Logger = require(ReplicatedStorage.Shared.Logger)
 local Skills = require(ReplicatedStorage.Content.Skills)
@@ -113,7 +113,7 @@ function StatService.Recompute(entity: Entity)
 			entity.level = StatService.LevelFromProfile(profile)
 		end
 	else
-		local def = Enemies.ById[entity.defId]
+		local def = NpcDefs.Get(entity.defId)
 		if def then
 			base = {}
 			for name, value in def.base do
@@ -161,7 +161,7 @@ function StatService.Recompute(entity: Entity)
 		humanoid.WalkSpeed = Tuning.Base.MoveSpeed * agilitySpeed * (1 + extras.MoveSpeedPct) * moveMultiplier
 		humanoid.JumpPower = if moveMultiplier == 0 then 0 else 50
 	elseif humanoid then
-		local def = Enemies.ById[entity.defId]
+		local def = NpcDefs.Get(entity.defId)
 		local speed = if def then def.moveSpeed else 0
 		humanoid.WalkSpeed = speed * (1 + extras.MoveSpeedPct) * moveMultiplier
 	end

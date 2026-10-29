@@ -135,7 +135,28 @@ return table.freeze({
 		PatrolRadius = 14,
 		PathRecompute = 1,
 		ReturnRegenPerSecond = 0.25,
-		ActivePerZone = 20,
+	}),
+
+	--[=[
+		Open-world groups (docs/systems/open-world.md). A group far from every player exists as data
+		only and moves along its route at `AbstractSpeed` of its slowest member; it gets bodies when a
+		player comes within `MaterializeRadius` and loses them again beyond `DematerializeRadius`
+		(never mid-fight). `MaxBodies` caps living NPC bodies on the server.
+	]=]
+	Population = table.freeze({
+		TickInterval = 0.5,
+		MaterializeRadius = 340,
+		DematerializeRadius = 460,
+		--[=[ A nest sends no squad while a player is this close, so nobody sees one appear. ]=]
+		HiddenRadius = 160,
+		MaxBodies = 80,
+		AbstractSpeed = 0.7,
+		--[=[ The leader walks this far ahead along its route. ]=]
+		Lookahead = 12,
+		--[=[ The leader waits while a follower is farther than this from its slot. ]=]
+		FollowLag = 14,
+		--[=[ Seconds between garrison respawn checks and schedule passes. ]=]
+		ScheduleInterval = 5,
 	}),
 
 	--[=[

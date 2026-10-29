@@ -155,7 +155,7 @@ export type CombatDef = {
 export type EnemyDef = {
 	id: string,
 	name: string,
-	tier: "Rabble" | "Warband" | "Training",
+	tier: "Rabble" | "Warband" | "Training" | "Civilian",
 	levelMin: number,
 	levelMax: number,
 	--[=[
@@ -175,6 +175,8 @@ export type EnemyDef = {
 	scale: number,
 	color: Color3,
 	elite: boolean?,
+	--[=[ Human template only: `Appearance` outfit ids, one picked per spawn. ]=]
+	outfits: { string }?,
 	-- ServerStorage.Templates model to clone; defaults to "Goblin".
 	template: string?,
 	-- Faction (Content/Factions); defaults to "Goblins". Allies call each other for help.

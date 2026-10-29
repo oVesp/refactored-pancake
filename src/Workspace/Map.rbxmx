@@ -185,648 +185,13 @@
     </Item>
     <Item class="Folder" referent="7">
       <Properties>
-        <string name="Name">Spawners</string>
-      </Properties>
-      <Item class="Part" referent="8">
-        <Properties>
-          <string name="Name">Spawner1</string>
-          <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">BgAAAAUAAABDb3VudAUAAEBABwAAAEVuZW15SWQCDQAAAGdvYmxpbl9yYWlkZXIIAAAATGV2ZWxNYXgFAAAAQAgAAABMZXZlbE1pbgUAAIA/BgAAAFJhZGl1cwUAAEBBDgAAAFJlc3Bhd25TZWNvbmRzBQAAoEE=</BinaryString>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>40</X>
-            <Y>0.69999695</Y>
-            <Z>-160</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <Color3uint8 name="Color3uint8">16711680</Color3uint8>
-          <token name="Material">288</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>1</Y>
-            <Z>2</Z>
-          </Vector3>
-          <BinaryString name="Tags">U3Bhd25lcg==</BinaryString>
-          <token name="TopSurface">0</token>
-          <float name="Transparency">1</float>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="9">
-        <Properties>
-          <string name="Name">Spawner2</string>
-          <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">BgAAAAUAAABDb3VudAUAAEBABwAAAEVuZW15SWQCDQAAAGdvYmxpbl9yYWlkZXIIAAAATGV2ZWxNYXgFAAAAQAgAAABMZXZlbE1pbgUAAIA/BgAAAFJhZGl1cwUAAEBBDgAAAFJlc3Bhd25TZWNvbmRzBQAAoEE=</BinaryString>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>-45</X>
-            <Y>0.69999695</Y>
-            <Z>-190</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <Color3uint8 name="Color3uint8">16711680</Color3uint8>
-          <token name="Material">288</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>1</Y>
-            <Z>2</Z>
-          </Vector3>
-          <BinaryString name="Tags">U3Bhd25lcg==</BinaryString>
-          <token name="TopSurface">0</token>
-          <float name="Transparency">1</float>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="10">
-        <Properties>
-          <string name="Name">Spawner3</string>
-          <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">BgAAAAUAAABDb3VudAUAAABABwAAAEVuZW15SWQCDQAAAGdvYmxpbl9yYWlkZXIIAAAATGV2ZWxNYXgFAABAQAgAAABMZXZlbE1pbgUAAABABgAAAFJhZGl1cwUAACBBDgAAAFJlc3Bhd25TZWNvbmRzBQAAoEE=</BinaryString>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>30</X>
-            <Y>0.69999695</Y>
-            <Z>-260</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <Color3uint8 name="Color3uint8">16711680</Color3uint8>
-          <token name="Material">288</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>1</Y>
-            <Z>2</Z>
-          </Vector3>
-          <BinaryString name="Tags">U3Bhd25lcg==</BinaryString>
-          <token name="TopSurface">0</token>
-          <float name="Transparency">1</float>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="11">
-        <Properties>
-          <string name="Name">Spawner4</string>
-          <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">BgAAAAUAAABDb3VudAUAAABABwAAAEVuZW15SWQCDgAAAGdvYmxpbl9zbGluZ2VyCAAAAExldmVsTWF4BQAAQEAIAAAATGV2ZWxNaW4FAAAAQAYAAABSYWRpdXMFAAAgQQ4AAABSZXNwYXduU2Vjb25kcwUAAMhB</BinaryString>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>-60</X>
-            <Y>0.69999695</Y>
-            <Z>-265</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <Color3uint8 name="Color3uint8">16711680</Color3uint8>
-          <token name="Material">288</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>1</Y>
-            <Z>2</Z>
-          </Vector3>
-          <BinaryString name="Tags">U3Bhd25lcg==</BinaryString>
-          <token name="TopSurface">0</token>
-          <float name="Transparency">1</float>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="12">
-        <Properties>
-          <string name="Name">Spawner5</string>
-          <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">BgAAAAUAAABDb3VudAUAAABABwAAAEVuZW15SWQCDgAAAGdvYmxpbl9zbGluZ2VyCAAAAExldmVsTWF4BQAAQEAIAAAATGV2ZWxNaW4FAAAAQAYAAABSYWRpdXMFAAAgQQ4AAABSZXNwYXduU2Vjb25kcwUAAMhB</BinaryString>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>70</X>
-            <Y>0.69999695</Y>
-            <Z>-225</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <Color3uint8 name="Color3uint8">16711680</Color3uint8>
-          <token name="Material">288</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>1</Y>
-            <Z>2</Z>
-          </Vector3>
-          <BinaryString name="Tags">U3Bhd25lcg==</BinaryString>
-          <token name="TopSurface">0</token>
-          <float name="Transparency">1</float>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="13">
-        <Properties>
-          <string name="Name">Spawner6</string>
-          <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">BgAAAAUAAABDb3VudAUAAEBABwAAAEVuZW15SWQCDQAAAGdvYmxpbl9yYWlkZXIIAAAATGV2ZWxNYXgFAABAQAgAAABMZXZlbE1pbgUAAEBABgAAAFJhZGl1cwUAAEBBDgAAAFJlc3Bhd25TZWNvbmRzBQAAyEE=</BinaryString>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>-50</X>
-            <Y>0.69999695</Y>
-            <Z>-390</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <Color3uint8 name="Color3uint8">16711680</Color3uint8>
-          <token name="Material">288</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>1</Y>
-            <Z>2</Z>
-          </Vector3>
-          <BinaryString name="Tags">U3Bhd25lcg==</BinaryString>
-          <token name="TopSurface">0</token>
-          <float name="Transparency">1</float>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="14">
-        <Properties>
-          <string name="Name">Spawner7</string>
-          <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">BgAAAAUAAABDb3VudAUAAABABwAAAEVuZW15SWQCDgAAAGdvYmxpbl9zbGluZ2VyCAAAAExldmVsTWF4BQAAgEAIAAAATGV2ZWxNaW4FAABAQAYAAABSYWRpdXMFAAAgQQ4AAABSZXNwYXduU2Vjb25kcwUAAMhB</BinaryString>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>55</X>
-            <Y>0.69999695</Y>
-            <Z>-410</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <Color3uint8 name="Color3uint8">16711680</Color3uint8>
-          <token name="Material">288</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>1</Y>
-            <Z>2</Z>
-          </Vector3>
-          <BinaryString name="Tags">U3Bhd25lcg==</BinaryString>
-          <token name="TopSurface">0</token>
-          <float name="Transparency">1</float>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="15">
-        <Properties>
-          <string name="Name">Spawner8</string>
-          <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">BgAAAAUAAABDb3VudAUAAABABwAAAEVuZW15SWQCDgAAAGdvYmxpbl90cmFwcGVyCAAAAExldmVsTWF4BQAAgEAIAAAATGV2ZWxNaW4FAABAQAYAAABSYWRpdXMFAAAgQQ4AAABSZXNwYXduU2Vjb25kcwUAAPBB</BinaryString>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>-40</X>
-            <Y>0.69999695</Y>
-            <Z>-470</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <Color3uint8 name="Color3uint8">16711680</Color3uint8>
-          <token name="Material">288</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>1</Y>
-            <Z>2</Z>
-          </Vector3>
-          <BinaryString name="Tags">U3Bhd25lcg==</BinaryString>
-          <token name="TopSurface">0</token>
-          <float name="Transparency">1</float>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="16">
-        <Properties>
-          <string name="Name">Spawner9</string>
-          <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">BgAAAAUAAABDb3VudAUAAABABwAAAEVuZW15SWQCDgAAAGdvYmxpbl90cmFwcGVyCAAAAExldmVsTWF4BQAAgEAIAAAATGV2ZWxNaW4FAABAQAYAAABSYWRpdXMFAAAgQQ4AAABSZXNwYXduU2Vjb25kcwUAAPBB</BinaryString>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>50</X>
-            <Y>0.69999695</Y>
-            <Z>-500</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <Color3uint8 name="Color3uint8">16711680</Color3uint8>
-          <token name="Material">288</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>1</Y>
-            <Z>2</Z>
-          </Vector3>
-          <BinaryString name="Tags">U3Bhd25lcg==</BinaryString>
-          <token name="TopSurface">0</token>
-          <float name="Transparency">1</float>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="17">
-        <Properties>
-          <string name="Name">Spawner10</string>
-          <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">BgAAAAUAAABDb3VudAUAAABABwAAAEVuZW15SWQCDQAAAGdvYmxpbl9yYWlkZXIIAAAATGV2ZWxNYXgFAABAQAgAAABMZXZlbE1pbgUAAEBABgAAAFJhZGl1cwUAACBBDgAAAFJlc3Bhd25TZWNvbmRzBQAAyEE=</BinaryString>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>15</X>
-            <Y>0.69999695</Y>
-            <Z>-520</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <Color3uint8 name="Color3uint8">16711680</Color3uint8>
-          <token name="Material">288</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>1</Y>
-            <Z>2</Z>
-          </Vector3>
-          <BinaryString name="Tags">U3Bhd25lcg==</BinaryString>
-          <token name="TopSurface">0</token>
-          <float name="Transparency">1</float>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="18">
-        <Properties>
-          <string name="Name">Spawner11</string>
-          <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">BgAAAAUAAABDb3VudAUAAEBABwAAAEVuZW15SWQCDQAAAGdvYmxpbl9yYWlkZXIIAAAATGV2ZWxNYXgFAACAQAgAAABMZXZlbE1pbgUAAIBABgAAAFJhZGl1cwUAACBBDgAAAFJlc3Bhd25TZWNvbmRzBQAA8EE=</BinaryString>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>-50</X>
-            <Y>0.69999695</Y>
-            <Z>-620</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <Color3uint8 name="Color3uint8">16711680</Color3uint8>
-          <token name="Material">288</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>1</Y>
-            <Z>2</Z>
-          </Vector3>
-          <BinaryString name="Tags">U3Bhd25lcg==</BinaryString>
-          <token name="TopSurface">0</token>
-          <float name="Transparency">1</float>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="19">
-        <Properties>
-          <string name="Name">Spawner12</string>
-          <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">BgAAAAUAAABDb3VudAUAAABABwAAAEVuZW15SWQCDgAAAGdvYmxpbl9zbGluZ2VyCAAAAExldmVsTWF4BQAAgEAIAAAATGV2ZWxNaW4FAACAQAYAAABSYWRpdXMFAAAgQQ4AAABSZXNwYXduU2Vjb25kcwUAAPBB</BinaryString>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>50</X>
-            <Y>0.69999695</Y>
-            <Z>-630</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <Color3uint8 name="Color3uint8">16711680</Color3uint8>
-          <token name="Material">288</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>1</Y>
-            <Z>2</Z>
-          </Vector3>
-          <BinaryString name="Tags">U3Bhd25lcg==</BinaryString>
-          <token name="TopSurface">0</token>
-          <float name="Transparency">1</float>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="20">
-        <Properties>
-          <string name="Name">Spawner13</string>
-          <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">BgAAAAUAAABDb3VudAUAAABABwAAAEVuZW15SWQCDgAAAGdvYmxpbl90cmFwcGVyCAAAAExldmVsTWF4BQAAgEAIAAAATGV2ZWxNaW4FAACAQAYAAABSYWRpdXMFAAAgQQ4AAABSZXNwYXduU2Vjb25kcwUAAPBB</BinaryString>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>-55</X>
-            <Y>0.69999695</Y>
-            <Z>-680</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <Color3uint8 name="Color3uint8">16711680</Color3uint8>
-          <token name="Material">288</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>1</Y>
-            <Z>2</Z>
-          </Vector3>
-          <BinaryString name="Tags">U3Bhd25lcg==</BinaryString>
-          <token name="TopSurface">0</token>
-          <float name="Transparency">1</float>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="21">
-        <Properties>
-          <string name="Name">Spawner14</string>
-          <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">BgAAAAUAAABDb3VudAUAAIA/BwAAAEVuZW15SWQCDAAAAGdvYmxpbl9icnV0ZQgAAABMZXZlbE1heAUAAKBACAAAAExldmVsTWluBQAAgEAGAAAAUmFkaXVzBQAAwEAOAAAAUmVzcGF3blNlY29uZHMFAAA0Qg==</BinaryString>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>40</X>
-            <Y>0.69999695</Y>
-            <Z>-690</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <Color3uint8 name="Color3uint8">16711680</Color3uint8>
-          <token name="Material">288</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>1</Y>
-            <Z>2</Z>
-          </Vector3>
-          <BinaryString name="Tags">U3Bhd25lcg==</BinaryString>
-          <token name="TopSurface">0</token>
-          <float name="Transparency">1</float>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="22">
-        <Properties>
-          <string name="Name">Spawner15</string>
-          <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">BgAAAAUAAABDb3VudAUAAIA/BwAAAEVuZW15SWQCDAAAAGdvYmxpbl9icnV0ZQgAAABMZXZlbE1heAUAAKBACAAAAExldmVsTWluBQAAgEAGAAAAUmFkaXVzBQAAwEAOAAAAUmVzcGF3blNlY29uZHMFAAA0Qg==</BinaryString>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>-30</X>
-            <Y>0.69999695</Y>
-            <Z>-700</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <Color3uint8 name="Color3uint8">16711680</Color3uint8>
-          <token name="Material">288</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>1</Y>
-            <Z>2</Z>
-          </Vector3>
-          <BinaryString name="Tags">U3Bhd25lcg==</BinaryString>
-          <token name="TopSurface">0</token>
-          <float name="Transparency">1</float>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="23">
-        <Properties>
-          <string name="Name">Spawner16</string>
-          <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">BgAAAAUAAABDb3VudAUAAIA/BwAAAEVuZW15SWQCEAAAAGdvYmxpbl9jaGllZnRhaW4IAAAATGV2ZWxNYXgFAADAQAgAAABMZXZlbE1pbgUAAMBABgAAAFJhZGl1cwUAAIBADgAAAFJlc3Bhd25TZWNvbmRzBQAA8EI=</BinaryString>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>0</X>
-            <Y>0.69999695</Y>
-            <Z>-725</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <Color3uint8 name="Color3uint8">16711680</Color3uint8>
-          <token name="Material">288</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>1</Y>
-            <Z>2</Z>
-          </Vector3>
-          <BinaryString name="Tags">U3Bhd25lcg==</BinaryString>
-          <token name="TopSurface">0</token>
-          <float name="Transparency">1</float>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="24">
-        <Properties>
-          <string name="Name">Spawner17</string>
-          <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">BgAAAAUAAABDb3VudAUAAABABwAAAEVuZW15SWQCCAAAAHNrZWxldG9uCAAAAExldmVsTWF4BQAAAEAIAAAATGV2ZWxNaW4FAACAPwYAAABSYWRpdXMFAAAAQQ4AAABSZXNwYXduU2Vjb25kcwUAAMhB</BinaryString>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>-90</X>
-            <Y>0.69999695</Y>
-            <Z>-150</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <Color3uint8 name="Color3uint8">16711680</Color3uint8>
-          <token name="Material">288</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>1</Y>
-            <Z>2</Z>
-          </Vector3>
-          <BinaryString name="Tags">U3Bhd25lcg==</BinaryString>
-          <token name="TopSurface">0</token>
-          <float name="Transparency">1</float>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="25">
-        <Properties>
-          <string name="Name">Spawner18</string>
-          <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">BgAAAAUAAABDb3VudAUAAABABwAAAEVuZW15SWQCCAAAAHNrZWxldG9uCAAAAExldmVsTWF4BQAAQEAIAAAATGV2ZWxNaW4FAAAAQAYAAABSYWRpdXMFAAAAQQ4AAABSZXNwYXduU2Vjb25kcwUAAMhB</BinaryString>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>90</X>
-            <Y>0.69999695</Y>
-            <Z>-300</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <Color3uint8 name="Color3uint8">16711680</Color3uint8>
-          <token name="Material">288</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>1</Y>
-            <Z>2</Z>
-          </Vector3>
-          <BinaryString name="Tags">U3Bhd25lcg==</BinaryString>
-          <token name="TopSurface">0</token>
-          <float name="Transparency">1</float>
-        </Properties>
-      </Item>
-    </Item>
-    <Item class="Folder" referent="26">
-      <Properties>
         <string name="Name">Npcs</string>
       </Properties>
-      <Item class="Model" referent="27">
+      <Item class="Model" referent="8">
         <Properties>
           <string name="Name">Warrior Trainer</string>
         </Properties>
-        <Item class="Part" referent="28">
+        <Item class="Part" referent="9">
           <Properties>
             <string name="Name">Body</string>
             <bool name="Anchored">true</bool>
@@ -856,7 +221,7 @@
             <BinaryString name="Tags">VHJhaW5lcg==</BinaryString>
             <token name="TopSurface">0</token>
           </Properties>
-          <Item class="ProximityPrompt" referent="29">
+          <Item class="ProximityPrompt" referent="10">
             <Properties>
               <string name="Name">TrainPrompt</string>
               <string name="ActionText">Train Warrior</string>
@@ -867,7 +232,7 @@
             </Properties>
           </Item>
         </Item>
-        <Item class="Part" referent="30">
+        <Item class="Part" referent="11">
           <Properties>
             <string name="Name">Head</string>
             <bool name="Anchored">true</bool>
@@ -896,7 +261,7 @@
             <token name="TopSurface">0</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="31">
+        <Item class="Part" referent="12">
           <Properties>
             <string name="Name">Plinth</string>
             <bool name="Anchored">true</bool>
@@ -926,11 +291,11 @@
           </Properties>
         </Item>
       </Item>
-      <Item class="Model" referent="32">
+      <Item class="Model" referent="13">
         <Properties>
           <string name="Name">Mage Trainer</string>
         </Properties>
-        <Item class="Part" referent="33">
+        <Item class="Part" referent="14">
           <Properties>
             <string name="Name">Body</string>
             <bool name="Anchored">true</bool>
@@ -960,7 +325,7 @@
             <BinaryString name="Tags">VHJhaW5lcg==</BinaryString>
             <token name="TopSurface">0</token>
           </Properties>
-          <Item class="ProximityPrompt" referent="34">
+          <Item class="ProximityPrompt" referent="15">
             <Properties>
               <string name="Name">TrainPrompt</string>
               <string name="ActionText">Train Mage</string>
@@ -971,7 +336,7 @@
             </Properties>
           </Item>
         </Item>
-        <Item class="Part" referent="35">
+        <Item class="Part" referent="16">
           <Properties>
             <string name="Name">Head</string>
             <bool name="Anchored">true</bool>
@@ -1000,7 +365,7 @@
             <token name="TopSurface">0</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="36">
+        <Item class="Part" referent="17">
           <Properties>
             <string name="Name">Plinth</string>
             <bool name="Anchored">true</bool>
@@ -1030,11 +395,11 @@
           </Properties>
         </Item>
       </Item>
-      <Item class="Model" referent="37">
+      <Item class="Model" referent="18">
         <Properties>
           <string name="Name">Healer Trainer</string>
         </Properties>
-        <Item class="Part" referent="38">
+        <Item class="Part" referent="19">
           <Properties>
             <string name="Name">Body</string>
             <bool name="Anchored">true</bool>
@@ -1064,7 +429,7 @@
             <BinaryString name="Tags">VHJhaW5lcg==</BinaryString>
             <token name="TopSurface">0</token>
           </Properties>
-          <Item class="ProximityPrompt" referent="39">
+          <Item class="ProximityPrompt" referent="20">
             <Properties>
               <string name="Name">TrainPrompt</string>
               <string name="ActionText">Train Healer</string>
@@ -1075,7 +440,7 @@
             </Properties>
           </Item>
         </Item>
-        <Item class="Part" referent="40">
+        <Item class="Part" referent="21">
           <Properties>
             <string name="Name">Head</string>
             <bool name="Anchored">true</bool>
@@ -1104,7 +469,7 @@
             <token name="TopSurface">0</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="41">
+        <Item class="Part" referent="22">
           <Properties>
             <string name="Name">Plinth</string>
             <bool name="Anchored">true</bool>
@@ -1134,11 +499,11 @@
           </Properties>
         </Item>
       </Item>
-      <Item class="Model" referent="42">
+      <Item class="Model" referent="23">
         <Properties>
           <string name="Name">Discipline Trainer</string>
         </Properties>
-        <Item class="Part" referent="43">
+        <Item class="Part" referent="24">
           <Properties>
             <string name="Name">Body</string>
             <bool name="Anchored">true</bool>
@@ -1168,7 +533,7 @@
             <BinaryString name="Tags">VHJhaW5lcg==</BinaryString>
             <token name="TopSurface">0</token>
           </Properties>
-          <Item class="ProximityPrompt" referent="44">
+          <Item class="ProximityPrompt" referent="25">
             <Properties>
               <string name="Name">TrainPrompt</string>
               <string name="ActionText">Learn Disciplines</string>
@@ -1179,7 +544,7 @@
             </Properties>
           </Item>
         </Item>
-        <Item class="Part" referent="45">
+        <Item class="Part" referent="26">
           <Properties>
             <string name="Name">Head</string>
             <bool name="Anchored">true</bool>
@@ -1208,7 +573,7 @@
             <token name="TopSurface">0</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="46">
+        <Item class="Part" referent="27">
           <Properties>
             <string name="Name">Plinth</string>
             <bool name="Anchored">true</bool>
@@ -1238,11 +603,11 @@
           </Properties>
         </Item>
       </Item>
-      <Item class="Model" referent="47">
+      <Item class="Model" referent="28">
         <Properties>
           <string name="Name">Vendor</string>
         </Properties>
-        <Item class="Part" referent="48">
+        <Item class="Part" referent="29">
           <Properties>
             <string name="Name">Body</string>
             <bool name="Anchored">true</bool>
@@ -1272,7 +637,7 @@
             <BinaryString name="Tags">VHJhaW5lcg==</BinaryString>
             <token name="TopSurface">0</token>
           </Properties>
-          <Item class="ProximityPrompt" referent="49">
+          <Item class="ProximityPrompt" referent="30">
             <Properties>
               <string name="Name">TrainPrompt</string>
               <string name="ActionText">Browse (not in M0.5)</string>
@@ -1283,7 +648,7 @@
             </Properties>
           </Item>
         </Item>
-        <Item class="Part" referent="50">
+        <Item class="Part" referent="31">
           <Properties>
             <string name="Name">Head</string>
             <bool name="Anchored">true</bool>
@@ -1312,7 +677,7 @@
             <token name="TopSurface">0</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="51">
+        <Item class="Part" referent="32">
           <Properties>
             <string name="Name">Plinth</string>
             <bool name="Anchored">true</bool>
@@ -1343,22 +708,22 @@
         </Item>
       </Item>
     </Item>
-    <Item class="Folder" referent="52">
+    <Item class="Folder" referent="33">
       <Properties>
         <string name="Name">Props</string>
       </Properties>
-      <Item class="Folder" referent="53">
+      <Item class="Folder" referent="34">
         <Properties>
           <string name="Name">DevYard</string>
         </Properties>
-        <Item class="Model" referent="54">
+        <Item class="Model" referent="35">
           <Properties>
             <string name="Name">Dummy Plain</string>
             <BinaryString name="AttributesSerialize">AQAAAAUAAABMZXZlbAUAAIA/</BinaryString>
-            <Ref name="PrimaryPart">55</Ref>
+            <Ref name="PrimaryPart">36</Ref>
             <BinaryString name="Tags">VHJhaW5pbmdEdW1teQ==</BinaryString>
           </Properties>
-          <Item class="Part" referent="56">
+          <Item class="Part" referent="37">
             <Properties>
               <string name="Name">Post</string>
               <bool name="Anchored">true</bool>
@@ -1387,7 +752,7 @@
               <token name="TopSurface">0</token>
             </Properties>
           </Item>
-          <Item class="Part" referent="55">
+          <Item class="Part" referent="36">
             <Properties>
               <string name="Name">Body</string>
               <bool name="Anchored">true</bool>
@@ -1416,7 +781,7 @@
               <token name="TopSurface">0</token>
             </Properties>
           </Item>
-          <Item class="Part" referent="57">
+          <Item class="Part" referent="38">
             <Properties>
               <string name="Name">Head</string>
               <bool name="Anchored">true</bool>
@@ -1446,14 +811,14 @@
             </Properties>
           </Item>
         </Item>
-        <Item class="Model" referent="58">
+        <Item class="Model" referent="39">
           <Properties>
             <string name="Name">Dummy Level 5</string>
             <BinaryString name="AttributesSerialize">AQAAAAUAAABMZXZlbAUAAKBA</BinaryString>
-            <Ref name="PrimaryPart">59</Ref>
+            <Ref name="PrimaryPart">40</Ref>
             <BinaryString name="Tags">VHJhaW5pbmdEdW1teQ==</BinaryString>
           </Properties>
-          <Item class="Part" referent="60">
+          <Item class="Part" referent="41">
             <Properties>
               <string name="Name">Post</string>
               <bool name="Anchored">true</bool>
@@ -1482,7 +847,7 @@
               <token name="TopSurface">0</token>
             </Properties>
           </Item>
-          <Item class="Part" referent="59">
+          <Item class="Part" referent="40">
             <Properties>
               <string name="Name">Body</string>
               <bool name="Anchored">true</bool>
@@ -1511,7 +876,7 @@
               <token name="TopSurface">0</token>
             </Properties>
           </Item>
-          <Item class="Part" referent="61">
+          <Item class="Part" referent="42">
             <Properties>
               <string name="Name">Head</string>
               <bool name="Anchored">true</bool>
@@ -1541,14 +906,14 @@
             </Properties>
           </Item>
         </Item>
-        <Item class="Model" referent="62">
+        <Item class="Model" referent="43">
           <Properties>
             <string name="Name">Dummy Level 10</string>
             <BinaryString name="AttributesSerialize">AQAAAAUAAABMZXZlbAUAACBB</BinaryString>
-            <Ref name="PrimaryPart">63</Ref>
+            <Ref name="PrimaryPart">44</Ref>
             <BinaryString name="Tags">VHJhaW5pbmdEdW1teQ==</BinaryString>
           </Properties>
-          <Item class="Part" referent="64">
+          <Item class="Part" referent="45">
             <Properties>
               <string name="Name">Post</string>
               <bool name="Anchored">true</bool>
@@ -1577,7 +942,7 @@
               <token name="TopSurface">0</token>
             </Properties>
           </Item>
-          <Item class="Part" referent="63">
+          <Item class="Part" referent="44">
             <Properties>
               <string name="Name">Body</string>
               <bool name="Anchored">true</bool>
@@ -1606,7 +971,7 @@
               <token name="TopSurface">0</token>
             </Properties>
           </Item>
-          <Item class="Part" referent="65">
+          <Item class="Part" referent="46">
             <Properties>
               <string name="Name">Head</string>
               <bool name="Anchored">true</bool>
@@ -1636,14 +1001,14 @@
             </Properties>
           </Item>
         </Item>
-        <Item class="Model" referent="66">
+        <Item class="Model" referent="47">
           <Properties>
             <string name="Name">Dummy Resist Physical</string>
             <BinaryString name="AttributesSerialize">AgAAAAUAAABMZXZlbAUAAIA/BgAAAFJlc2lzdAIIAAAAcGh5c2ljYWw=</BinaryString>
-            <Ref name="PrimaryPart">67</Ref>
+            <Ref name="PrimaryPart">48</Ref>
             <BinaryString name="Tags">VHJhaW5pbmdEdW1teQ==</BinaryString>
           </Properties>
-          <Item class="Part" referent="68">
+          <Item class="Part" referent="49">
             <Properties>
               <string name="Name">Post</string>
               <bool name="Anchored">true</bool>
@@ -1672,7 +1037,7 @@
               <token name="TopSurface">0</token>
             </Properties>
           </Item>
-          <Item class="Part" referent="67">
+          <Item class="Part" referent="48">
             <Properties>
               <string name="Name">Body</string>
               <bool name="Anchored">true</bool>
@@ -1701,7 +1066,7 @@
               <token name="TopSurface">0</token>
             </Properties>
           </Item>
-          <Item class="Part" referent="69">
+          <Item class="Part" referent="50">
             <Properties>
               <string name="Name">Head</string>
               <bool name="Anchored">true</bool>
@@ -1731,14 +1096,14 @@
             </Properties>
           </Item>
         </Item>
-        <Item class="Model" referent="70">
+        <Item class="Model" referent="51">
           <Properties>
             <string name="Name">Dummy Vulnerable Holy</string>
             <BinaryString name="AttributesSerialize">AgAAAAUAAABMZXZlbAUAAIA/CgAAAFZ1bG5lcmFibGUCBAAAAGhvbHk=</BinaryString>
-            <Ref name="PrimaryPart">71</Ref>
+            <Ref name="PrimaryPart">52</Ref>
             <BinaryString name="Tags">VHJhaW5pbmdEdW1teQ==</BinaryString>
           </Properties>
-          <Item class="Part" referent="72">
+          <Item class="Part" referent="53">
             <Properties>
               <string name="Name">Post</string>
               <bool name="Anchored">true</bool>
@@ -1767,7 +1132,7 @@
               <token name="TopSurface">0</token>
             </Properties>
           </Item>
-          <Item class="Part" referent="71">
+          <Item class="Part" referent="52">
             <Properties>
               <string name="Name">Body</string>
               <bool name="Anchored">true</bool>
@@ -1796,7 +1161,7 @@
               <token name="TopSurface">0</token>
             </Properties>
           </Item>
-          <Item class="Part" referent="73">
+          <Item class="Part" referent="54">
             <Properties>
               <string name="Name">Head</string>
               <bool name="Anchored">true</bool>
@@ -1826,14 +1191,14 @@
             </Properties>
           </Item>
         </Item>
-        <Item class="Model" referent="74">
+        <Item class="Model" referent="55">
           <Properties>
             <string name="Name">Dummy Immune Fire</string>
             <BinaryString name="AttributesSerialize">AgAAAAYAAABJbW11bmUCBAAAAGZpcmUFAAAATGV2ZWwFAACAPw==</BinaryString>
-            <Ref name="PrimaryPart">75</Ref>
+            <Ref name="PrimaryPart">56</Ref>
             <BinaryString name="Tags">VHJhaW5pbmdEdW1teQ==</BinaryString>
           </Properties>
-          <Item class="Part" referent="76">
+          <Item class="Part" referent="57">
             <Properties>
               <string name="Name">Post</string>
               <bool name="Anchored">true</bool>
@@ -1862,7 +1227,7 @@
               <token name="TopSurface">0</token>
             </Properties>
           </Item>
-          <Item class="Part" referent="75">
+          <Item class="Part" referent="56">
             <Properties>
               <string name="Name">Body</string>
               <bool name="Anchored">true</bool>
@@ -1891,7 +1256,7 @@
               <token name="TopSurface">0</token>
             </Properties>
           </Item>
-          <Item class="Part" referent="77">
+          <Item class="Part" referent="58">
             <Properties>
               <string name="Name">Head</string>
               <bool name="Anchored">true</bool>
@@ -1921,7 +1286,7 @@
             </Properties>
           </Item>
         </Item>
-        <Item class="Part" referent="78">
+        <Item class="Part" referent="59">
           <Properties>
             <string name="Name">LagLane</string>
             <bool name="Anchored">true</bool>
@@ -1950,7 +1315,7 @@
             <token name="TopSurface">0</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="79">
+        <Item class="Part" referent="60">
           <Properties>
             <string name="Name">LaneMark</string>
             <bool name="Anchored">true</bool>
@@ -1979,7 +1344,7 @@
             <token name="TopSurface">0</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="80">
+        <Item class="Part" referent="61">
           <Properties>
             <string name="Name">LaneMark</string>
             <bool name="Anchored">true</bool>
@@ -2008,7 +1373,7 @@
             <token name="TopSurface">0</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="81">
+        <Item class="Part" referent="62">
           <Properties>
             <string name="Name">LaneMark</string>
             <bool name="Anchored">true</bool>
@@ -2037,7 +1402,7 @@
             <token name="TopSurface">0</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="82">
+        <Item class="Part" referent="63">
           <Properties>
             <string name="Name">LaneMark</string>
             <bool name="Anchored">true</bool>
@@ -2066,7 +1431,7 @@
             <token name="TopSurface">0</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="83">
+        <Item class="Part" referent="64">
           <Properties>
             <string name="Name">LaneMark</string>
             <bool name="Anchored">true</bool>
@@ -2095,7 +1460,7 @@
             <token name="TopSurface">0</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="84">
+        <Item class="Part" referent="65">
           <Properties>
             <string name="Name">LaneMark</string>
             <bool name="Anchored">true</bool>
@@ -2124,7 +1489,7 @@
             <token name="TopSurface">0</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="85">
+        <Item class="Part" referent="66">
           <Properties>
             <string name="Name">LaneMark</string>
             <bool name="Anchored">true</bool>
@@ -2153,7 +1518,7 @@
             <token name="TopSurface">0</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="86">
+        <Item class="Part" referent="67">
           <Properties>
             <string name="Name">LaneMark</string>
             <bool name="Anchored">true</bool>
@@ -2182,7 +1547,7 @@
             <token name="TopSurface">0</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="87">
+        <Item class="Part" referent="68">
           <Properties>
             <string name="Name">LaneMark</string>
             <bool name="Anchored">true</bool>
@@ -2211,14 +1576,14 @@
             <token name="TopSurface">0</token>
           </Properties>
         </Item>
-        <Item class="Model" referent="88">
+        <Item class="Model" referent="69">
           <Properties>
             <string name="Name">Dummy Moving</string>
             <BinaryString name="AttributesSerialize">AwAAAAoAAABMYW5lTGVuZ3RoBQAAjEIJAAAATGFuZVNwZWVkBQAAQEEFAAAATGV2ZWwFAACAPw==</BinaryString>
-            <Ref name="PrimaryPart">89</Ref>
+            <Ref name="PrimaryPart">70</Ref>
             <BinaryString name="Tags">VHJhaW5pbmdEdW1teQ==</BinaryString>
           </Properties>
-          <Item class="Part" referent="89">
+          <Item class="Part" referent="70">
             <Properties>
               <string name="Name">Body</string>
               <bool name="Anchored">true</bool>
@@ -2248,7 +1613,7 @@
             </Properties>
           </Item>
         </Item>
-        <Item class="Part" referent="90">
+        <Item class="Part" referent="71">
           <Properties>
             <string name="Name">SpawnPad1</string>
             <bool name="Anchored">true</bool>
@@ -2278,7 +1643,7 @@
             <token name="TopSurface">0</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="91">
+        <Item class="Part" referent="72">
           <Properties>
             <string name="Name">SpawnPad2</string>
             <bool name="Anchored">true</bool>
@@ -2308,7 +1673,7 @@
             <token name="TopSurface">0</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="92">
+        <Item class="Part" referent="73">
           <Properties>
             <string name="Name">SpawnPad3</string>
             <bool name="Anchored">true</bool>
@@ -2340,7 +1705,7 @@
         </Item>
       </Item>
     </Item>
-    <Item class="SpawnLocation" referent="93">
+    <Item class="SpawnLocation" referent="74">
       <Properties>
         <string name="Name">VillageSpawn</string>
         <bool name="Anchored">true</bool>
@@ -2370,12 +1735,12 @@
         <BinaryString name="Tags">UmVzcGF3blBvaW50</BinaryString>
       </Properties>
     </Item>
-    <Item class="Model" referent="94">
+    <Item class="Model" referent="75">
       <Properties>
         <string name="Name">CreationStage</string>
         <token name="ModelStreamingMode">2</token>
       </Properties>
-      <Item class="Part" referent="95">
+      <Item class="Part" referent="76">
         <Properties>
           <string name="Name">Floor</string>
           <bool name="Anchored">true</bool>
@@ -2404,7 +1769,7 @@
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="96">
+      <Item class="Part" referent="77">
         <Properties>
           <string name="Name">Ceiling</string>
           <bool name="Anchored">true</bool>
@@ -2433,7 +1798,7 @@
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="97">
+      <Item class="Part" referent="78">
         <Properties>
           <string name="Name">Wall1</string>
           <bool name="Anchored">true</bool>
@@ -2462,7 +1827,7 @@
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="98">
+      <Item class="Part" referent="79">
         <Properties>
           <string name="Name">Wall2</string>
           <bool name="Anchored">true</bool>
@@ -2491,7 +1856,7 @@
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="99">
+      <Item class="Part" referent="80">
         <Properties>
           <string name="Name">Wall3</string>
           <bool name="Anchored">true</bool>
@@ -2520,7 +1885,7 @@
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="100">
+      <Item class="Part" referent="81">
         <Properties>
           <string name="Name">Wall4</string>
           <bool name="Anchored">true</bool>
@@ -2549,7 +1914,7 @@
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="101">
+      <Item class="Part" referent="82">
         <Properties>
           <string name="Name">Wall5</string>
           <bool name="Anchored">true</bool>
@@ -2578,7 +1943,7 @@
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="102">
+      <Item class="Part" referent="83">
         <Properties>
           <string name="Name">Wall6</string>
           <bool name="Anchored">true</bool>
@@ -2607,7 +1972,7 @@
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="103">
+      <Item class="Part" referent="84">
         <Properties>
           <string name="Name">Wall7</string>
           <bool name="Anchored">true</bool>
@@ -2636,7 +2001,7 @@
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="104">
+      <Item class="Part" referent="85">
         <Properties>
           <string name="Name">Wall8</string>
           <bool name="Anchored">true</bool>
@@ -2665,7 +2030,7 @@
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="105">
+      <Item class="Part" referent="86">
         <Properties>
           <string name="Name">Pedestal</string>
           <bool name="Anchored">true</bool>
@@ -2695,7 +2060,7 @@
           <BinaryString name="Tags">Q3JlYXRvclN0YWdl</BinaryString>
           <token name="TopSurface">0</token>
         </Properties>
-        <Item class="PointLight" referent="106">
+        <Item class="PointLight" referent="87">
           <Properties>
             <string name="Name">Key</string>
             <float name="Brightness">0.8</float>
@@ -2708,7 +2073,7 @@
           </Properties>
         </Item>
       </Item>
-      <Item class="Part" referent="107">
+      <Item class="Part" referent="88">
         <Properties>
           <string name="Name">FocusFull</string>
           <bool name="Anchored">true</bool>
@@ -2741,7 +2106,7 @@
           <float name="Transparency">1</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="108">
+      <Item class="Part" referent="89">
         <Properties>
           <string name="Name">CameraFull</string>
           <bool name="Anchored">true</bool>
@@ -2774,7 +2139,7 @@
           <float name="Transparency">1</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="109">
+      <Item class="Part" referent="90">
         <Properties>
           <string name="Name">FocusHead</string>
           <bool name="Anchored">true</bool>
@@ -2807,7 +2172,7 @@
           <float name="Transparency">1</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="110">
+      <Item class="Part" referent="91">
         <Properties>
           <string name="Name">CameraHead</string>
           <bool name="Anchored">true</bool>
@@ -2840,7 +2205,7 @@
           <float name="Transparency">1</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="111">
+      <Item class="Part" referent="92">
         <Properties>
           <string name="Name">Torch1</string>
           <bool name="Anchored">true</bool>
@@ -2868,14 +2233,14 @@
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
-        <Item class="Fire" referent="112">
+        <Item class="Fire" referent="93">
           <Properties>
             <string name="Name">Flame</string>
             <float name="heat_xml">4</float>
             <float name="size_xml">3</float>
           </Properties>
         </Item>
-        <Item class="PointLight" referent="113">
+        <Item class="PointLight" referent="94">
           <Properties>
             <string name="Name">Glow</string>
             <float name="Brightness">0.9</float>
@@ -2888,7 +2253,7 @@
           </Properties>
         </Item>
       </Item>
-      <Item class="Part" referent="114">
+      <Item class="Part" referent="95">
         <Properties>
           <string name="Name">Torch2</string>
           <bool name="Anchored">true</bool>
@@ -2916,14 +2281,14 @@
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
-        <Item class="Fire" referent="115">
+        <Item class="Fire" referent="96">
           <Properties>
             <string name="Name">Flame</string>
             <float name="heat_xml">4</float>
             <float name="size_xml">3</float>
           </Properties>
         </Item>
-        <Item class="PointLight" referent="116">
+        <Item class="PointLight" referent="97">
           <Properties>
             <string name="Name">Glow</string>
             <float name="Brightness">0.9</float>
@@ -2936,7 +2301,7 @@
           </Properties>
         </Item>
       </Item>
-      <Item class="Part" referent="117">
+      <Item class="Part" referent="98">
         <Properties>
           <string name="Name">Fill</string>
           <bool name="Anchored">true</bool>
@@ -2968,7 +2333,7 @@
           <token name="TopSurface">0</token>
           <float name="Transparency">1</float>
         </Properties>
-        <Item class="SpotLight" referent="118">
+        <Item class="SpotLight" referent="99">
           <Properties>
             <string name="Name">Fill</string>
             <float name="Angle">60</float>

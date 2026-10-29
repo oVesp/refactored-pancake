@@ -1,13 +1,17 @@
 --!strict
 
 local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerStorage = game:GetService("ServerStorage")
 
-local Enemies = require(ReplicatedStorage.Content.Enemies)
+local Appearance = require(ReplicatedStorage.Content.Appearance)
+local Avatar = require(ReplicatedStorage.Shared.Avatar)
 local Logger = require(ReplicatedStorage.Shared.Logger)
-local Tuning = require(ReplicatedStorage.Content.Tuning)
+local Names = require(ReplicatedStorage.Content.Names)
+local NpcDefs = require(ReplicatedStorage.Shared.NpcDefs)
+local Relations = require(ReplicatedStorage.Shared.Relations)
 local Types = require(script.Parent.Parent.Types)
 
 type Entity = Types.Entity
@@ -23,45 +27,31 @@ local CombatService: any
 local EntityService: any
 local StatService: any
 local StatusService: any
-local ZoneService: any
 
-type Spawner = {
-	part: BasePart,
-	enemyId: string,
-	count: number,
-	levelMin: number,
-	levelMax: number,
-	respawnSeconds: number,
-	radius: number,
-	zone: string?,
-	alive: { Entity },
-	pending: number,
-}
-
-local spawners: { Spawner } = {}
 local npcFolder: Folder
 local devSpawned: { Entity } = {}
 local random = Random.new()
 
 --[=[
-	Spawns enemies from `Spawner` parts with leash and respawn timers, keeps a per-zone active cap
-	(game-design.md 5.6), and registers training dummies.
+	Builds NPC bodies and registers them (game-design.md 5.6): monsters from ServerStorage.Templates,
+	people from a random `Appearance` look. Who spawns where is GroupService and PopulationService
+	(docs/systems/open-world.md); this service also registers training dummies, keeps dev spawns
+	and summons, and clears corpses.
 ]=]
 local SpawnService = {}
 
-local function activeInZone(zone: string?): number
-	local count = 0
-	for _, spawner in spawners do
-		if spawner.zone == zone then
-			count += #spawner.alive
-		end
-	end
-	return count
-end
+export type Options = {
+	--[=[ Leash and idle patrol centre; defaults to the spawn point. ]=]
+	home: Vector3?,
+	--[=[ Idle patrol radius (AIService.Attach); 0 holds the spot. ]=]
+	wander: number?,
+	--[=[ Share of max HP to start with (a group coming back into view keeps its wounds). ]=]
+	hp: number?,
+}
 
 -- The ground under a spawn point: terrain or generated world geometry (terraced plots, the camp
--- dais), so enemies never start inside raised ground. Falls back to the point itself.
-local function groundAt(position: Vector3): Vector3
+-- dais), so NPCs never start inside raised ground. Falls back to the point itself.
+function SpawnService.GroundAt(position: Vector3): Vector3
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Include
 	local world = workspace:FindFirstChild("World")
@@ -79,33 +69,86 @@ local function tint(model: Model, color: Color3)
 	end
 end
 
---[=[
-	Spawns one enemy at a position and hands it to AIService. `home`/`leash` default to the spawn
-	point and the enemy's leash radius. Returns the entity.
-]=]
-function SpawnService.Spawn(enemyId: string, level: number, position: Vector3, home: Vector3?): Entity?
-	local def = Enemies.ById[enemyId]
-	local template = def and ServerStorage.Templates:FindFirstChild(def.template or "Goblin")
-	if not def or not template or not template:IsA("Model") then
-		log:Warn("Cannot spawn %s", enemyId)
-		return nil
-	end
+local function pick<T>(list: { T }): T
+	return list[random:NextInteger(1, #list)]
+end
 
+-- A random look dressed in one of the definition's outfits; only men get beards.
+local function randomLook(outfits: { string }): Avatar.Look
+	local gender = pick(Appearance.Genders.Order)
+	return {
+		gender = gender,
+		skinTone = pick(Appearance.SkinTones.Order),
+		hair = pick(Appearance.Hair.Order),
+		hairColor = pick(Appearance.HairColors.Order),
+		facialHair = if gender == "male" and random:NextNumber() < 0.5
+			then pick(Appearance.FacialHair.Order)
+			else "none",
+		outfit = pick(outfits),
+	}
+end
+
+-- An R15 body for a human NPC. Its stock Animate script is removed: EnemyAnimationController
+-- plays the `Human` clip set from the client.
+local function humanModel(def: any): (Model?, string)
+	local look = randomLook(def.outfits or { Appearance.Default.outfit })
+	local ok, model = pcall(function()
+		return Players:CreateHumanoidModelFromDescription(Avatar.Build(look), Enum.HumanoidRigType.R15)
+	end)
+	if not ok then
+		log:Throttled("human", 30, "warn", "Cannot build a human body: %s", tostring(model))
+		return nil, def.name
+	end
+	local animate = model:FindFirstChild("Animate")
+	if animate then
+		animate:Destroy()
+	end
+	model:SetAttribute("AnimSet", "Human")
+	local names = (Names :: any)[look.gender] or Names.male
+	return model, `{pick(names)}, {def.name}`
+end
+
+local function bodyFor(def: any): (Model?, string)
+	if def.template == "Human" then
+		return humanModel(def)
+	end
+	local template = ServerStorage.Templates:FindFirstChild(def.template or "Goblin")
+	if not template or not template:IsA("Model") then
+		return nil, def.name
+	end
 	local model = template:Clone()
-	model.Name = def.name
 	-- Rojo does not keep PrimaryPart on a model file's root instance, so resolve it by name.
-	local root = model:FindFirstChild("HumanoidRootPart") :: BasePart
-	model.PrimaryPart = root
+	model.PrimaryPart = model:FindFirstChild("HumanoidRootPart") :: BasePart
 	local baseScale = model:GetAttribute("BaseScale")
 	model:ScaleTo(def.scale * (if type(baseScale) == "number" then baseScale else 1))
 	tint(model, def.color)
+	return model, def.name
+end
+
+--[=[
+	Spawns one NPC (Content/Enemies or Content/Npcs) at a position and hands it to AIService.
+	Monsters are tagged `Enemy`, people `Npc`. Returns the entity. May yield (human bodies load
+	their clothing).
+]=]
+function SpawnService.Spawn(npcId: string, level: number, position: Vector3, options: Options?): Entity?
+	local def = NpcDefs.Get(npcId)
+	local model, name = if def then bodyFor(def) else nil, ""
+	if not def or not model then
+		log:Warn("Cannot spawn %s", npcId)
+		return nil
+	end
+	local opts: Options = options or {}
+	model.Name = name
+	local root = model:FindFirstChild("HumanoidRootPart") :: BasePart
+	model.PrimaryPart = root
 	local humanoid = model:FindFirstChildOfClass("Humanoid") :: Humanoid
 	local height = root.Size.Y / 2 + humanoid.HipHeight
-	position = groundAt(position)
+	position = SpawnService.GroundAt(position)
 	model:PivotTo(
 		CFrame.new(position + Vector3.new(0, height, 0)) * CFrame.Angles(0, random:NextNumber(0, math.pi * 2), 0)
 	)
-	model:AddTag("Enemy")
+	local team = def.team or "Goblins"
+	model:AddTag(if Relations.IsMonster(team) then "Enemy" else "Npc")
 	model.Parent = npcFolder
 	root:SetNetworkOwner(nil)
 
@@ -114,58 +157,30 @@ function SpawnService.Spawn(enemyId: string, level: number, position: Vector3, h
 		root = root,
 		humanoid = humanoid,
 		kind = "Npc",
-		team = def.team or "Goblins",
-		defId = enemyId,
-		name = def.name,
+		team = team,
+		defId = npcId,
+		name = name,
 		level = level,
 		tags = def.tags,
 	})
 	model:SetAttribute("Elite", def.elite == true)
 	StatService.Recompute(entity)
 	StatService.Refill(entity)
-	AIService.Attach(entity, home or position, def.leashRadius)
+	if opts.hp and opts.hp < 1 then
+		StatService.SetHp(entity, math.max(1, entity.stats.MaxHp * opts.hp))
+	end
+	AIService.Attach(entity, opts.home or position, def.leashRadius, opts.wander)
 	return entity
 end
 
-local function fill(spawner: Spawner)
-	local missing = spawner.count - #spawner.alive - spawner.pending
-	for _ = 1, missing do
-		if activeInZone(spawner.zone) >= Tuning.Npc.ActivePerZone then
-			return
-		end
-		local angle = random:NextNumber(0, math.pi * 2)
-		local distance = random:NextNumber(0, spawner.radius)
-		local position = spawner.part.Position + Vector3.new(math.cos(angle) * distance, 0, math.sin(angle) * distance)
-		local level = random:NextInteger(spawner.levelMin, spawner.levelMax)
-		local entity = SpawnService.Spawn(spawner.enemyId, level, position, spawner.part.Position)
-		if entity then
-			table.insert(spawner.alive, entity)
-		end
-	end
-end
-
-local function readSpawner(part: Instance)
-	if not part:IsA("BasePart") then
+--[=[ Removes a living NPC without a death (a group walking out of sight). ]=]
+function SpawnService.Despawn(entity: Entity)
+	if not entity.alive or entity.kind ~= "Npc" then
 		return
 	end
-	local enemyId = part:GetAttribute("EnemyId")
-	if type(enemyId) ~= "string" or not Enemies.ById[enemyId] then
-		log:Warn("Spawner %s has unknown EnemyId", part:GetFullName())
-		return
-	end
-	local spawner: Spawner = {
-		part = part,
-		enemyId = enemyId,
-		count = part:GetAttribute("Count") :: number? or 1,
-		levelMin = part:GetAttribute("LevelMin") :: number? or 1,
-		levelMax = part:GetAttribute("LevelMax") :: number? or 1,
-		respawnSeconds = part:GetAttribute("RespawnSeconds") :: number? or 30,
-		radius = part:GetAttribute("Radius") :: number? or 8,
-		zone = ZoneService.ZoneAt(part.Position),
-		alive = {},
-		pending = 0,
-	}
-	table.insert(spawners, spawner)
+	entity.alive = false
+	EntityService.Unregister(entity.model)
+	entity.model:Destroy()
 end
 
 local function onDied(victim: Entity)
@@ -179,24 +194,10 @@ local function onDied(victim: Entity)
 	if victim.kind ~= "Npc" then
 		return
 	end
-
-	for _, spawner in spawners do
-		local index = table.find(spawner.alive, victim)
-		if index then
-			table.remove(spawner.alive, index)
-			spawner.pending += 1
-			task.delay(spawner.respawnSeconds, function()
-				spawner.pending -= 1
-				fill(spawner)
-			end)
-			break
-		end
-	end
 	local devIndex = table.find(devSpawned, victim)
 	if devIndex then
 		table.remove(devSpawned, devIndex)
 	end
-
 	task.delay(CORPSE_SECONDS, function()
 		EntityService.Unregister(victim.model)
 		victim.model:Destroy()
@@ -253,16 +254,16 @@ local function resetDummies()
 	end
 end
 
---[=[ Dev: spawns an enemy near a position, outside spawner bookkeeping. ]=]
-function SpawnService.DevSpawn(enemyId: string, level: number, position: Vector3): Entity?
-	local entity = SpawnService.Spawn(enemyId, level, position, position)
+--[=[ Dev: spawns an NPC near a position, outside any group. ]=]
+function SpawnService.DevSpawn(npcId: string, level: number, position: Vector3): Entity?
+	local entity = SpawnService.Spawn(npcId, level, position)
 	if entity then
 		table.insert(devSpawned, entity)
 	end
 	return entity
 end
 
---[=[ Dev: removes every dev-spawned enemy. Returns how many were removed. ]=]
+--[=[ Dev: removes every dev-spawned NPC. Returns how many were removed. ]=]
 function SpawnService.ClearDevSpawned(): number
 	local count = #devSpawned
 	for _, entity in table.clone(devSpawned) do
@@ -271,7 +272,7 @@ function SpawnService.ClearDevSpawned(): number
 	return count
 end
 
---[=[ Registers extra enemies (e.g. a boss's summons) so they are cleaned up like dev spawns. ]=]
+--[=[ Registers extra NPCs (e.g. a boss's summons) so they are cleaned up like dev spawns. ]=]
 function SpawnService.TrackSummon(entity: Entity)
 	table.insert(devSpawned, entity)
 end
@@ -282,27 +283,18 @@ function SpawnService.Init(deps: { [string]: any })
 	EntityService = deps.EntityService
 	StatService = deps.StatService
 	StatusService = deps.StatusService
-	ZoneService = deps.ZoneService
 end
 
 function SpawnService.Start()
 	AIService.SetSpawnService(SpawnService)
 	npcFolder = Instance.new("Folder")
-	npcFolder.Name = "Enemies"
+	npcFolder.Name = "Npcs"
 	npcFolder.Parent = workspace
 
-	for _, part in CollectionService:GetTagged("Spawner") do
-		readSpawner(part)
-	end
 	for _, dummy in CollectionService:GetTagged("TrainingDummy") do
 		registerDummy(dummy)
 	end
 	CombatService.Died:Connect(onDied)
-
-	for _, spawner in spawners do
-		fill(spawner)
-	end
-	log:Info("%d spawners active", #spawners)
 
 	task.spawn(function()
 		while true do

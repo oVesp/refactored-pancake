@@ -50,10 +50,9 @@ The Map (`tools/world/build.luau`) keeps only gameplay objects:
 - zone volumes and the spawn point;
 - trainers and the vendor;
 - the dev yard;
-- spawners;
 - the creation stage.
 
-The generator builds everything that dresses the pads, around those objects. `Anchors.fromMap` reads them (with a spawner's spawn radius), and nothing generated comes within `settlements.clear` studs of one. Footprints never overlap; tests check both rules.
+The generator builds everything that dresses the pads, around those objects and the open-world posts: `Anchors.fromMap(map, Population)` reads the Map objects plus every garrison post and nest lair in `ContentServerOnly/Population` (with its wander radius, docs/systems/open-world.md), and nothing generated comes within `settlements.clear` studs of one. Footprints never overlap; tests check both rules.
 
 - **Village** (VillageCore):
   - a cobbled plaza;

@@ -2,7 +2,7 @@
 
 -- Generates the M0.5 greybox world and NPC templates as Rojo model files.
 -- Run from the repo root: `lune run tools/world/build`. Output is deterministic; commit it.
--- Gameplay objects only: zones, spawn, NPCs, dev yard, spawners and the creation stage. Village,
+-- Gameplay objects only: zones, spawn, NPCs, dev yard and the creation stage. Village,
 -- farmland, orchard and camp dressing comes from the world generator (docs/systems/world-generation.md).
 local fs = require("@lune/fs")
 local roblox = require("@lune/roblox")
@@ -81,7 +81,6 @@ local COLORS = {
 
 local map = model(nil, "Map")
 local zoneFolder = folder(map, "Zones")
-local spawnerFolder = folder(map, "Spawners")
 local npcFolder = folder(map, "Npcs")
 local propFolder = folder(map, "Props")
 
@@ -229,53 +228,6 @@ for i, x in { -150, -130, -110 } do
 end
 
 -- Wheat Fields, Orchard Edge and Goblin Camp dressing is generated with the settlements.
-
--- Spawners: EnemyId, Count, LevelMin, LevelMax, RespawnSeconds, Radius
-local SPAWNERS = {
-	{ "goblin_raider", 3, 1, 2, 20, 12, 40, -160 },
-	{ "goblin_raider", 3, 1, 2, 20, 12, -45, -190 },
-	{ "goblin_raider", 2, 2, 3, 20, 10, 30, -260 },
-	{ "goblin_slinger", 2, 2, 3, 25, 10, -60, -265 },
-	{ "goblin_slinger", 2, 2, 3, 25, 10, 70, -225 },
-	{ "goblin_raider", 3, 3, 3, 25, 12, -50, -390 },
-	{ "goblin_slinger", 2, 3, 4, 25, 10, 55, -410 },
-	{ "goblin_trapper", 2, 3, 4, 30, 10, -40, -470 },
-	{ "goblin_trapper", 2, 3, 4, 30, 10, 50, -500 },
-	{ "goblin_raider", 2, 3, 3, 25, 10, 15, -520 },
-	{ "goblin_raider", 3, 4, 4, 30, 10, -50, -620 },
-	{ "goblin_slinger", 2, 4, 4, 30, 10, 50, -630 },
-	{ "goblin_trapper", 2, 4, 4, 30, 10, -55, -680 },
-	{ "goblin_brute", 1, 4, 5, 45, 6, 40, -690 },
-	{ "goblin_brute", 1, 4, 5, 45, 6, -30, -700 },
-	{ "goblin_chieftain", 1, 6, 6, 120, 4, 0, -725 },
-	{ "skeleton", 2, 1, 2, 25, 8, -90, -150 },
-	{ "skeleton", 2, 2, 3, 25, 8, 90, -300 },
-}
-for i, s in SPAWNERS do
-	part(
-		spawnerFolder,
-		"Spawner" .. i,
-		Vector3.new(2, 1, 2),
-		at(s[7], G + 0.5, s[8]),
-		rgb(255, 0, 0),
-		Enum.Material.Neon,
-		{
-			Transparency = 1,
-			CanCollide = false,
-			CanTouch = false,
-			CanQuery = false,
-			Tags = { "Spawner" },
-			Attributes = {
-				EnemyId = s[1],
-				Count = s[2],
-				LevelMin = s[3],
-				LevelMax = s[4],
-				RespawnSeconds = s[5],
-				Radius = s[6],
-			},
-		}
-	)
-end
 
 -- Character creation stage (docs/systems/character-creation.md): a closed, torch-lit hall high
 -- above the village, inside the streaming radius. The creator previews the character on the
