@@ -90,7 +90,10 @@
 				"$path": "vendor/PlayerModulePatch"
 			},
 			"WorldGen": {
-				"$path": "src/ServerStorage/WorldGen"
+				"$path": "src/ServerStorage/WorldGen",
+				"PropsManifest": {
+					"$path": "content/world/props.json"
+				}
 			}
 		}
 	}
