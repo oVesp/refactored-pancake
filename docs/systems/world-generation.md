@@ -1,59 +1,75 @@
-# World generation (Midgard terrain)
+# World generation (Midgard)
 
-Code: `tools/terrain/` (offline Lune generator), `src/ServerStorage/WorldGen/Apply.luau` (Studio applier), `src/ServerStorage/WorldGen/Data/` (generated, do not hand-edit). Tests: `tests/specs/WorldGen.spec.luau`.
+**Status (2026-10-28): redesign decided, not built.** The owner replaced the eroded voxel world with a stylized, vertical, zone-graph world (reference: the look of walled fantasy Roblox worlds; Kenshi for scale and variety only). Nothing below the *Target design* heading exists in code yet. Until the centre section is rebuilt, the place still holds the old output, described under *Current pipeline*.
 
-## Workflow
+Originality: the references give style and scale only. No layout, landmark, location name or unique feature of any referenced game is copied (game-design §2).
 
-1. Tune `tools/terrain/lib/Config.luau`.
-2. `lune run tools/terrain/build` (about 2 minutes) regenerates `Data/` and writes `build/terrain-preview.ppm` (top-down height and material preview, one pixel per 8 studs).
-3. In Studio, Edit mode: `require(game.ServerStorage.WorldGen.Apply).Apply()`. Use `ApplyTerrain()`, `ApplyScatter({ "Trees" })`, `ApplyPois()` or `Clear()` for partial runs. A full apply takes several minutes; run it in a spawned task. Save the place afterwards.
-4. When regenerating, also update the `worldgen:*` rows in `content/register.json` if the file list changed.
+## Target design
 
-Output is deterministic: the same seed and Config give the same bytes in Lune and in Studio.
+### Goals
 
-## World
+- **Perceived size over raw size.** A zone feels big because sight lines are short: cliffs, tiers and fog hide what is next. Hidden areas need something to hide behind, not more distance.
+- **Verticality separates zones.** Zones sit on elevation tiers; the cliff between two tiers is the border. There is no requirement for a wall on every edge.
+- **Section-by-section authoring.** One zone can be regenerated, viewed and tuned in seconds without moving any other zone.
 
-- 10,240 × 10,240 studs: a 5 × 5 grid of 2,048-stud tiles. Data is 1,280 × 1,280 columns of 8 studs, origin X=-5120 Z=-5456. The centre tile holds the gameplay areas (village, fields, orchard, goblin camp). Terrain is the only ground: the Map has no ground slabs or baseplate.
-- Floor at y=-80, sea level y=-3, seed `20261024`.
-- Regions (`Config.world`) blend in over about 1,000 studs with noise-warped borders:
+### Size
 
-| Region | Where | Relief | Biomes |
-|---|---|---|---|
-| Start valley | centre | valley along the zones, creek and lake; hills around | Meadow, MixedForest, PineForest, WetForest, Bog, Ridge |
-| Highlands | z -1400 to -2300 | hills 1.5× and lifted 60 studs | Heath, PineForest |
-| Mountains | north of z -2400 | ridged peaks up to about 560 studs | Alpine (snow above about 360, glacier above about 460), Ridge |
-| Swamp | west of x -2000 | flat, pools below sea level | Swamp, Bog |
-| Plains | east of x 2100 | low rolling ground | Plains (groves), WetForest along the river |
-| Coast | south of z 2300 | slopes to a sea floor at -42 | Beach, sea |
+10,240 × 10,240 studs per realm Place, **provisional**: the owner commits a final size after the first sections are played. Base walk speed is 16 studs/s, so a straight crossing takes about 11 minutes and a real route about 17.
 
-## Pipeline (`build.luau`)
+### Layout: the zone graph
 
-1. **Layout** (`Layout.luau`): pads from the `Map.Zones` volumes and prop blockers from `src/Workspace/Map.rbxmx`, the village-to-camp road from `Config.roads`, the lake, river splines (`Config.water.rivers`: the Creek through the start valley and the Eastwater from the northern mountains to the sea), and the region weights.
-2. **Heightfield** (`Heightfield.luau`): start-valley corridor, fBm hills reshaped per region, the north ridge behind the goblin camp (open past |x| 1300 as passes), ridged mountains, raised north/east/west edges, domain-warped detail, the coast falling to the sea floor.
-3. **Erosion** (`Erosion.luau`): droplet hydraulic erosion (0.5 droplets per cell), then thermal talus at 38°, masked off pads, rivers, the lake, the sea and the swamp.
-4. **Water** (`Water.luau`): each river is carved with a downstream-monotonic surface; the lake, the sea and swamp pools fill to sea level (ground below sea level elsewhere stays dry). Flow accumulation by Priority-Flood plus D8.
-5. **Pads** flattened to `padHeight` (0.2, the Map ground level) with a feather, so buildings and props sit flush.
-6. **POIs, sites and roads** (`Paths.luau`): two lookouts beside the start valley; one flat site per region (`SiteHighlands`, `SiteMountains`, `SiteSwamp`, `SitePlains`, `SiteCoast`, radius 48) for later towns and dungeons; A* trails in the valley and 14-stud roads from the valley to each site. All markers are tagged `PoiSite`.
-7. **Biomes and materials** (`Materials.luau`): 12 biomes from region, height, slope, moisture and noise; materials Grass, LeafyGrass, Ground, Mud, Sand, Rock, Slate, Pavement, Snow, Glacier, Sandstone. Each zone gets its own material (`Config.padMaterials`) with a ragged edge, and roads are painted Ground.
-8. **Scatter** (`Scatter.luau`): Bridson Poisson-disc per layer (Paths, Trees, Rocks, Understory, Cover, Pebbles), weighted asset groups per biome, slope limits, sinking and normal alignment. Canopy trees run at about twice pack size and may interlock (`canopyOverlap`); plains, heath and swamp trees gather in groves (`clump`).
+Authored data, one file per realm (`content/world/midgard.json`):
 
-## Prop budget
+- **Nodes**: `zone` (a playable area), `pocket` (a hidden area inside or above a cliff band), `landmark`. Each has an id, biome, danger band, elevation tier, target area, and optional anchor position.
+- **Edges**: how two nodes connect. Kinds: `ramp` (a path cut into the cliff), `stairs`, `bridge` (across a chasm), `cave` (tunnel through a cliff band), `drop` (one-way, down), `climb` (needs a climbing mechanic, see open questions), `open` (same tier, no cliff). `secret: true` marks an edge with no visual signpost.
 
-The whole world at start-valley density would be several hundred thousand props. Ground cover and pebbles appear only within `detailNear`..`detailFar` (1,200 to 2,200 studs) of the start; understory thins to a quarter outside it; trees drop to `outerTrees` (60%) and rocks to `outerRocks` (35%) far from the start. Terrain grass decoration covers the rest. Current output: about 117k props (44k trees, 35k rocks, 21k understory, 10k cover, 6k pebbles).
+Same-tier neighbours may share an open border; neighbours on different tiers always meet at a cliff band.
 
-## Applier (`Apply.luau`)
+### Generation stages
 
-- Terrain written with `WriteVoxelChannels` in blocks of 64 × 64 voxel columns (256 studs), yielding between blocks. The 8-stud data is upsampled to 4-stud voxels: heights and water bilinear, materials by a hashed pick among the four neighbouring cells. Each block fills from 24 studs below its lowest column (never below `floorY`) to keep mountain writes small. `MaterialColors` set to the palette.
-- Props cloned from the Nature MEGAPACK in `ServerStorage`, re-pivoted to their bounding-box bottom centre, anchored, scripts stripped; collision on trunks only for trees, off for cover.
-- `LevelOfDetail` is `Disabled` on every prop, and single-part props sit in their chunk as a bare part without a Model. `ApplyStreaming()` brings placed props up to this. See [atmosphere.md](atmosphere.md).
-- Placed under `Workspace.Nature/<Layer>/<256-stud chunk>`. Anything marked `Locked` or tagged `ScatterExclude` survives a re-apply.
+Each stage is a pure Luau module shared by Lune and Studio, seeded per zone (`hash(worldSeed, zoneId)`) and per border (`hash(worldSeed, lowId, highId)`), so rebuilding one zone never shifts another.
 
-## Data format
+1. **Placement**: graph to 2D. Anchored nodes stay put; the rest settle by a force layout, then cells are cut as a power diagram weighted by target area and clipped to the world. Pockets are placed inside the cliff band of their parent edge.
+2. **Elevation**: each cell gets its tier height plus low-amplitude noise. Borders between tiers become cliff bands (polylines with a width). Edges carve their crossing into the band: ramps and stairs as switchbacks, caves as tunnels, bridges across gaps.
+3. **Floors**: voxel terrain heightfield for walkable ground (grass, paths, water), written with the existing `WriteVoxelChannels` writer. Cliff bands are filled with Rock voxels under the parts so no gap shows.
+4. **Cliffs**: a procedural Part kit along each cliff band. Each band segment is a column of 2 to 5 stacked blocks (20 to 120 studs, yaw jitter about ±8°, tilt about ±4°) in the biome's rock material and palette, with a thin grass cap that overhangs the top face. Shelf blocks form ledges, which is where pockets and climb routes live. Plain Parts only, no unions. Budget: about 1,500 cliff parts per zone, tuned after profiling.
+5. **Props**: see below.
+6. **Mood**: each zone names an atmosphere mood; the atmosphere controller blends by zone instead of by region band.
 
-- `Meta.luau`: world constants, material palette, asset list, layers (each with its module list and prop count), POIs and sites.
-- `Terrain01`–`40`: 32 rows each, base64 of 5 bytes per column: u16 height `(h+128)*16`, u8 material, u16 water surface (0 = dry).
-- `Scatter<Layer><band>`: props in 2,048-stud bands along Z, one line per prop: `assetIdx x y z yaw ux uz scale`.
+### Props: procedural low-poly at low cost
 
-## Owner toggles (not scriptable)
+Built for performance first:
 
-- Expanded Terrain and `Terrain.Decoration` (animated grass on Grass) are Studio settings; both are on in the place (2026-10-24).
+- **Few, large props.** Trees 40 to 150 studs tall cover the same ground with a fraction of the instances.
+- **Variant library, not per-prop geometry.** A seeded offline generator (headless Blender script) makes about 16 to 32 low-poly variants per biome (bent trunk, 3 to 7 faceted canopy slabs, about 400 triangles or fewer), imported once in Studio. Every placed prop is a clone of a variant, so identical mesh and material render as one instanced batch.
+- **Two instances per tree at most**: a trunk with box collision and a canopy with no collision and `CanQuery` off. Single MeshParts, no Model.
+- **Clustered scatter with a per-zone budget**: groves and clearings instead of uniform cover, Poisson-disc inside clusters.
+- **Distance**: engine streaming, client culling (`PropDetail`) and fog as the far plane stay as they are.
+- Rejected: trees built from 6 to 12 Parts each (about 10 times the instances and physics and replication cost).
+
+### Section loop
+
+The unit of iteration is one zone and its borders.
+
+1. Edit the zone in `midgard.json` or its tuning.
+2. In Studio Edit mode: `WorldGen.BuildSection("zoneId")` clears and rebuilds that zone's terrain, cliffs and props (target under 10 seconds). `ClearSection` removes it.
+3. Fixed camera bookmarks per zone are captured with the Studio MCP `screen_capture` and compared with the previous pass and the references.
+4. Lune writes a top-down map (zones, tiers, edges, pockets) for the whole realm on every build.
+5. When a zone is signed off, it is marked `locked`; Lune bakes it to `Data/Zones/<id>.luau` and later builds keep the baked data.
+
+### Retired when the centre section lands
+
+`tools/terrain/lib/Erosion.luau`, the region and mountain code in `Heightfield.luau`, `Scatter.luau` and the Nature MEGAPACK layers, the generated `Data/` (about 16 MB), the `worldgen:*` rows in `content/register.json`, the matching `WorldGen.spec` cases, the `Nature` folder in the place (about 43k props), the region bands in `Atmosphere` moods, and `PropDetail` distances tuned for the old props. The voxel writer in `Apply.luau`, streaming settings and the day cycle stay.
+
+### Open questions
+
+- **Climbing**: `climb` edges and ledge pockets need a climbing mechanic, which no system defines yet.
+- **Final realm size** after the first sections are played.
+
+## Current pipeline (to be replaced)
+
+Code: `tools/terrain/` (offline Lune generator), `src/ServerStorage/WorldGen/Apply.luau` (Studio applier), `src/ServerStorage/WorldGen/Data/` (generated). Tests: `tests/specs/WorldGen.spec.luau`.
+
+- `lune run tools/terrain/build` (about 2 minutes) bakes a 10,240-stud world (5 × 5 tiles of 2,048 studs, 8-stud columns, seed `20261024`): start valley, highlands north, ridged mountains, swamp west, plains east, coast south; droplet and thermal erosion; river splines, lake and sea; A* roads to one site per region; 12 biomes; layered Poisson scatter of the Nature MEGAPACK (about 117k props).
+- In Studio: `require(game.ServerStorage.WorldGen.Apply).Apply()` (or `ApplyTerrain`, `ApplyScatter`, `ApplyPois`, `Clear`, `ApplyStreaming`), several minutes, in a spawned task; then save. Terrain is upsampled to 4-stud voxels; props go under `Workspace.Nature/<Layer>/<256-stud chunk>`.
+- **Place state (2026-10-28):** only the centre tile is kept. Terrain, props and POI markers outside X -1024..1024, Z -1360..688 were cleared in Studio. `Data/` and the applier still describe the full world, so a full `Apply()` would refill the outer tiles.
