@@ -52,6 +52,7 @@ The result (`Map`) holds per-cell region, height and mountain, coast, mainland a
 - the Adventurers hold exactly the central capital and a coastal harbor in the south-west;
 - each empire has one capital inside its own territory;
 - sites stand on dry ground in their own region, settlements off mountains;
+- named settlements (capitals, city, harbor) are on the mainland;
 - roads reach every mainland settlement from the central capital.
 
 ## Village kit (MegaKit)

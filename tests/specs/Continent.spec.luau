@@ -159,6 +159,17 @@ return {
 		end
 	end,
 
+	["named settlements are on the mainland"] = function()
+		for _, seed in SEEDS do
+			local m = map(seed)
+			for _, site in m.sites do
+				if SETTLEMENT[site.kind] and site.name ~= "" then
+					Expect.truthy(m.mainland[site.cell], `seed {seed}: {site.id} cut off from the mainland`)
+				end
+			end
+		end
+	end,
+
 	["roads reach every mainland settlement"] = function()
 		for _, seed in SEEDS do
 			local m = map(seed)

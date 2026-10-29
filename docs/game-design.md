@@ -125,7 +125,7 @@ Starter set (≈12 for the vertical slice, original names TBD): strike power, bo
 - Spell/Discipline learning is **not pure grind**: trainers, scrolls, rare drops.
 
 ### 3.7 World structure
-- **Nine realms** as long-term structure; launch with **one hub + one starter realm**. Starter realm: **Midgard**, one continent laid out from the owner's sketch (10,240 studs, provisional): the Holy Kingdom and the Dragon Empire hold most regions, the neutral Adventurers hold the Central Capital and the Harbor, and minor factions (Elves, Dragons, Undead) hold the rest. A seeded generator makes similar but different continents from the template ([world generation](systems/world-generation.md)). Each realm is its own *Place* in one universe eventually; early builds run as zones in one place behind a `ZoneService` abstraction so splitting later is mechanical.
+- **Nine realms** as long-term structure; launch with **one hub + one starter realm**. Starter realm: **Midgard** (first slice: [scope 01](scope/01-midgard-testing-grounds.md), placement open, §12 Q11), one continent laid out from the owner's sketch (10,240 studs, provisional): the Holy Kingdom and the Dragon Empire hold most regions, the neutral Adventurers hold the Central Capital and the Harbor, and minor factions (Elves, Dragons, Undead) hold the rest. A seeded generator makes similar but different continents from the template ([world generation](systems/world-generation.md)). Each realm is its own *Place* in one universe eventually; early builds run as zones in one place behind a `ZoneService` abstraction so splitting later is mechanical.
 - **Density**: realms are sharded servers (target 40–60 players per server) with instancing for dungeons, strongholds, tournaments.
 - Danger **banding by zone** (enemy level ranges, PK rules, loot) so power is legible: safe hub → starter fields → ruins → deep zones.
 - **Open world (experiment, branch `exp/open-world`)**: the world runs without the player, in the vein of an open sandbox RPG. Factions (`Content/Factions`) fight and help each other by a relation table; town guards hold posts and patrol in formation, caravans and travelers walk the roads, townsfolk thin out at night, and monsters come from nests that send squads out unseen to roam a territory. Zone bands and the safe village stay. See [open world](systems/open-world.md).
@@ -566,5 +566,6 @@ Define target concurrency per place, server count per realm, and what happens wh
 6. Real Data module delivery date. (Schema version starts at 1.)
 7. Guild siege schedule and protections for casual players.
 8. ~~M1 spell picks~~ Resolved 2026-10-28: 1 pick per caster level is the target (§3.2, §11 *Spell picks*).
-9. Climbing: the zone graph's `climb` edges and ledge pockets need a climbing mechanic ([world generation](systems/world-generation.md)).
+9. Climbing: cliffs and ledge routes need a climbing mechanic ([world generation](systems/world-generation.md)).
 10. Final Midgard size: 10,240 studs is provisional. The continent has 14 regions, about 2,500 studs each at that size, which is small for Kenshi-style travel; the size is a template field (`Continent.size`).
+11. Where the starter area (the scope 01 slice: village, fields, goblin camp) sits on the continent: at the Harbor in the Verdant Greens, or at the Central Capital in the Highlands.

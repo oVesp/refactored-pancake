@@ -33,7 +33,7 @@ Data: `ServerStorage/ContentServerOnly/Population.luau` (server-only). Services:
 | Caravan | Merchant plus guards in a column: down the highland stairs, through orchard and fields, a market stop on the plaza, back up. Day only, one at a time. |
 | Traveler | Small parties on open routes; they leave the world at the end. |
 | Residents | Villagers wandering the village: `day` out by day, `night` at night; extras go indoors once no player is within 140 studs. |
-| Nest | Hidden monster source. `stationed` garrisons hold a lair (the goblin camp and its Chieftain); `squads` leave in formation to roam the `territory` loop, sent only while no player is within `HiddenRadius` of the nest. `time = "Night"` nests (the field barrow's skeletons) recall their squads at dawn, unseen. |
+| Nest | Hidden monster source. `stationed` garrisons hold a lair (for example a goblin camp and its Chieftain); `squads` leave in formation to roam the `territory` loop, sent only while no player is within `HiddenRadius` of the nest. `time = "Night"` nests (the field barrow's skeletons) recall their squads at dawn, unseen. |
 
 ### Groups and level of detail
 
