@@ -80,7 +80,7 @@ All three are **base classes** (cap 15). Level cap here is 5. Stats per §3.1, n
 
 Every class level grants **one class skill**, either **Active** (hotbar) or **Passive** (always on, applied by `StatService`/`SkillService` from data). Caster levels also grant **1 spell pick** from the class list (D2). Base stat growth per level comes from the class's stat lean, separate from these grants. Names are placeholders, plain descriptive (§2).
 
-**Warrior**
+**Warrior** (superseded: the starter becomes Fighter and Warrior a Fighter 5 specialization, [classes](../systems/classes.md); content migration pending)
 
 | Lv | Grant | Kind | Effect | Tests |
 |---|---|---|---|---|

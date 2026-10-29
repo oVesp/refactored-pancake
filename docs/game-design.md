@@ -121,7 +121,7 @@ Starter set (≈12 for the vertical slice, original names TBD): strike power, bo
 - Per-class level curves; slow early levels, long mid-game.
 - **Every class level grants one class skill**, either **Active** (hotbar) or **Passive** (always on, applied from data by `StatService`/`SkillService`), plus the class's base stat growth. Caster levels also grant spell picks (§3.2).
 - XP sources: monster kills, quests, discovery, crafting, tournaments.
-- **Classes unlock via conditions**: kill counts, quest chains, item turn-ins, other class thresholds. Rare classes are one-per-tournament or event-gated.
+- **Classes unlock via a requirement set**: every requirement must pass. Types: specific class level, category class level (summed levels of tagged classes), total level, kill counts, achievements and quest chains, karma, heritage, item turn-ins. Rare classes are one-per-tournament or event-gated. Roster, requirements and per-class grants: [classes](systems/classes.md).
 - Spell/Discipline learning is **not pure grind**: trainers, scrolls, rare drops.
 
 ### 3.7 World structure
@@ -154,7 +154,7 @@ Faucets: monsters, quests, vendors (small), tournaments. Sinks: crafting, repair
 From [low-level-human-design.md](low-level-human-design.md), adapted to this document's terms.
 
 - 5 levels in classes only. Build templates: specialist (5), duo (3+2), dabbler (2+1+1+1).
-- First classes (M0.5): **Warrior, Mage, Healer**. Planned starter set (original names TBD): front-line fighter, evasion fighter, bare-hand adept, scout, healer, spellcaster, apothecary, laborer. Dabbler needs a 4th class.
+- First classes: **Fighter, Mage, Healer** (M0.5 content still ships the old Warrior until migrated). Warrior (melee) and Ranger (ranged) are high-class specializations of Fighter, unlocked at Fighter 5 ([classes](systems/classes.md)). Planned starter set (original names TBD): front-line fighter, evasion fighter, bare-hand adept, scout, healer, spellcaster, apothecary, laborer. Dabbler needs a 4th class.
 - Spells: Tiers 0–1 for casters (Tier 2 at casting-line level 8, §3.2); 1 pick per caster level (`SPELL_PICKS_PER_LEVEL`).
 - Enemies: Goblin **Rabble** (Lv 1–6, raiding bands, no casters) and the **Skeleton** (Lv 1–3, unarmed undead). Goblin **Warband** (Lv 7+, organized company with casters, healers, riders and a leader) is the next band.
 - Disciplines: Focus 2; learn 2 by level 5 via the tutorial trainer.
