@@ -6,11 +6,12 @@ Branch `exp/open-world`. The owner switched the design from a zone-banded RPG to
 
 Data: `Content/Factions.luau`. Logic: `Shared/Relations.luau` (pure, unit-tested in `tests/specs/Relations.spec.luau`).
 
-- Every entity's `team` is a faction id: `Players`, `Town`, `Merchants`, `Travelers`, `Goblins`, `Undead`, `Neutral` (training dummies).
+- Every entity's `team` is a faction id: `Adventurers` (players), `HolyKingdom`, `DragonEmpire`, `Elves`, `Town`, `Merchants`, `Travelers`, `Goblins`, `Undead`, `Dragons`, `Neutral` (training dummies).
+- **Great powers**: the Holy Kingdom and the Dragon Empire are at war. The Adventurers are neutral to both; the world treats a player as one more adventurer. Elves are a minor nation. Town, Merchants and Travelers are civilian roles; who owns their settlement comes from the continent template ([world generation](world-generation.md)).
 - `Relations` lists each pair that is not Neutral, as `Hostile` or `Allied`; pairs are symmetric and a faction is Allied with itself.
-- `EntityService.AreEnemies` is `Relations.Hostile`, so every hit check, AoE and AI target follows the table. Players are Allied with the civilian factions and cannot hurt them; they cannot hurt other players (no PvP).
+- `EntityService.AreEnemies` is `Relations.Hostile`, so every hit check, AoE and AI target follows the table. Adventurers are Allied with the civilian factions and cannot hurt them; they cannot hurt other players (no PvP).
 - A faction marked `monster` is hostile to players. Monsters never enter safe zones; civilians do.
-- Goblins and Undead are hostile to each other.
+- Goblins, Undead and Dragons are monsters: hostile to every people and to each other. Dragons leave the Dragon Empire and the Elves alone.
 
 ## People
 

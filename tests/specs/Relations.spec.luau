@@ -33,18 +33,25 @@ return {
 	["monsters are hostile to players and the town"] = function()
 		for id, def in Factions.ById do
 			if def.monster then
-				Expect.truthy(Relations.Hostile(id, "Players"), `{id} not hostile to players`)
+				Expect.truthy(Relations.Hostile(id, "Adventurers"), `{id} not hostile to players`)
 				Expect.truthy(Relations.Hostile(id, "Town"), `{id} not hostile to the town`)
 				Expect.truthy(Relations.IsMonster(id), id)
 			end
 		end
 	end,
 
-	["players never fight players or civilians"] = function()
-		for _, other in { "Players", "Town", "Merchants", "Travelers" } do
-			Expect.truthy(not Relations.Hostile("Players", other), other)
+	["adventurers never fight adventurers or civilians"] = function()
+		for _, other in { "Adventurers", "Town", "Merchants", "Travelers" } do
+			Expect.truthy(not Relations.Hostile("Adventurers", other), other)
 		end
-		Expect.truthy(Relations.Hostile("Players", "Neutral"))
+		Expect.truthy(Relations.Hostile("Adventurers", "Neutral"))
 		Expect.truthy(not Relations.Hostile("Goblins", "Neutral"))
+	end,
+
+	["the empires are at war and adventurers stay neutral to both"] = function()
+		Expect.truthy(Relations.Hostile("HolyKingdom", "DragonEmpire"))
+		for _, empire in { "HolyKingdom", "DragonEmpire" } do
+			Expect.equal(Relations.Standing("Adventurers", empire), "Neutral")
+		end
 	end,
 }

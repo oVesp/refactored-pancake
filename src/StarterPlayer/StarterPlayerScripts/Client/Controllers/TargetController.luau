@@ -76,7 +76,7 @@ local function allyCandidates(woundedOnly: boolean): { Targeting.Candidate<Model
 	local list: { Targeting.Candidate<Model> } = {}
 	for _, other in Players:GetPlayers() do
 		local model = other.Character
-		if other ~= player and model and model:GetAttribute("Team") == "Players" and isAlive(model) then
+		if other ~= player and model and model:GetAttribute("Team") == "Adventurers" and isAlive(model) then
 			local hp = model:GetAttribute(Attributes.Hp)
 			local maxHp = model:GetAttribute(Attributes.MaxHp)
 			local wounded = type(hp) == "number" and type(maxHp) == "number" and hp < maxHp
@@ -203,7 +203,7 @@ end
 function TargetController.Ally(range: number): Model?
 	if lastPointerWasMouse then
 		local hovered = modelAt(UserInputService:GetMouseLocation())
-		if hovered and hovered ~= player.Character and hovered:GetAttribute("Team") == "Players" then
+		if hovered and hovered ~= player.Character and hovered:GetAttribute("Team") == "Adventurers" then
 			return if withinRange(hovered, range) then hovered else nil
 		end
 	end

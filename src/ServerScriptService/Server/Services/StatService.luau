@@ -265,7 +265,7 @@ local function setUpCharacter(player: Player, character: Model)
 		humanoid = humanoid,
 		kind = "Player",
 		player = player,
-		team = "Players",
+		team = "Adventurers",
 		defId = "player",
 		name = player.DisplayName,
 		level = StatService.LevelFromProfile(profile),
