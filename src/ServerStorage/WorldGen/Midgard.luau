@@ -50,6 +50,8 @@ export type Pad = {
 
 export type Lake = { zone: string, x: number, z: number, r: number, level: number, depth: number }
 
+export type Road = { width: number, points: { { number } } }
+
 export type Biome = {
 	grass: string, -- terrain material on open ground
 	ground: string, -- paths and corridor floors
@@ -107,6 +109,7 @@ local Midgard = {
 		Slate = { 108, 116, 124 },
 		Rock = { 100, 106, 112 },
 		Pavement = { 128, 128, 122 },
+		Cobblestone = { 122, 120, 112 },
 	} :: { [string]: { number } },
 
 	-- Low-poly prop library: each placement is `<prefix><two-digit variant>`, a template in
@@ -151,6 +154,18 @@ local Midgard = {
 			scale = { 0.7, 1.6 },
 			height = 9,
 			colors = { Rock = { 116, 122, 128 } },
+		},
+		-- Farm crops and orchard trees, placed by the settlement layout, not the wild scatter.
+		crops = {
+			wheat = { prefix = "Wheat", variants = 4, height = 5, colors = { Canopy = { 196, 168, 88 } } },
+			sprout = { prefix = "Sprout", variants = 3, height = 2.6, colors = { Canopy = { 96, 140, 70 } } },
+			fruit = {
+				prefix = "Fruit",
+				variants = 6,
+				height = 26,
+				colors = { Trunk = { 82, 66, 54 }, Canopy = { 74, 118, 72 }, Fruit = { 176, 52, 40 } },
+			},
+			hay = { prefix = "Hay", variants = 2, height = 4.2, colors = { Bale = { 196, 166, 92 } } },
 		},
 	},
 
@@ -391,6 +406,72 @@ local Midgard = {
 	lakes = {
 		{ zone = "south-hollow", x = 90, z = 470, r = 80, level = -31, depth = 12 },
 	} :: { Lake },
+
+	-- Dirt roads painted into the terrain (they do not change its height).
+	roads = {
+		{ width = 10, points = { { 0, 150 }, { 0, -575 } } }, -- village to the goblin camp gate
+		{ width = 8, points = { { -30, 0 }, { -96, 0 } } }, -- plaza to the dev yard
+		{ width = 8, points = { { 30, 0 }, { 88, 0 } } },
+	} :: { Road },
+
+	-- Settlements on the pads (Gen/Settlement). Kit sizes are metres; `scale` turns them into studs.
+	-- `fixtures` are authored: gameplay objects (the Purifiable well, Kindleable braziers) and set
+	-- pieces that must sit exactly there. Everything else is laid out around the Map's NPCs,
+	-- spawners and dummies, which keep `clear` studs of room.
+	settlements = {
+		scale = 3.2,
+		clear = 6,
+		village = {
+			pad = "VillageCore",
+			plaza = { x = 0, z = 0, r = 32 },
+			houses = 10,
+			barns = 1,
+			setback = 4, -- studs between a road edge and a house front
+			gap = 6, -- studs between buildings
+			fence = { "south", "east", "north" },
+			fixtures = {
+				{ asset = "Well", x = 0, z = -8, yaw = 0 },
+				{ asset = "Brazier", x = -14, z = 8, yaw = 0 },
+				{ asset = "Brazier", x = 14, z = 8, yaw = 0 },
+			},
+			clutter = { Crate = 6, Wagon = 1, Hay01 = 2, Hay02 = 2 },
+		},
+		fields = {
+			pad = "WheatFields",
+			margin = 6,
+			path = 8,
+			plotMin = 30,
+			plotMax = 62,
+			levels = { 0, 1.5, 3 },
+			roads = { { x = 0, half = 5 } },
+			crops = { wheat = 0.7, sprout = 0.15, fallow = 0.05, hay = 0.1 },
+			rowSpacing = 4, -- furrow period, studs
+			fence = { "east", "west" },
+			scarecrows = 1, -- per wheat plot
+		},
+		orchard = {
+			pad = "OrchardEdge",
+			spacing = { 22, 20 },
+			jitter = 2.5,
+			aisle = 12, -- clear studs either side of the road
+			fence = { "east", "west" },
+			clutter = { Crate = 5, Wagon = 1 },
+		},
+		camp = {
+			pad = "GoblinCamp",
+			centre = { x = 0, z = -660 },
+			radius = 86,
+			gate = 0, -- degrees from +Z (towards the village)
+			gateWidth = 2, -- palisade segments left out for the gate
+			tents = 7,
+			tentRing = 52,
+			fixtures = {
+				{ asset = "Brazier", x = 0, z = -650, yaw = 0 },
+				{ asset = "Dais", x = 0, z = -728, yaw = 0 },
+			},
+			clutter = { Crate = 8, Wagon = 1, Hay01 = 2 },
+		},
+	},
 }
 
 return Midgard

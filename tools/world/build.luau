@@ -2,7 +2,8 @@
 
 -- Generates the M0.5 greybox world and NPC templates as Rojo model files.
 -- Run from the repo root: `lune run tools/world/build`. Output is deterministic; commit it.
--- Greybox uses Roblox materials only; Kenney meshes replace props once uploads are possible.
+-- Gameplay objects only: zones, spawn, NPCs, dev yard, spawners and the creation stage. Village,
+-- farmland, orchard and camp dressing comes from the world generator (docs/systems/world-generation.md).
 local fs = require("@lune/fs")
 local roblox = require("@lune/roblox")
 
@@ -12,7 +13,7 @@ local CFrame = roblox.CFrame
 local Color3 = roblox.Color3
 local Enum = roblox.Enum
 
--- Ground level of the gameplay areas; tools/terrain flattens the terrain to this height under them.
+-- Ground level of the gameplay areas; the world generator holds the pads at this height.
 local G = 0.2
 
 type Props = { [string]: any }
@@ -75,11 +76,6 @@ local COLORS = {
 	stone = rgb(150, 150, 145),
 	wood = rgb(120, 85, 55),
 	darkWood = rgb(80, 58, 40),
-	roof = rgb(150, 70, 50),
-	thatch = rgb(190, 165, 95),
-	wheat = rgb(215, 190, 100),
-	leaf = rgb(70, 125, 55),
-	canvas = rgb(150, 130, 100),
 	devLine = rgb(230, 200, 60),
 }
 
@@ -89,7 +85,7 @@ local spawnerFolder = folder(map, "Spawners")
 local npcFolder = folder(map, "Npcs")
 local propFolder = folder(map, "Props")
 
--- Areas: id, zone id, center X/Z, size X/Z. The ground under them is terrain (tools/terrain).
+-- Areas: id, zone id, center X/Z, size X/Z. The ground under them is terrain (src/ServerStorage/WorldGen).
 local AREAS = {
 	{ "VillageCore", "village_core", 0, 0, 180, 180 },
 	{ "DevYard", "dev_yard", -165, 0, 150, 180 },
@@ -108,122 +104,6 @@ for _, area in AREAS do
 		Tags = { "Zone" },
 		Attributes = { ZoneId = zoneId },
 	})
-end
-
-local function house(parent: any, name: string, x: number, z: number, rotation: number)
-	local m = model(parent, name)
-	local base = CFrame.new(x, G, z) * CFrame.Angles(0, math.rad(rotation), 0)
-	part(m, "Walls", Vector3.new(16, 10, 12), base * CFrame.new(0, 5, 0), COLORS.wood, Enum.Material.WoodPlanks)
-	part(m, "Door", Vector3.new(4, 7, 0.4), base * CFrame.new(0, 3.5, 6.1), COLORS.darkWood, Enum.Material.Wood)
-	local roofProps = { Color = COLORS.roof, Material = Enum.Material.Slate }
-	make("WedgePart", {
-		Name = "RoofFront",
-		Size = Vector3.new(17, 5, 7),
-		CFrame = base * CFrame.new(0, 12.5, 3.5),
-		Anchored = true,
-		Color = roofProps.Color,
-		Material = roofProps.Material,
-	}, m)
-	make("WedgePart", {
-		Name = "RoofBack",
-		Size = Vector3.new(17, 5, 7),
-		CFrame = base * CFrame.new(0, 12.5, -3.5) * CFrame.Angles(0, math.rad(180), 0),
-		Anchored = true,
-		Color = roofProps.Color,
-		Material = roofProps.Material,
-	}, m)
-end
-
-local function fenceLine(parent: any, name: string, x1: number, z1: number, x2: number, z2: number)
-	local m = model(parent, name)
-	local dx, dz = x2 - x1, z2 - z1
-	local length = math.sqrt(dx * dx + dz * dz)
-	local center = CFrame.new((x1 + x2) / 2, G, (z1 + z2) / 2) * CFrame.Angles(0, math.atan2(-dx, -dz), 0)
-	part(m, "RailTop", Vector3.new(0.4, 0.4, length), center * CFrame.new(0, 3, 0), COLORS.wood, Enum.Material.Wood)
-	part(m, "RailLow", Vector3.new(0.4, 0.4, length), center * CFrame.new(0, 1.5, 0), COLORS.wood, Enum.Material.Wood)
-	local posts = math.max(2, math.floor(length / 8) + 1)
-	for i = 0, posts - 1 do
-		local offset = -length / 2 + i * length / (posts - 1)
-		part(
-			m,
-			"Post",
-			Vector3.new(0.6, 4, 0.6),
-			center * CFrame.new(0, 2, offset),
-			COLORS.darkWood,
-			Enum.Material.Wood
-		)
-	end
-end
-
-local function tree(parent: any, x: number, z: number, height: number)
-	local m = model(parent, "Tree")
-	part(
-		m,
-		"Trunk",
-		Vector3.new(height, 1.6, 1.6),
-		CFrame.new(x, G + height / 2, z) * CFrame.Angles(0, 0, math.rad(90)),
-		COLORS.darkWood,
-		Enum.Material.Wood,
-		{ Shape = Enum.PartType.Cylinder }
-	)
-	part(
-		m,
-		"Canopy",
-		Vector3.new(9, 9, 9),
-		at(x, G + height + 2.5, z),
-		COLORS.leaf,
-		Enum.Material.Grass,
-		{ Shape = Enum.PartType.Ball }
-	)
-end
-
-local function brazier(parent: any, name: string, x: number, z: number)
-	local m = model(parent, name)
-	part(m, "Stand", Vector3.new(1, 3, 1), at(x, G + 1.5, z), COLORS.stone, Enum.Material.Slate)
-	local bowl = part(m, "Bowl", Vector3.new(3, 1, 3), at(x, G + 3.5, z), COLORS.stone, Enum.Material.Slate, {
-		Tags = { "Kindleable" },
-		Attributes = { Lit = false },
-	})
-	make("Fire", { Name = "Flame", Enabled = false, Size = 4, Heat = 6 }, bowl)
-	make("PointLight", { Name = "Glow", Enabled = false, Range = 18, Brightness = 2, Color = rgb(255, 170, 90) }, bowl)
-end
-
-local function well(parent: any, name: string, x: number, z: number)
-	local m = model(parent, name)
-	part(
-		m,
-		"Ring",
-		Vector3.new(3, 8, 8),
-		CFrame.new(x, G + 1.5, z) * CFrame.Angles(0, 0, math.rad(90)),
-		COLORS.stone,
-		Enum.Material.Cobblestone,
-		{ Shape = Enum.PartType.Cylinder }
-	)
-	local water = part(
-		m,
-		"Water",
-		Vector3.new(0.4, 6.5, 6.5),
-		CFrame.new(x, G + 2.8, z) * CFrame.Angles(0, 0, math.rad(90)),
-		rgb(60, 90, 70),
-		Enum.Material.Glass,
-		{
-			Shape = Enum.PartType.Cylinder,
-			Transparency = 0.2,
-			Tags = { "Purifiable" },
-			Attributes = { Purified = false },
-		}
-	)
-	make("ParticleEmitter", {
-		Name = "Sparkle",
-		Enabled = false,
-		Rate = 12,
-		Lifetime = roblox.NumberRange.new(1, 2),
-		Speed = roblox.NumberRange.new(1, 2),
-	}, water)
-	make("PointLight", { Name = "Glow", Enabled = false, Range = 12, Color = rgb(160, 220, 255) }, water)
-	part(m, "PostA", Vector3.new(0.6, 7, 0.6), at(x - 3.5, G + 3.5, z), COLORS.darkWood, Enum.Material.Wood)
-	part(m, "PostB", Vector3.new(0.6, 7, 0.6), at(x + 3.5, G + 3.5, z), COLORS.darkWood, Enum.Material.Wood)
-	part(m, "Beam", Vector3.new(8, 0.6, 0.6), at(x, G + 7, z), COLORS.darkWood, Enum.Material.Wood)
 end
 
 local function trainer(
@@ -254,8 +134,8 @@ local function trainer(
 	}, body)
 end
 
--- Village Core
-local village = folder(propFolder, "Village")
+-- Village Core: the houses, well, braziers, fences and plaza are generated by the world generator
+-- (src/ServerStorage/WorldGen/Gen/Settlement.luau); the Map keeps the spawn and the NPCs.
 make("SpawnLocation", {
 	Name = "VillageSpawn",
 	Size = Vector3.new(8, 1, 8),
@@ -267,23 +147,6 @@ make("SpawnLocation", {
 	Material = Enum.Material.Slate,
 	Tags = { "RespawnPoint" },
 }, map)
-part(village, "Plaza", Vector3.new(60, 0.4, 60), at(0, G + 0.2, 0), COLORS.stone, Enum.Material.Cobblestone)
-well(village, "VillageWell", 0, -6)
-brazier(village, "VillageBrazierWest", -14, 8)
-brazier(village, "VillageBrazierEast", 14, 8)
-house(village, "HouseA", -55, -50, 0)
-house(village, "HouseB", 55, -50, 0)
-house(village, "HouseC", -60, 30, 90)
-house(village, "HouseD", 60, 30, -90)
-house(village, "HouseE", -30, 60, 180)
-house(village, "HouseF", 30, 60, 180)
-part(village, "Barn", Vector3.new(24, 14, 18), at(65, G + 7, 70), rgb(140, 50, 40), Enum.Material.WoodPlanks)
-part(village, "HayBale", Vector3.new(4, 3, 3), at(50, G + 1.5, 75), COLORS.thatch, Enum.Material.Fabric)
-fenceLine(village, "FenceSouth", -88, 88, 88, 88)
-fenceLine(village, "FenceEast", 88, 88, 88, -88)
-fenceLine(village, "FenceNorthWest", -88, -88, -10, -88)
-fenceLine(village, "FenceNorthEast", 10, -88, 88, -88)
-
 trainer(
 	npcFolder,
 	"Warrior Trainer",
@@ -365,86 +228,7 @@ for i, x in { -150, -130, -110 } do
 	})
 end
 
--- Wheat Fields
-local fields = folder(propFolder, "WheatFields")
-for row = 0, 11 do
-	for _, side in { -1, 1 } do
-		local x = side * (25 + row * 7)
-		part(
-			fields,
-			"WheatRow",
-			Vector3.new(3, 2.5, 60),
-			at(x, G + 1.25, -170),
-			COLORS.wheat,
-			Enum.Material.Grass,
-			{ CanCollide = false }
-		)
-		part(
-			fields,
-			"WheatRow",
-			Vector3.new(3, 2.5, 60),
-			at(x, G + 1.25, -250),
-			COLORS.wheat,
-			Enum.Material.Grass,
-			{ CanCollide = false }
-		)
-	end
-end
-for i, pos in { { -40, -210 }, { 45, -150 }, { 60, -280 } } do
-	local m = model(fields, "Scarecrow" .. i)
-	part(m, "Pole", Vector3.new(0.6, 8, 0.6), at(pos[1], G + 4, pos[2]), COLORS.darkWood, Enum.Material.Wood)
-	part(m, "Arms", Vector3.new(6, 0.5, 0.5), at(pos[1], G + 6, pos[2]), COLORS.darkWood, Enum.Material.Wood)
-	part(m, "Sack", Vector3.new(2.5, 3, 1.5), at(pos[1], G + 5, pos[2]), COLORS.thatch, Enum.Material.Fabric)
-end
-fenceLine(fields, "FieldFenceWest", -108, -100, -108, -315)
-fenceLine(fields, "FieldFenceEast", 108, -100, 108, -315)
-
--- Orchard Edge
-local orchard = folder(propFolder, "Orchard")
-for row = 0, 5 do
-	for col = 0, 7 do
-		local x = -84 + col * 24 + (row % 2) * 12
-		local z = -350 - row * 32
-		if math.abs(x) > 10 then
-			tree(orchard, x, z, 8 + (row + col) % 3)
-		end
-	end
-end
-
--- Goblin Camp: palisade with a south gate facing the village
-local camp = folder(propFolder, "GoblinCamp")
-local function wall(name: string, size: any, cframe: any)
-	part(camp, name, size, cframe, COLORS.darkWood, Enum.Material.WoodPlanks)
-end
-wall("PalisadeNorth", Vector3.new(180, 12, 2), at(0, G + 6, -750))
-wall("PalisadeWest", Vector3.new(2, 12, 180), at(-90, G + 6, -660))
-wall("PalisadeEast", Vector3.new(2, 12, 180), at(90, G + 6, -660))
-wall("PalisadeSouthWest", Vector3.new(80, 12, 2), at(-50, G + 6, -570))
-wall("PalisadeSouthEast", Vector3.new(80, 12, 2), at(50, G + 6, -570))
-wall("GateTowerWest", Vector3.new(6, 18, 6), at(-12, G + 9, -570))
-wall("GateTowerEast", Vector3.new(6, 18, 6), at(12, G + 9, -570))
-for i, pos in { { -55, -610 }, { 55, -610 }, { -60, -690 }, { 60, -690 }, { -25, -640 }, { 30, -660 } } do
-	local m = model(camp, "Tent" .. i)
-	local base = CFrame.new(pos[1], G, pos[2])
-	make("WedgePart", {
-		Name = "Left",
-		Size = Vector3.new(10, 7, 5),
-		CFrame = base * CFrame.new(0, 3.5, 2.5),
-		Anchored = true,
-		Color = COLORS.canvas,
-		Material = Enum.Material.Fabric,
-	}, m)
-	make("WedgePart", {
-		Name = "Right",
-		Size = Vector3.new(10, 7, 5),
-		CFrame = base * CFrame.new(0, 3.5, -2.5) * CFrame.Angles(0, math.rad(180), 0),
-		Anchored = true,
-		Color = COLORS.canvas,
-		Material = Enum.Material.Fabric,
-	}, m)
-end
-brazier(camp, "CampFire", 0, -650)
-part(camp, "ChieftainDais", Vector3.new(24, 1.5, 16), at(0, G + 0.75, -725), COLORS.stone, Enum.Material.Cobblestone)
+-- Wheat Fields, Orchard Edge and Goblin Camp dressing is generated with the settlements.
 
 -- Spawners: EnemyId, Count, LevelMin, LevelMax, RespawnSeconds, Radius
 local SPAWNERS = {
@@ -492,9 +276,6 @@ for i, s in SPAWNERS do
 		}
 	)
 end
-
--- Lighting fill so the greybox reads
-make("PointLight", { Name = "PlazaLight", Range = 40, Brightness = 0.5 }, village:FindFirstChild("Plaza"))
 
 -- Character creation stage (docs/systems/character-creation.md): a closed, torch-lit hall high
 -- above the village, inside the streaming radius. The creator previews the character on the
@@ -650,21 +431,14 @@ for _, child in scout:GetChildren() do
 end
 
 -- Invisible anchor at head height for nameplates and the target marker.
-local head = part(
-	goblin,
-	"Head",
-	Vector3.new(1, 1, 1),
-	at(0, 3.4, 0),
-	Color3.new(1, 1, 1),
-	Enum.Material.SmoothPlastic,
-	{
+local head =
+	part(goblin, "Head", Vector3.new(1, 1, 1), at(0, 3.4, 0), Color3.new(1, 1, 1), Enum.Material.SmoothPlastic, {
 		Transparency = 1,
 		Anchored = false,
 		CanCollide = false,
 		CanQuery = false,
 		Massless = true,
-	}
-)
+	})
 make("WeldConstraint", { Name = "Weld", Part0 = root, Part1 = head }, head)
 
 local humanoid = make("Humanoid", {

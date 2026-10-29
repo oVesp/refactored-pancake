@@ -102,7 +102,7 @@ function Props.scatter(field: Field.Field, grid: Grid.Grid, zone: number): { Pro
 		if grid.assign[k] ~= zone or grid.owner[k] ~= zone then
 			return false
 		end
-		if grid.water[k] ~= 0 or grid.corridor[k] then
+		if grid.water[k] ~= 0 or grid.corridor[k] or field.roadDistance(x, z) < 6 then
 			return false
 		end
 		-- Away from corridors and water by `keepOff`.

@@ -216,10 +216,9 @@ Rules live in `game-design.md` §7.5. Per-pack use here:
 
 | Pack | Use |
 |---|---|
-| retro-fantasy-kit | Village blockout: walls, roofs, fences, barrels, crates, towers, docks, trees; goblin palisade from fortified walls |
-| retro-textures-fantasy | Village and camp surfaces |
-| prototype-textures | Greybox for Dev Yard and unfinished areas |
-| foliage-sprites | Billboard crops, grass, bushes |
+| Medieval Village MegaKit (Quaternius, CC0; `assets/third_party`) | Village houses and barns (`tools/blender/house_generator.py`), fences, crates, wagon, stone borders; its materials also clad the generated well, braziers, scarecrows, palisade, gate towers, tents and dais (`tools/blender/village_kit.py`) |
+| Generated low-poly library (`tools/blender/world_props.py`) | Wheat, sprouts, hay bales, orchard fruit trees |
+| prototype-textures | Dev Yard |
 | game-icons, game-icons-expansion | Placeholder skill, passive, status and HUD icons |
 | ui-pack (+ Kenney Future font), fantasy-ui-borders | HUD and menu frames |
 | input-prompts | Keyboard/gamepad/touch prompts |
@@ -264,7 +263,7 @@ Verified by Studio playtest (single client, Studio) and Lune unit tests.
 Also verified: guard (parry window, then 40% damage and stamina cost), dodge i-frames, Disciplines with Focus capacity, XP debt on death repaid by later XP, Weakened after respawn, loot to inventory, equip/unequip changing stats, potions, fire immunity, physical resistance, Rebuke knockback.
 
 Deviations and open items:
-- The greybox world is generated Parts with Roblox materials; Kenney meshes and textures wait for uploads.
+- The Map keeps only gameplay objects; the village, fields, orchard and camp are dressed by the world generator's settlement layout (2026-10-29, [world generation](../systems/world-generation.md)). The Dev Yard stays greybox.
 - Audio ids are Creator Store picks (mostly Roblox-licensed Pro Sound Effects and APM); status `draft` in the register until a reviewer signs off.
 - Player-facing text lives in `Content/Strings`; LocalizationTable is deferred to M1.
 - Player attacks have no animations: they show placeholder neon arcs, telegraph discs and projectiles. Goblins use a placeholder skinned mesh with idle, walk, run, attack, throw, hit and death clips that play only in Studio until uploaded.

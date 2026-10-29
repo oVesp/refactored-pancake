@@ -1,0 +1,636 @@
+{
+	"assetId": "118850699190671",
+	"assets": {
+		"Barn01": {
+			"anchors": {},
+			"door": 3.0,
+			"footprint": [
+				8,
+				14
+			],
+			"kind": "building",
+			"max": [
+				4.957,
+				9.001,
+				7.877
+			],
+			"min": [
+				-4.957,
+				-0.014,
+				-7.829
+			],
+			"stories": 1
+		},
+		"Barn02": {
+			"anchors": {},
+			"door": 1.0,
+			"footprint": [
+				8,
+				12
+			],
+			"kind": "building",
+			"max": [
+				4.976,
+				9.001,
+				7.117
+			],
+			"min": [
+				-4.976,
+				-0.014,
+				-7.015
+			],
+			"stories": 1
+		},
+		"Border": {
+			"anchors": {},
+			"kind": "prop",
+			"max": [
+				1.0,
+				0.134,
+				0.0
+			],
+			"min": [
+				-1.0,
+				0.0,
+				-0.7
+			]
+		},
+		"BorderCorner": {
+			"anchors": {},
+			"kind": "prop",
+			"max": [
+				0.7,
+				0.134,
+				0.0
+			],
+			"min": [
+				-0.0,
+				0.0,
+				-0.7
+			]
+		},
+		"Brazier": {
+			"anchors": {
+				"bowl": [
+					0.0,
+					1.22,
+					0.0
+				],
+				"bowlRadius": 0.55
+			},
+			"kind": "structure",
+			"max": [
+				0.62,
+				1.22,
+				0.62
+			],
+			"min": [
+				-0.62,
+				0.0,
+				-0.62
+			]
+		},
+		"Crate": {
+			"anchors": {},
+			"kind": "prop",
+			"max": [
+				0.542,
+				1.063,
+				0.542
+			],
+			"min": [
+				-0.542,
+				0.003,
+				-0.542
+			]
+		},
+		"Dais": {
+			"anchors": {},
+			"kind": "structure",
+			"max": [
+				3.8,
+				1.0,
+				2.6
+			],
+			"min": [
+				-3.8,
+				-0.2,
+				-2.6
+			]
+		},
+		"Fence": {
+			"anchors": {},
+			"kind": "prop",
+			"max": [
+				1.031,
+				0.81,
+				0.06
+			],
+			"min": [
+				-1.033,
+				-0.028,
+				-0.06
+			]
+		},
+		"GateTower": {
+			"anchors": {},
+			"kind": "structure",
+			"max": [
+				1.4,
+				5.6,
+				1.4
+			],
+			"min": [
+				-1.4,
+				-0.4,
+				-1.4
+			]
+		},
+		"House01": {
+			"anchors": {},
+			"door": -1.0,
+			"footprint": [
+				4,
+				8
+			],
+			"kind": "building",
+			"max": [
+				2.757,
+				6.713,
+				4.829
+			],
+			"min": [
+				-2.757,
+				-0.0,
+				-4.854
+			],
+			"stories": 1
+		},
+		"House02": {
+			"anchors": {},
+			"door": 1.0,
+			"footprint": [
+				4,
+				4
+			],
+			"kind": "building",
+			"max": [
+				2.757,
+				6.733,
+				2.794
+			],
+			"min": [
+				-2.757,
+				-0.0,
+				-2.821
+			],
+			"stories": 1
+		},
+		"House03": {
+			"anchors": {},
+			"door": 1.0,
+			"footprint": [
+				4,
+				8
+			],
+			"kind": "building",
+			"max": [
+				2.757,
+				9.713,
+				4.829
+			],
+			"min": [
+				-2.757,
+				-0.0,
+				-4.854
+			],
+			"stories": 2
+		},
+		"House04": {
+			"anchors": {},
+			"door": 1.0,
+			"footprint": [
+				4,
+				6
+			],
+			"kind": "building",
+			"max": [
+				2.757,
+				6.743,
+				3.8
+			],
+			"min": [
+				-2.757,
+				-0.0,
+				-3.794
+			],
+			"stories": 1
+		},
+		"House05": {
+			"anchors": {},
+			"door": 1.0,
+			"footprint": [
+				8,
+				12
+			],
+			"kind": "building",
+			"max": [
+				4.976,
+				12.001,
+				7.117
+			],
+			"min": [
+				-4.976,
+				-0.014,
+				-7.015
+			],
+			"stories": 2
+		},
+		"House06": {
+			"anchors": {},
+			"door": -1.0,
+			"footprint": [
+				8,
+				8
+			],
+			"kind": "building",
+			"max": [
+				4.976,
+				15.001,
+				5.085
+			],
+			"min": [
+				-4.976,
+				-0.0,
+				-5.247
+			],
+			"stories": 3
+		},
+		"House07": {
+			"anchors": {},
+			"door": -2.0,
+			"footprint": [
+				6,
+				8
+			],
+			"kind": "building",
+			"max": [
+				4.125,
+				13.89,
+				4.829
+			],
+			"min": [
+				-4.125,
+				-0.014,
+				-4.854
+			],
+			"stories": 3
+		},
+		"House08": {
+			"anchors": {},
+			"door": 1.0,
+			"footprint": [
+				4,
+				6
+			],
+			"kind": "building",
+			"max": [
+				2.757,
+				12.743,
+				3.8
+			],
+			"min": [
+				-2.757,
+				-0.014,
+				-3.794
+			],
+			"stories": 3
+		},
+		"House09": {
+			"anchors": {},
+			"door": -2.0,
+			"footprint": [
+				6,
+				14
+			],
+			"kind": "building",
+			"max": [
+				4.123,
+				10.89,
+				7.877
+			],
+			"min": [
+				-4.123,
+				-0.0,
+				-7.829
+			],
+			"stories": 2
+		},
+		"House10": {
+			"anchors": {},
+			"door": -3.0,
+			"footprint": [
+				8,
+				8
+			],
+			"kind": "building",
+			"max": [
+				4.976,
+				15.001,
+				5.085
+			],
+			"min": [
+				-4.976,
+				-0.0,
+				-5.247
+			],
+			"stories": 3
+		},
+		"Palisade1": {
+			"anchors": {},
+			"kind": "wall",
+			"length": 4.0,
+			"max": [
+				2.075,
+				4.298,
+				0.361
+			],
+			"min": [
+				-2.053,
+				-0.406,
+				-0.454
+			]
+		},
+		"Palisade2": {
+			"anchors": {},
+			"kind": "wall",
+			"length": 4.0,
+			"max": [
+				2.052,
+				4.108,
+				0.338
+			],
+			"min": [
+				-2.089,
+				-0.405,
+				-0.454
+			]
+		},
+		"Palisade3": {
+			"anchors": {},
+			"kind": "wall",
+			"length": 4.0,
+			"max": [
+				2.052,
+				4.134,
+				0.361
+			],
+			"min": [
+				-2.052,
+				-0.407,
+				-0.454
+			]
+		},
+		"Scarecrow1": {
+			"anchors": {},
+			"kind": "structure",
+			"max": [
+				0.944,
+				2.62,
+				0.415
+			],
+			"min": [
+				-0.956,
+				-0.2,
+				-0.415
+			]
+		},
+		"Scarecrow2": {
+			"anchors": {},
+			"kind": "structure",
+			"max": [
+				0.854,
+				2.62,
+				0.41
+			],
+			"min": [
+				-0.746,
+				-0.202,
+				-0.41
+			]
+		},
+		"Tent1": {
+			"anchors": {},
+			"kind": "structure",
+			"max": [
+				1.642,
+				2.75,
+				2.0
+			],
+			"min": [
+				-1.641,
+				-0.2,
+				-2.0
+			]
+		},
+		"Tent2": {
+			"anchors": {},
+			"kind": "structure",
+			"max": [
+				2.14,
+				3.25,
+				2.5
+			],
+			"min": [
+				-2.14,
+				-0.2,
+				-2.5
+			]
+		},
+		"Wagon": {
+			"anchors": {},
+			"kind": "prop",
+			"max": [
+				0.979,
+				1.532,
+				3.15
+			],
+			"min": [
+				-0.972,
+				0.003,
+				-0.874
+			]
+		},
+		"Well": {
+			"anchors": {
+				"water": [
+					0.0,
+					0.6,
+					0.0
+				],
+				"waterRadius": 0.95
+			},
+			"kind": "structure",
+			"max": [
+				1.5,
+				3.115,
+				1.219
+			],
+			"min": [
+				-1.5,
+				0.0,
+				-1.219
+			]
+		}
+	},
+	"front": "-Z",
+	"history": [
+		{
+			"assetId": "125261678255877",
+			"retired": "2026-10-28",
+			"sha": "ecd65dc080290e0be71b795dcab31fceffe411962e45991e17b3856e4afb9ec4"
+		},
+		{
+			"assetId": "93462985408584",
+			"retired": "2026-10-28",
+			"sha": "9ee6f9b82d81f894b26eb411116c90d41193ee95cdfbc73a123ab662bbdc864e"
+		},
+		{
+			"assetId": "101579549897253",
+			"retired": "2026-10-28",
+			"sha": "7899d1acd45c960bf5166fda9ef1072ea0cad4a89072a2fd1995208a7381259a"
+		}
+	],
+	"materials": {
+		"MI_Brick": {
+			"color": [
+				204,
+				204,
+				204
+			],
+			"textured": true
+		},
+		"MI_Canvas": {
+			"color": [
+				164,
+				146,
+				116
+			],
+			"material": "Fabric",
+			"textured": false
+		},
+		"MI_CanvasDark": {
+			"color": [
+				118,
+				96,
+				74
+			],
+			"material": "Fabric",
+			"textured": false
+		},
+		"MI_Cloth": {
+			"color": [
+				110,
+				84,
+				62
+			],
+			"material": "Fabric",
+			"textured": false
+		},
+		"MI_MetalOrnaments": {
+			"color": [
+				64,
+				60,
+				56
+			],
+			"material": "Metal",
+			"textured": true
+		},
+		"MI_Plaster": {
+			"color": [
+				204,
+				204,
+				204
+			],
+			"textured": true
+		},
+		"MI_RockTrim": {
+			"color": [
+				204,
+				204,
+				204
+			],
+			"textured": true
+		},
+		"MI_RoundTiles": {
+			"color": [
+				204,
+				204,
+				204
+			],
+			"textured": true
+		},
+		"MI_Sack": {
+			"color": [
+				176,
+				150,
+				104
+			],
+			"material": "Fabric",
+			"textured": false
+		},
+		"MI_Straw": {
+			"color": [
+				196,
+				166,
+				92
+			],
+			"material": "Grass",
+			"textured": false
+		},
+		"MI_UnevenBrick": {
+			"color": [
+				204,
+				204,
+				204
+			],
+			"textured": true
+		},
+		"MI_Vine": {
+			"alphaMode": "Transparency",
+			"color": [
+				204,
+				204,
+				204
+			],
+			"textured": true,
+			"tint": [
+				92,
+				132,
+				70
+			]
+		},
+		"MI_WindowGlass": {
+			"color": [
+				138,
+				168,
+				180
+			],
+			"material": "Glass",
+			"textured": false,
+			"transparency": 0.35
+		},
+		"MI_WoodTrim": {
+			"color": [
+				204,
+				204,
+				204
+			],
+			"textured": true
+		}
+	},
+	"sha": "81c80a01c1ade20746eb61029d73c1da9394e5ba246dfc9c0d14b73e8b38ee67",
+	"source": "tools/blender/village_kit.py",
+	"unit": "metre",
+	"uploaded": "2026-10-28"
+}

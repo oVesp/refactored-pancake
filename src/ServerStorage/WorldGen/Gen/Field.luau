@@ -12,6 +12,7 @@
 ]=]
 local Graph = require(script.Parent.Graph)
 local Hash = require(script.Parent.Hash)
+local Plots = require(script.Parent.Plots)
 
 type Graph = Graph.Graph
 type Node = Graph.Node
@@ -41,6 +42,8 @@ export type Sample = {
 export type Field = {
 	graph: Graph,
 	corridors: { Corridor },
+	plots: { Plots.Plot }, -- farmland plots (`settlements.fields`), terraced into the pad
+	roadDistance: (x: number, z: number) -> number, -- studs to the nearest road edge (negative on it)
 	owner: (x: number, z: number, skip: number?) -> (number, number, number),
 	baseHeight: (x: number, z: number, skip: number?) -> number,
 	sample: (x: number, z: number) -> Sample,
@@ -102,6 +105,19 @@ function Field.new(graph: Graph): Field
 	local self = {} :: Field
 	self.graph = graph
 	self.corridors = {}
+
+	-- Settlement ground: plaza, roads and terraced field plots.
+	local settlements = realm.settlements
+	local padByName: { [string]: any } = {}
+	for _, pad in pads do
+		padByName[pad.name] = pad
+	end
+	local fieldsSite = settlements.fields
+	local fieldsPad = padByName[fieldsSite.pad]
+	assert(fieldsPad, `settlements.fields: unknown pad {fieldsSite.pad}`)
+	self.plots = Plots.layout(graph.seed, fieldsSite, fieldsPad)
+	local plaza = settlements.village.plaza
+	local roads = realm.roads
 
 	local function inSection(x: number, z: number): boolean
 		for _, s in sections do
@@ -199,6 +215,7 @@ function Field.new(graph: Graph): Field
 	end
 
 	local rimHeight: (x: number, z: number, skip: number?) -> number
+	local settlementGround: (x: number, z: number, h: number, material: string) -> (number, string)
 	local rim = realm.rim
 	local stepRise = Hash.fbm(Hash.named(graph.seed, "rimRise"), rim.ledgeScale, 2)
 	local stepWidth = Hash.fbm(Hash.named(graph.seed, "rimWidth"), rim.ledgeScale, 2)
@@ -478,6 +495,61 @@ function Field.new(graph: Graph): Field
 		return best, height
 	end
 
+	local function roadDistance(x: number, z: number): (number, number)
+		local best, half = math.huge, 0
+		for _, road in roads do
+			local pts = road.points
+			for k = 1, #pts - 1 do
+				local ax, az, bx, bz = pts[k][1], pts[k][2], pts[k + 1][1], pts[k + 1][2]
+				local dx, dz = bx - ax, bz - az
+				local t = math.clamp(((x - ax) * dx + (z - az) * dz) / math.max(dx * dx + dz * dz, 1e-6), 0, 1)
+				local d = math.sqrt((x - ax - dx * t) ^ 2 + (z - az - dz * t) ^ 2) - road.width / 2
+				if d < best then
+					best, half = d, road.width / 2
+				end
+			end
+		end
+		return best, half
+	end
+
+	function self.roadDistance(x: number, z: number): number
+		return (roadDistance(x, z))
+	end
+
+	--[=[
+		Plaza cobbles, dirt roads, and on the farmland pad: plots raised to their terrace level with
+		furrows painted along their rows, dirt paths between them.
+	]=]
+	function settlementGround(x: number, z: number, h: number, material: string): (number, string)
+		local ragged = 2.5 * edgeNoise(x + 77, z - 31)
+		local fp = fieldsPad
+		if x >= fp.x0 and x <= fp.x1 and z >= fp.z0 and z <= fp.z1 then
+			local plot = Plots.at(self.plots, x, z)
+			if plot then
+				h += plot.level * smoothstep(0, 3, Plots.inset(plot, x, z))
+				if plot.crop == "wheat" or plot.crop == "sprout" then
+					local across = if plot.alongX then z - plot.z0 else x - plot.x0
+					local period = fieldsSite.rowSpacing
+					material = if across % period < period / 2 then "Mud" else "Ground"
+				elseif plot.crop == "fallow" then
+					material = "LeafyGrass"
+				else
+					material = "Grass"
+				end
+			else
+				material = "Ground"
+			end
+		end
+		local dp = math.sqrt((x - plaza.x) ^ 2 + (z - plaza.z) ^ 2)
+		if dp < plaza.r + ragged then
+			return h, "Cobblestone"
+		end
+		if roadDistance(x, z) < ragged * 0.5 then
+			return h, "Ground"
+		end
+		return h, material
+	end
+
 	function self.sample(x: number, z: number): Sample
 		local h, a, b = cellHeight(x, z)
 		local assign = if a ~= 0 then a else b
@@ -510,6 +582,10 @@ function Field.new(graph: Graph): Field
 					end
 				end
 			end
+		end
+
+		if a ~= 0 then
+			h, material = settlementGround(x, z, h, material)
 		end
 
 		local inside: Corridor? = nil

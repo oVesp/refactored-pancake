@@ -99,6 +99,10 @@ return {
 	["pads are flat at padHeight inside their zone"] = function()
 		local graph, field = world()
 		for _, pad in Realm.pads do
+			-- The farmland pad is terraced into plots; Settlement.spec checks its heights.
+			if pad.name == Realm.settlements.fields.pad then
+				continue
+			end
 			for _, f in { { 0.2, 0.2 }, { 0.5, 0.5 }, { 0.8, 0.3 } } do
 				local x = pad.x0 + (pad.x1 - pad.x0) * f[1]
 				local z = pad.z0 + (pad.z1 - pad.z0) * f[2]

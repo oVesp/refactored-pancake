@@ -14,6 +14,7 @@ type Entity = Types.Entity
 
 local CORPSE_SECONDS = 3
 local DUMMY_RESET_SECONDS = 4
+local GROUND_PROBE = 40 -- studs above and below a spawn point searched for the ground
 
 local log = Logger.new("SpawnService")
 
@@ -58,6 +59,18 @@ local function activeInZone(zone: string?): number
 	return count
 end
 
+-- The ground under a spawn point: terrain or generated world geometry (terraced plots, the camp
+-- dais), so enemies never start inside raised ground. Falls back to the point itself.
+local function groundAt(position: Vector3): Vector3
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	local world = workspace:FindFirstChild("World")
+	params.FilterDescendantsInstances = if world then { workspace.Terrain, world } else { workspace.Terrain }
+	local hit =
+		workspace:Raycast(position + Vector3.new(0, GROUND_PROBE, 0), Vector3.new(0, -GROUND_PROBE * 2, 0), params)
+	return if hit then Vector3.new(position.X, hit.Position.Y, position.Z) else position
+end
+
 -- Tints a template's `Body` part; the Goblin template has none, its textures carry the colour.
 local function tint(model: Model, color: Color3)
 	local body = model:FindFirstChild("Body")
@@ -88,6 +101,7 @@ function SpawnService.Spawn(enemyId: string, level: number, position: Vector3, h
 	tint(model, def.color)
 	local humanoid = model:FindFirstChildOfClass("Humanoid") :: Humanoid
 	local height = root.Size.Y / 2 + humanoid.HipHeight
+	position = groundAt(position)
 	model:PivotTo(
 		CFrame.new(position + Vector3.new(0, height, 0)) * CFrame.Angles(0, random:NextNumber(0, math.pi * 2), 0)
 	)

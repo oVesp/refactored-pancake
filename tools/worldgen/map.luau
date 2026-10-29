@@ -6,6 +6,8 @@
 -- cliff parts and node labels. Two pixels per terrain column (4 studs).
 local fs = require("@lune/fs")
 local process = require("@lune/process")
+local roblox = require("@lune/roblox")
+local serde = require("@lune/serde")
 
 local Loader = require("../../tests/Loader")
 local Png = require("./Png")
@@ -13,7 +15,9 @@ local Png = require("./Png")
 local Graph = Loader.load("src/ServerStorage/WorldGen/Gen/Graph")
 local Field = Loader.load("src/ServerStorage/WorldGen/Gen/Field")
 local Grid = Loader.load("src/ServerStorage/WorldGen/Gen/Grid")
+local Anchors = Loader.load("src/ServerStorage/WorldGen/Gen/Anchors")
 local Cliffs = Loader.load("src/ServerStorage/WorldGen/Gen/Cliffs")
+local Settlement = Loader.load("src/ServerStorage/WorldGen/Gen/Settlement")
 local realm = Loader.load("src/ServerStorage/WorldGen/Midgard")
 
 local STEP = 4
@@ -114,6 +118,51 @@ for _, node in graph.nodes do
 				end
 			end
 		end
+	end
+end
+
+-- Settlements: kit assets as their footprints, crops and trees as dots, anchors as rings.
+local manifest = serde.decode("json", fs.readFile("content/world/village.json"))
+local mapModel = roblox.deserializeModel(fs.readFile("src/Workspace/Map.rbxmx"))[1]
+local anchors = Anchors.fromMap(mapModel)
+local scale = realm.settlements.scale
+for _, node in graph.nodes do
+	for _, spec in Settlement.forZone(field, manifest, anchors, node.id) do
+		local meta = manifest.assets[spec.asset]
+		if meta then
+			local cy, sy = math.cos(spec.yaw), math.sin(spec.yaw)
+			local reach = math.max(meta.max[1] - meta.min[1], meta.max[3] - meta.min[3]) * scale
+			local x0, z0 = toPixel(spec.x - reach, spec.z - reach)
+			local x1, z1 = toPixel(spec.x + reach, spec.z + reach)
+			for py = z0, z1 do
+				for px = x0, x1 do
+					local wx = section.x0 + (px + 0.5) / SCALE * STEP - spec.x
+					local wz = section.z0 + (py + 0.5) / SCALE * STEP - spec.z
+					-- Into the asset's frame (yaw turns local +X towards -Z).
+					local lx = (wx * cy - wz * sy) / scale
+					local lz = (wx * sy + wz * cy) / scale
+					if lx >= meta.min[1] and lx <= meta.max[1] and lz >= meta.min[3] and lz <= meta.max[3] then
+						if meta.kind == "building" then
+							put(px, py, 170, 80, 60)
+						else
+							put(px, py, 120, 90, 60)
+						end
+					end
+				end
+			end
+		else
+			local px, py = toPixel(spec.x, spec.z)
+			local wheat = string.match(spec.asset, "^Wheat") ~= nil
+			put(px, py, if wheat then 230 else 60, if wheat then 200 else 120, if wheat then 90 else 50)
+		end
+	end
+end
+for _, a in anchors do
+	local px, py = toPixel(a.x, a.z)
+	local r = a.r / STEP * SCALE
+	for k = 0, 23 do
+		local t = k / 24 * math.pi * 2
+		put(px + math.floor(math.cos(t) * r), py + math.floor(math.sin(t) * r), 255, 0, 255)
 	end
 end
 

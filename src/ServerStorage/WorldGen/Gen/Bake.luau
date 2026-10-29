@@ -10,6 +10,7 @@ local Field = require(script.Parent.Field)
 local Graph = require(script.Parent.Graph)
 local Grid = require(script.Parent.Grid)
 local Props = require(script.Parent.Props)
+local Settlement = require(script.Parent.Settlement)
 
 export type Columns = {
 	x0: number,
@@ -29,6 +30,9 @@ export type Result = {
 }
 
 export type Extent = { x0: number, z0: number, x1: number, z1: number }
+
+-- What the settlement layout needs beyond the field: the village-kit manifest and the Map anchors.
+export type SettlementInput = { manifest: any, anchors: { Settlement.Anchor } }
 
 local Bake = {}
 
@@ -119,9 +123,16 @@ end
 
 --[=[
 	Generates a zone: samples its extent plus `margin`, paints cliff faces with the rock material,
-	and builds its parts and props.
+	and builds its parts and props. With `settlement`, the zone's settlements (village, farmland,
+	orchard, camp) join its props.
 ]=]
-function Bake.generate(field: Field.Field, node: Graph.Node, extent: Extent, margin: number): Result
+function Bake.generate(
+	field: Field.Field,
+	node: Graph.Node,
+	extent: Extent,
+	margin: number,
+	settlement: SettlementInput?
+): Result
 	local realm = field.graph.realm
 	local x0, z0 = extent.x0 - margin, extent.z0 - margin
 	local nx = math.floor((extent.x1 - extent.x0 + margin * 2) / STEP) + 1
@@ -148,6 +159,13 @@ function Bake.generate(field: Field.Field, node: Graph.Node, extent: Extent, mar
 		end
 	end
 
+	local props = Props.scatter(field, grid, node.index)
+	if settlement then
+		for _, spec in Settlement.forZone(field, settlement.manifest, settlement.anchors, node.id) do
+			table.insert(props, spec)
+		end
+	end
+
 	return {
 		columns = {
 			x0 = x0,
@@ -160,7 +178,7 @@ function Bake.generate(field: Field.Field, node: Graph.Node, extent: Extent, mar
 			water = grid.water,
 		},
 		parts = Cliffs.build(field, grid, node.index),
-		props = Props.scatter(field, grid, node.index),
+		props = props,
 	}
 end
 

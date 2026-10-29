@@ -93,6 +93,9 @@
 				"$path": "src/ServerStorage/WorldGen",
 				"PropsManifest": {
 					"$path": "content/world/props.json"
+				},
+				"VillageManifest": {
+					"$path": "content/world/village.json"
 				}
 			}
 		}

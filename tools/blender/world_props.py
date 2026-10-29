@@ -34,6 +34,10 @@ LIBRARY = [
     ("Snag", 6),
     ("Bush", 6),
     ("Boulder", 6),
+    ("Wheat", 4),
+    ("Sprout", 3),
+    ("Fruit", 6),
+    ("Hay", 2),
 ]
 
 
@@ -200,7 +204,83 @@ def boulder(name, rng, origin):
     new_object(f"{name}_Rock", rock)
 
 
-BUILDERS = {"Broadleaf": broadleaf, "Pine": pine, "Snag": snag, "Bush": bush, "Boulder": boulder}
+def wheat(name, rng, origin):
+    """A patch of stalks about 4 x 4 units with grain heads; placed in rows on field plots."""
+    canopy = bmesh.new()
+    for _ in range(rng.randint(14, 18)):
+        base = origin + Vector((rng.uniform(-2, 2), rng.uniform(-2, 2), 0))
+        lean = Vector((rng.uniform(-0.25, 0.25), rng.uniform(-0.25, 0.25), 1))
+        stalk = bent_path(rng, base, lean, rng.uniform(3.4, 4.4), 2, 0.12)
+        tube(canopy, rng, stalk, [0.09, 0.07, 0.05], 3)
+        hull_blob(canopy, rng, stalk[-1] + Vector((0, 0, 0.35)), (0.16, 0.16, 0.5), 7)
+    new_object(f"{name}_Canopy", canopy)
+
+
+def sprout(name, rng, origin):
+    """A low leafy crop: blades fanning out of a centre."""
+    canopy = bmesh.new()
+    blades = rng.randint(6, 8)
+    for k in range(blades):
+        angle = k * math.tau / blades + rng.uniform(-0.2, 0.2)
+        length = rng.uniform(1.0, 1.5)
+        out = Vector((math.cos(angle), math.sin(angle), 0))
+        side = Vector((-out.y, out.x, 0)) * rng.uniform(0.22, 0.32)
+        tip = origin + out * length + Vector((0, 0, rng.uniform(0.7, 1.1)))
+        mid = origin + out * length * 0.5 + Vector((0, 0, 0.6))
+        root = origin + Vector((0, 0, 0.05))
+        verts = [canopy.verts.new(v) for v in (root, mid - side, tip, mid + side)]
+        canopy.faces.new(verts)
+        canopy.faces.new(list(reversed([canopy.verts.new(v.co) for v in verts])))
+    new_object(f"{name}_Canopy", canopy)
+
+
+def fruit(name, rng, origin):
+    """A small orchard tree: short trunk, round canopy, fruit on the canopy surface."""
+    trunk = bmesh.new()
+    height = rng.uniform(9, 12)
+    path = bent_path(rng, origin, Vector((0, 0, 1)), height, 3, 0.15)
+    base = rng.uniform(1.0, 1.3)
+    tube(trunk, rng, path, [base * 1.2, base, base * 0.75, base * 0.55], 6)
+    new_object(f"{name}_Trunk", trunk)
+    canopy = bmesh.new()
+    spread = rng.uniform(6.5, 8.5)
+    centre = path[-1] + Vector((0, 0, 2.5))
+    hull_blob(canopy, rng, centre, (spread, spread * rng.uniform(0.85, 1.1), spread * 0.72), 16)
+    for _ in range(2):
+        offset = Vector((rng.uniform(-3, 3), rng.uniform(-3, 3), rng.uniform(-1, 2)))
+        hull_blob(canopy, rng, centre + offset, (spread * 0.7, spread * 0.7, spread * 0.55), 12)
+    new_object(f"{name}_Canopy", canopy)
+    fruits = bmesh.new()
+    for _ in range(rng.randint(8, 12)):
+        theta = rng.uniform(0, math.tau)
+        z = rng.uniform(-0.6, 0.3)
+        r = math.sqrt(1 - z * z)
+        p = centre + Vector((math.cos(theta) * r * spread * 0.95, math.sin(theta) * r * spread * 0.95, z * spread * 0.7))
+        hull_blob(fruits, rng, p, (0.6, 0.6, 0.6), 8)
+    new_object(f"{name}_Fruit", fruits)
+
+
+def hay(name, rng, origin):
+    """A round hay bale lying on its side."""
+    bale = bmesh.new()
+    radius = rng.uniform(1.6, 1.9)
+    length = rng.uniform(2.2, 2.6)
+    path = [origin + Vector((-length / 2, 0, radius)), origin + Vector((length / 2, 0, radius))]
+    tube(bale, rng, path, [radius, radius], 9)
+    new_object(f"{name}_Bale", bale)
+
+
+BUILDERS = {
+    "Broadleaf": broadleaf,
+    "Pine": pine,
+    "Snag": snag,
+    "Bush": bush,
+    "Boulder": boulder,
+    "Wheat": wheat,
+    "Sprout": sprout,
+    "Fruit": fruit,
+    "Hay": hay,
+}
 
 
 def build():
@@ -256,8 +336,13 @@ def preview():
     leaf.diffuse_color = (0.22, 0.42, 0.3, 1)
     rock = bpy.data.materials.new("Rock")
     rock.diffuse_color = (0.45, 0.48, 0.5, 1)
+    fruit_mat = bpy.data.materials.new("Fruit")
+    fruit_mat.diffuse_color = (0.7, 0.18, 0.12, 1)
+    straw = bpy.data.materials.new("Straw")
+    straw.diffuse_color = (0.75, 0.62, 0.3, 1)
+    by_suffix = {"Canopy": leaf, "Rock": rock, "Fruit": fruit_mat, "Bale": straw}
     for obj in list(bpy.data.objects):
-        obj.data.materials.append(leaf if obj.name.endswith("Canopy") else rock if obj.name.endswith("Rock") else trunk)
+        obj.data.materials.append(by_suffix.get(obj.name.rsplit("_", 1)[-1], trunk))
     sun = bpy.data.objects.new("Sun", bpy.data.lights.new("Sun", "SUN"))
     sun.rotation_euler = (math.radians(50), 0, math.radians(30))
     scene.collection.objects.link(sun)

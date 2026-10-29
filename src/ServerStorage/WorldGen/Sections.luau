@@ -31,6 +31,7 @@ local Bake = require(script.Parent.Gen.Bake)
 local Cliffs = require(script.Parent.Gen.Cliffs)
 local Field = require(script.Parent.Gen.Field)
 local Graph = require(script.Parent.Gen.Graph)
+local Anchors = require(script.Parent.Gen.Anchors)
 local Props = require(script.Parent.Gen.Props)
 local Realm = require(script.Parent.Midgard)
 
@@ -47,6 +48,8 @@ local MARGIN = 48 -- studs of samples around a zone, for cliff tops and neighbou
 local FLUSH = 400 -- parts parented per frame
 local ROOT = "World"
 local LIBRARY = "WorldProps" -- ServerStorage folder of prop templates (tools/blender/world_props.py)
+local VILLAGE_KIT = "VillageKit" -- ServerStorage folder of village templates (tools/blender/village_kit.py)
+local WORLD_TAG = "WorldTag" -- template attribute naming the tag a placed copy receives
 
 local Sections = {}
 
@@ -210,6 +213,7 @@ local function placeProps(folder: Folder, specs: { Props.PropSpec })
 		return
 	end
 	local library = ServerStorage:FindFirstChild(LIBRARY)
+	local kit = ServerStorage:FindFirstChild(VILLAGE_KIT)
 	local group = Instance.new("Folder")
 	group.Name = "Props"
 	group.Parent = folder
@@ -222,11 +226,11 @@ local function placeProps(folder: Folder, specs: { Props.PropSpec })
 		task.wait()
 	end
 	for _, spec in specs do
-		local template = library and library:FindFirstChild(spec.asset)
+		local template = (library and library:FindFirstChild(spec.asset)) or (kit and kit:FindFirstChild(spec.asset))
 		if not template or not template:IsA("Model") then
 			if not missingWarned[spec.asset] then
 				missingWarned[spec.asset] = true
-				log:Warn("prop template %s missing from ServerStorage.%s", spec.asset, LIBRARY)
+				log:Warn("prop template %s missing from ServerStorage.%s and .%s", spec.asset, LIBRARY, VILLAGE_KIT)
 			end
 			continue
 		end
@@ -236,6 +240,10 @@ local function placeProps(folder: Folder, specs: { Props.PropSpec })
 			if source:IsA("BasePart") then
 				local offset = pivot:ToObjectSpace(source.CFrame)
 				local part = source:Clone()
+				local tag = part:GetAttribute(WORLD_TAG)
+				if type(tag) == "string" then
+					part:AddTag(tag)
+				end
 				part.Size = source.Size * spec.scale
 				part.CFrame = target * CFrame.new(offset.Position * spec.scale) * offset.Rotation
 				table.insert(pending, part)
@@ -248,12 +256,25 @@ local function placeProps(folder: Folder, specs: { Props.PropSpec })
 	flush()
 end
 
-type Context = { graph: Graph.Graph, field: Field.Field, extents: { [number]: Bake.Extent } }
+type Context = {
+	graph: Graph.Graph,
+	field: Field.Field,
+	extents: { [number]: Bake.Extent },
+	settlement: Bake.SettlementInput?,
+}
 
 local function context(): Context
 	local graph = Graph.build(Realm)
 	local field = Field.new(graph)
-	return { graph = graph, field = field, extents = Bake.extents(field) }
+	-- Settlements need the village kit and the Map's anchors; without either, zones build bare.
+	local settlement: Bake.SettlementInput? = nil
+	local map = workspace:FindFirstChild("Map")
+	if script.Parent:FindFirstChild("VillageManifest") and map and ServerStorage:FindFirstChild(VILLAGE_KIT) then
+		settlement = { manifest = require(script.Parent.VillageManifest) :: any, anchors = Anchors.fromMap(map) }
+	else
+		log:Warn("settlements skipped: run Sections.ImportVillage() first")
+	end
+	return { graph = graph, field = field, extents = Bake.extents(field), settlement = settlement }
 end
 
 local function buildZone(ctx: Context, node: Graph.Node)
@@ -283,7 +304,7 @@ local function buildZone(ctx: Context, node: Graph.Node)
 		if node.locked then
 			log:Warn("%s is locked but has no baked data; generating", node.id)
 		end
-		result = Bake.generate(ctx.field, node, extent, MARGIN)
+		result = Bake.generate(ctx.field, node, extent, MARGIN, ctx.settlement)
 	end
 	zoneFolder.Parent = root()
 
@@ -361,6 +382,8 @@ local PART_RULES = {
 	Trunk = { material = Enum.Material.Wood, collide = true, query = true },
 	Canopy = { material = Enum.Material.Grass, collide = false, query = false },
 	Rock = { material = Enum.Material.Slate, collide = true, query = true },
+	Fruit = { material = Enum.Material.SmoothPlastic, collide = false, query = false },
+	Bale = { material = Enum.Material.Grass, collide = true, query = true },
 }
 
 --[=[
@@ -381,6 +404,9 @@ function Sections.ImportProps(assetId: number?)
 	end
 	defs[Realm.props.bushes.prefix] = Realm.props.bushes
 	defs[Realm.props.boulders.prefix] = Realm.props.boulders
+	for _, def in Realm.props.crops :: { [string]: any } do
+		defs[def.prefix] = def
+	end
 
 	local variants: { [string]: Model } = {}
 	for _, d in asset:GetDescendants() do
@@ -444,6 +470,170 @@ function Sections.ImportProps(assetId: number?)
 	end
 	library.Parent = ServerStorage
 	log:Info("imported %d prop variants from asset %d", count, id)
+end
+
+-- Gameplay parts added to village-kit templates at their manifest anchors. The tags, attributes
+-- and effects are what SkillService looks for (Kindle and Purify spells). Templates carry the tag
+-- as a `WORLD_TAG` attribute and only placed copies get the CollectionService tag, so a template
+-- in ServerStorage is never a spell target.
+local FUNCTIONAL: { [string]: (anchor: Vector3, radius: number) -> BasePart } = {
+	water = function(anchor: Vector3, radius: number): BasePart
+		local water = Instance.new("Part")
+		water.Name = "Water"
+		water.Shape = Enum.PartType.Cylinder
+		water.Size = Vector3.new(0.4, radius * 2, radius * 2)
+		water.CFrame = CFrame.new(anchor) * CFrame.Angles(0, 0, math.rad(90))
+		water.Material = Enum.Material.Glass
+		water.Color = Color3.fromRGB(60, 90, 70)
+		water.Transparency = 0.2
+		water.CanCollide = false
+		water:SetAttribute(WORLD_TAG, "Purifiable")
+		water:SetAttribute("Purified", false)
+		local sparkle = Instance.new("ParticleEmitter")
+		sparkle.Name = "Sparkle"
+		sparkle.Enabled = false
+		sparkle.Rate = 12
+		sparkle.Lifetime = NumberRange.new(1, 2)
+		sparkle.Speed = NumberRange.new(1, 2)
+		sparkle.Parent = water
+		local glow = Instance.new("PointLight")
+		glow.Name = "Glow"
+		glow.Enabled = false
+		glow.Range = 12
+		glow.Color = Color3.fromRGB(160, 220, 255)
+		glow.Parent = water
+		return water
+	end,
+	bowl = function(anchor: Vector3, radius: number): BasePart
+		local bowl = Instance.new("Part")
+		bowl.Name = "Bowl"
+		bowl.Size = Vector3.new(radius * 2, 0.4, radius * 2)
+		bowl.CFrame = CFrame.new(anchor)
+		bowl.Transparency = 1
+		bowl.CanCollide = false
+		bowl:SetAttribute(WORLD_TAG, "Kindleable")
+		bowl:SetAttribute("Lit", false)
+		local flame = Instance.new("Fire")
+		flame.Name = "Flame"
+		flame.Enabled = false
+		flame.Size = 4
+		flame.Heat = 6
+		flame.Parent = bowl
+		local glow = Instance.new("PointLight")
+		glow.Name = "Glow"
+		glow.Enabled = false
+		glow.Range = 18
+		glow.Brightness = 2
+		glow.Color = Color3.fromRGB(255, 170, 90)
+		glow.Parent = bowl
+		return bowl
+	end,
+}
+
+-- Village-kit assets that are only decoration underfoot: no collision.
+local WALK_THROUGH = { Border = true, BorderCorner = true }
+
+--[=[
+	Imports the uploaded village kit (asset id from `VillageManifest`, written by
+	tools/worldgen/props.py) into `ServerStorage.VillageKit`. The upload arrives as one
+	`<Asset>__<Material>_Node` model per asset and material, in metres; each asset becomes one Model
+	of MeshParts named by material, pivoted at the asset origin (footprint centre on the ground,
+	front towards the manifest's `front`) and scaled by `settlements.scale`. Materials without textures get the manifest colour
+	and Roblox material; the well and braziers get their gameplay parts. Rebuild zones afterwards.
+]=]
+function Sections.ImportVillage(assetId: number?)
+	assertEditMode()
+	local manifest = require(script.Parent:WaitForChild("VillageManifest")) :: any
+	local id = assetId or tonumber(manifest.assetId)
+	assert(id, "no village asset id; run tools/worldgen/props.py upload --library village")
+	local asset = InsertService:LoadAsset(id)
+	local scale = Realm.settlements.scale
+
+	local groups: { [string]: { BasePart } } = {}
+	for _, node in asset:GetDescendants() do
+		local name, material = string.match(node.Name, "^(.-)__(.-)_Node$")
+		if not (name and material and node:IsA("Model")) then
+			continue
+		end
+		for _, d in node:GetDescendants() do
+			if d:IsA("MeshPart") then
+				local part = d:Clone()
+				part.Name = material
+				groups[name] = groups[name] or {}
+				table.insert(groups[name], part)
+			end
+		end
+	end
+	asset:Destroy()
+
+	local old = ServerStorage:FindFirstChild(VILLAGE_KIT)
+	if old then
+		old:Destroy()
+	end
+	local library = Instance.new("Folder")
+	library.Name = VILLAGE_KIT
+	local count = 0
+	for name, parts in groups do
+		local meta = manifest.assets[name]
+		if not meta then
+			log:Warn("village import: %s is not in the manifest", name)
+			continue
+		end
+		local model = Instance.new("Model")
+		model.Name = name
+		for _, part in parts do
+			local info = manifest.materials[part.Name] or {}
+			part.Anchored = true
+			part.CanTouch = false
+			part.CanCollide = not WALK_THROUGH[name] and part.Name ~= "MI_Vine"
+			part.CanQuery = part.CanCollide
+			local surface = part:FindFirstChildOfClass("SurfaceAppearance")
+			if not info.textured and surface then
+				surface:Destroy()
+				surface = nil
+			end
+			if info.material then
+				part.Material = (Enum.Material :: any)[info.material]
+			end
+			if not info.textured or info.material then
+				local rgb = info.color or { 200, 200, 200 }
+				part.Color = Color3.fromRGB(rgb[1], rgb[2], rgb[3])
+			end
+			part.Transparency = info.transparency or 0
+			if surface and info.alphaMode then
+				surface.AlphaMode = (Enum.AlphaMode :: any)[info.alphaMode]
+			end
+			if surface and info.tint then
+				surface.Color = Color3.fromRGB(info.tint[1], info.tint[2], info.tint[3])
+			end
+			part.Parent = model
+		end
+		-- The upload keeps metres as studs; the asset origin is the bounds centre minus the
+		-- manifest's bounds centre.
+		local box = model:GetBoundingBox()
+		local centre = Vector3.new(
+			(meta.min[1] + meta.max[1]) / 2,
+			(meta.min[2] + meta.max[2]) / 2,
+			(meta.min[3] + meta.max[3]) / 2
+		)
+		model.WorldPivot = CFrame.new(box.Position - centre)
+		model:ScaleTo(scale)
+		model:PivotTo(CFrame.new())
+		for key, value in meta.anchors do
+			local make = FUNCTIONAL[key]
+			if make and type(value) == "table" then
+				local radius = (meta.anchors[key .. "Radius"] or 0.5) * scale
+				local functional = make(Vector3.new(value[1], value[2], value[3]) * scale, radius)
+				functional.Anchored = true
+				functional.CanTouch = false
+				functional.Parent = model
+			end
+		end
+		model.Parent = library
+		count += 1
+	end
+	library.Parent = ServerStorage
+	log:Info("imported %d village-kit assets from asset %d", count, id)
 end
 
 local VIEW_HEIGHT = 28 -- studs above the ground at the zone's site

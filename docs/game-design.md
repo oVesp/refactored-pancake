@@ -201,14 +201,14 @@ src/
     Templates/                Enemy models, hold interiors
     ContentServerOnly/        Drop tables, dev allowlist, formulas players must not see
     WorldGen/                 Terrain applier (Apply.luau) + generated Data/ (tools/terrain/build.luau)
-  Workspace/Map.rbxmx         Generated greybox world (tools/world/build.luau)
+  Workspace/Map.rbxmx         Generated gameplay objects: zones, NPCs, spawners, dev yard (tools/world/build.luau)
   StarterPlayer/StarterPlayerScripts/
     Client/
       Bootstrap.client.luau
       Controllers/            InputController, CombatController, UIController, CameraController, ...
   StarterGui/                 Authored ScreenGuis (.model.json)
 assets/                       Source art (Blender, PSD, SVG), not synced into the place
-tools/                        gate.sh (quality gate), scan.sh, world/build.luau (greybox + templates), terrain/build.luau (Midgard terrain), Python/Node/Lune/Blender scripts
+tools/                        gate.sh (quality gate), scan.sh, world/build.luau (Map gameplay objects + templates), worldgen/ (world map preview, bake, mesh library upload), terrain/build.luau (old Midgard terrain), Python/Node/Lune/Blender scripts
 content/register.json         Content register (§7.1), validated by tests/specs/Register.spec.luau
 docs/
 tests/                        Lune runner + specs/*.spec.luau
@@ -518,7 +518,7 @@ Define target concurrency per place, server count per realm, and what happens wh
 | Toolchain manager | Not specified | Rokit pins every tool, including luau-lsp; Roblox type definitions pinned to the same luau-lsp tag | Reproducible gate on every machine |
 | Damage formula | §3.5 wrote `... − mitigation` | Multiplicative mitigation `100 / (100 + defense)` with a 1-damage floor | Subtraction zeroes low-level hits; the level-gap curve already provides the wall |
 | UI file format | §5.1 said `.rbxmx` saved from Studio | Hand-authored Rojo `.model.json` with layout objects and templates; no runtime-built UI | Agent cannot save from Studio; declarative JSON diffs cleanly and Studio can re-save over it |
-| Greybox world | Kenney meshes listed for the village (§7.5) | Generated Part greybox (`tools/world/build.luau`), Roblox materials only | Mesh uploads not available yet; generator is deterministic and re-runnable |
+| Greybox world | Kenney meshes listed for the village (§7.5); owner (2026-10-29): replace all decorative greybox with generated models, laid out by the generator around the NPCs and spawners, using the MegaKit house generator once its textures work in Roblox | The Map keeps gameplay objects only. The world generator dresses the pads (`Gen/Settlement`): MegaKit houses and barns on lots facing the roads, terraced field plots with crop rows, an orchard grid and a palisade camp. Kit-textured structures are built for what the kit lacks (well, braziers, scarecrows, palisade, tents). The well and braziers carry the `Purifiable` and `Kindleable` parts. The kit is made Roblox-ready in `tools/blender/village_kit.py`: OpenGL normals, 1024 px textures, the wear material merged, heavy pieces decimated (45k to 20k triangles for the largest house), one MeshPart per material, and colours for untextured materials. `SpawnService` seats enemies on the ground below spawners | Footprints and clearances are checked by tests; the kit is CC0 and already in the repo; per-material parts keep a house to about 8 parts; the axis mapping was measured, not assumed |
 | Test automation hook | Dev commands are chat-only | Studio-only `ServerStorage.RunDevCommand` BindableFunction runs the same handlers | Studio MCP cannot send chat from plugin context; the hook is server-side and absent outside Studio |
 | Combat feel | §12.8: prototype tab-hybrid and free-aim in M1 | Hybrid soft target + optional lock replaces pure free-aim (2026-10-24); per-delivery aim rules; no AoE target cap; ranged physical class deferred | Owner decision after targeting research (FFXIV, BDO, TERA, Lost Ark, GW2); one system that works on phone, pad and mouse |
 | Player-facing text | §6.3: all strings through LocalizationTable | M0.5 keeps strings in `Content/Strings` and content names; LocalizationTable deferred to M1 | Single source table makes the later move mechanical |

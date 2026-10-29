@@ -1,7 +1,13 @@
 {
+	"assetId": "73460080113066",
+	"history": [
+		{
+			"assetId": "87667133504381",
+			"retired": "2026-10-28",
+			"sha": "1f1113f07b287cea9eb616121469d4e4d421016e917ca10bd28b8d515d1ddcd4"
+		}
+	],
+	"sha": "51c00603abcd9bf6179c88e9af4ebd1575683a66a1b30c906273df36bad4c01d",
 	"source": "tools/blender/world_props.py",
-	"history": [],
-	"assetId": "87667133504381",
-	"sha": "1f1113f07b287cea9eb616121469d4e4d421016e917ca10bd28b8d515d1ddcd4",
 	"uploaded": "2026-10-28"
 }

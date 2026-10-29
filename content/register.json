@@ -3128,8 +3128,49 @@
 			"license": "project",
 			"owner": "dev",
 			"status": "draft",
-			"notes": "Low-poly prop library (34 variants: Broadleaf, Pine, Snag, Bush, Boulder), uploaded through Open Cloud by tools/worldgen/props.py and imported into ServerStorage.WorldProps by Sections.ImportProps.",
-			"assetId": "87667133504381"
+			"notes": "Low-poly prop library (49 variants: Broadleaf, Pine, Snag, Bush, Boulder, Wheat, Sprout, Fruit, Hay), uploaded through Open Cloud by tools/worldgen/props.py and imported into ServerStorage.WorldProps by Sections.ImportProps.",
+			"assetId": "73460080113066"
+		},
+		{
+			"id": "worldgen:GenAnchors",
+			"type": "code",
+			"path": "src/ServerStorage/WorldGen/Gen/Anchors.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Keep-out anchors (NPCs, spawners, dummies, spawn) read from the Map for the settlement layout."
+		},
+		{
+			"id": "worldgen:GenPlots",
+			"type": "code",
+			"path": "src/ServerStorage/WorldGen/Gen/Plots.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Farmland plots: binary space partition of the fields pad with terrace levels, crops and furrows."
+		},
+		{
+			"id": "worldgen:GenSettlement",
+			"type": "code",
+			"path": "src/ServerStorage/WorldGen/Gen/Settlement.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Settlement layout: village lots, field crops, orchard grid, goblin camp palisade and tents."
+		},
+		{
+			"id": "model:VillageKit",
+			"type": "model",
+			"path": "content/world/village.json",
+			"origin": "third-party (Quaternius Medieval Village MegaKit, CC0, assets/third_party) assembled by tools/blender/village_kit.py, plus original structures on the kit materials",
+			"license": "CC0 1.0 (kit); project (structures)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Village kit: 10 houses and 2 barns from tools/blender/house_generator.py, kit fences, crates, wagon and stone borders, and wells, braziers, scarecrows, palisades, gate tower, tents and dais. Uploaded through Open Cloud by tools/worldgen/props.py and imported into ServerStorage.VillageKit by Sections.ImportVillage.",
+			"assetId": "101579549897253"
 		}
 	]
 }
