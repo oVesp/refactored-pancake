@@ -2,6 +2,7 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Factions = require(ReplicatedStorage.Content.Factions)
 local Swarm = require(ReplicatedStorage.Shared.Swarm)
 
 export type Tags = {
@@ -34,14 +35,14 @@ export type Sample = {
 	position: Vector3,
 }
 
---[=[ Server-side combat entity: a player character, a goblin or a training dummy. ]=]
+--[=[ Server-side combat entity: a player character, an NPC of any faction or a training dummy. ]=]
 export type Entity = {
 	model: Model,
 	humanoid: Humanoid?,
 	root: BasePart,
 	kind: "Player" | "Npc" | "Dummy",
 	player: Player?,
-	team: "Players" | "Goblins" | "Undead" | "Neutral",
+	team: Factions.FactionId,
 	defId: string,
 	name: string,
 	level: number,

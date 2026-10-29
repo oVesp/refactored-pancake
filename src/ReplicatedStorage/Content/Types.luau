@@ -1,5 +1,7 @@
 --!strict
 
+local Factions = require(script.Parent.Factions)
+
 --[=[ Shared types for content tables. Content modules hold data only, never logic. ]=]
 
 export type StatName =
@@ -175,8 +177,8 @@ export type EnemyDef = {
 	elite: boolean?,
 	-- ServerStorage.Templates model to clone; defaults to "Goblin".
 	template: string?,
-	-- Defaults to "Goblins". Enemies of one team call each other for help.
-	team: ("Goblins" | "Undead")?,
+	-- Faction (Content/Factions); defaults to "Goblins". Allies call each other for help.
+	team: Factions.FactionId?,
 	combat: CombatDef?,
 }
 

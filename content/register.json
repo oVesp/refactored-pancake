@@ -187,6 +187,16 @@
 			"notes": "Placeholder names, plain descriptive (game-design.md 2)."
 		},
 		{
+			"id": "content:Factions",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Factions.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Generic faction names, plain descriptive (game-design.md 2)."
+		},
+		{
 			"id": "content:Zones",
 			"type": "data",
 			"path": "src/ReplicatedStorage/Content/Zones.luau",

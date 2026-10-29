@@ -4,7 +4,9 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Factions = require(ReplicatedStorage.Content.Factions)
 local Logger = require(ReplicatedStorage.Shared.Logger)
+local Relations = require(ReplicatedStorage.Shared.Relations)
 local Signal = require(ReplicatedStorage.Shared.Signal)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 local Types = require(script.Parent.Parent.Types)
@@ -39,7 +41,7 @@ export type NewEntity = {
 	humanoid: Humanoid?,
 	kind: "Player" | "Npc" | "Dummy",
 	player: Player?,
-	team: "Players" | "Goblins" | "Undead" | "Neutral",
+	team: Factions.FactionId,
 	defId: string,
 	name: string,
 	level: number,
@@ -142,9 +144,12 @@ function EntityService.All(): { [Model]: Entity }
 	return entities
 end
 
---[=[ True when two entities are hostile to each other. Players never hurt players (no PvP in M0.5). ]=]
+--[=[
+	True when two entities' factions are hostile (Shared/Relations). Players never hurt players
+	(no PvP in M0.5).
+]=]
 function EntityService.AreEnemies(a: Entity, b: Entity): boolean
-	return a ~= b and a.team ~= b.team
+	return a ~= b and Relations.Hostile(a.team, b.team)
 end
 
 --[=[
