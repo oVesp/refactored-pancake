@@ -27,7 +27,7 @@ SEED = 20261028
 SPACING = 120.0
 OUT_DIR = os.path.join(os.getcwd(), "build")
 
-# Counts must match `props` in src/ServerStorage/WorldGen/Midgard.luau.
+# Variant counts are recorded per species in content/world/props.json on upload.
 LIBRARY = [
     ("Broadleaf", 8),
     ("Pine", 8),

@@ -45,11 +45,11 @@ Data: `ServerStorage/ContentServerOnly/Population.luau` (server-only). Services:
 
 ### Routes
 
-Points are `{ x, z }`; heights come from a ground raycast. `tests/specs/Population.spec.luau` walks every leg on the generated terrain (`Gen/Field`) and fails on any rise over 5 studs per 4 studs off a corridor, so routes stay on the valley floor and generated ramps and stairs.
+Points are `{ x, z }`; heights come from a ground raycast. The data is empty since the continent replaced the centre section (2026-10-29); entries come back per site and road as regions are built ([world generation](world-generation.md)). Routes must then follow generated roads.
 
 ## Not done
 
 - No live Studio check yet (no Studio was connected when this landed).
-- The fields–east-terrace ramp ends in a pit and the village–south-hollow side has a terrace cliff, so the east terrace and south hollow have no routes.
+- `Population` is empty until the continent's regions are built.
 - No trading (currency and a shop UI are needed), no faction reputation, no player squads, no NPC needs or jobs.
 - Monsters cannot raid inside the safe village (owner kept it safe).

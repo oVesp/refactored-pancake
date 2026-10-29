@@ -1,82 +1,58 @@
 # World generation (Midgard)
 
-The owner replaced the eroded voxel world with a stylized, vertical, zone-graph world (2026-10-28). The references are walled fantasy Roblox worlds for the look and Kenshi for scale and variety. The centre section is built in the place. The old eroded-terrain pipeline is still in the repo; see *Old pipeline* for what remains.
+Midgard is one continent (owner, 2026-10-29), laid out from the owner's sketch: a living world in the vein of Kenshi that runs without the player, who is one more adventurer in it. Two great powers, the **Holy Kingdom** and the **Dragon Empire**, hold most of the land. The neutral **Adventurers** hold two cities: the **Central Capital** on the mainland and the **Harbor** in the south-west. The rest belongs to minor factions (Elves, Dragons, Undead) or to nobody. Factions: [open world](open-world.md).
 
-Originality: the references give style and scale only. No layout, landmark, location name or unique feature of any referenced game is copied (game-design §2).
+This replaced the zone-graph world (village, fields and goblin camp in one centre section, 2026-10-28). Its generator, Studio builder, bake tool, routes and tests were removed with it.
 
-Code: `src/ServerStorage/WorldGen/Midgard.luau` (authored graph and tuning), `Gen/` (pure generator, runs in Lune and Studio), `Sections.luau` (Studio builder), `Baked/` (locked zones, generated). Tools: `tools/worldgen/` (map preview, bake, prop upload), `tools/blender/world_props.py` (prop library). Tests: `tests/specs/WorldGraph.spec.luau`.
+Originality: the sketch is the owner's own; region names and placeholder site names are generic. No layout, landmark, location name or unique feature of another game is copied (game-design §2).
 
-## Goals
+Code: `src/ServerStorage/WorldGen/Continent.luau` (template), `Gen/Continent.luau` (pure generator, runs in Lune and Studio), `Gen/Hash.luau` (hashing and noise). Tool: `tools/worldgen/continent.luau`. Tests: `tests/specs/Continent.spec.luau`.
 
-- **Perceived size over raw size.** A zone feels big because sight lines are short: cliffs, tiers and fog hide what is next. Hidden areas need something to hide behind, not more distance.
-- **Verticality separates zones.** Zones sit on elevation tiers; the cliff between two tiers is the border. There is no requirement for a wall on every edge.
-- **Section-by-section authoring.** One zone can be regenerated, viewed and tuned in seconds without moving any other zone.
+## Template (`Continent.luau`)
 
-## Size
+Unit map coordinates: `u` west to east, `v` north to south, both 0..1, so the data reads like the sketch. `size` (10,240 studs, provisional, game-design §12) turns them into studs with the map centre at the origin (`Continent.toStuds`).
 
-10,240 × 10,240 studs per realm Place, **provisional**: the owner commits a final size after the first sections are played. Base walk speed is 16 studs/s, so a straight crossing takes about 11 minutes and a real route about 17. Authoring happens inside `sections` rectangles; the centre section is X -1024..1024, Z -1360..688.
+- **Regions**: id, name, biome, owner faction, base `height`, noise `relief` and `anchors` `{ u, v, r }`. Several anchors shape a region (the Tundra band has three). `scatter` adds islets around the first anchor (Archipelago). `sky` marks floating isles that roads do not reach (Sky Isles). Each region asks for a number of `towns`, `pois` and `dungeons`.
+- **Ridges**: region pairs whose shared border is a mountain range.
+- **Lakes**: `{ u, v, r }`.
+- **Sites**: named sites with a kind (`capital`, `city`, `town`, `harbor`, `poi`, `dungeon`, `portal`), region, owner and rough spot. `coastal` moves a site to the coast. Names are placeholders until the content pass.
 
-## Layout: the zone graph (`Midgard.luau`)
+| Region | Biome | Owner |
+|---|---|---|
+| Land of Dragons (NW) | volcanic | Dragons |
+| Tundras (N band), Triad Canyon (NE), Wastelands (E), Magma Wastelands (E) | tundra, canyon, wasteland, magma | Dragon Empire (capital in the Tundras) |
+| The Highlands (centre), Sky Isles, Swamps (W), Verdant Greens (SW) | highland, sky, swamp, plains | Holy Kingdom (Highland Capital) |
+| Deep Forests (S centre) | forest | Elves (Eldergrove) |
+| Undead Fields, Undead Kingdom (SE) | undead | Undead (Niflheim Gate on the coast) |
+| The Coasts (S), Archipelago (NE) | coast, isles | unclaimed |
 
-- **Nodes**: `zone` (a playable area) or `pocket` (a hidden area). Each has an id, biome, danger band, tier (or an explicit `floor` for ledge pockets), radius `r` and usually an authored position. A node without `x`/`z` is placed by a deterministic force layout next to the nodes it connects to. `roof = true` covers a pocket so it sits inside the ground around it. `locked = true` freezes a signed-off zone (see the section loop).
-- **Edges**: `open` (no border feature), `pass` (a gap through the ridge or rim between them), `ramp` / `stairs` (a path between tiers, straight across or `along = true` down the lower zone's border), `cave` (a roofed tunnel), `drop` (one-way, down; no geometry beyond the cliff). `secret` marks an edge with no signpost.
-- **Pads**: the Map zones (`Workspace.Map.Zones`), held flat at the Map ground level; a test keeps them equal to `Map.rbxmx`.
-- **Lakes**: water below the zone floor, with a sand shore.
-- **Roads**: dirt polylines painted into the terrain (village to the camp gate, plaza to the dev yard and east).
-- **Settlements** (`settlements`): what dresses each pad. See *Settlements*.
+The Central Capital stands in the Highlands and the Harbor on the Verdant Greens coast; both belong to the Adventurers.
 
-Centre section: village, fields, orchard and goblin camp on the valley floor (tier 0); south hollow below (tier -1, lake); east terrace (tier 1), west heights (tier 2) and north rim (tier 3) above; pockets `cellar-hollow` (cave from the village), `camp-den` (cave from the goblin camp) and `fern-ledge` (ledge between fields and east terrace, reached by drops).
+## Generator (`Gen/Continent.luau`)
 
-## Generator (`Gen/`)
+`Continent.generate(template, seed?, res?)` is a pure function on a `res` x `res` grid (256 by default; tests use 128). Every random stream is seeded by name (`Hash.named`), so a seed gives the same continent in Lune and Studio.
 
-Every stage is a pure function of position, seeded per zone (`Hash.named(seed, id)`) and per border (`Hash.pair`), so a zone's output depends only on the graph data near it.
+1. **Land and regions**: anchors are jittered per seed. A cell belongs to the region with the smallest distance / `r` to one of its anchors, measured on domain-warped coordinates so borders curve. It is land while that distance stays under `coast.reach` plus coastline noise (1 for scattered islets); this closes the gaps between anchors and draws the coast. A `margin` of open sea surrounds the map.
+2. **Height, mountains, lakes**: base height plus noise per region, lower near the shore. Cells near a `ridges` border (noisy `ridge.width`) become mountains. Template lakes are carved with a noisy shore.
+3. **Shore and mainland**: coast cells touch the sea; the mainland is the largest land mass.
+4. **Sites**: each named site takes the dry, non-mountain cell of its region nearest to its jittered spot (a coast cell when `coastal`). Then each region places its towns, points of interest and dungeons on random cells, `spacing` apart from every site; dungeons may sit on mountains. Towns belong to the region's owner.
+5. **Roads**: a minimum spanning tree over the mainland settlements (capital, city, town, harbor; not the Sky Isles), plus a link to a node's second-nearest neighbour when that is under `roads.extra` times the nearest distance. Shortest links are routed first, by A* over 8 neighbours: cost grows with slope, mountains cost `roads.mountain` times more and existing road costs `roads.reuse` times less, so roads merge into trunks.
 
-1. **Ownership** (`Field.owner`): a multiplicatively weighted Voronoi diagram on domain-warped coordinates (two warp scales). A point belongs to the node with the smallest distance / `r`, so borders curve and larger nodes claim more ground. Past `r` from every site, or outside every section, is mountain rim.
-2. **Height** (`Field.sample`):
-   - zone floor plus gentle per-zone noise;
-   - **terraces**: realm-wide noise above a biome's thresholds lifts the floor one or two steps, fading out near pads, lakes and open borders;
-   - **ridges** between same-tier neighbours that have no `open` edge;
-   - **rim**: from every nearby zone the ground climbs in ledges (`rim.rise`, `rim.ledge`), and the rim takes the lowest climb, so between zones it rises from both sides to a crest under a noisy ceiling;
-   - pads flattened, lakes carved;
-   - **corridors** for ramps, stairs, passes and caves, which override the height along a polyline. `along` paths follow the lower zone's border at a fixed offset, on the side that keeps farther from pads.
-3. **Parts** (`Cliffs.build`): wherever the ground rises more than `cliff.step` between neighbouring samples there is a face, whatever made it. Face points on the zone's ground are thinned to `cliff.spacing` and each grows a column of stacked, jittered blocks from below the low ground to the top of that face's ledge, with a grass cap. Columns never cover walkable corridor ground: each footprint is tested against points across every corridor's width, and the column shrinks or is dropped. Rim columns may rise into spires. Standalone outcrops dot zone floors. Stairs get Part steps; caves and roofed pockets get roof slabs up to the ground they cut through.
-4. **Props** (`Props.scatter`): groves from a realm-wide noise mask thresholded so each biome covers its `groves` share of the zone; trees Poisson-disc spaced for the biome density, a few loners outside groves, bushes around trees, boulders on a jittered lattice; all kept off corridors, water, pads and slopes.
-5. **Settlements** (`Settlement.forZone`): see below.
-6. **Terrain**: one 4-stud column per sample; faces steeper than a cliff step are painted with the rock material. Studio draws solid terrain half a voxel above the height a linear occupancy encodes, so the writer lowers ground by 2 studs (water is not shifted).
+The result (`Map`) holds per-cell region, height and mountain, coast, mainland and road flags, the placed sites and the roads as cell paths.
 
-## Settlements
+## Preview
 
-The Map (`tools/world/build.luau`) keeps only gameplay objects:
-- zone volumes and the spawn point;
-- trainers and the vendor;
-- the dev yard;
-- the creation stage.
+`lune run tools/worldgen/continent [seed]` writes `build/continent-<seed>.png` in about 2 seconds: biomes with hillshade, mountains, lakes, coast, territory borders in faction colours, roads, site markers and labels. Other seeds keep the sketch layout and change the coast, borders, mountain lines, minor sites and roads.
 
-The generator builds everything that dresses the pads, around those objects and the open-world posts: `Anchors.fromMap(map, Population)` reads the Map objects plus every garrison post and nest lair in `ContentServerOnly/Population` (with its wander radius, docs/systems/open-world.md), and nothing generated comes within `settlements.clear` studs of one. Footprints never overlap; tests check both rules.
+## Tests
 
-- **Village** (VillageCore):
-  - a cobbled plaza;
-  - lots along every road and around the plaza, each house or barn standing back `setback` studs with its door side to the road;
-  - a perimeter fence with gaps at the roads;
-  - crates, a wagon and hay near the buildings.
-- **Farmland** (WheatFields): `Plots.layout` splits the pad either side of the road into plots by binary space partition.
-  - Each plot has a terrace level (0, 1.5 or 3 studs over the pad), a crop and a furrow direction.
-  - The terrain raises each plot with a 3-stud bank and paints furrows (Mud and Ground stripes) along its rows. Paths stay at pad level.
-  - Wheat and sprouts grow in rows on the ridges; hay plots get bales; wheat plots get a scarecrow.
-  - Raised plots get a stone lip, open in the middle of each side.
-- **Orchard** (OrchardEdge): a jittered grid of fruit trees, an aisle along the road, fences and clutter.
-- **Goblin camp** (GoblinCamp):
-  - a palisade ring with two gate towers facing the village road;
-  - tents on an inner ring, opening to the centre;
-  - the fire brazier, the chieftain's dais and clutter.
-- **Fixtures** are authored positions for gameplay objects and set pieces:
-  - the village well (`Purifiable` water) and two braziers;
-  - the camp brazier (`Kindleable` bowl);
-  - the dais.
-
-  Their templates carry the tag as a `WorldTag` attribute; only placed copies get the CollectionService tag, so a template in ServerStorage is never a spell target.
-
-`SpawnService` stands each enemy on the ground below its spawn point (terrain and `Workspace.World`), so terraced plots and the dais are handled.
+`Continent.spec` runs eight seeds and checks:
+- the same seed gives the same continent, and different seeds differ;
+- every region exists, and its largest piece holds at least 80% of it;
+- the Adventurers hold exactly the central capital and a coastal harbor in the south-west;
+- each empire has one capital inside its own territory;
+- sites stand on dry ground in their own region, settlements off mountains;
+- roads reach every mainland settlement from the central capital.
 
 ## Village kit (MegaKit)
 
@@ -94,49 +70,26 @@ Roblox compatibility fixes, all in the script:
 - Untextured materials (glass, canvas, cloth, metal) and the vine tint listed in the manifest; Roblox drops glTF base colours.
 - Axes measured with marker cubes: the Roblox glTF import maps Blender X to -X and Y to +Z, so an asset's front faces Roblox -Z. The manifest records bounds in Roblox axes and `front = "-Z"`.
 
-`python tools/worldgen/props.py upload --creator-user 82401475 --library village` uploads it. That writes the asset id, the materials and the asset metadata to `content/world/village.json`, which Rojo maps to `WorldGen.VillageManifest`. `Sections.ImportVillage()` then fills `ServerStorage.VillageKit`:
-- one Model per asset, pivoted at its footprint centre on the ground, at `settlements.scale` (3.2 studs per kit metre);
-- materials coloured from the manifest;
-- the well's `Water` and the braziers' `Bowl` gameplay parts added at their manifest anchors.
+`python tools/worldgen/props.py upload --creator-user 82401475 --library village` uploads it and writes the asset id, materials and asset metadata to `content/world/village.json`, which Rojo maps to `WorldGen.VillageManifest`. The Studio importer went with the zone graph; the region builder brings it back.
 
 ## Props: procedural low-poly at low cost
 
 - **Few, large props.** Broadleaf trees about 58 studs and pines about 72 at scale 1, scaled 0.8 to 1.4.
-- **Variant library.** `tools/blender/world_props.py` (headless Blender 5.2) builds 49 seeded variants: 8 Broadleaf, 8 Pine, 6 Snag, 6 Bush, 6 Boulder, and for the settlements 4 Wheat, 3 Sprout, 6 Fruit (orchard trees) and 2 Hay. Each part has at most about 450 triangles. Canopies are convex hulls of a few random points; pines are stacked low-sided cones.
-- **Upload and import.**
-  1. `python tools/worldgen/props.py upload --creator-user 82401475` uploads the FBX through Open Cloud. It records the asset id and a geometry hash in `content/world/props.json`, which Rojo maps to `WorldGen.PropsManifest`.
-  2. `Sections.ImportProps()` makes `ServerStorage.WorldProps`: one Model per variant, pivoted at the base and scaled to the species height.
-  3. Every placed prop is a clone of a variant, so identical meshes render as one instanced batch.
-- **Two instances per tree at most.**
-  - The trunk collides; the canopy has collision, query and touch off.
-  - Parts are placed bare, without a Model.
-  - Collision fidelity stays Default, because the MCP context cannot set it. Setting trunks and boulders to Hull in Studio is cheaper.
+- **Variant library.** `tools/blender/world_props.py` (headless Blender 5.2) builds 49 seeded variants: 8 Broadleaf, 8 Pine, 6 Snag, 6 Bush, 6 Boulder, and for settlements 4 Wheat, 3 Sprout, 6 Fruit (orchard trees) and 2 Hay. Each part has at most about 450 triangles. Canopies are convex hulls of a few random points; pines are stacked low-sided cones.
+- **Upload.** `python tools/worldgen/props.py upload --creator-user 82401475` uploads the FBX through Open Cloud and records the asset id and a geometry hash in `content/world/props.json`, which Rojo maps to `WorldGen.PropsManifest`. Every placed prop is to be a clone of a variant, so identical meshes render as one instanced batch.
+- **Two instances per tree at most.** The trunk collides; the canopy has collision, query and touch off. Parts are placed bare, without a Model.
 - Rejected: trees built from 6 to 12 Parts each, which would be about 10 times the instances.
-
-## Section loop
-
-1. Edit `Midgard.luau` (nodes, edges, tuning).
-2. `lune run tools/worldgen/map` writes `build/worldgen-centre.png` in about 10 seconds. It shows shaded ground, water, borders, corridors, pads, every cliff part and labelled nodes.
-3. In Studio Edit mode, after Rojo syncs, require a fresh copy: `local c = game.ServerStorage.WorldGen:Clone(); c.Parent = game.ServerStorage; local S = require(c.Sections)`. After a library upload, run `S.ImportProps()` or `S.ImportVillage()` first. Then run one of:
-   - `S.Build("orchard")`: about 1 to 6 seconds per zone;
-   - `S.Build("orchard", true)`: the zone and every zone whose ground lies within the build margin of it;
-   - `S.Build()`: everything, about 25 seconds for the centre.
-
-   A zone reads each 256-stud terrain block it touches, replaces only its own columns, and writes the block back. Its parts go to `Workspace.World/<zone>/<Kind>`.
-4. `S.View("orchard", k)` puts the camera behind the site, clear of parts, facing N/E/S/W for `k` 1 to 4. It returns the camera position and target, which the Studio MCP `screen_capture` takes.
-5. When a zone is signed off, set `locked = true` and run `lune run tools/worldgen/bake`. That writes `Baked/<zone>.luau` with terrain columns, parts and props. Builds then use the bake, so generator changes can no longer alter the zone. `--rebake <zone>` regenerates one on purpose.
-
-`S.Reset()` clears all terrain and the `World` folder. It also moves the old `Workspace.Nature` props to `ServerStorage.RetiredNature`, where they stay until the owner deletes them.
 
 ## Not built yet
 
-- **Per-zone mood**: the atmosphere still blends by the old region bands (`tools/terrain/lib/Config.luau`), not by zone.
-- **Prop culling**: `PropDetail` culls the old `Nature` chunks. The new props are few enough not to need it yet.
-- **Climbing**: `climb` edges and ledge routes wait for a climbing mechanic (game-design §12).
-- **Water and caves inside zones**: only lakes, cave corridors and roofed pockets exist.
+- **Terrain and builds**: nothing turns the continent into Studio terrain, parts and props yet. Next is a region builder that reads a region's cells and builds it section by section.
+- **Population**: `ContentServerOnly/Population` is empty. Garrisons, patrols, caravans and nests come back per site and road once regions are built.
+- **The Map**: `Workspace.Map` (spawn, trainers, vendor, dev yard, creation stage) still stands at the old village spot, a placeholder until the Harbor or the Central Capital is built.
+- **Per-region mood**: the atmosphere still blends by the old region bands (`tools/terrain/lib/Config.luau`).
+- **Realm size**: 10,240 studs gives about 2,500 studs per region, small for Kenshi-style travel. The owner commits a size after the first regions are played.
 
 ## Old pipeline (to be removed)
 
-`tools/terrain/` (eroded heightfield generator), `src/ServerStorage/WorldGen/Apply.luau`, the generated `WorldGen/Data/` (about 16 MB), their `worldgen:*` register rows and `tests/specs/WorldGen.spec.luau` describe the replaced world.
-- The place no longer uses them: `Reset()` cleared their terrain, and their props are parked in `ServerStorage.RetiredNature`.
-- `Atmosphere` still reads the region bands from `tools/terrain/lib/Config.luau`. Removal therefore goes together with per-zone moods.
+`tools/terrain/` (eroded heightfield generator), `src/ServerStorage/WorldGen/Apply.luau`, the generated `WorldGen/Data/` (about 16 MB), their `worldgen:*` register rows and `tests/specs/WorldGen.spec.luau` describe an older replaced world.
+- The place no longer uses them; their props are parked in `ServerStorage.RetiredNature`.
+- `Atmosphere` still reads the region bands from `tools/terrain/lib/Config.luau`, so removal goes together with per-region moods.

@@ -3085,26 +3085,6 @@
 			"status": "draft"
 		},
 		{
-			"id": "worldgen:Midgard",
-			"type": "data",
-			"path": "src/ServerStorage/WorldGen/Midgard.luau",
-			"origin": "original",
-			"license": "project",
-			"owner": "dev",
-			"status": "draft",
-			"notes": "Midgard zone graph: nodes, edges, pads, lakes, biomes, cliff and prop tuning."
-		},
-		{
-			"id": "worldgen:Sections",
-			"type": "tool",
-			"path": "src/ServerStorage/WorldGen/Sections.luau",
-			"origin": "original",
-			"license": "project",
-			"owner": "dev",
-			"status": "draft",
-			"notes": "Studio edit-mode builder for the zone-graph world: Build, Clear, Reset, View, ImportProps."
-		},
-		{
 			"id": "worldgen:GenHash",
 			"type": "code",
 			"path": "src/ServerStorage/WorldGen/Gen/Hash.luau",
@@ -3115,64 +3095,24 @@
 			"notes": "Deterministic hashing, RNG and fractal noise shared by Lune and Studio."
 		},
 		{
-			"id": "worldgen:GenGraph",
-			"type": "code",
-			"path": "src/ServerStorage/WorldGen/Gen/Graph.luau",
+			"id": "worldgen:Continent",
+			"type": "data",
+			"path": "src/ServerStorage/WorldGen/Continent.luau",
 			"origin": "original",
 			"license": "project",
 			"owner": "dev",
 			"status": "draft",
-			"notes": "Resolves the zone graph, checks it and places unanchored nodes."
+			"notes": "Midgard continent template: regions, ridges, lakes, named sites and generator tuning, laid out from the owner's sketch."
 		},
 		{
-			"id": "worldgen:GenField",
-			"type": "code",
-			"path": "src/ServerStorage/WorldGen/Gen/Field.luau",
+			"id": "worldgen:ContinentGen",
+			"type": "tool",
+			"path": "src/ServerStorage/WorldGen/Gen/Continent.luau",
 			"origin": "original",
 			"license": "project",
 			"owner": "dev",
 			"status": "draft",
-			"notes": "Ownership, height, material, water and corridors as a pure function of position."
-		},
-		{
-			"id": "worldgen:GenGrid",
-			"type": "code",
-			"path": "src/ServerStorage/WorldGen/Gen/Grid.luau",
-			"origin": "original",
-			"license": "project",
-			"owner": "dev",
-			"status": "draft",
-			"notes": "Regular grid of field samples per zone build."
-		},
-		{
-			"id": "worldgen:GenCliffs",
-			"type": "code",
-			"path": "src/ServerStorage/WorldGen/Gen/Cliffs.luau",
-			"origin": "original",
-			"license": "project",
-			"owner": "dev",
-			"status": "draft",
-			"notes": "Cliff columns, spires, outcrops, stairs and roofs as part specs."
-		},
-		{
-			"id": "worldgen:GenProps",
-			"type": "code",
-			"path": "src/ServerStorage/WorldGen/Gen/Props.luau",
-			"origin": "original",
-			"license": "project",
-			"owner": "dev",
-			"status": "draft",
-			"notes": "Grove and boulder scatter over the prop library."
-		},
-		{
-			"id": "worldgen:GenBake",
-			"type": "code",
-			"path": "src/ServerStorage/WorldGen/Gen/Bake.luau",
-			"origin": "original",
-			"license": "project",
-			"owner": "dev",
-			"status": "draft",
-			"notes": "Zone build results: generate, encode to a baked module, decode."
+			"notes": "Pure continent generator: land, regions, mountains, lakes, sites and roads from the template and a seed."
 		},
 		{
 			"id": "model:WorldProps",
@@ -3184,36 +3124,6 @@
 			"status": "draft",
 			"notes": "Low-poly prop library (49 variants: Broadleaf, Pine, Snag, Bush, Boulder, Wheat, Sprout, Fruit, Hay), uploaded through Open Cloud by tools/worldgen/props.py and imported into ServerStorage.WorldProps by Sections.ImportProps.",
 			"assetId": "73460080113066"
-		},
-		{
-			"id": "worldgen:GenAnchors",
-			"type": "code",
-			"path": "src/ServerStorage/WorldGen/Gen/Anchors.luau",
-			"origin": "original",
-			"license": "project",
-			"owner": "dev",
-			"status": "draft",
-			"notes": "Keep-out anchors (NPCs, spawners, dummies, spawn) read from the Map for the settlement layout."
-		},
-		{
-			"id": "worldgen:GenPlots",
-			"type": "code",
-			"path": "src/ServerStorage/WorldGen/Gen/Plots.luau",
-			"origin": "original",
-			"license": "project",
-			"owner": "dev",
-			"status": "draft",
-			"notes": "Farmland plots: binary space partition of the fields pad with terrace levels, crops and furrows."
-		},
-		{
-			"id": "worldgen:GenSettlement",
-			"type": "code",
-			"path": "src/ServerStorage/WorldGen/Gen/Settlement.luau",
-			"origin": "original",
-			"license": "project",
-			"owner": "dev",
-			"status": "draft",
-			"notes": "Settlement layout: village lots, field crops, orchard grid, goblin camp palisade and tents."
 		},
 		{
 			"id": "model:VillageKit",
