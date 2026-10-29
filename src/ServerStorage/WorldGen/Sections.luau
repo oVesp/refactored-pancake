@@ -37,6 +37,11 @@ local Realm = require(script.Parent.Midgard)
 local log = Logger.new("WorldGen")
 
 local VOXEL = 4
+-- Studio draws a solid terrain surface half a voxel above the height a linear occupancy encodes
+-- (measured: occupancy for h = 0.2 renders at 2.19, for every h tested), so ground heights are
+-- written this much lower to land the surface on the generated height. Water renders where it is
+-- written and is not shifted.
+local SURFACE_OFFSET = VOXEL / 2
 local BLOCK = 64 -- voxel columns per terrain read/write block (256 studs)
 local MARGIN = 48 -- studs of samples around a zone, for cliff tops and neighbour checks
 local FLUSH = 400 -- parts parented per frame
@@ -123,7 +128,7 @@ local function writeTerrain(zone: Graph.Node, columns: Bake.Columns)
 					if not (k and columns.assign[k] == zone.index) then
 						continue
 					end
-					local h = columns.height[k]
+					local h = columns.height[k] - SURFACE_OFFSET
 					local w = columns.water[k]
 					local surface = (Enum.Material :: any)[columns.material[k]]
 					for iy = 1, layers do
