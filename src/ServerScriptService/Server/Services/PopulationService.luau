@@ -78,7 +78,7 @@ local function memberSpec(npc: string, level: { number }?): any
 	local def = NpcDefs.Get(npc)
 	local low = if level then level[1] elseif def then def.levelMin else 1
 	local high = if level then level[2] elseif def then def.levelMax else low
-	return { npc = npc, level = random:NextInteger(low, high), hp = 1, entity = nil }
+	return { npc = npc, level = random:NextInteger(low, high), range = level, hp = 1, entity = nil }
 end
 
 local function expand(members: { Population.Member }): { any }
@@ -104,7 +104,7 @@ local function garrison(def: Population.Garrison, label: string)
 		onLoss = function(group: Group, lost: any)
 			task.delay(def.respawnSeconds, function()
 				if not group.removed then
-					GroupService.AddMember(group, memberSpec(lost.npc, nil))
+					GroupService.AddMember(group, memberSpec(lost.npc, lost.range))
 				end
 			end)
 		end,

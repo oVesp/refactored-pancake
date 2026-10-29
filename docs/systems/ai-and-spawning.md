@@ -1,6 +1,6 @@
 # AI and spawning
 
-Code: `Server/Services/AIService.luau`, `SquadService.luau`, `SpawnService.luau`, `Shared/Swarm.luau`, `Client/Controllers/EnemyAnimationController.luau`; template `src/ServerStorage/Templates/Goblin.rbxmx`.
+Code: `Server/Services/AIService.luau`, `SquadService.luau`, `SpawnService.luau`, `GroupService.luau`, `PopulationService.luau` (docs/systems/open-world.md), `Shared/Swarm.luau`, `Client/Controllers/EnemyAnimationController.luau`; template `src/ServerStorage/Templates/Goblin.rbxmx`.
 
 Goblin template: the Goblin Scout's Studio import (`tools/world/goblin_scout_import.rbxm`, built by `tools/world/build.luau`): ten skinned MeshParts with PBR SurfaceAppearances on the bone tree of an invisible `Rig` part, jointed to a Humanoid's `HumanoidRootPart`, plus an invisible `Head` anchor for nameplates. Spawn scales it by `def.scale × BaseScale` (1.05). Spawn tints a template's `Body` part (the Skeleton); the Scout's textures carry its colours, so goblin `color` values no longer show. The model streams atomically.
 

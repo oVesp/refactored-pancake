@@ -237,7 +237,7 @@ Toolbox audio needed: footsteps (grass, wood), melee swing/hit, spell cast/impac
 1. Join → pick class at trainer → kill goblins → reach level 5 in each class, on desktop and phone emulator.
 2. Every class skill, passive and spell in §4 resolves through the server path. Passives show in stats. Rejected casts roll back client prediction.
 3. Tier 2 spells are refused at casting-line level 7 and allowed at 8 (unit test + playtest).
-4. Each Rabble AI state (idle, patrol, aggro, attack, return) observed. Leash and respawn work. Hexer interrupt works in the Dev Yard.
+4. Each Rabble AI state (idle, patrol, aggro, attack, return) observed. Leash and respawn work (on `exp/open-world`: the leash follows the group and garrisons and nests replace their dead). Hexer interrupt works in the Dev Yard.
 5. Multiclass to 5 total levels using each D4 template.
 6. Dev commands refused for non-allowlisted users in a published test.
 7. Every asset in the place has a register row. No hard-coded asset ids.

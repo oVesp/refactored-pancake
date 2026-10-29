@@ -77,13 +77,17 @@ function Route.At(route: Route, distance: number): (Vector3, Vector3, boolean)
 	return last, if heading.Magnitude > 1e-3 then heading.Unit else Vector3.new(0, 0, -1), finished
 end
 
---[=[ Distance along the route of the closest point to `position` (resumes after a fight). ]=]
-function Route.Nearest(route: Route, position: Vector3): number
+--[=[
+	Distance along the route of the closest point to `position` (resumes after a fight). With a
+	`hint`, only points within `window` studs of it along the route count, so a route that passes
+	the same ground twice (out and back) resolves to the leg the walker was on.
+]=]
+function Route.Nearest(route: Route, position: Vector3, hint: number?, window: number?): number
 	local points = route.points
 	if #points == 1 then
 		return 0
 	end
-	local best, bestDistance = 0, math.huge
+	local best, bestDistance = hint or 0, math.huge
 	local p = Vector3.new(position.X, 0, position.Z)
 	for i = 1, #points do
 		local j = nextIndex(route, i)
@@ -95,10 +99,19 @@ function Route.Nearest(route: Route, position: Vector3): number
 		local ab = b - a
 		local lengthSq = ab:Dot(ab)
 		local t = if lengthSq > 0 then math.clamp((p - a):Dot(ab) / lengthSq, 0, 1) else 0
+		local along = route.marks[i] + math.sqrt(lengthSq) * t
 		local gap = (a + ab * t - p).Magnitude
-		if gap < bestDistance then
+		local fits = true
+		if hint then
+			local offset = math.abs(along - hint)
+			if route.loop then
+				offset = math.min(offset, route.length - offset)
+			end
+			fits = offset <= (window or 0)
+		end
+		if fits and gap < bestDistance then
 			bestDistance = gap
-			best = route.marks[i] + math.sqrt(lengthSq) * t
+			best = along
 		end
 	end
 	return best

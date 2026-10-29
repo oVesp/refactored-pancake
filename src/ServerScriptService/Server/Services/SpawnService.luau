@@ -104,6 +104,11 @@ local function humanModel(def: any): (Model?, string)
 		animate:Destroy()
 	end
 	model:SetAttribute("AnimSet", "Human")
+	-- Clients load clips through the Animator; it must exist on the server to replicate.
+	local humanoid = model:FindFirstChildOfClass("Humanoid")
+	if humanoid and not humanoid:FindFirstChildOfClass("Animator") then
+		Instance.new("Animator").Parent = humanoid
+	end
 	local names = (Names :: any)[look.gender] or Names.male
 	return model, `{pick(names)}, {def.name}`
 end

@@ -68,6 +68,16 @@ return {
 		Expect.truthy(math.abs(Route.Nearest(route, Vector3.new(3, 0, -2)) - 3) < 1e-3)
 	end,
 
+	["a hint keeps an out-and-back route on the leg the walker was on"] = function()
+		local route = Route.new({ Vector3.new(0, 0, 0), Vector3.new(100, 0, 0), Vector3.new(0, 0, 0) }, false)
+		local onReturn = Vector3.new(30, 0, 1)
+		Expect.truthy(math.abs(Route.Nearest(route, onReturn) - 30) < 1e-3, "no hint: first leg")
+		Expect.truthy(math.abs(Route.Nearest(route, onReturn, 165, 80) - 170) < 1e-3, "hint: return leg")
+		local loop = Route.new({ Vector3.new(0, 0, 0), Vector3.new(10, 0, 0), Vector3.new(10, 0, 10) }, true)
+		-- (1, 1) lies on the closing leg, 3.4 studs before the start: within the wrapped window.
+		Expect.truthy(Route.Nearest(loop, Vector3.new(1, 0, 1), 2, 6) > 30, "loop wraps the window")
+	end,
+
 	["spatial hash returns exactly the items in range"] = function()
 		local hash = SpatialHash.new(16)
 		local points = {}

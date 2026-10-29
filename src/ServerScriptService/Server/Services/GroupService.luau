@@ -12,6 +12,7 @@ local Types = require(script.Parent.Parent.Types)
 type Entity = Types.Entity
 
 local STATION_SPACING = 4
+local RESUME_WINDOW = 80 -- studs along the route searched for the resume point after a fight
 local END_HIDE_SHARE = 0.5 -- an open route's group leaves once no player is within this share of MaterializeRadius
 
 local log = Logger.new("GroupService")
@@ -24,6 +25,8 @@ local SpawnService: any
 export type MemberSpec = {
 	npc: string,
 	level: number,
+	--[=[ Authored level range; a replacement rolls in it again. ]=]
+	range: { number }?,
 	--[=[ Share of max HP, kept while the group has no bodies. ]=]
 	hp: number,
 	entity: Entity?,
@@ -224,9 +227,6 @@ local function dematerialize(group: Group)
 			spec.entity = nil
 		end
 	end
-	if group.route then
-		group.progress = Route.Nearest(group.route, group.position)
-	end
 	group.materialized = false
 end
 
@@ -307,7 +307,8 @@ local function tick(group: Group, dt: number, now: number)
 		end
 	end
 	if group.busy and not busy and group.route then
-		group.progress = Route.Nearest(group.route, (members[1].entity :: Entity).root.Position)
+		group.progress =
+			Route.Nearest(group.route, (members[1].entity :: Entity).root.Position, group.progress, RESUME_WINDOW)
 	end
 	group.busy = busy
 	local distance = nearestPlayer(group.position)
