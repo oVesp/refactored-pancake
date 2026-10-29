@@ -147,13 +147,19 @@ return {
 		end
 	end,
 
-	["no cliff or outcrop blocks the headroom of a ramp or stairs"] = function()
+	["no cliff, spire or outcrop blocks the headroom of any corridor"] = function()
 		local graph, field = world()
 		local ids = {}
 		for _, c in field.corridors do
-			if c.kind == "ramp" or c.kind == "stairs" then
-				ids[graph.nodes[c.edge.a].id] = true
-				ids[graph.nodes[c.edge.b].id] = true
+			ids[graph.nodes[c.edge.a].id] = true
+			ids[graph.nodes[c.edge.b].id] = true
+			-- The zone a corridor runs through (a tunnel under a plateau) builds walls along it too.
+			for _, p in c.points do
+				local a, b = field.owner(p.x, p.z)
+				local owner = if a ~= 0 then a else b
+				if owner ~= 0 then
+					ids[graph.nodes[owner].id] = true
+				end
 			end
 		end
 		for id in ids do
@@ -164,9 +170,6 @@ return {
 				local frame = partCFrame(part)
 				local radius = math.max(part.sx, part.sz) * 0.75
 				for _, c in field.corridors do
-					if c.kind ~= "ramp" and c.kind ~= "stairs" then
-						continue
-					end
 					if
 						part.x + radius < c.minX
 						or part.x - radius > c.maxX
@@ -205,6 +208,16 @@ return {
 				Expect.truthy(s.padDistance >= 10, `{id} {prop.asset} on a pad`)
 			end
 		end
+	end,
+
+	["neighbours by shared ground include rim neighbours without an edge"] = function()
+		local graph, field = world()
+		local touching = Bake.neighbours(field, MARGIN)
+		local orchard = graph.byId.orchard.index
+		local terrace = graph.byId["east-terrace"].index
+		Expect.truthy(Graph.edgeBetween(graph, orchard, terrace) == nil, "no edge between them")
+		Expect.truthy(touching[orchard] and touching[orchard][terrace], "orchard and east terrace share ground")
+		Expect.truthy(touching[terrace] and touching[terrace][orchard], "symmetric")
 	end,
 
 	["a zone is untouched by changes to a zone it does not border"] = function()

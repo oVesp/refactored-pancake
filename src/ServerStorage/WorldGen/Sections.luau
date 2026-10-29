@@ -304,12 +304,17 @@ function Sections.Build(id: string?, withNeighbours: boolean?)
 		assert(node, `unknown zone {id}`)
 		table.insert(targets, node)
 		if withNeighbours then
-			for _, edge in ctx.graph.edges do
-				if edge.a == node.index then
-					table.insert(targets, ctx.graph.nodes[edge.b])
-				elseif edge.b == node.index then
-					table.insert(targets, ctx.graph.nodes[edge.a])
+			-- Neighbours by shared ground, not by edges: rim and cliff neighbours have no edge.
+			local touching = Bake.neighbours(ctx.field, MARGIN)[node.index]
+			local others = {}
+			if touching then
+				for index in touching do
+					table.insert(others, index)
 				end
+			end
+			table.sort(others)
+			for _, index in others do
+				table.insert(targets, ctx.graph.nodes[index])
 			end
 		end
 	end

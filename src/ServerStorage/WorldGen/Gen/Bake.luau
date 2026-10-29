@@ -66,6 +66,47 @@ function Bake.extents(field: Field.Field): { [number]: Extent }
 	return out
 end
 
+--[=[
+	Zones whose ground lies within `reach` studs of each other's, from a coarse scan of the
+	sections. A zone's cliffs and terrain read the ground this close across its border, so these are
+	the zones to rebuild together after a border moves (graph edges miss rim and cliff neighbours).
+]=]
+function Bake.neighbours(field: Field.Field, reach: number): { [number]: { [number]: boolean } }
+	local out: { [number]: { [number]: boolean } } = {}
+	local steps = math.max(1, math.ceil(reach / COARSE))
+	for _, s in field.graph.realm.sections do
+		local cols = math.floor((s.x1 - s.x0) / COARSE) + 1
+		local rows = math.floor((s.z1 - s.z0) / COARSE) + 1
+		local assign = table.create(cols * rows, 0)
+		for j = 0, rows - 1 do
+			for i = 0, cols - 1 do
+				local a, b = field.owner(s.x0 + i * COARSE, s.z0 + j * COARSE)
+				assign[i + j * cols + 1] = if a ~= 0 then a else b
+			end
+		end
+		for j = 0, rows - 1 do
+			for i = 0, cols - 1 do
+				local here = assign[i + j * cols + 1]
+				for d = 1, steps do
+					for _, o in { { d, 0 }, { 0, d } } do
+						local ni, nj = i + o[1], j + o[2]
+						if ni < cols and nj < rows then
+							local there = assign[ni + nj * cols + 1]
+							if here ~= 0 and there ~= 0 and here ~= there then
+								out[here] = out[here] or {}
+								out[there] = out[there] or {}
+								out[here][there] = true
+								out[there][here] = true
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	return out
+end
+
 --[=[ Index of the column at world (x, z), or nil outside the table. ]=]
 function Bake.columnIndex(columns: Columns, x: number, z: number): number?
 	local i = (x - columns.x0) / STEP
