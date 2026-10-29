@@ -57,14 +57,14 @@ for j = 0, res - 1 do
 		local color: { number }
 		local shade = 1
 		if r == Continent.SEA then
-			color = biomes.sea.color
+			color = template.colors.sea
 		elseif r == Continent.LAKE then
-			color = biomes.lake.color
+			color = template.colors.lake
 		else
-			color = if map.mountain[k] then biomes.mountain.color else biomes[regionDefs[r].biome].color
+			color = if map.mountain[k] then template.colors.mountain else biomes[regionDefs[r].biome].color
 			local west = if i > 0 then map.height[k - 1] else map.height[k]
 			local north = if j > 0 then map.height[k - res] else map.height[k]
-			shade = math.clamp(1 + (map.height[k] * 2 - west - north) * 12, 0.7, 1.25)
+			shade = math.clamp(1 + (map.height[k] * 2 - west - north) / template.heights.scale * 12, 0.7, 1.25)
 		end
 		local c = { color[1] * shade, color[2] * shade, color[3] * shade }
 		for sy = 0, SCALE - 1 do

@@ -6,11 +6,15 @@ This replaced the zone-graph world (village, fields and goblin camp in one centr
 
 Originality: the sketch is the owner's own; region names and placeholder site names are generic. No layout, landmark, location name or unique feature of another game is copied (game-design §2).
 
-Code: `src/ServerStorage/WorldGen/Continent.luau` (template), `Gen/Continent.luau` (pure generator, runs in Lune and Studio), `Gen/Hash.luau` (hashing and noise). Tool: `tools/worldgen/continent.luau`. Tests: `tests/specs/Continent.spec.luau`.
+Code: `src/ServerStorage/WorldGen/Continent.luau` (template), `Gen/Continent.luau` (pure generator and point query, runs in Lune and Studio), `Gen/Region.luau` (one region at stud scale, pure), `Regions.luau` (Studio builder), `Gen/Hash.luau` (hashing and noise). Tools: `tools/worldgen/continent.luau`, `tools/worldgen/region.luau`. Tests: `tests/specs/Continent.spec.luau`, `tests/specs/Region.spec.luau`.
 
 ## Template (`Continent.luau`)
 
-Unit map coordinates: `u` west to east, `v` north to south, both 0..1, so the data reads like the sketch. `size` (10,240 studs, provisional, game-design §12) turns them into studs with the map centre at the origin (`Continent.toStuds`).
+Unit map coordinates: `u` west to east, `v` north to south, both 0..1, so the data reads like the sketch. `size` is 20,480 studs (owner, 2026-10-29); a grid cell is 80 studs. Studs have the **Harbor village at the origin** (`origin`, `Continent.toStuds` and `toUnit`), so the Map's spawn, trainers, zones and dev yard keep their coordinates.
+
+- **Heights** (`heights`, studs): water at -8, seabed down to -70, a 3-stud beach, region height 1 = 300 studs, mountain peaks up to 1.15 of that, Map ground 0.2.
+- **Pads**: rectangles in studs around the origin, one per Map zone (village core, dev yard, fields, orchard, goblin camp), held flat at the Map ground and dry, fading out over `pads.blend`. They count as Verdant Greens.
+- **Bay**: a circle of sea south of the village, so the Harbor has water for its docks on every seed.
 
 - **Regions**: id, name, biome, owner faction, base `height`, noise `relief` and `anchors` `{ u, v, r }`. Several anchors shape a region (the Tundra band has three). `scatter` adds islets around the first anchor (Archipelago). `sky` marks floating isles that roads do not reach (Sky Isles). Each region asks for a number of `towns`, `pois` and `dungeons`.
 - **Ridges**: region pairs whose shared border is a mountain range.
@@ -26,14 +30,14 @@ Unit map coordinates: `u` west to east, `v` north to south, both 0..1, so the da
 | Undead Fields, Undead Kingdom (SE) | undead | Undead (Niflheim Gate on the coast) |
 | The Coasts (S), Archipelago (NE) | coast, isles | unclaimed |
 
-The Central Capital stands in the Highlands and the Harbor on the Verdant Greens coast; both belong to the Adventurers.
+The Central Capital stands in the Highlands and the Harbor on the Verdant Greens coast; both belong to the Adventurers. The Harbor is the starter village (scope 01 slice: village, fields, orchard, goblin camp inland to the north); it is `fixed` at the origin, and a small Verdant anchor keeps it on the mainland for every seed.
 
 ## Generator (`Gen/Continent.luau`)
 
-`Continent.generate(template, seed?, res?)` is a pure function on a `res` x `res` grid (256 by default; tests use 128). Every random stream is seeded by name (`Hash.named`), so a seed gives the same continent in Lune and Studio.
+`Continent.generate(template, seed?, res?)` is a pure function on a `res` x `res` grid (256 by default; tests use 128). Every random stream is seeded by name (`Hash.named`), so a seed gives the same continent in Lune and Studio. Stages 1 and 2 are the point query `Continent.sampler(template, seed)(u, v)`, which the grid and the Studio terrain writer both call, so regions built at different times meet exactly.
 
 1. **Land and regions**: anchors are jittered per seed. A cell belongs to the region with the smallest distance / `r` to one of its anchors, measured on domain-warped coordinates so borders curve. It is land while that distance stays under `coast.reach` plus coastline noise (1 for scattered islets); this closes the gaps between anchors and draws the coast. A `margin` of open sea surrounds the map.
-2. **Height, mountains, lakes**: base height plus noise per region, lower near the shore. Cells near a `ridges` border (noisy `ridge.width`) become mountains. Template lakes are carved with a noisy shore.
+2. **Height, mountains, lakes**: base height plus noise and per-biome detail relief, lower near the shore. Neighbouring regions blend across a `blend` band, so borders are slopes, not steps. Points near a `ridges` border (noisy `ridge.width`) rise into ridged mountains. Template lakes are carved with a noisy shore at their own water level. Pads and the bay override land and height last.
 3. **Shore and mainland**: coast cells touch the sea; the mainland is the largest land mass.
 4. **Sites**: each named site takes the dry, non-mountain cell of its region nearest to its jittered spot (a coast cell when `coastal`). Then each region places its towns, points of interest and dungeons on random cells, `spacing` apart from every site; dungeons may sit on mountains. Towns belong to the region's owner.
 5. **Roads**: a minimum spanning tree over the mainland settlements (capital, city, town, harbor; not the Sky Isles), plus a link to a node's second-nearest neighbour when that is under `roads.extra` times the nearest distance. Shortest links are routed first, by A* over 8 neighbours: cost grows with slope, mountains cost `roads.mountain` times more and existing road costs `roads.reuse` times less, so roads merge into trunks.
@@ -54,6 +58,21 @@ The result (`Map`) holds per-cell region, height and mountain, coast, mainland a
 - sites stand on dry ground in their own region, settlements off mountains;
 - named settlements (capitals, city, harbor) are on the mainland;
 - roads reach every mainland settlement from the central capital.
+
+## Region builds
+
+Each region is built and approved on its own (owner, 2026-10-29). Verdant Greens, with the Harbor village, is first.
+
+- **Ownership**: a region owns every 4-stud column whose sample names it as `owner`: its land, its lakes and the sea out to `offshore` anchor reaches from its coast. Sea farther out is not built yet.
+- **Columns** (`Region.column`): ground and water from the sample; material from the biome: beach sand near the coastline, rock on mountains and slopes over 4.5 studs per column (snow above 250 studs), bare ground on roads (7 studs either side of the smoothed road line) and in large noise patches, grass elsewhere; sand and mud under water.
+- **Props** (`Region.props`): trees on a jittered lattice at the biome density inside groves (noise mask covering `groves` of the ground), a few loners, bushes around trees, boulders on a coarser lattice. Kept off water, beaches, mountains, roads, pads and uneven ground. Each is a clone of a `ServerStorage.WorldProps` variant.
+- **Sites**: neon placeholder pillars until settlements are dressed.
+- **Studio** (`Regions.luau`): `Regions.Build(id)` runs in the background; it reads each 256-stud terrain block near the region, replaces only owned columns and writes it back, then places props and markers under `Workspace.World/<id>`. `Regions.Status(id)` reports progress; Verdant Greens takes about 50 seconds. `Regions.View(id, k)` frames the region from the N/E/S/W edge or above.
+- **Report**: `lune run tools/worldgen/region <id>` prints bounds, prop count, sites and the fingerprint, and writes `build/region-<id>.png` (8 studs per pixel).
+
+### Approval
+
+Terrain lives only in the place file, so approval is a fingerprint: `Region.fingerprint` hashes the owned ground, water and material on a 32-stud lattice, the props and the markers. When the owner approves a region, its fingerprint goes into `Continent.approved`. `Region.spec` fails if a change would alter an approved region, and `Regions.Build` refuses an approved region unless forced.
 
 ## Village kit (MegaKit)
 
@@ -83,11 +102,11 @@ Roblox compatibility fixes, all in the script:
 
 ## Not built yet
 
-- **Terrain and builds**: nothing turns the continent into Studio terrain, parts and props yet. Next is a region builder that reads a region's cells and builds it section by section.
+- **Settlements**: sites are placeholder pillars. The Harbor village dressing (houses, docks, fields, orchard, goblin camp) is the next pass for Verdant Greens.
+- **Open sea**: sea beyond each region's offshore band is not built.
 - **Population**: `ContentServerOnly/Population` is empty. Garrisons, patrols, caravans and nests come back per site and road once regions are built.
-- **The Map**: `Workspace.Map` (spawn, trainers, vendor, dev yard, creation stage) still stands at the old village spot, a placeholder until the Harbor or the Central Capital is built.
+- **The Map**: `Workspace.Map` (spawn, trainers, vendor, dev yard, creation stage) stands on the Harbor village pads at the origin.
 - **Per-region mood**: the atmosphere still blends by the old region bands (`tools/terrain/lib/Config.luau`).
-- **Realm size**: 10,240 studs gives about 2,500 studs per region, small for Kenshi-style travel. The owner commits a size after the first regions are played.
 
 ## Old pipeline (to be removed)
 

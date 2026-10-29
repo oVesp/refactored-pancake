@@ -122,7 +122,18 @@ return {
 				"capital not central"
 			)
 			Expect.truthy(harbor.u < 0.45 and harbor.v > 0.6, "harbor not in the south-west")
-			Expect.truthy(m.coast[harbor.cell], `seed {seed}: harbor off the coast`)
+			-- Sea within three cells (240 studs) of the harbor.
+			local res = m.res
+			local hi, hj = (harbor.cell - 1) % res, (harbor.cell - 1) // res
+			local nearSea = false
+			for dj = -3, 3 do
+				for di = -3, 3 do
+					if m.region[Continent.index(res, hi + di, hj + dj)] == Continent.SEA then
+						nearSea = true
+					end
+				end
+			end
+			Expect.truthy(nearSea, `seed {seed}: harbor off the coast`)
 		end
 	end,
 

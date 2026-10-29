@@ -38,14 +38,50 @@ export type Site = {
 	owner: string?,
 	at: { number }, -- { u, v } before jitter
 	coastal: boolean?, -- moved to the nearest coast cell of its region
+	fixed: boolean?, -- placed exactly at `at` (the Harbor village, which is the world origin)
 }
 
-export type Biome = { color: { number } }
+export type Biome = {
+	color: { number }, -- preview
+	grass: string, -- terrain material on open ground
+	ground: string, -- patches, roads and steep ground
+	rock: string, -- cliffs and mountains
+	sand: string, -- beaches and shallow beds
+	detail: { number }, -- { studs, wavelength in studs } of small relief on top of the region height
+	trees: number, -- trees per 10,000 square studs inside groves
+	groves: number, -- share of the ground covered by groves, 0..1
+	species: { [string]: number }, -- weights over `props.species`
+	boulders: number, -- per 100,000 square studs
+}
 
 local Continent = {
 	seed = 20261029,
-	size = 10240, -- studs edge to edge, provisional (game-design §12)
-	res = 256, -- grid cells per edge
+	size = 20480, -- studs edge to edge (owner, 2026-10-29)
+	res = 256, -- grid cells per edge (80 studs each)
+	-- The Harbor village sits at studs 0, 0: the Map (spawn, trainers, zones) is built around it.
+	origin = { 0.205, 0.815 },
+	-- Heights in studs: water level, deepest seabed, beach rise over the water, height of region
+	-- height 1, mountain peaks as a share of that, and the Map ground (tools/world/build.luau G).
+	heights = { sea = -8, seabed = -70, beach = 3, scale = 300, mountain = 1.15, ground = 0.2 },
+	-- Ground held flat at `heights.ground` under the Map's zones (studs from the origin), fading over
+	-- `blend`; they count as `region` and stay dry. A test keeps them over Map.rbxmx's zones.
+	pads = {
+		region = "verdant",
+		blend = 140,
+		rects = {
+			{ -100, -100, 100, 110 }, -- VillageCore
+			{ -250, -100, -90, 100 }, -- DevYard
+			{ -120, -330, 120, -90 }, -- WheatFields
+			{ -120, -570, 120, -320 }, -- OrchardEdge
+			{ -110, -770, 110, -550 }, -- GoblinCamp
+		},
+	} :: { region: string, blend: number, rects: { { number } } },
+	bay = { x = 40, z = 470, r = 300 }, -- sea held south of the village, for the docks
+	blend = 0.35, -- width of the slope between neighbouring regions, in anchor reaches
+	offshore = 0.5, -- sea a region builds, in anchor reaches out from its coast
+	offshoreMargin = 900, -- studs around a region's cells searched for its sea
+	-- Signed-off regions: id to `Gen/Region.fingerprint`. Builds refuse to touch them unless forced.
+	approved = {} :: { [string]: string },
 	margin = 0.035, -- open sea kept around the map edge
 	-- Land reaches `reach` times an anchor's `r`, give or take `amp` of coastline noise.
 	coast = { reach = 1.45, amp = 0.25, scale = 0.09, octaves = 4 },
@@ -54,24 +90,199 @@ local Continent = {
 	spacing = { town = 0.06, poi = 0.035, dungeon = 0.04 }, -- minimum distance from any other site
 	roads = { extra = 1.35, mountain = 9, slope = 6, reuse = 0.45 },
 
+	-- Preview colours of what is not a biome.
+	colors = {
+		sea = { 34, 62, 72 },
+		lake = { 52, 92, 104 },
+		mountain = { 104, 102, 112 },
+	} :: { [string]: { number } },
+
+	-- Terrain material colours are global per material, so the palette lives on the realm.
+	materialColors = {
+		Grass = { 96, 136, 82 },
+		LeafyGrass = { 78, 116, 80 },
+		Ground = { 112, 102, 84 },
+		Mud = { 86, 80, 66 },
+		Sand = { 196, 182, 140 },
+		Slate = { 108, 112, 118 },
+		Rock = { 112, 112, 116 },
+		Snow = { 226, 232, 238 },
+		Basalt = { 62, 58, 60 },
+		Sandstone = { 168, 132, 96 },
+		Cobblestone = { 122, 120, 112 },
+	} :: { [string]: { number } },
+
 	biomes = {
-		sea = { color = { 34, 62, 72 } },
-		lake = { color = { 52, 92, 104 } },
-		mountain = { color = { 104, 102, 112 } },
-		volcanic = { color = { 150, 66, 50 } },
-		tundra = { color = { 196, 212, 220 } },
-		canyon = { color = { 112, 96, 104 } },
-		highland = { color = { 124, 112, 150 } },
-		sky = { color = { 214, 218, 236 } },
-		wasteland = { color = { 192, 160, 108 } },
-		magma = { color = { 178, 82, 46 } },
-		swamp = { color = { 70, 104, 62 } },
-		plains = { color = { 124, 160, 76 } },
-		forest = { color = { 46, 84, 58 } },
-		undead = { color = { 82, 70, 104 } },
-		coast = { color = { 210, 196, 156 } },
-		isles = { color = { 118, 140, 82 } },
+		volcanic = {
+			color = { 150, 66, 50 },
+			grass = "Basalt",
+			ground = "Ground",
+			rock = "Basalt",
+			sand = "Sand",
+			detail = { 14, 260 },
+			trees = 0.3,
+			groves = 0.1,
+			species = { dead = 1 },
+			boulders = 6,
+		},
+		tundra = {
+			color = { 196, 212, 220 },
+			grass = "Snow",
+			ground = "Glacier",
+			rock = "Slate",
+			sand = "Sand",
+			detail = { 10, 300 },
+			trees = 1.2,
+			groves = 0.2,
+			species = { pine = 1 },
+			boulders = 4,
+		},
+		canyon = {
+			color = { 112, 96, 104 },
+			grass = "Sandstone",
+			ground = "Ground",
+			rock = "Sandstone",
+			sand = "Sand",
+			detail = { 18, 220 },
+			trees = 0.2,
+			groves = 0.1,
+			species = { dead = 1 },
+			boulders = 6,
+		},
+		highland = {
+			color = { 124, 112, 150 },
+			grass = "Grass",
+			ground = "Ground",
+			rock = "Slate",
+			sand = "Sand",
+			detail = { 12, 260 },
+			trees = 2,
+			groves = 0.35,
+			species = { pine = 0.7, broad = 0.3 },
+			boulders = 4,
+		},
+		sky = {
+			color = { 214, 218, 236 },
+			grass = "Grass",
+			ground = "Ground",
+			rock = "Slate",
+			sand = "Sand",
+			detail = { 6, 200 },
+			trees = 1.5,
+			groves = 0.3,
+			species = { broad = 1 },
+			boulders = 2,
+		},
+		wasteland = {
+			color = { 192, 160, 108 },
+			grass = "Sand",
+			ground = "Sandstone",
+			rock = "Sandstone",
+			sand = "Sand",
+			detail = { 8, 300 },
+			trees = 0.2,
+			groves = 0.1,
+			species = { dead = 1 },
+			boulders = 5,
+		},
+		magma = {
+			color = { 178, 82, 46 },
+			grass = "CrackedLava",
+			ground = "Basalt",
+			rock = "Basalt",
+			sand = "Sand",
+			detail = { 16, 240 },
+			trees = 0.1,
+			groves = 0.05,
+			species = { dead = 1 },
+			boulders = 6,
+		},
+		swamp = {
+			color = { 70, 104, 62 },
+			grass = "LeafyGrass",
+			ground = "Mud",
+			rock = "Slate",
+			sand = "Mud",
+			detail = { 3, 180 },
+			trees = 1.8,
+			groves = 0.4,
+			species = { dead = 0.5, broad = 0.5 },
+			boulders = 1,
+		},
+		plains = {
+			color = { 124, 160, 76 },
+			grass = "Grass",
+			ground = "Ground",
+			rock = "Slate",
+			sand = "Sand",
+			detail = { 6, 280 },
+			trees = 1.6,
+			groves = 0.22,
+			species = { broad = 1 },
+			boulders = 2,
+		},
+		forest = {
+			color = { 46, 84, 58 },
+			grass = "LeafyGrass",
+			ground = "Ground",
+			rock = "Slate",
+			sand = "Sand",
+			detail = { 8, 220 },
+			trees = 3,
+			groves = 0.7,
+			species = { broad = 0.6, pine = 0.4 },
+			boulders = 2,
+		},
+		undead = {
+			color = { 82, 70, 104 },
+			grass = "Ground",
+			ground = "Mud",
+			rock = "Slate",
+			sand = "Sand",
+			detail = { 6, 240 },
+			trees = 0.8,
+			groves = 0.25,
+			species = { dead = 1 },
+			boulders = 3,
+		},
+		coast = {
+			color = { 210, 196, 156 },
+			grass = "Sand",
+			ground = "Ground",
+			rock = "Sandstone",
+			sand = "Sand",
+			detail = { 3, 200 },
+			trees = 0.3,
+			groves = 0.1,
+			species = { broad = 1 },
+			boulders = 1,
+		},
+		isles = {
+			color = { 118, 140, 82 },
+			grass = "Grass",
+			ground = "Ground",
+			rock = "Slate",
+			sand = "Sand",
+			detail = { 6, 200 },
+			trees = 1.5,
+			groves = 0.3,
+			species = { broad = 0.5, pine = 0.5 },
+			boulders = 2,
+		},
 	} :: { [string]: Biome },
+
+	-- Low-poly prop library (ServerStorage.WorldProps, tools/blender/world_props.py): each placement
+	-- is `<prefix><two-digit variant>`; templates are already scaled to `height`.
+	props = {
+		groveScale = 260,
+		species = {
+			broad = { prefix = "Broadleaf", variants = 8, scale = { 0.8, 1.35 } },
+			pine = { prefix = "Pine", variants = 8, scale = { 0.8, 1.4 } },
+			dead = { prefix = "Snag", variants = 6, scale = { 0.8, 1.2 } },
+		},
+		bushes = { prefix = "Bush", variants = 6, perTree = 1.5, scale = { 0.8, 1.4 } },
+		boulders = { prefix = "Boulder", variants = 6, scale = { 0.7, 1.8 } },
+	},
 
 	-- Territory colours on the preview.
 	factionColors = {
@@ -188,7 +399,7 @@ local Continent = {
 			owner = "HolyKingdom",
 			height = 0.15,
 			relief = 0.1,
-			anchors = { { 0.28, 0.67, 0.09 }, { 0.35, 0.73, 0.07 } },
+			anchors = { { 0.28, 0.67, 0.09 }, { 0.35, 0.73, 0.07 }, { 0.225, 0.79, 0.035 } },
 			towns = 3,
 			pois = 2,
 			dungeons = 1,
@@ -265,7 +476,7 @@ local Continent = {
 	} :: { { string } },
 
 	lakes = {
-		{ 0.56, 0.33, 0.022 },
+		{ 0.56, 0.33, 0.022, 0.3 }, -- { u, v, r, water level as a region height }
 	} :: { { number } },
 
 	-- Named sites. Names are placeholders until the content pass.
@@ -284,8 +495,8 @@ local Continent = {
 			kind = "harbor",
 			region = "verdant",
 			owner = "Adventurers",
-			at = { 0.22, 0.8 },
-			coastal = true,
+			at = { 0.205, 0.815 }, -- the origin
+			fixed = true,
 		},
 		{
 			id = "holy-capital",

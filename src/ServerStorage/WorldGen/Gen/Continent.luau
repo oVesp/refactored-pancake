@@ -10,8 +10,10 @@
 	   nearest by distance / reach, measured on domain-warped coordinates so borders curve. A cell
 	   is land while that distance stays under a noisy `coast.reach` (1 for scattered islets), which
 	   draws the coastline and closes the gaps between neighbouring anchors.
-	2. Height, mountains and lakes: base height plus noise per region; borders listed in `ridges`
-	   become mountain bands; template lakes are carved.
+	2. Height, mountains and lakes: base height plus noise per region, blended across borders;
+	   borders listed in `ridges` become mountain bands; template lakes are carved. The template's
+	   `pads` hold the Harbor village ground flat and dry, and its `bay` keeps the sea beside it.
+	   All of this is the point query `Continent.sampler`, which the Studio builder also uses.
 	3. Sites: named sites at their template spot (jittered, moved to the coast when `coastal`), then
 	   each region's towns, points of interest and dungeons at random, kept apart by `spacing`.
 	4. Roads: a minimum spanning tree over the mainland settlements plus a few short extra links,
@@ -41,7 +43,7 @@ export type Map = {
 	seed: number,
 	regionIds: { string }, -- region index to id
 	region: { number }, -- per cell: region index, 0 sea, -1 lake
-	height: { number }, -- per cell, 0..1
+	height: { number }, -- per cell, ground in studs
 	mountain: { boolean },
 	coast: { boolean }, -- land cell next to the sea
 	mainland: { boolean }, -- in the largest land mass
@@ -69,9 +71,14 @@ function Continent.center(res: number, k: number): (number, number)
 	return (i + 0.5) / res, (j + 0.5) / res
 end
 
---[=[ Studs from unit coordinates: X east, Z south, the map centre at the origin. ]=]
-function Continent.toStuds(map: Map, u: number, v: number): (number, number)
-	return (u - 0.5) * map.size, (v - 0.5) * map.size
+--[=[ Studs from unit coordinates: X east, Z south, the Harbor village (`template.origin`) at 0, 0. ]=]
+function Continent.toStuds(template: Template, u: number, v: number): (number, number)
+	return (u - template.origin[1]) * template.size, (v - template.origin[2]) * template.size
+end
+
+--[=[ Unit coordinates from studs (inverse of `toStuds`). ]=]
+function Continent.toUnit(template: Template, x: number, z: number): (number, number)
+	return template.origin[1] + x / template.size, template.origin[2] + z / template.size
 end
 
 type AnchorPoint = { u: number, v: number, r: number, region: number }
@@ -114,7 +121,39 @@ local function ridgeSet(template: Template, indexOf: { [string]: number }): { [n
 	return set
 end
 
-local function terrain(template: Template, seed: number, res: number, map: Map)
+local function smooth(t: number): number
+	t = math.clamp(t, 0, 1)
+	return t * t * (3 - 2 * t)
+end
+
+local function lerp(a: number, b: number, t: number): number
+	return a + (b - a) * t
+end
+
+--[=[
+	One point of the continent. `region` is the region index, `Continent.SEA` or `Continent.LAKE`;
+	`owner` is the region that builds this point (for sea, the nearest region). `height` is the
+	ground in studs; `water` the water surface in studs, or nil on dry ground. `mountain` is 0..1
+	inside a ridge band; `shore` is 0 at the coastline and 1 inland.
+]=]
+export type Sample = {
+	region: number,
+	owner: number,
+	height: number,
+	water: number?,
+	mountain: number,
+	shore: number,
+	offshore: number, -- how far out to sea, in anchor reaches; 0 on land
+	pad: number, -- 1 on a Map pad, fading to 0 over `pads.blend`
+}
+
+export type Sampler = (u: number, v: number) -> Sample
+
+--[=[
+	Point query used by both the grid (`generate`) and the Studio terrain writer, so terrain built
+	region by region meets exactly at the seams.
+]=]
+function Continent.sampler(template: Template, seed: number): Sampler
 	local indexOf: { [string]: number } = {}
 	for index, region in template.regions do
 		indexOf[region.id] = index
@@ -126,12 +165,35 @@ local function terrain(template: Template, seed: number, res: number, map: Map)
 	local coastNoise = Hash.fbm(Hash.named(seed, "coast"), template.coast.scale, template.coast.octaves)
 	local heightNoise = Hash.fbm(Hash.named(seed, "height"), 0.08, 4)
 	local ridgeNoise = Hash.fbm(Hash.named(seed, "ridge"), 0.05, 3)
+	local peakNoise = Hash.fbm(Hash.named(seed, "peaks"), 0.012, 4)
+	local detailNoise = Hash.fbm(Hash.named(seed, "detail"), 1, 3)
 	local margin = template.margin
-	local regionCount = #template.regions
-	local best = table.create(regionCount, math.huge)
+	local heights = template.heights
+	local pads = template.pads
+	local padRegion = indexOf[pads.region]
+	assert(padRegion, `pads name an unknown region {pads.region}`)
+	local best: { [number]: number } = {}
 
-	for k = 1, res * res do
-		local u, v = Continent.center(res, k)
+	local function padWeight(x: number, z: number): number
+		local w = 0
+		for _, r in pads.rects do
+			local dx = math.max(r[1] - x, 0, x - r[3])
+			local dz = math.max(r[2] - z, 0, z - r[4])
+			w = math.max(w, 1 - smooth(math.sqrt(dx * dx + dz * dz) / pads.blend))
+		end
+		return w
+	end
+
+	-- Base height of a region at a point, in studs above the beach.
+	local function base(index: number, u: number, v: number): number
+		local region = template.regions[index]
+		local biome = template.biomes[region.biome]
+		local h = (region.height + region.relief * (heightNoise(u, v) * 0.5 + 0.5)) * heights.scale
+		local x, z = u * template.size, v * template.size
+		return h + biome.detail[1] * detailNoise(x / biome.detail[2], z / biome.detail[2])
+	end
+
+	return function(u: number, v: number): Sample
 		local wu = u + template.warp.amp * warpU(u, v)
 		local wv = v + template.warp.amp * warpV(u, v)
 		table.clear(best)
@@ -151,38 +213,92 @@ local function terrain(template: Template, seed: number, res: number, map: Map)
 			end
 		end
 
+		local x, z = Continent.toStuds(template, u, v)
+		local pad = padWeight(x, z)
 		local inside = u > margin and u < 1 - margin and v > margin and v < 1 - margin
 		local land = if template.regions[r1].scatter then 1 else template.coast.reach
 		local reach = land + template.coast.amp * coastNoise(u, v)
-		if not inside or d1 >= reach then
-			map.region[k] = Continent.SEA
-			map.height[k] = 0
-			map.mountain[k] = false
-			continue
+		local s = if inside then reach - d1 else -1
+		local bay = template.bay
+		local bayDepth = 1 - math.sqrt((x - bay.x) ^ 2 + (z - bay.z) ^ 2) / bay.r
+		if bayDepth > 0 then
+			s = math.min(s, -bayDepth * 0.4)
+		end
+		if pad > 0 then
+			s = math.max(s, 0.3 * pad)
+			if pad > 0.5 then
+				r1 = padRegion
+			end
 		end
 
-		local region = template.regions[r1]
-		local shore = math.clamp((reach - d1) / 0.25, 0, 1)
-		local h = (region.height + region.relief * (heightNoise(u, v) * 0.5 + 0.5)) * (0.4 + 0.6 * shore)
-		local mountain = false
+		if s <= 0 then
+			return {
+				region = Continent.SEA,
+				owner = r1,
+				height = lerp(heights.sea - 1, heights.seabed, smooth(-s / 0.35)),
+				water = heights.sea,
+				mountain = 0,
+				shore = 0,
+				offshore = -s,
+				pad = pad,
+			}
+		end
+
+		local shore = smooth(s / 0.25)
+		local h = base(r1, u, v)
+		if r2 ~= 0 then
+			-- Neighbouring regions meet halfway across a blend band, so borders are slopes, not steps.
+			local t = 0.5 + 0.5 * math.clamp((d2 - d1) / template.blend, 0, 1)
+			h = lerp(base(r2, u, v), h, t)
+		end
+		local mountain = 0
 		if r2 ~= 0 and ridges[r1 * 1000 + r2] then
 			local width = template.ridge.width * (1 + template.ridge.noise * ridgeNoise(u, v))
-			if d2 - d1 < width / region.anchors[1][3] then
-				mountain = true
-				h = math.max(h, 0.75 + 0.2 * (ridgeNoise(v, u) * 0.5 + 0.5))
-			end
+			mountain = smooth(1 - (d2 - d1) / (width / template.regions[r1].anchors[1][3]))
+			local peak = (0.72 + 0.28 * (1 - math.abs(peakNoise(u, v)))) * heights.scale * heights.mountain
+			h = lerp(h, peak, mountain)
 		end
-		map.region[k] = r1
-		map.height[k] = math.clamp(h, 0, 1)
-		map.mountain[k] = mountain
+		local ground = lerp(heights.sea + heights.beach + h * shore, heights.ground, pad)
 
+		local region = r1
+		local water: number? = nil
 		for _, lake in template.lakes do
-			local d = math.sqrt((u - lake[1]) ^ 2 + (v - lake[2]) ^ 2) / lake[3]
-			if d + 0.3 * coastNoise(v, u) < 1 then
-				map.region[k] = Continent.LAKE
-				map.mountain[k] = false
+			local d = math.sqrt((u - lake[1]) ^ 2 + (v - lake[2]) ^ 2) / lake[3] + 0.3 * coastNoise(v, u)
+			if d < 1.3 then
+				local level = heights.sea + heights.beach + lake[4] * heights.scale
+				if d < 1 then
+					region = Continent.LAKE
+					water = level
+					ground = math.min(ground, level - 2 - 30 * smooth((1 - d) / 0.5))
+					mountain = 0
+				else
+					-- Lake shore: ease the ground down to the water.
+					ground = lerp(math.min(ground, level + 2), ground, smooth((d - 1) / 0.3))
+				end
 			end
 		end
+
+		return {
+			region = region,
+			owner = r1,
+			height = ground,
+			water = water,
+			mountain = mountain,
+			shore = shore,
+			offshore = 0,
+			pad = pad,
+		}
+	end
+end
+
+local function terrain(template: Template, seed: number, res: number, map: Map)
+	local sample = Continent.sampler(template, seed)
+	for k = 1, res * res do
+		local u, v = Continent.center(res, k)
+		local point = sample(u, v)
+		map.region[k] = point.region
+		map.height[k] = point.height
+		map.mountain[k] = point.mountain > 0.5
 	end
 end
 
@@ -267,10 +383,20 @@ local function placeSites(template: Template, seed: number, res: number, map: Ma
 	for _, site in template.sites do
 		local regionIndex = indexOf[site.region]
 		assert(regionIndex, `site {site.id} names an unknown region {site.region}`)
-		local tu = site.at[1] + rng:range(-0.015, 0.015)
-		local tv = site.at[2] + rng:range(-0.015, 0.015)
+		local jitter = if site.fixed then 0 else 0.015
+		local tu = site.at[1] + rng:range(-jitter, jitter)
+		local tv = site.at[2] + rng:range(-jitter, jitter)
 		local bestK, bestD = 0, math.huge
 		for k = 1, res * res do
+			if site.fixed then
+				-- A fixed site keeps its spot; the template's pads hold the ground under it dry.
+				local u, v = Continent.center(res, k)
+				local d = (u - tu) ^ 2 + (v - tv) ^ 2
+				if d < bestD then
+					bestK, bestD = k, d
+				end
+				continue
+			end
 			if map.region[k] == regionIndex and not map.mountain[k] and (map.coast[k] or not site.coastal) then
 				local u, v = Continent.center(res, k)
 				local d = (u - tu) ^ 2 + (v - tv) ^ 2
@@ -406,7 +532,8 @@ local function route(template: Template, res: number, map: Map, from: number, to
 					local n = Continent.index(res, ni, nj)
 					if map.mainland[n] and not closed[n] then
 						local step = if d[1] ~= 0 and d[2] ~= 0 then 1.414 else 1
-						local cost = step * (1 + tuning.slope * math.abs(map.height[n] - map.height[k]) * res / 64)
+						local rise = math.abs(map.height[n] - map.height[k]) / template.heights.scale
+						local cost = step * (1 + tuning.slope * rise * res / 64)
 						if map.mountain[n] then
 							cost *= tuning.mountain
 						end

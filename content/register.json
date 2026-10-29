@@ -3115,6 +3115,26 @@
 			"notes": "Pure continent generator: land, regions, mountains, lakes, sites and roads from the template and a seed."
 		},
 		{
+			"id": "worldgen:Region",
+			"type": "tool",
+			"path": "src/ServerStorage/WorldGen/Gen/Region.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Pure region build data: owned columns and materials, props, site markers and the approval fingerprint."
+		},
+		{
+			"id": "worldgen:Regions",
+			"type": "tool",
+			"path": "src/ServerStorage/WorldGen/Regions.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Studio edit-mode builder: one continent region at a time (terrain, sea, roads, props, site markers), View cameras."
+		},
+		{
 			"id": "model:WorldProps",
 			"type": "model",
 			"path": "content/world/props.json",
