@@ -54,6 +54,9 @@ type Brain = {
 	monster: boolean,
 	state: State,
 	target: Entity?,
+	--[=[ Where the target was last seen and when it was lost (os.clock); a fight resumes there before the brain gives up. ]=]
+	lastSeen: Vector3?,
+	lostAt: number?,
 	nextThink: number,
 	nextPatrol: number,
 	waypoints: { Vector3 },
@@ -225,7 +228,7 @@ local function validTarget(brain: Brain, target: Entity?): boolean
 	if target.kind == "Player" and shielded(brain, target.root.Position) then
 		return false
 	end
-	return (flat(target.root.Position) - flat(brain.home)).Magnitude <= brain.leash + 10
+	return (flat(target.root.Position) - flat(brain.home)).Magnitude <= brain.leash + Tuning.Npc.TargetSlack
 end
 
 local function pickTarget(brain: Brain): Entity?
@@ -455,6 +458,7 @@ local function startReturn(brain: Brain)
 	SquadService.Leave(brain.member)
 	setState(brain, "Return")
 	brain.target = nil
+	brain.lostAt = nil
 	table.clear(brain.entity.threat)
 	EntityService.Forgive(brain.entity)
 	brain.entity.tauntedBy = nil
@@ -749,6 +753,8 @@ local function think(brain: Brain, now: number)
 	local target = pickTarget(brain)
 	brain.target = target
 	if target then
+		brain.lastSeen = target.root.Position
+		brain.lostAt = nil
 		SquadService.Join(brain.member, target)
 		if target ~= previous then
 			alertSquad(brain, target)
@@ -758,6 +764,15 @@ local function think(brain: Brain, now: number)
 	end
 	if not target then
 		if brain.state ~= "Idle" and brain.state ~= "Patrol" and brain.state ~= "Travel" then
+			-- A target that slips out of sight is hunted at its last known spot before the brain gives up.
+			local lastSeen = brain.lastSeen
+			local lostAt = brain.lostAt or now
+			brain.lostAt = lostAt
+			if lastSeen and now - lostAt < Tuning.Npc.LoseTargetGrace and not forbidden(brain, lastSeen) then
+				setState(brain, "Aggro")
+				moveTo(brain, lastSeen, now)
+				return
+			end
 			startReturn(brain)
 			return
 		end
@@ -895,7 +910,8 @@ function AIService.Attach(entity: Entity, home: Vector3, leash: number, wander: 
 		entity = entity,
 		def = def,
 		home = home,
-		leash = leash,
+		-- A summon keeps the exact leash around its owner.
+		leash = if entity.owner then leash else leash * Tuning.Npc.LeashMultiplier,
 		wander = wander or Tuning.Npc.PatrolRadius,
 		goal = nil,
 		leader = nil,
@@ -907,6 +923,8 @@ function AIService.Attach(entity: Entity, home: Vector3, leash: number, wander: 
 		monster = monster,
 		state = "Idle",
 		target = nil,
+		lastSeen = nil,
+		lostAt = nil,
 		nextThink = os.clock() + random:NextNumber(0, Tuning.Npc.ThinkInterval),
 		nextPatrol = os.clock() + random:NextNumber(2, 8),
 		waypoints = {},

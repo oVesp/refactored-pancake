@@ -68,8 +68,8 @@ export type Nest = {
 	time: ("Day" | "Night")?,
 }
 
--- Mostly empty until the continent's regions are built: the centre section these lived in was
--- replaced by the continent generator (docs/systems/world-generation.md).
+-- Goblins only for now: a patrol around the camp and roaming squads from the camp and two burrows,
+-- all on the Verdant Greens pads (docs/systems/world-generation.md). Other kinds return per site.
 local garrisons: { Garrison } = {}
 local patrols: { Troop } = {
 	-- Circles just outside the goblin camp. Nobody here has `combat.leader`: without the Brute the
@@ -90,26 +90,68 @@ local patrols: { Troop } = {
 		interval = 180,
 		max = 1,
 	},
-	-- Neutral until attacked. The second Sergeant takes over if the first falls.
-	{
-		id = "kingdom_field_patrol",
-		members = {
-			{ npc = "kingdom_sergeant", count = 2 },
-			{ npc = "kingdom_soldier", count = 3 },
-		},
-		route = {
-			points = { { 230, -120 }, { 330, -200 }, { 330, -400 }, { 230, -480 }, { 170, -300 } },
-			loop = true,
-			stops = { [2] = 8 },
-		},
-		interval = 240,
-		max = 1,
-	},
 }
 local caravans: { Troop } = {}
 local travelers: { Troop } = {}
 local residents: { Residents } = {}
-local nests: { Nest } = {}
+local nests: { Nest } = {
+	{
+		-- The camp is the one obvious lair; its raiding bands are what reach the farms.
+		id = "goblin_camp",
+		at = { 0, -650 },
+		stationed = {},
+		squads = {
+			{
+				members = {
+					{ npc = "goblin_raider", count = 3, level = { 3, 4 } },
+					{ npc = "goblin_slinger", count = 1, level = { 3, 4 } },
+				},
+			},
+		},
+		territory = { { 0, -600 }, { 0, -520 }, { -60, -480 }, { 70, -470 }, { 0, -600 } },
+		maxSquads = 1,
+		interval = 120,
+	},
+	{
+		id = "orchard_thicket",
+		at = { -90, -480 },
+		stationed = {},
+		squads = {
+			{
+				members = {
+					{ npc = "goblin_raider", count = 2, level = { 3, 3 } },
+					{ npc = "goblin_trapper", count = 1, level = { 3, 4 } },
+				},
+			},
+			{
+				members = {
+					{ npc = "goblin_slinger", count = 2, level = { 3, 4 } },
+					{ npc = "goblin_raider", count = 1, level = { 3, 3 } },
+				},
+			},
+		},
+		territory = { { -90, -480 }, { -40, -420 }, { 60, -480 }, { 40, -380 }, { -80, -380 }, { -90, -480 } },
+		maxSquads = 2,
+		interval = 90,
+	},
+	{
+		id = "field_burrow",
+		at = { -90, -260 },
+		stationed = {},
+		squads = {
+			{ members = { { npc = "goblin_raider", count = 3, level = { 1, 2 } } } },
+			{
+				members = {
+					{ npc = "goblin_raider", count = 2, level = { 2, 3 } },
+					{ npc = "goblin_slinger", count = 1, level = { 2, 3 } },
+				},
+			},
+		},
+		territory = { { -90, -260 }, { -60, -200 }, { 40, -170 }, { 70, -260 }, { -20, -300 }, { -90, -260 } },
+		maxSquads = 2,
+		interval = 60,
+	},
+}
 
 return table.freeze({
 	Garrisons = garrisons,

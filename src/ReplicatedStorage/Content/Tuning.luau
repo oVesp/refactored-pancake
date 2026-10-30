@@ -181,6 +181,12 @@ return table.freeze({
 		PatrolSpeedMultiplier = 0.45,
 		PathRecompute = 1,
 		ReturnRegenPerSecond = 0.25,
+		--[=[ Scales every definition's leashRadius: how far from home an NPC chases before it gives up. ]=]
+		LeashMultiplier = 2,
+		--[=[ Studs past the leash a target may stand and still be a valid target. ]=]
+		TargetSlack = 30,
+		--[=[ Seconds an NPC hunts a target's last known spot after losing it, before it walks home. ]=]
+		LoseTargetGrace = 5,
 	}),
 
 	--[=[ Cascading tasks and leader following (docs/systems/ai-and-spawning.md, Tasks). Studs. ]=]

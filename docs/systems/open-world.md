@@ -46,10 +46,10 @@ Data: `ServerStorage/ContentServerOnly/Population.luau` (server-only). Services:
 
 ### Routes
 
-Points are `{ x, z }`; heights come from a ground raycast. Most data is empty since the continent replaced the centre section (2026-10-29); entries come back per site and road as regions are built ([world generation](world-generation.md)). Routes must then follow generated roads. Two patrols are in: `goblin_camp_patrol` circles the goblin camp (a Brute, nobody to promote) and `kingdom_field_patrol` walks east of the wheat fields (Neutral, two Sergeants to show promotion).
+Points are `{ x, z }`; heights come from a ground raycast. Only goblins roam for now (owner, 2026-10-30): `goblin_camp_patrol` circles the goblin camp (a Brute, nobody to promote), and the nests `goblin_camp`, `orchard_thicket` and `field_burrow` send squads around territory loops on the Verdant Greens pads. Other kinds come back per site and road as regions are built ([world generation](world-generation.md)); routes must then follow generated roads.
 
 ## Not done
 
-- `Population` holds only the two example patrols until the continent's regions are built.
+- `Population` holds only goblin parties until the continent's regions are built.
 - No trading (currency and a shop UI are needed), no faction reputation, no player squads, no NPC needs or jobs.
 - Monsters cannot raid inside the safe village (owner kept it safe).
