@@ -156,8 +156,8 @@ return {
 				if skill.source == "Spell" then
 					Expect.truthy(skill.gcd, `{id}: spells are on the GCD`)
 				end
-				if skill.castTime and skill.source ~= "Enemy" then
-					Expect.truthy(skill.gcd, `{id}: off-GCD actions are instant`)
+				if skill.castTime and skill.source ~= "Enemy" and skill.source ~= "Basic" then
+					Expect.truthy(skill.gcd, `{id}: off-GCD class actions are instant`)
 				end
 				if skill.delivery == "Projectile" or skill.delivery == "Target" then
 					Expect.truthy(skill.speed and skill.range, `{id} projectile speed/range`)

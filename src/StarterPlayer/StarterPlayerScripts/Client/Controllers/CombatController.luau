@@ -3,8 +3,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
 
 local Archery = require(ReplicatedStorage.Shared.Archery)
 local Chain = require(ReplicatedStorage.Shared.Chain)
@@ -20,17 +18,13 @@ local Tuning = require(ReplicatedStorage.Content.Tuning)
 local Types = require(ReplicatedStorage.Content.Types)
 local Weapons = require(ReplicatedStorage.Content.Weapons)
 
-local AIM_RANGE = 300
-local PAD_AIM_DISTANCE = 30
+-- Studs the screen-centre aim ray reaches; stays inside the server's aim sanity check.
+local AIM_RANGE = 280
 local DODGE_SECONDS = 0.2
 -- Seconds a queued action may wait past its predicted ready time for the server's cast to end.
 local QUEUE_GRACE = 0.5
 -- Studs a melee lunge stops short of the aim point.
 local LUNGE_STOP_SHORT = 3
--- Over-the-shoulder camera while drawing the bow: offset (studs), field of view and blend time.
-local DRAW_CAMERA_OFFSET = Vector3.new(2, 0.6, 0)
-local DRAW_FOV = 55
-local DRAW_CAMERA_SECONDS = 0.2
 
 local player = Players.LocalPlayer
 
@@ -58,6 +52,7 @@ CombatController.DrawReady = Signal.new() :: Signal.Signal<>
 
 local ProfileController: any
 local TargetController: any
+local CameraController: any
 
 local seq = 0
 local pending: { [number]: string } = {}
@@ -76,7 +71,6 @@ local chainAt = 0
 local guarding = false
 -- os.clock() when the current bow draw started.
 local drawStartedAt: number? = nil
-local drawFov: number? = nil
 local drawConnection: RBXScriptConnection? = nil
 
 local function character(): (Model?, BasePart?, Humanoid?)
@@ -89,26 +83,27 @@ local function character(): (Model?, BasePart?, Humanoid?)
 	return nil, nil, nil
 end
 
---[=[ World point the player is aiming at: mouse hit on desktop, a point ahead of the camera otherwise. ]=]
+--[=[
+	World point the player is aiming at: what the ray through the screen centre (the shift-lock
+	crosshair) hits, else a point far along it. The same on mouse, touch and gamepad.
+]=]
 function CombatController.GetAim(): Vector3
 	local model, root = character()
 	local camera = workspace.CurrentCamera
-	if TargetController.UsingMouse() and camera then
-		local mouse = UserInputService:GetMouseLocation()
-		local ray = camera:ViewportPointToRay(mouse.X, mouse.Y)
-		local params = RaycastParams.new()
-		params.FilterType = Enum.RaycastFilterType.Exclude
-		params.FilterDescendantsInstances = if model then { model } else {}
-		local result = workspace:Raycast(ray.Origin, ray.Direction * AIM_RANGE, params)
-		return if result then result.Position else ray.Origin + ray.Direction * AIM_RANGE
+	if not camera then
+		return if root then root.Position else Vector3.zero
 	end
-	if root and camera then
-		local look = camera.CFrame.LookVector
-		local flat = Vector3.new(look.X, 0, look.Z)
-		flat = if flat.Magnitude > 1e-3 then flat.Unit else root.CFrame.LookVector
-		return root.Position + flat * PAD_AIM_DISTANCE
-	end
-	return Vector3.zero
+	local size = camera.ViewportSize
+	local ray = camera:ViewportPointToRay(size.X / 2, size.Y / 2)
+	local direction = ray.Direction.Unit
+	-- Start the ray level with the character so nothing between the camera and it is hit.
+	local skip = if root then math.max(0, (root.Position - ray.Origin):Dot(direction)) else 0
+	local origin = ray.Origin + direction * skip
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = if model then { model } else {}
+	local result = workspace:Raycast(origin, direction * AIM_RANGE, params)
+	return if result then result.Position else origin + direction * AIM_RANGE
 end
 
 --[=[ Weapon type the local character holds (its `Weapon` attribute), fists when unarmed. ]=]
@@ -137,13 +132,19 @@ local function face(root: BasePart, point: Vector3)
 	end
 end
 
--- Aim point and target for a skill. Melee turns toward a close target in front of the aim
--- (magnetism); skillshots stay free-aim, with a small bend toward the target off the mouse;
--- Target and Dash need an enemy target; Ground lands on the target off the mouse; Ally takes the
--- ally target (nil means self). Returns nil aim when the skill cannot be used without a target.
+-- Aim point and target for a skill. Melee swings where the character faces (the camera yaw)
+-- and turns toward a close target in front of it (magnetism); skillshots stay free-aim through
+-- the screen centre, with a small bend toward the target off the mouse; Target and Dash need an
+-- enemy target; Ground lands on the target off the mouse; Ally takes the ally target (nil means
+-- self). Returns nil aim when the skill cannot be used without a target.
 local function aimFor(skill: any, root: BasePart): (Vector3?, Model?)
 	local aim = CombatController.GetAim()
 	local delivery = skill.delivery
+	if delivery == "Melee" or delivery == "Cone" then
+		local look = root.CFrame.LookVector
+		local reach = math.max(skill.range or 0, LUNGE_STOP_SHORT + (skill.lunge or 0))
+		aim = root.Position + Vector3.new(look.X, 0, look.Z).Unit * reach
+	end
 	local enemy = TargetController.Enemy()
 	local enemyAt = positionOf(enemy)
 	local t = Tuning.Targeting
@@ -293,7 +294,8 @@ local function send(skillId: string): boolean
 		if skill.lunge then
 			lunge(skill, root, aim)
 		end
-	elseif skill.source ~= "Basic" then
+	elseif skill.source ~= "Basic" or skill.castTime then
+		-- Non-basic actions lock for the animation; a basic with a cast time locks for the cast.
 		local cast = if skill.castTime then hasted(skill.castTime) else 0
 		lockedUntil = now + math.max(cast, Tuning.Combat.Gcd.AnimationLock)
 	end
@@ -383,24 +385,13 @@ local function endDrawCamera()
 		drawConnection:Disconnect()
 		drawConnection = nil
 	end
-	local _, _, humanoid = character()
-	local camera = workspace.CurrentCamera
-	local tween = TweenInfo.new(DRAW_CAMERA_SECONDS)
-	if humanoid then
-		humanoid.AutoRotate = true
-		TweenService:Create(humanoid, tween, { CameraOffset = Vector3.zero }):Play()
-	end
-	if camera and drawFov then
-		TweenService:Create(camera, tween, { FieldOfView = drawFov }):Play()
-	end
-	drawFov = nil
+	CameraController.SetAiming(false)
 end
 
---[=[ Starts drawing the bow: over-the-shoulder camera, the archer faces the camera and slows down. ]=]
+--[=[ Starts drawing the bow: the camera aims in tighter (CameraController) and the archer slows down. ]=]
 function CombatController.StartDraw()
-	local _, root, humanoid = character()
-	local camera = workspace.CurrentCamera
-	if drawStartedAt or not root or not humanoid or not camera or not CombatController.Weapon().drawn then
+	local _, root = character()
+	if drawStartedAt or not root or not CombatController.Weapon().drawn then
 		return
 	end
 	if guarding or waitFor(CombatController.Weapon().light) > 0 then
@@ -408,15 +399,9 @@ function CombatController.StartDraw()
 	end
 	drawStartedAt = os.clock()
 	NetClient.Fire("SetDraw", true)
-	local tween = TweenInfo.new(DRAW_CAMERA_SECONDS)
-	drawFov = camera.FieldOfView
-	humanoid.AutoRotate = false
-	TweenService:Create(humanoid, tween, { CameraOffset = DRAW_CAMERA_OFFSET }):Play()
-	TweenService:Create(camera, tween, { FieldOfView = DRAW_FOV }):Play()
+	CameraController.SetAiming(true)
 	local announced = false
-	drawConnection = RunService.RenderStepped:Connect(function()
-		local look = camera.CFrame.LookVector
-		face(root, root.Position + Vector3.new(look.X, 0, look.Z))
+	drawConnection = RunService.Heartbeat:Connect(function()
 		if not announced and drawStartedAt and os.clock() - drawStartedAt >= Tuning.Combat.Bow.FullDraw then
 			announced = true
 			CombatController.DrawReady:Fire()
@@ -517,6 +502,7 @@ end
 function CombatController.Init(deps: { [string]: any })
 	ProfileController = deps.ProfileController
 	TargetController = deps.TargetController
+	CameraController = deps.CameraController
 end
 
 function CombatController.Start()
@@ -552,7 +538,6 @@ function CombatController.Start()
 			drawConnection = nil
 		end
 		drawStartedAt = nil
-		drawFov = nil
 	end)
 	GuardClips.Start()
 	-- Old sequence numbers never resolve on success; trim them so the table stays small.

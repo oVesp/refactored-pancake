@@ -17,6 +17,7 @@ local CONTROLLER_ORDER = {
 	"UIController",
 	"ProfileController",
 	"TargetController",
+	"CameraController",
 	"CombatController",
 	"AudioController",
 	"AtmosphereController",

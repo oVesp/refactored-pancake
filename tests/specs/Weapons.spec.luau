@@ -55,6 +55,24 @@ return {
 			end
 		end
 	end,
+	["wand chains committed bolts and casts its blast"] = function()
+		local wand = Weapons.ById.wand
+		local chain = Chain.Members(Skills, wand.light)
+		Expect.equal(table.concat(chain, ","), "wand_bolt,wand_bolt_2,wand_bolt_3", "wand chain")
+		for _, id in chain do
+			local bolt = Skills[id]
+			Expect.equal(bolt.delivery, "Projectile", `{id} delivery`)
+			Expect.truthy(bolt.windup and bolt.recovery, `{id}: bolts commit the caster`)
+			Expect.equal(bolt.range, 90, `{id} range`)
+		end
+		Expect.truthy(Skills.wand_bolt_3.damage.base > Skills.wand_bolt.damage.base, "closing bolt hits harder")
+		local blast = Skills[wand.heavy]
+		Expect.truthy(blast.castTime and blast.castTime > 0, "blast has a cast time")
+		Expect.truthy(blast.cooldown and blast.cooldown >= blast.castTime, "blast cooldown")
+		Expect.equal(blast.windup, nil, "blast casts, it does not wind up")
+		Expect.equal(blast.gcd, nil, "blast off the GCD")
+		Expect.truthy(blast.cost == nil or blast.cost.resource ~= "Mp", "blast costs no MP")
+	end,
 	["weapon and shield items resolve"] = function()
 		for id, item in Items.ById do
 			if item.kind == "Weapon" then
