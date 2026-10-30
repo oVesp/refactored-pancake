@@ -102,7 +102,7 @@ return {
 	["approved regions are unchanged"] = function()
 		local ctx: any = nil
 		for id, fingerprint in Template.approved do
-			ctx = ctx or Region.context(Template)
+			ctx = ctx or Region.context(Template, nil, serde.decode("json", fs.readFile("content/world/village.json")))
 			Expect.equal(Region.fingerprint(ctx, id), fingerprint)
 		end
 	end,

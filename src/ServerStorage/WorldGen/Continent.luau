@@ -83,7 +83,9 @@ local Continent = {
 	offshore = 0.5, -- sea a region builds, in anchor reaches out from its coast
 	offshoreMargin = 900, -- studs around a region's cells searched for its sea
 	-- Signed-off regions: id to `Gen/Region.fingerprint`. Builds refuse to touch them unless forced.
-	approved = {} :: { [string]: string },
+	approved = {
+		verdant = "edc33ff1", -- owner, 2026-10-29: terrain and goblin camps
+	} :: { [string]: string },
 	margin = 0.035, -- open sea kept around the map edge
 	-- Land reaches `reach` times an anchor's `r`, give or take `amp` of coastline noise.
 	coast = { reach = 1.45, amp = 0.25, scale = 0.09, octaves = 4 },

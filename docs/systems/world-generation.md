@@ -61,7 +61,7 @@ The result (`Map`) holds per-cell region, height and mountain, coast, mainland a
 
 ## Region builds
 
-Each region is built and approved on its own (owner, 2026-10-29). Verdant Greens, with the Harbor village, is first.
+Each region is built and approved on its own (owner, 2026-10-29). Approved: **Verdant Greens** (terrain, roads, props and goblin camps; 2026-10-29).
 
 - **Ownership**: a region owns every 4-stud column whose sample names it as `owner`: its land, its lakes and the sea out to `offshore` anchor reaches from its coast. Sea farther out is not built yet.
 - **Columns** (`Region.column`): ground and water from the sample; material from the biome: beach sand near the coastline, rock on mountains and slopes over 4.5 studs per column (snow above 250 studs), bare ground on roads (7 studs either side of the smoothed road line) and in large noise patches, grass elsewhere; sand and mud under water.
