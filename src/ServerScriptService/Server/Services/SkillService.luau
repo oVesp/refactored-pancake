@@ -484,12 +484,14 @@ local function resolve(caster: Entity, skill: SkillDef, aim: Vector3, target: En
 		if skill.shield then
 			supportAlly(caster, caster, skill)
 		end
-		local restore = skill.restore
-		if restore and restore.Hp then
-			CombatService.Heal(caster, caster, caster.stats.MaxHp * restore.Hp)
-		end
-		if restore and restore.Stamina then
-			StatService.Restore(caster, "Stamina", caster.maxStamina * restore.Stamina)
+		if skill.restore then
+			local hp, stamina = Formulas.SelfRestore(skill.restore, caster.stats.MaxHp, caster.maxStamina)
+			if hp > 0 then
+				CombatService.Heal(caster, caster, hp)
+			end
+			if stamina > 0 then
+				StatService.Restore(caster, "Stamina", stamina)
+			end
 		end
 	elseif delivery == "Dash" then
 		if target and validEnemy(caster, target, skill) then

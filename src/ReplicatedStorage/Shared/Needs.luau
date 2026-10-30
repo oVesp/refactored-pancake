@@ -72,4 +72,28 @@ function Needs.DrainHp(hp: number, amount: number, config: Config): number
 	return math.max(config.FloorHp, hp - amount)
 end
 
+--[=[
+	One starvation tick. HP moves in whole points, so the fraction owed carries over between ticks.
+	Returns the new `owed` and the new HP, or nil when HP does not change. Nothing is owed while
+	nothing drains, in god mode or at the floor.
+]=]
+function Needs.Starve(
+	owed: number,
+	hp: number,
+	rate: number,
+	dt: number,
+	god: boolean,
+	config: Config
+): (number, number?)
+	if rate <= 0 or god or hp <= config.FloorHp then
+		return 0, nil
+	end
+	local total = owed + rate * dt
+	local whole = math.floor(total)
+	if whole < 1 then
+		return total, nil
+	end
+	return total - whole, Needs.DrainHp(hp, whole, config)
+end
+
 return Needs

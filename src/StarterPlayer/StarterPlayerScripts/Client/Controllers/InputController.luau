@@ -7,6 +7,7 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local Disciplines = require(ReplicatedStorage.Content.Disciplines)
+local Gait = require(ReplicatedStorage.Shared.Gait)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 
 local HEAVY_HOLD_SECONDS = 0.35
@@ -38,13 +39,13 @@ local CameraController: any
 local UIController: any
 
 local attackPressedAt: number? = nil
-local forwardTappedAt = -math.huge
-local running = false
+local gait = Gait.new()
+local sentRunning = false
 
-local function setRunning(on: boolean)
-	if running ~= on then
-		running = on
-		CombatController.SetRun(on)
+local function syncRunning()
+	if sentRunning ~= gait.running then
+		sentRunning = gait.running
+		CombatController.SetRun(gait.running)
 	end
 end
 
@@ -54,30 +55,25 @@ local function onForwardInput(input: InputObject, processed: boolean)
 		return
 	end
 	if input.UserInputState == Enum.UserInputState.Begin then
-		if processed then
-			return
-		end
-		local now = os.clock()
-		if now - forwardTappedAt <= Tuning.Base.Run.DoubleTapWindow then
-			setRunning(true)
-			forwardTappedAt = -math.huge
-		else
-			forwardTappedAt = now
-		end
+		Gait.ForwardBegan(gait, processed, os.clock(), Tuning.Base.Run.DoubleTapWindow)
 	elseif input.UserInputState == Enum.UserInputState.End then
-		setRunning(false)
+		Gait.ForwardEnded(gait)
 	end
+	syncRunning()
 end
 
 local function stopWhenIdle()
-	if not running then
+	if not gait.running then
 		return
 	end
 	local character = Players.LocalPlayer.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	if not humanoid or humanoid.Health <= 0 or humanoid.MoveDirection.Magnitude < 0.1 then
-		setRunning(false)
+	if humanoid then
+		Gait.Step(gait, true, humanoid.Health, humanoid.MoveDirection.Magnitude)
+	else
+		Gait.Step(gait, false, 0, 0)
 	end
+	syncRunning()
 end
 
 local function sink(): Enum.ContextActionResult

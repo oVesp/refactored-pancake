@@ -277,25 +277,21 @@ local function regenerate(dt: number)
 		if not entity.alive or entity.kind ~= "Player" then
 			continue
 		end
-		local changed = false
-		local mpRate = (Tuning.Base.MpRegen + entity.extras.MpRegen) * entity.regenScale
-		if entity.mp < entity.stats.MaxMp then
-			entity.mp = math.min(entity.stats.MaxMp, entity.mp + mpRate * dt)
-			changed = true
-		end
-		if entity.stamina < entity.maxStamina and entity.guardSince == nil then
-			entity.stamina = math.min(
-				entity.maxStamina,
-				entity.stamina + Tuning.Base.StaminaRegen * (1 + entity.extras.StaminaRegenPct) * dt
-			)
-			changed = true
-		end
-		if entity.hp < entity.stats.MaxHp and now - entity.lastCombatAt > Tuning.Base.OutOfCombatDelay then
-			entity.hp =
-				math.min(entity.stats.MaxHp, entity.hp + Tuning.Base.HpRegenOutOfCombat * entity.regenScale * dt)
-			changed = true
-		end
+		local hp, mp, stamina, changed = Formulas.Regen({
+			hp = entity.hp,
+			maxHp = entity.stats.MaxHp,
+			mp = entity.mp,
+			maxMp = entity.stats.MaxMp,
+			stamina = entity.stamina,
+			maxStamina = entity.maxStamina,
+			regenScale = entity.regenScale,
+			mpRegenBonus = entity.extras.MpRegen,
+			staminaRegenPct = entity.extras.StaminaRegenPct,
+			guarding = entity.guardSince ~= nil,
+			secondsSinceCombat = now - entity.lastCombatAt,
+		}, Tuning.Base, dt)
 		if changed then
+			entity.hp, entity.mp, entity.stamina = hp, mp, stamina
 			writePools(entity)
 		end
 	end

@@ -80,15 +80,10 @@ local function tick(dt: number)
 		entity.regenScale = Needs.CombinedRegenScale(state.values, Config)
 
 		local rate = Needs.DrainRate(state.values, Config)
-		if rate <= 0 or entity.god or entity.hp <= Config.FloorHp then
-			state.owed = 0
-			continue
-		end
-		state.owed += rate * dt
-		local whole = math.floor(state.owed)
-		if whole >= 1 then
-			state.owed -= whole
-			StatService.SetHp(entity, Needs.DrainHp(entity.hp, whole, Config))
+		local owed, hp = Needs.Starve(state.owed, entity.hp, rate, dt, entity.god, Config)
+		state.owed = owed
+		if hp then
+			StatService.SetHp(entity, hp)
 		end
 	end
 end

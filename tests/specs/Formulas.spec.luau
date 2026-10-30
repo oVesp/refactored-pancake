@@ -8,15 +8,94 @@ local Tuning = Loader.load("src/ReplicatedStorage/Content/Tuning")
 local Classes = Loader.load("src/ReplicatedStorage/Content/Classes").ById
 local Skills = Loader.load("src/ReplicatedStorage/Content/Skills").ById
 
-local function near(actual: number, expected: number, label: string)
-	Expect.truthy(math.abs(actual - expected) < 1e-6, `{label}: {actual} ~= {expected}`)
+local function regenInput(overrides: { [string]: any }): any
+	local input: { [string]: any } = {
+		hp = 50,
+		maxHp = 100,
+		mp = 50,
+		maxMp = 100,
+		stamina = 50,
+		maxStamina = 100,
+		regenScale = 1,
+		mpRegenBonus = 0,
+		staminaRegenPct = 0,
+		guarding = false,
+		secondsSinceCombat = math.huge,
+	}
+	for key, value in overrides do
+		input[key] = value
+	end
+	return input
 end
 
 return {
+	["regen fills every pool and clamps at max"] = function()
+		local base = Tuning.Base
+		local hp, mp, stamina, changed = Formulas.Regen(regenInput({}), base, 1)
+		Expect.near(hp, 50 + base.HpRegenOutOfCombat, "HP")
+		Expect.near(mp, 50 + base.MpRegen, "MP")
+		Expect.near(stamina, 50 + base.StaminaRegen, "Stamina")
+		Expect.equal(changed, true, "changed")
+
+		hp, mp, stamina = Formulas.Regen(regenInput({ hp = 99.9, mp = 99.9, stamina = 99.9 }), base, 100)
+		Expect.equal(hp, 100, "HP cap")
+		Expect.equal(mp, 100, "MP cap")
+		Expect.equal(stamina, 100, "Stamina cap")
+	end,
+	["regen leaves full pools alone and reports no change"] = function()
+		local hp, mp, stamina, changed =
+			Formulas.Regen(regenInput({ hp = 100, mp = 100, stamina = 100 }), Tuning.Base, 1)
+		Expect.equal(hp, 100, "HP")
+		Expect.equal(mp, 100, "MP")
+		Expect.equal(stamina, 100, "Stamina")
+		Expect.equal(changed, false, "changed")
+	end,
+	["HP regen waits for the out of combat delay, MP and Stamina do not"] = function()
+		local delay = Tuning.Base.OutOfCombatDelay
+		local hp, mp, stamina = Formulas.Regen(regenInput({ secondsSinceCombat = delay }), Tuning.Base, 1)
+		Expect.equal(hp, 50, "HP on the delay")
+		Expect.truthy(mp > 50, "MP in combat")
+		Expect.truthy(stamina > 50, "Stamina in combat")
+		hp = Formulas.Regen(regenInput({ secondsSinceCombat = delay + 0.01 }), Tuning.Base, 1)
+		Expect.truthy(hp > 50, "HP after the delay")
+	end,
+	["guarding stops Stamina regen only"] = function()
+		local hp, mp, stamina = Formulas.Regen(regenInput({ guarding = true }), Tuning.Base, 1)
+		Expect.truthy(hp > 50, "HP")
+		Expect.truthy(mp > 50, "MP")
+		Expect.equal(stamina, 50, "Stamina")
+	end,
+	["regen bonuses apply, and the need scale covers the MP bonus"] = function()
+		local base = Tuning.Base
+		local _, mp, stamina = Formulas.Regen(regenInput({ mpRegenBonus = 1, staminaRegenPct = 0.5 }), base, 1)
+		Expect.near(mp, 50 + base.MpRegen + 1, "MP bonus")
+		Expect.near(stamina, 50 + base.StaminaRegen * 1.5, "Stamina bonus")
+		_, mp = Formulas.Regen(regenInput({ mpRegenBonus = 1, regenScale = 0.5 }), base, 1)
+		Expect.near(mp, 50 + (base.MpRegen + 1) * 0.5, "scaled MP bonus")
+	end,
+	["regen keeps fractional HP"] = function()
+		local hp = Formulas.Regen(regenInput({}), Tuning.Base, 0.1)
+		Expect.near(hp, 50 + Tuning.Base.HpRegenOutOfCombat * 0.1, "fraction")
+	end,
+	["Second Wind restores 10% max HP and 40% Stamina"] = function()
+		local skill = Skills.second_wind
+		Expect.equal(skill.delivery, "Self", "delivery")
+		local hp, stamina = Formulas.SelfRestore(skill.restore, 200, 150)
+		Expect.near(hp, 20, "HP")
+		Expect.near(stamina, 60, "Stamina")
+	end,
+	["self restore is 0 for a pool the skill does not name"] = function()
+		local hp, stamina = Formulas.SelfRestore({ Stamina = 0.5 }, 200, 100)
+		Expect.equal(hp, 0, "HP")
+		Expect.near(stamina, 50, "Stamina")
+		hp, stamina = Formulas.SelfRestore({ Hp = 0.5 }, 200, 100)
+		Expect.near(hp, 100, "HP")
+		Expect.equal(stamina, 0, "Stamina")
+	end,
 	["level gap is 1 at or below and falls smoothly above"] = function()
-		near(Formulas.LevelGapMultiplier(5, 5, 8), 1, "equal")
-		near(Formulas.LevelGapMultiplier(5, 1, 8), 1, "lower")
-		near(Formulas.LevelGapMultiplier(1, 9, 8), 0.5, "gap 8")
+		Expect.near(Formulas.LevelGapMultiplier(5, 5, 8), 1, "equal")
+		Expect.near(Formulas.LevelGapMultiplier(5, 1, 8), 1, "lower")
+		Expect.near(Formulas.LevelGapMultiplier(1, 9, 8), 0.5, "gap 8")
 		Expect.truthy(Formulas.LevelGapMultiplier(1, 31, 8) < 0.07, "gap 30 near zero")
 	end,
 	["type multiplier honors immune, resist, vulnerable"] = function()
@@ -190,7 +269,7 @@ return {
 		Expect.equal(stats.MaxHp, 150)
 		Expect.equal(stats.PhysDef, 19)
 		Expect.equal(stats.Agility, 22)
-		near(extras.MoveSpeedPct, 0.4, "move")
+		Expect.near(extras.MoveSpeedPct, 0.4, "move")
 		local weakened = Formulas.ComputeStats({
 			base = Tuning.Base.Stats,
 			classes = {},
@@ -209,21 +288,21 @@ return {
 				Skills
 			)
 		end
-		near(traitsAt(1).proficiency.damage, 0.1, "WP I")
-		near(traitsAt(6).proficiency.damage, 0.2, "WP II")
+		Expect.near(traitsAt(1).proficiency.damage, 0.1, "WP I")
+		Expect.near(traitsAt(6).proficiency.damage, 0.2, "WP II")
 		local top = traitsAt(15)
-		near(top.proficiency.damage, 0.3, "WP III")
-		near(top.proficiency.critDamage, 0.15, "WP III crit damage")
+		Expect.near(top.proficiency.damage, 0.3, "WP III")
+		Expect.near(top.proficiency.critDamage, 0.15, "WP III crit damage")
 		Expect.equal(top.upgrades.gather_strength.charges, 2)
-		near(top.upgrades.gather_strength.selfEffects[1].magnitude, 0.75, "GS II bonus")
-		near(top.upgrades.heightened_senses.selfEffects[1].magnitude, 0.6, "Keen Reflexes agility")
+		Expect.near(top.upgrades.gather_strength.selfEffects[1].magnitude, 0.75, "GS II bonus")
+		Expect.near(top.upgrades.heightened_senses.selfEffects[1].magnitude, 0.6, "Keen Reflexes agility")
 		Expect.equal(top.upgrades.heightened_senses.selfEffects[1].duration, 12)
 		Expect.equal(top.critEffects[1].status, "exposed")
 		Expect.equal(traitsAt(11).upgrades.gather_strength, nil)
 	end,
 	["gather strength adds 50% to the next hit, additively"] = function()
 		local gather = Skills.gather_strength.selfEffects[1]
-		near(gather.magnitude, 0.5, "magnitude")
+		Expect.near(gather.magnitude, 0.5, "magnitude")
 		Expect.equal(gather.duration, 8)
 		local input = {
 			base = 6,
@@ -276,8 +355,8 @@ return {
 				exposure = 0.1,
 			})
 		end
-		near(bonus(0.5), 0.2, "healthy target")
-		near(bonus(0.29), 0.45, "below 30%")
+		Expect.near(bonus(0.5), 0.2, "healthy target")
+		Expect.near(bonus(0.29), 0.45, "below 30%")
 	end,
 	["crit damage adds to the crit multiplier"] = function()
 		local input = {
@@ -300,11 +379,11 @@ return {
 	end,
 	["charges: a second use waits only once both are spent"] = function()
 		local readyAt = Formulas.ChargeSpend(0, 100, 20)
-		near(Formulas.ChargeReadyIn(readyAt, 100, 20, 2), 0, "second charge ready")
-		near(Formulas.ChargeReadyIn(readyAt, 100, 20, 1), 20, "single charge waits")
+		Expect.near(Formulas.ChargeReadyIn(readyAt, 100, 20, 2), 0, "second charge ready")
+		Expect.near(Formulas.ChargeReadyIn(readyAt, 100, 20, 1), 20, "single charge waits")
 		readyAt = Formulas.ChargeSpend(readyAt, 100, 20)
-		near(Formulas.ChargeReadyIn(readyAt, 100, 20, 2), 20, "both spent")
-		near(Formulas.ChargeReadyIn(readyAt, 125, 20, 2), 0, "one recharged")
+		Expect.near(Formulas.ChargeReadyIn(readyAt, 100, 20, 2), 20, "both spent")
+		Expect.near(Formulas.ChargeReadyIn(readyAt, 125, 20, 2), 0, "one recharged")
 	end,
 	["proficiency weapon: choice, else equipped, else default"] = function()
 		local items = { rusty = { weapon = "sword" }, potion = {} }
@@ -316,8 +395,8 @@ return {
 		Expect.equal(Formulas.ProficiencyFamily("", "bow", "sword"), "bow")
 	end,
 	["harmful status duration shrinks with resistance"] = function()
-		near(Formulas.StatusDuration(4, 100, true, 100), 2, "harmful")
-		near(Formulas.StatusDuration(4, 100, false, 100), 4, "helpful")
+		Expect.near(Formulas.StatusDuration(4, 100, true, 100), 2, "harmful")
+		Expect.near(Formulas.StatusDuration(4, 100, false, 100), 4, "helpful")
 	end,
 	["discipline capacity formula"] = function()
 		Expect.equal(Formulas.DisciplineCapacity(5, 2, 7), 2)
@@ -330,9 +409,9 @@ return {
 	end,
 	["haste shortens the GCD and casts up to its cap"] = function()
 		local gcd = Tuning.Combat.Gcd
-		near(Formulas.Hasted(gcd.Base, 0, gcd.MaxHaste), 2.5, "no haste")
-		near(Formulas.Hasted(gcd.Base, 0.1, gcd.MaxHaste), 2.25, "10%")
-		near(Formulas.Hasted(gcd.Base, 5, gcd.MaxHaste), 2.5 * (1 - gcd.MaxHaste), "capped")
-		near(Formulas.Hasted(1.5, -1, gcd.MaxHaste), 1.5, "never slower")
+		Expect.near(Formulas.Hasted(gcd.Base, 0, gcd.MaxHaste), 2.5, "no haste")
+		Expect.near(Formulas.Hasted(gcd.Base, 0.1, gcd.MaxHaste), 2.25, "10%")
+		Expect.near(Formulas.Hasted(gcd.Base, 5, gcd.MaxHaste), 2.5 * (1 - gcd.MaxHaste), "capped")
+		Expect.near(Formulas.Hasted(1.5, -1, gcd.MaxHaste), 1.5, "never slower")
 	end,
 }

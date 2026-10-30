@@ -555,4 +555,60 @@ function Formulas.InArc(
 	return cosine >= math.cos(math.rad(angle / 2))
 end
 
+export type RegenInput = {
+	hp: number,
+	maxHp: number,
+	mp: number,
+	maxMp: number,
+	stamina: number,
+	maxStamina: number,
+	--[=[ HP and MP multiplier from hunger and thirst. Stamina ignores it. ]=]
+	regenScale: number,
+	mpRegenBonus: number,
+	staminaRegenPct: number,
+	guarding: boolean,
+	secondsSinceCombat: number,
+}
+
+export type RegenTuning = {
+	MpRegen: number,
+	StaminaRegen: number,
+	HpRegenOutOfCombat: number,
+	OutOfCombatDelay: number,
+}
+
+--[=[
+	One regeneration step of a player's pools. Returns the new HP, MP and Stamina, and whether any
+	pool below its max was eligible to regenerate. HP waits for `OutOfCombatDelay`; Stamina stops
+	while guarding.
+]=]
+function Formulas.Regen(input: RegenInput, tuning: RegenTuning, dt: number): (number, number, number, boolean)
+	local hp, mp, stamina = input.hp, input.mp, input.stamina
+	local changed = false
+	if mp < input.maxMp then
+		local rate = (tuning.MpRegen + input.mpRegenBonus) * input.regenScale
+		mp = math.min(input.maxMp, mp + rate * dt)
+		changed = true
+	end
+	if stamina < input.maxStamina and not input.guarding then
+		local rate = tuning.StaminaRegen * (1 + input.staminaRegenPct)
+		stamina = math.min(input.maxStamina, stamina + rate * dt)
+		changed = true
+	end
+	if hp < input.maxHp and input.secondsSinceCombat > tuning.OutOfCombatDelay then
+		hp = math.min(input.maxHp, hp + tuning.HpRegenOutOfCombat * input.regenScale * dt)
+		changed = true
+	end
+	return hp, mp, stamina, changed
+end
+
+--[=[ HP and Stamina a Self skill's `restore` fractions are worth; 0 for a pool it does not name. ]=]
+function Formulas.SelfRestore(
+	restore: { Hp: number?, Stamina: number? },
+	maxHp: number,
+	maxStamina: number
+): (number, number)
+	return maxHp * (restore.Hp or 0), maxStamina * (restore.Stamina or 0)
+end
+
 return Formulas
