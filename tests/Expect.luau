@@ -15,6 +15,12 @@ function Expect.truthy(value: any, label: string?)
 	end
 end
 
+function Expect.near(actual: number, expected: number, label: string?, tolerance: number?)
+	if math.abs(actual - expected) > (tolerance or 1e-6) then
+		error(`{label or "value"}: expected about {expected}, got {actual}`, 2)
+	end
+end
+
 function Expect.errors(fn: () -> (), label: string?)
 	if pcall(fn) then
 		error(`{label or "call"}: expected an error`, 2)

@@ -179,7 +179,7 @@ From [low-level-human-design.md](low-level-human-design.md), adapted to this doc
 | Toolchain | **Rokit** (`rokit.toml`) pins rojo, stylua, selene, luau-lsp, lune, wally | One `rokit install` reproduces every tool version. |
 | Typing & lint | `--!strict` Luau everywhere, `luau-lsp`, `selene`, `stylua` | Catches bugs at edit time. |
 | Packages | **Wally** with pinned versions; vendor reviewed copies | No unpinned dependencies. |
-| Tests | **Lune** unit tests for pure modules (`tests/specs/*.spec.luau`), Studio playtests for integration, MicroProfiler | Lune runs in CI without Studio. Pure modules take no instance requires so they load in both runtimes. |
+| Tests | **Lune** unit tests for pure modules (`tests/specs/*.spec.luau`; `lune run tests/run <text>` filters by spec or test name; `Coverage.spec` fails on a Shared module with no spec), Studio playtests for integration, MicroProfiler. A service's decisions live in a pure Shared function so a spec can reach them; the service keeps the wiring. | Lune runs in CI without Studio. Pure modules take no instance requires so they load in both runtimes. |
 | Build/publish | `rojo build` in CI; Open Cloud upload with scoped keys | Keys never in repo. |
 | External tools | Blender (bpy headless), Python or Node scripts, Lune | §8. |
 
