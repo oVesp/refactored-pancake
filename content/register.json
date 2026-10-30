@@ -3285,6 +3285,16 @@
 			"notes": "Goblin camp layout from village-kit models: palisade ring, gate towers, tents, brazier, dais, clutter."
 		},
 		{
+			"id": "worldgen:Harbor",
+			"type": "tool",
+			"path": "src/ServerStorage/WorldGen/Harbor.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Studio edit-mode builder: the Harbor mock (inn, guild hall, quest board, Pylon, dock) from the village kit and plain parts."
+		},
+		{
 			"id": "worldgen:Regions",
 			"type": "tool",
 			"path": "src/ServerStorage/WorldGen/Regions.luau",

@@ -93,6 +93,18 @@ Roblox compatibility fixes, all in the script:
 
 `python tools/worldgen/props.py upload --creator-user 82401475 --library village` uploads it and writes the asset id, materials and asset metadata to `content/world/village.json`, which Rojo maps to `WorldGen.VillageManifest`. The Studio importer went with the zone graph; the region builder brings it back.
 
+## Harbor mock (owner, 2026-10-30)
+
+`WorldGen/Harbor.luau` is a Studio builder, run in Edit mode with `require(game.ServerStorage.WorldGen.Harbor).Build()`. It rebuilds `Workspace.Harbor` from `ServerStorage.VillageKit` models and plain parts, and removes the region builder's placeholder pillar for the Harbor site. It does not touch the approved Verdant Greens build (terrain, props, `Region.fingerprint`); the ground there is the existing village pads and bay.
+
+- **Inn** (kit House06) east of the plaza, door facing west; the innkeeper (the Map's vendor, `TrainerType = "Vendor"`) stands at its door and `InnSpawn` (`RespawnPoint`) is beside it.
+- **Guild hall** (kit Barn01) west of the plaza, door facing east; the **quest board** (`QuestBoard` tag) stands in front of it.
+- **Pylon** (`Pylon` tag, with an `Arrival` part) south of the plaza on a stone dais with a glowing core.
+- **Dock**: a 12-stud pier from z 150 to 330 on piles with rails, a 44-stud head with crates and a wagon, and `DockSpawn` (`ArrivalSpawn`) on the head.
+- **Dressing**: houses around the plaza and road, a well, a warehouse.
+
+The gameplay behind each tag is in [economy](economy.md). Positions are code constants; art can be replaced as long as the tags and the `Arrival` part stay. Not done: Fantasy Props MegaKit dressing (barrels, banners, benches), Poly Haven props, signage, lamps and boats.
+
 ## Props: procedural low-poly at low cost
 
 - **Few, large props.** Broadleaf trees about 58 studs and pines about 72 at scale 1, scaled 0.8 to 1.4.
@@ -103,11 +115,11 @@ Roblox compatibility fixes, all in the script:
 
 ## Not built yet
 
-- **Settlements**: towns, the Harbor and other sites are placeholder pillars; only goblin camps are dressed.
-- **Camp population**: camps have no goblin nests yet (`ContentServerOnly/Population`).
+- **Settlements**: towns and other sites are placeholder pillars; only goblin camps and the Harbor mock are dressed.
+- **Camp population**: camps hold no stationed goblins yet; roaming squads come from the nests in `ContentServerOnly/Population`.
 - **Open sea**: sea beyond each region's offshore band is not built.
 - **Population**: `ContentServerOnly/Population` is empty. Garrisons, patrols, caravans and nests come back per site and road once regions are built.
-- **The Map**: `Workspace.Map` (spawn, trainers, vendor, dev yard, creation stage) stands on the Harbor village pads at the origin.
+- **The Map**: `Workspace.Map` (inn and dock spawns, trainers, the innkeeper, dev yard, creation stage) stands on the Harbor village pads at the origin. The `harbor_dock` safe zone (z 80 to 360, in `Map.DockZones`, outside `Map.Zones` because the pads end at the shore) covers the pier.
 - **Per-region mood**: the atmosphere still blends by the old region bands (`tools/terrain/lib/Config.luau`).
 
 ## Old pipeline (to be removed)

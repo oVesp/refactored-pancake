@@ -2,7 +2,7 @@
 
 Status: **approved scope, revision 2; built 2026-10-24 (see §10).** Milestone **M0.5** in [game-design.md](../game-design.md) §7.4 and §10. Where this file and `game-design.md` disagree, `game-design.md` wins.
 
-**2026-10-29:** Midgard is now a generated continent ([world generation](../systems/world-generation.md)). The generated village, fields and camp terrain and their population were removed; the Map's gameplay objects remain as a placeholder. The slice now sits at the Harbor, the stud origin (owner, 2026-10-29); its dressing is rebuilt as part of the Verdant Greens region.
+**2026-10-29:** Midgard is now a generated continent ([world generation](../systems/world-generation.md)). The generated village, fields and camp terrain and their population were removed; the Map's gameplay objects remain as a placeholder. The slice now sits at the Harbor, the stud origin (owner, 2026-10-29); its dressing is rebuilt as part of the Verdant Greens region. The Harbor mock (inn, guild hall with quest board, Pylon, dock; 2026-10-30) is described in [world generation](../systems/world-generation.md#harbor-mock-owner-2026-10-30).
 
 | Field | Value |
 |---|---|
