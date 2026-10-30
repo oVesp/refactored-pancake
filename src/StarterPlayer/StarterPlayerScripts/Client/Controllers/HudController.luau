@@ -305,6 +305,17 @@ local function renderHotbar(slots: { [number]: any })
 				DragController.Begin(input, { kind = slot.kind, id = slot.id }, name, index)
 			else
 				CombatController.ActivateSlot(index)
+				-- Tracked on the input so letting go off the slot still shoots a draw.
+				local released: RBXScriptConnection
+				released = input:GetPropertyChangedSignal("UserInputState"):Connect(function()
+					if input.UserInputState == Enum.UserInputState.End then
+						released:Disconnect()
+						CombatController.ReleaseSlot(index)
+					elseif input.UserInputState == Enum.UserInputState.Cancel then
+						released:Disconnect()
+						CombatController.CancelDraw()
+					end
+				end)
 			end
 		end)
 		frame.Parent = bound.Bind_Hotbar

@@ -116,6 +116,10 @@ local function onSlot(index: number)
 	return function(_: string, state: Enum.UserInputState): Enum.ContextActionResult
 		if state == Enum.UserInputState.Begin then
 			CombatController.ActivateSlot(index)
+		elseif state == Enum.UserInputState.End then
+			CombatController.ReleaseSlot(index)
+		elseif state == Enum.UserInputState.Cancel then
+			CombatController.CancelDraw()
 		end
 		return sink()
 	end

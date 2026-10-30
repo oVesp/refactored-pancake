@@ -73,6 +73,8 @@ local chainAt = 0
 local guarding = false
 -- os.clock() when the current bow draw started.
 local drawStartedAt: number? = nil
+-- Skill the current draw will shoot: the bow's light attack or a `weaponAttack` skill.
+local drawSkill: string? = nil
 local drawConnection: RBXScriptConnection? = nil
 
 local function character(): (Model?, BasePart?, Humanoid?)
@@ -120,6 +122,12 @@ end
 
 local function lightChain(): { string }
 	return Chain.Members(Skills.ById, CombatController.Weapon().light)
+end
+
+-- The skill as the character uses it: a `weaponAttack` skill follows the held weapon.
+local function skillOf(skillId: string): any
+	local skill = Skills.ById[skillId]
+	return skill and Loadout.Attack(Skills.ById, skill, CombatController.Weapon())
 end
 
 local function positionOf(model: Model?): Vector3?
@@ -268,7 +276,7 @@ end
 -- Sends the use now. Returns false while the character is stunned or still casting.
 -- `chatText`: the chat message that cast it, sent instead of the id (chat casting).
 local function send(skillId: string, chatText: string?): boolean
-	local skill = Skills.ById[skillId]
+	local skill = skillOf(skillId)
 	local model, root = character()
 	if not skill or not model or not root or waitFor(skillId) > 0 then
 		return false
@@ -321,14 +329,19 @@ end
 	Sends a skill use if the local prediction allows it. A hotbar skill pressed within
 	`QueueWindow` of becoming ready is queued (one at a time, the latest press wins) and sent the
 	moment it is, which buffers presses made during a swing's recovery. The light attack entry continues the chain: it
-	uses the last hit's `chainNext` within Tuning.Combat.Chain.Window, else starts over.
+	uses the last hit's `chainNext` within Tuning.Combat.Chain.Window, else starts over. A skill the
+	held weapon draws starts the draw; releasing the slot shoots it (`ReleaseSlot`).
 ]=]
 function CombatController.UseSkill(skillId: string)
 	if skillId == CombatController.Weapon().light then
 		skillId = Chain.Next(Skills.ById, skillId, chainLast, chainAt, os.clock(), Tuning.Combat.Chain.Window)
 	end
-	local skill = Skills.ById[skillId]
+	local skill = skillOf(skillId)
 	if not skill then
+		return
+	end
+	if skill.drawn then
+		CombatController.StartDraw(skillId)
 		return
 	end
 	local wait = waitFor(skillId)
@@ -391,6 +404,14 @@ function CombatController.ActivateSlot(index: number)
 	end
 end
 
+--[=[ Hotbar slot `index` let go: shoots the draw that slot started. ]=]
+function CombatController.ReleaseSlot(index: number)
+	local slot = hotbar[index]
+	if slot and slot.id == drawSkill then
+		CombatController.ReleaseDraw()
+	end
+end
+
 --[=[ Current hotbar slots by index; empty slots are absent. ]=]
 function CombatController.Hotbar(): { [number]: Slot }
 	return hotbar
@@ -419,13 +440,22 @@ local function endDrawCamera()
 	CameraController.SetAiming(false)
 end
 
---[=[ Starts drawing the bow: the camera aims in tighter (CameraController) and the archer slows down. ]=]
-function CombatController.StartDraw()
+--[=[
+	Starts drawing the bow: the camera aims in tighter (CameraController) and the archer slows down.
+	`skillId` is what the release shoots, the light attack by default; naming one during a draw
+	switches the shot to it.
+]=]
+function CombatController.StartDraw(skillId: string?)
 	local _, root = character()
-	if drawStartedAt or not root or not CombatController.Weapon().drawn then
+	local shot = skillId or CombatController.Weapon().light
+	if (drawStartedAt and not skillId) or not root or not CombatController.Weapon().drawn then
 		return
 	end
-	if guarding or waitFor(CombatController.Weapon().light) > 0 then
+	if guarding or waitFor(shot) > 0 then
+		return
+	end
+	drawSkill = shot
+	if drawStartedAt then
 		return
 	end
 	drawStartedAt = os.clock()
@@ -446,10 +476,12 @@ function CombatController.ReleaseDraw()
 	if not startedAt then
 		return
 	end
+	local shot = drawSkill or CombatController.Weapon().light
 	drawStartedAt = nil
+	drawSkill = nil
 	endDrawCamera()
 	local scale = Archery.DrawScale(os.clock() - startedAt, Tuning.Combat.Bow)
-	if scale <= 0 or not send(CombatController.Weapon().light) then
+	if scale <= 0 or not send(shot) then
 		NetClient.Fire("SetDraw", false)
 	end
 end
@@ -458,6 +490,7 @@ end
 function CombatController.CancelDraw()
 	if drawStartedAt then
 		drawStartedAt = nil
+		drawSkill = nil
 		endDrawCamera()
 		NetClient.Fire("SetDraw", false)
 	end
@@ -577,6 +610,7 @@ function CombatController.Start()
 			drawConnection = nil
 		end
 		drawStartedAt = nil
+		drawSkill = nil
 	end)
 	GuardClips.Start()
 	-- Old sequence numbers never resolve on success; trim them so the table stays small.

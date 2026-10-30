@@ -58,6 +58,30 @@ function Loadout.Basics(skills: SkillMap, weapon: Types.WeaponDef, hasShield: bo
 	return basics
 end
 
+--[=[
+	The skill as used with `weapon`: a `weaponAttack` skill takes on the first hit of the weapon's
+	light attack (delivery, reach, timing, draw) with damage times `scale`; its own fields win and it
+	stays out of the chain. Any other skill comes back as it is.
+]=]
+function Loadout.Attack(skills: SkillMap, skill: any, weapon: Types.WeaponDef): any
+	local attack = skill.weaponAttack
+	if not attack then
+		return skill
+	end
+	local light = skills[weapon.light]
+	local resolved: any = table.clone(light)
+	resolved.chainNext = nil
+	resolved.cooldown = nil
+	for key, value in skill do
+		resolved[key] = value
+	end
+	resolved.shownAs = light.id
+	resolved.damage = table.clone(light.damage)
+	resolved.damage.base *= attack.scale
+	resolved.damage.ratio *= attack.scale
+	return resolved
+end
+
 --[=[ True when the holder can guard: a shield, or a weapon that guards on its own. ]=]
 function Loadout.CanGuard(weapon: Types.WeaponDef, hasShield: boolean): boolean
 	return hasShield or weapon.guard

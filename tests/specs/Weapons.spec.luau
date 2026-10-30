@@ -118,6 +118,36 @@ return {
 		)
 		Expect.equal(#Loadout.Displaced("Shield", shield, Weapons.ById.wand, Weapons.ById), 0, "wand keeps it")
 	end,
+	["a weaponAttack skill takes on each weapon's light attack"] = function()
+		local precise = Skills.precise_attack
+		local scale = precise.weaponAttack.scale
+		for id, weapon in Weapons.ById do
+			local light = Skills[weapon.light]
+			local used = Loadout.Attack(Skills, precise, weapon)
+			Expect.equal(used.id, "precise_attack", `{id}: keeps its id`)
+			Expect.equal(used.shownAs, weapon.light, `{id}: shows the light attack`)
+			Expect.equal(used.delivery, light.delivery, `{id}: delivery`)
+			Expect.equal(used.range, light.range, `{id}: range`)
+			Expect.equal(used.windup, light.windup, `{id}: windup`)
+			Expect.equal(used.recovery, light.recovery, `{id}: recovery`)
+			Expect.equal(used.speed, light.speed, `{id}: speed`)
+			Expect.equal(used.drawn, light.drawn, `{id}: draw`)
+			Expect.equal(used.damage.type, light.damage.type, `{id}: damage type`)
+			Expect.truthy(math.abs(used.damage.base - light.damage.base * scale) < 1e-6, `{id}: base`)
+			Expect.truthy(math.abs(used.damage.ratio - light.damage.ratio * scale) < 1e-6, `{id}: ratio`)
+			Expect.equal(used.gcd, true, `{id}: on the GCD`)
+			Expect.equal(used.critChance, precise.critChance, `{id}: crit`)
+			Expect.equal(used.maxTargets, precise.maxTargets, `{id}: single target`)
+			Expect.equal(used.cooldown, nil, `{id}: no light cooldown`)
+			Expect.equal(used.chainNext, nil, `{id}: outside the chain`)
+		end
+		Expect.equal(Skills.bow_shot.damage.base, 12, "the light attack itself is untouched")
+		Expect.equal(
+			Loadout.Attack(Skills, Skills.strike, Weapons.ById.sword),
+			Skills.strike,
+			"other skills pass through"
+		)
+	end,
 	["guarding needs a guarding weapon or a shield"] = function()
 		Expect.truthy(Loadout.CanGuard(Weapons.ById.sword, false), "sword")
 		Expect.equal(Loadout.CanGuard(Weapons.ById.bow, false), false, "bow alone")

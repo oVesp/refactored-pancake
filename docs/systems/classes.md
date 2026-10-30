@@ -63,4 +63,4 @@ Naming: the skill is **Gather Strength**, not "Focus", because Focus is the Disc
 - Every damage bonus (Gather Strength, Proficiency, Battle Rhythm, Finishing Instinct, Exposed, Battle Trance, Overcharge) adds into one outgoing bonus; Precise Attack's 140% scales the hit itself.
 - Gather Strength and Disengage are spent by the next damaging skill use, shared by every target of that use.
 - Battle Trance halves skill Stamina costs only, not dodge or guard. Exposed keeps the last Fighter that applied it as its source.
-- Precise Attack is a melee swing until weapon-aware attacks exist for bows.
+- Precise Attack (`weaponAttack`, `Loadout.Attack`) is the first hit of the equipped weapon's light attack at 140% with +15% crit, on the GCD and outside the chain: a swing with sword, staff or fists, a wand bolt, an arrow with the bow. With the bow the slot works like the attack button: hold to draw, release to shoot, with the same draw scaling. Its damage type is the weapon's, so staff and wand hits are `force` and earn no Weapon Proficiency.

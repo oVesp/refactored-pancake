@@ -86,10 +86,8 @@ return {
 			Expect.truthy(skill.damage == nil or skill.damage.type == "physical", `{skillId}: physical only`)
 			Expect.truthy(skill.cost == nil or skill.cost.resource == "Stamina", `{skillId}: Stamina`)
 		end
-		local light = Skills[Basic.Light].damage
-		local precise = Skills.precise_attack.damage
-		Expect.truthy(math.abs(precise.base - light.base * 1.4) < 1e-6, "Precise Attack base is 140%")
-		Expect.truthy(math.abs(precise.ratio - light.ratio * 1.4) < 1e-6, "Precise Attack ratio is 140%")
+		Expect.equal(Skills.precise_attack.weaponAttack.scale, 1.4, "Precise Attack is 140%")
+		Expect.equal(Skills.precise_attack.critChance, 0.15, "Precise Attack crit")
 		Expect.equal(Skills.disengage.cooldown, 15)
 		local weapons = Loader.load(Content .. "Weapons").ById
 		for _, weaponId in Loader.load(Content .. "Tuning").Combat.ProficiencyWeapons do
@@ -135,7 +133,7 @@ return {
 			checkEffects(id, skill.effects)
 			checkEffects(id, skill.selfEffects)
 			if skill.kind == "Active" then
-				Expect.truthy(skill.delivery, `{id} delivery`)
+				Expect.truthy(skill.delivery or skill.weaponAttack, `{id} delivery`)
 				Expect.truthy(skill.targets, `{id} targets`)
 				if skill.gcd then
 					Expect.truthy(

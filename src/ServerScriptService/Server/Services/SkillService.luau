@@ -133,6 +133,12 @@ local function spellBonus(caster: Entity, skill: SkillDef): number
 	return 0
 end
 
+-- The skill as this caster uses it: a `weaponAttack` skill follows the equipped weapon.
+local function skillOf(caster: Entity, skillId: string): SkillDef?
+	local skill = Skills.ById[skillId]
+	return skill and Loadout.Attack(Skills.ById, skill, Weapons.ById[caster.weapon] or Weapons.ById[Weapons.Default])
+end
+
 local function hitEnemy(caster: Entity, target: Entity, skill: SkillDef, bonus: number, mods: any?)
 	if skill.rearBonus then
 		local look = target.root.CFrame.LookVector
@@ -141,7 +147,7 @@ local function hitEnemy(caster: Entity, target: Entity, skill: SkillDef, bonus: 
 		end
 	end
 	if skill.damage then
-		local dealt = CombatService.DealDamage(caster, target, skill.damage, skill.id, bonus, mods)
+		local dealt = CombatService.DealDamage(caster, target, skill.damage, skill.shownAs or skill.id, bonus, mods)
 		if dealt <= 0 and not CombatService.CanHarm(caster, target) then
 			return
 		end
@@ -303,7 +309,7 @@ local function launchProjectile(caster: Entity, skill: SkillDef, aim: Vector3, b
 		id = id,
 		kind = "Projectile",
 		caster = caster.model,
-		skillId = skill.id,
+		skillId = skill.shownAs or skill.id,
 		origin = origin,
 		direction = direction,
 		speed = skill.speed,
@@ -516,7 +522,7 @@ local function resolve(caster: Entity, skill: SkillDef, aim: Vector3, target: En
 		broadcast({
 			kind = "Resolve",
 			caster = caster.model,
-			skillId = skill.id,
+			skillId = skill.shownAs or skill.id,
 			origin = origin,
 			aim = aim,
 			target = shownTarget,
@@ -594,7 +600,7 @@ function SkillService.Cast(
 	target: Entity?,
 	cost: { resource: "Mp" | "Stamina", amount: number }?
 )
-	local skill = Skills.ById[skillId]
+	local skill = skillOf(caster, skillId)
 	if not skill or not caster.alive then
 		return
 	end
@@ -739,7 +745,7 @@ local function handleUseSkill(
 		reject(player, seq, "Dead")
 		return
 	end
-	local skill = Skills.ById[skillId]
+	local skill = skillOf(caster, skillId)
 	if
 		not skill
 		or skill.kind ~= "Active"

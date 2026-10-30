@@ -127,6 +127,13 @@ export type SkillDef = {
 	maxTargets: number?,
 	--[=[ Added to the caster's crit chance for this skill's hits. ]=]
 	critChance: number?,
+	--[=[
+		The skill attacks with the equipped weapon: it takes on the weapon's light attack with damage
+		times `scale` (Loadout.Attack), so it needs no delivery or damage of its own.
+	]=]
+	weaponAttack: { scale: number }?,
+	--[=[ Set by Loadout.Attack: the light attack whose visuals a `weaponAttack` use shows. ]=]
+	shownAs: string?,
 	--[=[ Self only: restores these fractions of max HP and Stamina. ]=]
 	restore: { Hp: number?, Stamina: number? }?,
 	--[=[ Uses of the cooldown held at once; each recharges in `cooldown` seconds. Default 1. ]=]
