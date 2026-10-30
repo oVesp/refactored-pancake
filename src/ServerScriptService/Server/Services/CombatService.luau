@@ -5,6 +5,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Formulas = require(ReplicatedStorage.Shared.Formulas)
 local NetServer = require(ReplicatedStorage.Shared.Net.Server)
+local Relations = require(ReplicatedStorage.Shared.Relations)
 local Signal = require(ReplicatedStorage.Shared.Signal)
 local Statuses = require(ReplicatedStorage.Content.Statuses)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
@@ -54,12 +55,23 @@ local function inFront(defender: Entity, attacker: Entity, arc: number): boolean
 	return Formulas.InArc(o.X, o.Z, look.X, look.Z, p.X, p.Z, math.huge, arc)
 end
 
+--[=[
+	True when `source` may aim at or hit `target`: enemies (factions or grudges), and a player
+	against any NPC outside safe zones. NPCs inside a safe zone only fight hostile factions.
+]=]
+function CombatService.MayAttack(source: Entity, target: Entity): boolean
+	if source.kind == "Player" and target.kind == "Npc" and not Relations.Hostile(source.team, target.team) then
+		return not ZoneService.IsSafe(target.root.Position)
+	end
+	return EntityService.AreEnemies(source, target)
+end
+
 --[=[ True when `target` can currently be damaged by `source`. ]=]
 function CombatService.CanHarm(source: Entity?, target: Entity): boolean
 	if not target.alive or target.god then
 		return false
 	end
-	if source and not EntityService.AreEnemies(source, target) then
+	if source and not CombatService.MayAttack(source, target) then
 		return false
 	end
 	if target.kind == "Player" and ZoneService.IsSafe(target.root.Position) then

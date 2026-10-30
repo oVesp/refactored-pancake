@@ -34,6 +34,7 @@ local NeedsService: any
 local ProgressionService: any
 local SpawnService: any
 local StatService: any
+local ZoneService: any
 
 local limiter = RateLimiter.new(5, 2)
 
@@ -139,7 +140,11 @@ local commands: { [string]: Handler } = {
 		for i = 1, count do
 			SpawnService.DevSpawn(enemyId, level, origin + Vector3.new((i - 1) * 4, 0, 0))
 		end
+		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		local safe = root and root:IsA("BasePart") and ZoneService.IsSafe(root.Position)
+		-- NPCs never target a player inside a safe zone, which looks like a broken brain.
 		return `Spawned {count} {enemyId} at level {level}`
+			.. if safe then " (safe zone: it will not attack you here)" else ""
 	end,
 	clear = function()
 		return `Cleared {SpawnService.ClearDevSpawned()} dev spawns`
@@ -314,6 +319,7 @@ function DevService.Init(deps: { [string]: any })
 	ProgressionService = deps.ProgressionService
 	SpawnService = deps.SpawnService
 	StatService = deps.StatService
+	ZoneService = deps.ZoneService
 end
 
 function DevService.Start()

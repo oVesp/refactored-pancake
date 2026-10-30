@@ -13,6 +13,7 @@ local Theme = require(ReplicatedStorage.Shared.Theme)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 
 local ENEMY_TAGS = { "Enemy", "TrainingDummy" }
+local PERSON_TAG = "Npc"
 local REFRESH_SECONDS = 0.1
 local PICK_RAY = 300
 local SOFT_COLOR = Theme.Gold
@@ -60,16 +61,26 @@ local function isAlive(model: Model): boolean
 	return model.Parent ~= nil and (type(hp) ~= "number" or hp > 0)
 end
 
-local function enemyCandidates(): { Targeting.Candidate<Model> }
+-- Enemies, plus people the server marks: `attribute` is Provoked for the soft target (it never
+-- lands on a bystander) and Attackable for a deliberate lock.
+local function enemyCandidates(attribute: string): { Targeting.Candidate<Model> }
 	local list: { Targeting.Candidate<Model> } = {}
+	local function add(instance: Instance)
+		if instance:IsA("Model") and isAlive(instance) then
+			local root = rootOf(instance)
+			if root then
+				table.insert(list, { key = instance, position = root.Position })
+			end
+		end
+	end
 	for _, tag in ENEMY_TAGS do
 		for _, instance in CollectionService:GetTagged(tag) do
-			if instance:IsA("Model") and isAlive(instance) then
-				local root = rootOf(instance)
-				if root then
-					table.insert(list, { key = instance, position = root.Position })
-				end
-			end
+			add(instance)
+		end
+	end
+	for _, instance in CollectionService:GetTagged(PERSON_TAG) do
+		if instance:GetAttribute(attribute) == true then
+			add(instance)
 		end
 	end
 	return list
@@ -143,7 +154,7 @@ local function isEnemyModel(model: Model): boolean
 			return true
 		end
 	end
-	return false
+	return CollectionService:HasTag(model, PERSON_TAG) and model:GetAttribute("Attackable") == true
 end
 
 local function render()
@@ -195,7 +206,7 @@ local function refresh()
 	end
 	local range = t.Range
 	local opts = options(range, soft)
-	soft = if opts then Targeting.Pick(enemyCandidates(), opts) else nil
+	soft = if opts then Targeting.Pick(enemyCandidates("Provoked"), opts) else nil
 	render()
 end
 
@@ -217,7 +228,7 @@ end
 --[=[ Locks the next enemy in score order; past the last one it releases the lock. ]=]
 function TargetController.Cycle()
 	local opts = options(Tuning.Targeting.Range, nil)
-	setLock(if opts then Targeting.Next(enemyCandidates(), opts, locked) else nil)
+	setLock(if opts then Targeting.Next(enemyCandidates("Attackable"), opts, locked) else nil)
 	render()
 end
 

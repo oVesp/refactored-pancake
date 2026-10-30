@@ -13,8 +13,6 @@ export type Point = { number }
 
 export type Member = { npc: string, count: number, level: { number }? }
 
-export type Formation = "Column" | "Line" | "Wedge" | "Ring"
-
 --[=[ Stands at `at`; members wander `wander` studs around it. Respawns one by one. ]=]
 export type Garrison = {
 	id: string,
@@ -24,7 +22,7 @@ export type Garrison = {
 	respawnSeconds: number,
 }
 
---[=[ Walks `points` in formation. Loops come back forever; open routes end and the group leaves. ]=]
+--[=[ Walks `points`. Loops come back forever; open routes end and the group leaves. ]=]
 export type Route = {
 	points: { Point },
 	loop: boolean,
@@ -32,11 +30,10 @@ export type Route = {
 	stops: { [number]: number }?,
 }
 
+--[=[ The first member listed leads; the others trail it in a loose clump (Shared/Tasks). ]=]
 export type Troop = {
 	id: string,
 	members: { Member },
-	formation: Formation,
-	spacing: number,
 	route: Route,
 	--[=[ Seconds between dispatches while fewer than `max` are out. ]=]
 	interval: number,
@@ -56,25 +53,59 @@ export type Residents = {
 }
 
 --[=[
-	A hidden source of monsters. `stationed` hold the lair; `squads` leave it in formation to
-	roam `territory` (a loop of points). A squad is only sent out while no player is within
+	A hidden source of monsters. `stationed` hold the lair; `squads` leave it behind their first
+	member to roam `territory` (a loop of points). A squad is only sent out while no player is within
 	`Tuning.Population.HiddenRadius` of `at`, so nobody sees it appear.
 ]=]
 export type Nest = {
 	id: string,
 	at: Point,
 	stationed: { Garrison },
-	squads: { { members: { Member }, formation: Formation } },
+	squads: { { members: { Member } } },
 	territory: { Point },
 	maxSquads: number,
 	interval: number,
 	time: ("Day" | "Night")?,
 }
 
--- Empty until the continent's regions are built: the centre section these lived in was replaced
--- by the continent generator (docs/systems/world-generation.md).
+-- Mostly empty until the continent's regions are built: the centre section these lived in was
+-- replaced by the continent generator (docs/systems/world-generation.md).
 local garrisons: { Garrison } = {}
-local patrols: { Troop } = {}
+local patrols: { Troop } = {
+	-- Circles just outside the goblin camp. Nobody here has `combat.leader`: without the Brute the
+	-- squad falls apart until a new one is sent.
+	{
+		id = "goblin_camp_patrol",
+		members = {
+			{ npc = "goblin_brute", count = 1 },
+			{ npc = "goblin_raider", count = 2, level = { 3, 4 } },
+			{ npc = "goblin_slinger", count = 2 },
+			{ npc = "goblin_trapper", count = 1 },
+		},
+		route = {
+			points = { { -135, -560 }, { 135, -560 }, { 150, -700 }, { 0, -800 }, { -150, -700 } },
+			loop = true,
+			stops = { [3] = 6 },
+		},
+		interval = 180,
+		max = 1,
+	},
+	-- Neutral until attacked. The second Sergeant takes over if the first falls.
+	{
+		id = "kingdom_field_patrol",
+		members = {
+			{ npc = "kingdom_sergeant", count = 2 },
+			{ npc = "kingdom_soldier", count = 3 },
+		},
+		route = {
+			points = { { 230, -120 }, { 330, -200 }, { 330, -400 }, { 230, -480 }, { 170, -300 } },
+			loop = true,
+			stops = { [2] = 8 },
+		},
+		interval = 240,
+		max = 1,
+	},
+}
 local caravans: { Troop } = {}
 local travelers: { Troop } = {}
 local residents: { Residents } = {}

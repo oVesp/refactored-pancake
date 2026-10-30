@@ -92,6 +92,7 @@ function EntityService.Register(info: NewEntity): Entity
 		statuses = {},
 		history = {},
 		threat = {},
+		grudges = {},
 		tauntedBy = nil,
 		lastHitBy = nil,
 		traits = { critEffects = {}, upgrades = {} },
@@ -124,6 +125,7 @@ function EntityService.Unregister(model: Model)
 	end
 	for _, other in entities do
 		other.threat[entity] = nil
+		other.grudges[entity] = nil
 		if other.tauntedBy == entity then
 			other.tauntedBy = nil
 		end
@@ -156,11 +158,21 @@ function EntityService.All(): { [Model]: Entity }
 end
 
 --[=[
-	True when two entities' factions are hostile (Shared/Relations). Players never hurt players
-	(no PvP in M0.5).
+	True when two entities' factions are hostile (Shared/Relations) or one holds a grudge against
+	the other. Players never hurt players (no PvP in M0.5).
 ]=]
 function EntityService.AreEnemies(a: Entity, b: Entity): boolean
-	return a ~= b and Relations.Hostile(a.team, b.team)
+	return a ~= b and (Relations.Hostile(a.team, b.team) or a.grudges[b] == true or b.grudges[a] == true)
+end
+
+--[=[ `entity` now fights `other` whatever their factions say, until it forgives. ]=]
+function EntityService.Provoke(entity: Entity, other: Entity)
+	entity.grudges[other] = true
+end
+
+--[=[ Drops every grudge `entity` holds (back home after a fight). ]=]
+function EntityService.Forgive(entity: Entity)
+	table.clear(entity.grudges)
 end
 
 --[=[

@@ -6,7 +6,9 @@ local Types = require(script.Parent.Types)
 	Human NPCs of the open world (docs/systems/open-world.md): townsfolk, guards, merchants and
 	travelers. Same shape as `Enemies`; `template = "Human"` builds a varied R15 body from
 	`Appearance`, dressed in one of `outfits`. Civilians never fight: their morale is always below
-	`fleeBelow`, so they run home from any monster they see.
+	`fleeBelow`, so they run home from any monster they see. Outside safe zones all of them can be
+	attacked and fight back (stance Neutral by default). Kingdom soldiers are placeholders on the
+	Human rig.
 ]=]
 local COWARD = { base = 10, fleeBelow = 100 }
 
@@ -147,6 +149,59 @@ local list: { Types.EnemyDef } = {
 		team = "Travelers",
 		outfits = { "cloaked", "hunter" },
 		combat = { slot = "Melee", morale = { base = 80, fleeBelow = 45 } },
+	},
+	{
+		id = "kingdom_soldier",
+		name = "Kingdom Soldier",
+		tier = "Civilian",
+		levelMin = 5,
+		levelMax = 7,
+		base = { MaxHp = 90, PhysAtk = 12, PhysDef = 10, MagDef = 6, Agility = 8 },
+		growth = { MaxHp = 16, PhysAtk = 2, PhysDef = 2 },
+		tags = {},
+		skills = { "guard_strike" },
+		aggroRadius = 45,
+		leashRadius = 110,
+		moveSpeed = 14,
+		xp = 0,
+		scale = 1,
+		color = Color3.fromRGB(150, 150, 165),
+		template = "Human",
+		team = "HolyKingdom",
+		outfits = { "nightwatch" },
+		combat = {
+			slot = "Melee",
+			roles = { Pressure = 2, Flanker = 1 },
+			morale = { base = 100, fleeBelow = 20 },
+			poise = 0.3,
+		},
+	},
+	{
+		id = "kingdom_sergeant",
+		name = "Kingdom Sergeant",
+		tier = "Civilian",
+		levelMin = 6,
+		levelMax = 8,
+		base = { MaxHp = 130, PhysAtk = 14, PhysDef = 12, MagDef = 7, Agility = 8 },
+		growth = { MaxHp = 20, PhysAtk = 2, PhysDef = 2 },
+		tags = {},
+		skills = { "guard_strike" },
+		aggroRadius = 48,
+		leashRadius = 110,
+		moveSpeed = 13,
+		xp = 0,
+		scale = 1,
+		color = Color3.fromRGB(170, 150, 90),
+		template = "Human",
+		team = "HolyKingdom",
+		outfits = { "nightwatch" },
+		combat = {
+			slot = "Melee",
+			roles = { Pressure = 2 },
+			morale = { base = 100, fleeBelow = 15 },
+			poise = 0.35,
+			leader = true,
+		},
 	},
 }
 

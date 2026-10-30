@@ -88,6 +88,8 @@ export type Entity = {
 	statuses: { [string]: StatusInstance },
 	history: { Sample },
 	threat: { [Entity]: number },
+	--[=[ Entities this one fights although their factions are not Hostile: who attacked it. ]=]
+	grudges: { [Entity]: true },
 	tauntedBy: Entity?,
 	lastHitBy: Entity?,
 	--[=[ Combat traits from granted passives (players; empty for NPCs). ]=]

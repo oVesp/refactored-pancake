@@ -6,6 +6,7 @@ local Formation = require(ReplicatedStorage.Shared.Formation)
 local Logger = require(ReplicatedStorage.Shared.Logger)
 local NpcDefs = require(ReplicatedStorage.Shared.NpcDefs)
 local Route = require(ReplicatedStorage.Shared.Route)
+local Tasks = require(ReplicatedStorage.Shared.Tasks)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 local Types = require(script.Parent.Parent.Types)
 
@@ -34,9 +35,8 @@ export type MemberSpec = {
 
 export type Spec = {
 	label: string,
+	--[=[ The first member leads a route group. ]=]
 	members: { MemberSpec },
-	formation: Formation.Shape,
-	spacing: number,
 	--[=[ Walks this route; nil for a station. ]=]
 	route: Route.Route?,
 	--[=[ Seconds to wait at a route point index. ]=]
@@ -68,6 +68,10 @@ export type Group = Spec & {
 	spawning: boolean,
 	busy: boolean,
 	removed: boolean,
+	--[=[ Walks the route; the others follow it. ]=]
+	leader: MemberSpec?,
+	--[=[ The leader died and nobody can take over; the group disbands once out of sight. ]=]
+	leaderless: boolean,
 }
 
 local groups: { [number]: Group } = {}
@@ -77,9 +81,9 @@ local nextId = 0
 --[=[
 	NPC groups in the open world (docs/systems/open-world.md): patrols, caravans, travelers, nest
 	squads and stations. A group far from every player is data only and moves along its route; near
-	a player it gets bodies (SpawnService) whose brains GroupService steers into formation behind the
-	leader through `AIService.SetGoal`. In a fight the formation breaks and AI takes over; afterwards
-	the group picks its route up from the nearest point.
+	a player it gets bodies (SpawnService). The leader's brain walks the route (`AIService.SetGoal`)
+	and the others trail it in a loose clump (`AIService.SetLeader`, the FollowLeader task). In a
+	fight AI takes over; afterwards the group picks its route up from the nearest point.
 ]=]
 local GroupService = {}
 
@@ -180,11 +184,13 @@ end
 -- Where member `index` (of `count`) stands right now.
 local function slotOf(group: Group, index: number, count: number, origin: Vector3): Vector3
 	if group.station then
-		local offsets = Formation.Offsets("Ring", count, STATION_SPACING)
+		local offsets = Formation.Ring(count, STATION_SPACING)
 		return group.station + (if count > 1 then offsets[index] else Vector3.zero)
 	end
-	local offsets = Formation.Offsets(group.formation, count, group.spacing)
-	return Formation.Place(origin, group.heading, offsets[index])
+	if index == 1 then
+		return origin
+	end
+	return Formation.Place(origin, group.heading, Tasks.SlotOffset(index - 1, index, Tuning.Tasks.Follow))
 end
 
 local function spawnMember(group: Group, spec: MemberSpec, at: Vector3)
@@ -200,6 +206,7 @@ local function spawnMember(group: Group, spec: MemberSpec, at: Vector3)
 	spec.entity = entity
 	byEntity[entity] = { group = group, spec = spec }
 	entity.model:SetAttribute("Group", group.label)
+	AIService.SetSquad(entity, group.id)
 end
 
 local function materialize(group: Group)
@@ -230,28 +237,68 @@ local function dematerialize(group: Group)
 	group.materialized = false
 end
 
--- Bodies follow the route in formation behind the leader, or hold their station.
+-- A dead leader's place goes to a member with `combat.leader`; with none the squad is leaderless.
+local function promote(group: Group, members: { MemberSpec })
+	local candidates: { Tasks.LeaderCandidate } = {}
+	for index, spec in members do
+		local def = NpcDefs.Get(spec.npc)
+		table.insert(candidates, {
+			key = spec,
+			seq = index,
+			capable = def ~= nil and def.combat ~= nil and def.combat.leader == true,
+		})
+	end
+	group.leader = Tasks.PickLeader(candidates)
+	group.leaderless = group.leader == nil
+	if group.leader then
+		log:Debug("Group %d (%s) has a new leader: %s", group.id, group.label, group.leader.npc)
+	end
+end
+
+-- The leader walks the route and the others trail it; a station holds its ground; a leaderless
+-- squad mills about where it stands.
 local function steer(group: Group, members: { MemberSpec }, dt: number, now: number): boolean
-	local leader = members[1].entity :: Entity
-	local origin = leader.root.Position
-	group.position = origin
 	local route = group.route
 	if not route then
+		local first = members[1].entity :: Entity
+		group.position = first.root.Position
 		for index, spec in members do
 			local entity = spec.entity :: Entity
 			AIService.SetGoal(entity, nil)
-			AIService.SetHome(entity, slotOf(group, index, #members, origin))
+			AIService.SetHome(entity, slotOf(group, index, #members, first.root.Position))
 		end
 		return false
 	end
 
+	local current = group.leader
+	if not current or not current.entity or not current.entity.alive then
+		promote(group, members)
+	end
+	local leading = group.leader
+	if not leading then
+		group.position = (members[1].entity :: Entity).root.Position
+		for _, spec in members do
+			local entity = spec.entity :: Entity
+			AIService.SetLeader(entity, nil, 1)
+			AIService.SetGoal(entity, nil)
+			AIService.SetWander(entity, Tuning.Tasks.LeaderlessWander)
+		end
+		return false
+	end
+	local leader = leading.entity :: Entity
+	local origin = leader.root.Position
+	group.position = origin
+
 	local settings = Tuning.Population
 	local target = Route.At(route, group.progress)
 	local lag = 0
-	for index = 2, #members do
-		local entity = members[index].entity :: Entity
-		local slot = slotOf(group, index, #members, origin)
-		lag = math.max(lag, (flat(entity.root.Position) - flat(slot)).Magnitude)
+	local followers: { Entity } = {}
+	for _, spec in members do
+		if spec ~= leading then
+			local entity = spec.entity :: Entity
+			table.insert(followers, entity)
+			lag = math.max(lag, AIService.FollowGap(entity))
+		end
 	end
 	local ended = false
 	if (flat(target) - flat(origin)).Magnitude < settings.Lookahead and lag < settings.FollowLag then
@@ -260,13 +307,12 @@ local function steer(group: Group, members: { MemberSpec }, dt: number, now: num
 	local goal, heading = Route.At(route, group.progress + settings.Lookahead)
 	local toward = flat(goal - origin)
 	group.heading = if toward.Magnitude > 1 then toward.Unit else heading
+	AIService.SetLeader(leader, nil, 1)
 	AIService.SetGoal(leader, if now < group.pauseUntil then nil else goal)
 	AIService.SetHome(leader, origin)
-	for index = 2, #members do
-		local entity = members[index].entity :: Entity
-		local slot = slotOf(group, index, #members, origin)
-		AIService.SetGoal(entity, slot)
-		AIService.SetHome(entity, slot)
+	for index, entity in followers do
+		AIService.SetGoal(entity, nil)
+		AIService.SetLeader(entity, leader, index)
 	end
 	return ended
 end
@@ -274,6 +320,10 @@ end
 local function tick(group: Group, dt: number, now: number)
 	local settings = Tuning.Population
 	if not group.materialized then
+		if group.leaderless then
+			finish(group, false)
+			return
+		end
 		if group.route then
 			local ended = advance(group, speedOf(group) * dt, now)
 			local at, heading = Route.At(group.route, group.progress)
@@ -317,7 +367,11 @@ local function tick(group: Group, dt: number, now: number)
 		return
 	end
 	local ended = steer(group, members, dt, now)
-	if ended and distance > settings.MaterializeRadius * END_HIDE_SHARE then
+	if group.leaderless then
+		if distance > settings.HiddenRadius then
+			finish(group, false)
+		end
+	elseif ended and distance > settings.MaterializeRadius * END_HIDE_SHARE then
 		finish(group, true)
 	elseif distance > settings.DematerializeRadius then
 		dematerialize(group)
@@ -337,6 +391,8 @@ function GroupService.Create(spec: Spec, progress: number?): Group
 	group.spawning = false
 	group.busy = false
 	group.removed = false
+	group.leader = if spec.route then group.members[1] else nil
+	group.leaderless = false
 	if spec.route then
 		local at, heading = Route.At(spec.route, group.progress)
 		group.position, group.heading = at, heading

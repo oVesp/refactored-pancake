@@ -181,6 +181,29 @@ return table.freeze({
 		ReturnRegenPerSecond = 0.25,
 	}),
 
+	--[=[ Cascading tasks and leader following (docs/systems/ai-and-spawning.md, Tasks). Studs. ]=]
+	Tasks = table.freeze({
+		--[=[ Shared/Tasks.FollowSettings: the loose clump behind a leader. Pace comes from the leader. ]=]
+		Follow = table.freeze({
+			Back = 6,
+			Spacing = 6,
+			RowWidth = 3,
+			Jitter = 1.5,
+			ArriveRadius = 2,
+			ResumeRadius = 5,
+			CatchUpDistance = 8,
+			CatchUpFactor = 1.6,
+			SettleFactor = 1.1,
+		}),
+		--[=[ FollowLeader only holds while the leader is this close; beyond it the follower falls through. ]=]
+		LeaderRange = 120,
+		--[=[ Guard looks for its tag within this distance of home and stands within GuardRadius of it. ]=]
+		GuardRange = 120,
+		GuardRadius = 8,
+		--[=[ Idle patrol radius of a squad that lost its leader and has nobody to promote. ]=]
+		LeaderlessWander = 10,
+	}),
+
 	--[=[
 		Open-world groups (docs/systems/open-world.md). A group far from every player exists as data
 		only and moves along its route at `AbstractSpeed` of its slowest member; it gets bodies when a

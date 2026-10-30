@@ -8,11 +8,31 @@ Animation: AIService sets `AnimCue = "<clip>:<seq>"` on attack (melee, dash and 
 
 - **Spawning** comes from the open-world population (docs/systems/open-world.md): `SpawnService.Spawn(npcId, level, position, { home, wander, hp })` builds a body (monster template, or a random R15 look for `Content/Npcs` people) and attaches a brain; `GroupService` decides when. Monsters are tagged `Enemy`, people `Npc`. Corpses go after 3 s.
 - **Targets** are any entity of a hostile faction (`Shared/Relations`) found through a spatial grid rebuilt every step (`Shared/SpatialHash`, 32-stud cells); dummies are never targets. Monster factions never step into a safe zone or target anyone inside one; people move freely. Damage pulls in idle allies of the victim's faction (`Allied`) within 20 studs, so guards answer a villager or a caravan.
-- **Goals.** `AIService.SetGoal` gives an idle brain a point to walk to (`Travel` state) and `SetHome` moves its leash and patrol centre; GroupService uses both for formations. `AIService.Busy` is true outside Idle, Patrol and Travel.
+- **Tasks.** With no combat target a brain runs its task cascade (below). `AIService.SetGoal` gives the Patrol task a point to walk to (`Travel` state), `SetLeader` gives FollowLeader someone to trail, `SetHome` moves the leash and patrol centre and `SetSquad` groups brains that fight together; GroupService drives all four. `AIService.Busy` is true outside Idle, Patrol and Travel.
 - **Brains** think every 0.25 s with jitter: Idle → Patrol (random point within `wander` of home) or Travel (to the goal), both at `Tuning.Npc.PatrolSpeedMultiplier` of walk speed (`StatService.SetPace`) → Aggro (taunt, then threat, then the nearest player in aggro radius) → Position (waiting for an attack token) → Disrupt (running at a casting player) → Flee / Regroup (morale broken) → Stagger (poise broken) → Attack (first ready skill in data order whose conditions hold and whose budget grants a token) → Return (beyond the leash: clear threat, walk home, regenerate, reset). Players in safe zones are never targeted. Damage alerts nearby idle enemies of the same team.
 - **Behaviors** come from data: `keepDistance` makes ranged units kite; Ally skills heal the most wounded ally; Dash skills open from range; group behaviour comes from `combat` (below). `EnemyDef.behavior` is kept only for special cases: `Dummy` never thinks, `Boss` labels an encounter boss (no AI branch). `combat.summons` spawns adds once HP falls below each entry's `belowHp`, applies its `selfEffects` and sets the `Phase` attribute (the Chieftain: two level-4 Raiders and Rally at 50%).
 - **Movement** uses `Humanoid:MoveTo` on clear lines and `PathfindingService` (pcall, staggered recompute) when blocked.
 - `AiState` is replicated as an attribute for the debug overlay. In Studio, brains also publish `AiRole`, `AiSlot` (ring, index and Front/Side/Rear), `AiToken` (`Held` or `Spent`) and `AiMorale` every think.
+
+## Tasks
+
+Pure logic: `Shared/Tasks.luau` (specs in `tests/specs/Tasks.spec.luau`). Tuning: `Tuning.Tasks`. Data: optional `tasks` and `stance` on an `EnemyDef`.
+
+- **Cascade.** `tasks` lists what an NPC tries out of combat, highest priority first; every think it runs the first one whose precondition holds and falls through otherwise. Combat comes before all of them: the cascade only runs while the brain has no target, and the NPC returns to it after `Return`. Without `tasks` the list is `Tasks.Default`: FollowLeader, Patrol, Wander, Idle.
+
+| Task | Possible when | Does |
+|---|---|---|
+| `FollowLeader` | It has a living leader within `LeaderRange` | Walks to its slot behind the leader |
+| `Guard` (`tag`, `radius`) | Something tagged `tag` (alive, if an entity) is within `GuardRange` of home | Stays within `radius` (default `GuardRadius`) of it |
+| `Patrol` | GroupService gave it a route goal | Walks to the goal |
+| `Wander` | Its wander radius is above 0 | Random points around home |
+| `Idle` | Always | Stands |
+
+- **Following** (`Tuning.Tasks.Follow`). Followers form a loose clump: rows behind the leader's facing, `RowWidth` across and `Spacing` apart, shifted up to `Jitter` by noise seeded once from the member, so a slot never re-rolls. A follower keeps walking while its leader walks. Around a standing leader it stops within `ArriveRadius` and only starts again beyond `ResumeRadius`. Pace comes from the leader, through `StatService.SetPace`: its walking speed (full speed × `Tuning.Npc.PatrolSpeedMultiplier`) on the slot, × `SettleFactor` beyond `ArriveRadius` and × `CatchUpFactor` beyond `CatchUpDistance`, never above the follower's own speed. Separation (`Tuning.Swarm.Separation`) applies to where it walks.
+- **Stance.** `stance` sets the attitude to players: `Hostile` attacks on sight, `Neutral` ignores them until attacked. Default by faction: monsters Hostile, everyone else Neutral. It does not change how factions treat each other: a Neutral soldier still attacks goblins on sight.
+- **Attacking people.** Outside safe zones a player can attack any NPC (`CombatService.MayAttack`, used by `CanHarm` and every `SkillService` target check). NPCs in a safe zone only fight hostile factions. A player who hits a non-hostile NPC starts a grudge (`EntityService.Provoke`) that makes `AreEnemies` true both ways; a Hostile-stance NPC takes one when it sees a player. `startReturn` forgives. NPCs publish `Attackable` (outside a safe zone) and `Provoked` (fighting a player): the client's soft target takes only provoked people, so it never lands on a bystander, while a lock (Tab, tap) takes any attackable one. Melee and area hits land on any attackable NPC in reach, so a careless swing starts a fight.
+- **Squads.** Brains with the same `SetSquad` key (a GroupService group) fight together, however far apart: when one is hit or picks a new target, the others gain threat on that enemy (and the grudge, if it is a player).
+- **Safe zones.** No NPC targets a player inside a safe zone. A monster `/spawn`ed next to a player in the village therefore stands idle; the command says so.
 
 ## Group combat
 

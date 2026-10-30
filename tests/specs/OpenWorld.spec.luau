@@ -14,25 +14,15 @@ local function near(a: any, b: any, label: string)
 end
 
 return {
-	["formations put the leader at the origin and never stack members"] = function()
-		for _, shape in { "Column", "Line", "Wedge", "Ring" } do
-			local offsets = Formation.Offsets(shape, 6, 4)
-			Expect.equal(#offsets, 6, shape)
-			near(offsets[1], Vector3.zero, shape)
-			for i = 1, #offsets do
-				for j = i + 1, #offsets do
-					Expect.truthy((offsets[i] - offsets[j]).Magnitude >= 3.9, `{shape} {i}/{j} overlap`)
-				end
+	["a station ring starts at the origin and never stacks members"] = function()
+		local offsets = Formation.Ring(6, 4)
+		Expect.equal(#offsets, 6)
+		near(offsets[1], Vector3.zero, "origin")
+		for i = 1, #offsets do
+			for j = i + 1, #offsets do
+				Expect.truthy((offsets[i] - offsets[j]).Magnitude >= 3.9, `{i}/{j} overlap`)
 			end
 		end
-	end,
-
-	["column and wedge trail behind the leader"] = function()
-		for _, offset in Formation.Offsets("Column", 4, 5) do
-			Expect.truthy(offset.Z >= 0 and offset.X == 0)
-		end
-		local wedge = Formation.Offsets("Wedge", 5, 4)
-		Expect.truthy(wedge[2].X > 0 and wedge[3].X < 0 and wedge[2].Z == wedge[3].Z)
 	end,
 
 	["place turns offsets into the leader's frame"] = function()

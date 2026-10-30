@@ -96,8 +96,6 @@ local function garrison(def: Population.Garrison, label: string)
 	GroupService.Create({
 		label = label,
 		members = expand(def.members),
-		formation = "Ring",
-		spacing = 4,
 		station = ground(def.at[1], def.at[2]),
 		wander = def.wander,
 		keep = true,
@@ -123,7 +121,7 @@ local function addSchedule(schedule: Schedule)
 	table.insert(schedules, schedule)
 end
 
--- Patrols, caravans and travelers walking their route in formation.
+-- Patrols, caravans and travelers walking their route behind their first member.
 local function troopSchedule(troop: Population.Troop, warm: boolean)
 	local route = Route.new(points(troop.route.points), troop.route.loop)
 	local schedule: Schedule
@@ -141,8 +139,6 @@ local function troopSchedule(troop: Population.Troop, warm: boolean)
 			group = GroupService.Create({
 				label = troop.id,
 				members = expand(troop.members),
-				formation = troop.formation,
-				spacing = troop.spacing,
 				route = route,
 				stops = troop.route.stops,
 				onEnd = function()
@@ -186,8 +182,6 @@ local function nestSchedules(nest: Population.Nest)
 			group = GroupService.Create({
 				label = nest.id,
 				members = expand(squad.members),
-				formation = squad.formation,
-				spacing = 5,
 				route = territory,
 				onEmpty = function()
 					forget(schedule, group)
@@ -246,8 +240,6 @@ local function runResidents()
 			group = GroupService.Create({
 				label = def.id,
 				members = { memberSpec(def.npc, nil) },
-				formation = "Ring",
-				spacing = 4,
 				station = residentAt(def),
 				wander = RESIDENT_WANDER,
 				onEmpty = function()

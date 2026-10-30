@@ -226,6 +226,13 @@ export type CombatDef = {
 	summons: { Summon }?,
 }
 
+--[=[ One step of an NPC's task cascade (Shared/Tasks); `tag` and `radius` are for Guard. ]=]
+export type TaskDef = {
+	kind: "FollowLeader" | "Guard" | "Patrol" | "Wander" | "Idle",
+	tag: string?,
+	radius: number?,
+}
+
 export type EnemyDef = {
 	id: string,
 	name: string,
@@ -256,6 +263,10 @@ export type EnemyDef = {
 	-- Faction (Content/Factions); defaults to "Goblins". Allies call each other for help.
 	team: Factions.FactionId?,
 	combat: CombatDef?,
+	--[=[ "Hostile" attacks players on sight; "Neutral" ignores them until attacked. Default by faction. ]=]
+	stance: ("Hostile" | "Neutral")?,
+	--[=[ Out-of-combat tasks, highest priority first. Default Shared/Tasks.Default. ]=]
+	tasks: { TaskDef }?,
 }
 
 --[=[

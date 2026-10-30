@@ -105,7 +105,7 @@ end
 local function enemiesOf(caster: Entity): { Entity }
 	local list = {}
 	for _, other in EntityService.All() do
-		if other.alive and EntityService.AreEnemies(caster, other) then
+		if other.alive and CombatService.MayAttack(caster, other) then
 			table.insert(list, other)
 		end
 	end
@@ -263,7 +263,7 @@ end
 local function validEnemy(caster: Entity, target: Entity?, skill: SkillDef): boolean
 	return target ~= nil
 		and target.alive
-		and EntityService.AreEnemies(caster, target)
+		and CombatService.MayAttack(caster, target)
 		and inRange(caster, target, skill.range or 0)
 end
 
@@ -801,7 +801,7 @@ local function handleUseSkill(
 	-- The client's target is a suggestion: it must still be alive, on the right side and in range.
 	local target = if targetModel then EntityService.Get(targetModel) else nil
 	if needsEnemyTarget(skill) then
-		if not target or not target.alive or not EntityService.AreEnemies(caster, target) then
+		if not target or not target.alive or not CombatService.MayAttack(caster, target) then
 			reject(player, seq, "NoTarget")
 			return
 		end
