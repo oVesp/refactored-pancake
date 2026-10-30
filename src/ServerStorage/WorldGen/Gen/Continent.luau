@@ -167,6 +167,7 @@ function Continent.sampler(template: Template, seed: number): Sampler
 	local ridgeNoise = Hash.fbm(Hash.named(seed, "ridge"), 0.05, 3)
 	local peakNoise = Hash.fbm(Hash.named(seed, "peaks"), 0.012, 4)
 	local detailNoise = Hash.fbm(Hash.named(seed, "detail"), 1, 3)
+	local hillNoise = Hash.fbm(Hash.named(seed, "hills"), 1, 3)
 	local margin = template.margin
 	local heights = template.heights
 	local pads = template.pads
@@ -190,7 +191,12 @@ function Continent.sampler(template: Template, seed: number): Sampler
 		local biome = template.biomes[region.biome]
 		local h = (region.height + region.relief * (heightNoise(u, v) * 0.5 + 0.5)) * heights.scale
 		local x, z = u * template.size, v * template.size
-		return h + biome.detail[1] * detailNoise(x / biome.detail[2], z / biome.detail[2])
+		h += biome.detail[1] * detailNoise(x / biome.detail[2], z / biome.detail[2])
+		local hills = biome.hills
+		if hills then
+			h += hills[1] * (hillNoise(x / hills[2], z / hills[2]) * 0.5 + 0.5)
+		end
+		return h
 	end
 
 	return function(u: number, v: number): Sample
@@ -224,11 +230,12 @@ function Continent.sampler(template: Template, seed: number): Sampler
 		if bayDepth > 0 then
 			s = math.min(s, -bayDepth * 0.4)
 		end
-		if pad > 0 then
-			s = math.max(s, 0.3 * pad)
-			if pad > 0.5 then
-				r1 = padRegion
-			end
+		-- The shore rise comes from the real coastline, so the land around the pads stays low.
+		local coastline = s
+		if pad > 0.5 then
+			-- Only the inner half of the fade holds land, so the bay can come close.
+			s = math.max(s, 0.6 * (pad - 0.5))
+			r1 = padRegion
 		end
 
 		if s <= 0 then
@@ -244,7 +251,7 @@ function Continent.sampler(template: Template, seed: number): Sampler
 			}
 		end
 
-		local shore = smooth(s / 0.25)
+		local shore = smooth(math.max(coastline, 0) / 0.25)
 		local h = base(r1, u, v)
 		if r2 ~= 0 then
 			-- Neighbouring regions meet halfway across a blend band, so borders are slopes, not steps.

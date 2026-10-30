@@ -181,7 +181,7 @@ function Region.column(
 		material = biome.sand
 	elseif point.mountain > 0.55 or slope > 4.5 then
 		material = if point.height > SNOW_LINE then "Snow" else biome.rock
-	elseif Region.roadDistance(ctx, x, z) < ROAD_HALF or ctx.patches(x, z) > 0.45 then
+	elseif Region.roadDistance(ctx, x, z) < ROAD_HALF or ctx.patches(x, z) > 0.55 then
 		material = biome.ground
 	end
 	return { height = point.height, water = point.water, material = material, owned = owned }
@@ -199,8 +199,8 @@ function Region.props(ctx: Context, id: string): { PropSpec }
 	local bounds = Region.bounds(ctx, id)
 	local seed = Hash.named(ctx.seed, "props:" .. id)
 	local grove = Hash.fbm(Hash.named(seed, "grove"), template.props.groveScale, 3)
-	-- Grove mask threshold so groves cover about `groves` of the ground (noise is about -1..1).
-	local threshold = 1 - 2 * biome.groves
+	-- Grove mask threshold so groves cover about `groves` of the ground (the mask is mostly -0.5..0.5).
+	local threshold = 0.5 - biome.groves
 	local out: { PropSpec } = {}
 
 	local function ground(x: number, z: number): number?
@@ -271,7 +271,7 @@ function Region.props(ctx: Context, id: string): { PropSpec }
 				local x = (gx + Hash.unit(seed, gx, gz, 1)) * cell
 				local z = (gz + Hash.unit(seed, gx, gz, 2)) * cell
 				local inGrove = grove(x, z) > threshold
-				if inGrove or Hash.unit(seed, gx, gz, 3) < 0.06 then
+				if inGrove or Hash.unit(seed, gx, gz, 3) < 0.02 then
 					local name = pick(biome.species, Hash.unit(seed, gx, gz, 4))
 					local species = name and (template.props.species :: any)[name]
 					if species and place(species.prefix, species.variants, species.scale, x, z, n * 8) then

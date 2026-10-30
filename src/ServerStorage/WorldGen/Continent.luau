@@ -48,6 +48,7 @@ export type Biome = {
 	rock: string, -- cliffs and mountains
 	sand: string, -- beaches and shallow beds
 	detail: { number }, -- { studs, wavelength in studs } of small relief on top of the region height
+	hills: { number }?, -- { studs, wavelength in studs } of rolling hills on top of that
 	trees: number, -- trees per 10,000 square studs inside groves
 	groves: number, -- share of the ground covered by groves, 0..1
 	species: { [string]: number }, -- weights over `props.species`
@@ -67,7 +68,7 @@ local Continent = {
 	-- `blend`; they count as `region` and stay dry. A test keeps them over Map.rbxmx's zones.
 	pads = {
 		region = "verdant",
-		blend = 140,
+		blend = 260,
 		rects = {
 			{ -100, -100, 100, 110 }, -- VillageCore
 			{ -250, -100, -90, 100 }, -- DevYard
@@ -156,7 +157,8 @@ local Continent = {
 			rock = "Slate",
 			sand = "Sand",
 			detail = { 12, 260 },
-			trees = 2,
+			hills = { 80, 1200 },
+			trees = 3,
 			groves = 0.35,
 			species = { pine = 0.7, broad = 0.3 },
 			boulders = 4,
@@ -215,11 +217,12 @@ local Continent = {
 			ground = "Ground",
 			rock = "Slate",
 			sand = "Sand",
-			detail = { 6, 280 },
-			trees = 1.6,
-			groves = 0.22,
-			species = { broad = 1 },
-			boulders = 2,
+			detail = { 5, 220 },
+			hills = { 120, 1500 },
+			trees = 7,
+			groves = 0.32,
+			species = { broad = 0.6, pine = 0.4 },
+			boulders = 3,
 		},
 		forest = {
 			color = { 46, 84, 58 },
@@ -228,7 +231,8 @@ local Continent = {
 			rock = "Slate",
 			sand = "Sand",
 			detail = { 8, 220 },
-			trees = 3,
+			hills = { 60, 900 },
+			trees = 5,
 			groves = 0.7,
 			species = { broad = 0.6, pine = 0.4 },
 			boulders = 2,
@@ -274,14 +278,14 @@ local Continent = {
 	-- Low-poly prop library (ServerStorage.WorldProps, tools/blender/world_props.py): each placement
 	-- is `<prefix><two-digit variant>`; templates are already scaled to `height`.
 	props = {
-		groveScale = 260,
+		groveScale = 700,
 		species = {
 			broad = { prefix = "Broadleaf", variants = 8, scale = { 0.8, 1.35 } },
 			pine = { prefix = "Pine", variants = 8, scale = { 0.8, 1.4 } },
 			dead = { prefix = "Snag", variants = 6, scale = { 0.8, 1.2 } },
 		},
 		bushes = { prefix = "Bush", variants = 6, perTree = 1.5, scale = { 0.8, 1.4 } },
-		boulders = { prefix = "Boulder", variants = 6, scale = { 0.7, 1.8 } },
+		boulders = { prefix = "Boulder", variants = 6, scale = { 0.8, 4 } },
 	},
 
 	-- Territory colours on the preview.

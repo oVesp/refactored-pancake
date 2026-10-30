@@ -38,11 +38,11 @@ export type Band = { from: number, to: number }
 	which is small next to the 1,000-stud blend.
 ]=]
 local moods: { [string]: Mood } = {
-	-- Start valley: clear green morning air, haze closing in past about 1,000 studs.
+	-- Start valley: clear, warm morning air with long views over the hills (owner references, 2026-10-29).
 	valley = {
-		density = 0.36,
+		density = 0.28,
 		offset = 0.25,
-		haze = 1.6,
+		haze = 0.7,
 		glare = 0.4,
 		color = Color3.fromRGB(199, 214, 222),
 		decay = Color3.fromRGB(106, 120, 112),
