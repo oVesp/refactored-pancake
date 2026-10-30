@@ -73,6 +73,14 @@ local Remotes: { [string]: RemoteSpec } = {
 				and argOk
 		end,
 	},
+	--[=[ `(on)`: combat mode on draws the held weapon, off sheathes it (`Drawn` attribute). ]=]
+	SetCombatMode = {
+		direction = "ClientToServer",
+		rateLimit = { capacity = 6, perSecond = 3 },
+		validate = function(...)
+			return arity(1, ...) and type((...)) == "boolean"
+		end,
+	},
 	SetGuard = {
 		direction = "ClientToServer",
 		rateLimit = { capacity = 6, perSecond = 4 },

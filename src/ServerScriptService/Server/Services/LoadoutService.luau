@@ -15,22 +15,67 @@ local EntityService: any
 
 --[=[
 	Shows what a player holds (docs/systems/weapons.md): clones the weapon and shield models from
-	ReplicatedStorage.Weapons onto the character's hands whenever its `Weapon` or `Shield`
-	attribute changes (StatService.Recompute sets them from the equipment). Cosmetic only; the
-	models never collide or take hits.
+	ReplicatedStorage.Weapons whenever its `Weapon`, `Shield` or `Drawn` attribute changes
+	(StatService.Recompute sets the first two from the equipment, SkillService the last from combat
+	mode). Drawn models sit in the hands; sheathed ones hang from the body sockets below. Cosmetic
+	only; the models never collide or take hits.
 ]=]
 local LoadoutService = {}
 
 -- Name of the folder in the character that holds the held models.
 local HELD_FOLDER = "Held"
 
-local function attach(character: Model, modelName: string, hand: string): Model?
+-- Where each model hangs while sheathed: body part and offset (the Handle's axes follow the
+-- socket's: Y is the blade or shaft and a shield's face normal; a bow's limbs run along Z).
+local SOCKETS: { [string]: { part: string, cframe: CFrame } } = {
+	Sword = {
+		part = "LowerTorso",
+		cframe = CFrame.new(-0.95, -0.1, 0.1) * CFrame.Angles(math.rad(-15), 0, math.pi),
+	},
+	Wand = {
+		part = "LowerTorso",
+		cframe = CFrame.new(0.95, -0.1, 0.1) * CFrame.Angles(math.rad(-15), 0, math.pi),
+	},
+	Shield = {
+		part = "UpperTorso",
+		cframe = CFrame.new(0, 0, 0.15) * CFrame.Angles(math.rad(90), 0, 0),
+	},
+	Bow = {
+		part = "UpperTorso",
+		cframe = CFrame.new(-0.2, 0, 1) * CFrame.Angles(math.rad(90), 0, math.rad(15)),
+	},
+	Staff = {
+		part = "UpperTorso",
+		cframe = CFrame.new(0.3, -1.3, 0.8) * CFrame.Angles(0, 0, math.rad(15)),
+	},
+}
+local SOCKET_NAME = "SheathSocket"
+
+-- The attachment a model hangs from: the hand's grip when drawn, else its body socket.
+local function holder(character: Model, modelName: string, hand: string, drawn: boolean): Attachment?
+	if drawn then
+		local handPart = character:FindFirstChild(hand .. "Hand")
+		local grip = handPart and handPart:FindFirstChild(hand .. "GripAttachment")
+		return if grip and grip:IsA("Attachment") then grip else nil
+	end
+	local socket = SOCKETS[modelName]
+	local part = socket and character:FindFirstChild(socket.part)
+	if not socket or not part or not part:IsA("BasePart") then
+		return nil
+	end
+	local attachment = Instance.new("Attachment")
+	attachment.Name = SOCKET_NAME
+	attachment.CFrame = socket.cframe
+	attachment.Parent = part
+	return attachment
+end
+
+local function attach(character: Model, modelName: string, hand: string, drawn: boolean): Model?
 	local source = ReplicatedStorage:FindFirstChild("Weapons")
 	local template = source and source:FindFirstChild(modelName)
-	local handPart = character:FindFirstChild(hand .. "Hand")
-	local handGrip = handPart and handPart:FindFirstChild(hand .. "GripAttachment")
-	if not (template and template:IsA("Model")) or not (handGrip and handGrip:IsA("Attachment")) then
-		log:Warn("Cannot hold %s in %s hand", modelName, hand)
+	local handGrip = holder(character, modelName, hand, drawn)
+	if not (template and template:IsA("Model")) or not handGrip then
+		log:Warn("Cannot hold %s (%s)", modelName, if drawn then hand .. " hand" else "sheathed")
 		return nil
 	end
 	local model = template:Clone()
@@ -57,6 +102,14 @@ local function attach(character: Model, modelName: string, hand: string): Model?
 			part.Massless = true
 		end
 	end
+	-- Weld offsets are read when the model enters the world, and the grip constraint would already
+	-- have moved the Handle by then, leaving the other parts behind: stand the model on its grip first.
+	local delta = handGrip.WorldCFrame * grip.CFrame:Inverse() * handle.CFrame:Inverse()
+	for _, part in model:GetDescendants() do
+		if part:IsA("BasePart") then
+			part.CFrame = delta * part.CFrame
+		end
+	end
 	local weld = Instance.new("RigidConstraint")
 	weld.Name = "HoldWeld"
 	weld.Attachment0 = handGrip
@@ -70,19 +123,25 @@ local function refresh(character: Model)
 	if previous then
 		previous:Destroy()
 	end
+	for _, descendant in character:GetDescendants() do
+		if descendant:IsA("Attachment") and descendant.Name == SOCKET_NAME then
+			descendant:Destroy()
+		end
+	end
+	local drawn = character:GetAttribute("Drawn") == true
 	local folder = Instance.new("Folder")
 	folder.Name = HELD_FOLDER
 
 	local weapon = Weapons.ById[character:GetAttribute("Weapon") :: any]
 	if weapon and weapon.model then
-		local model = attach(character, weapon.model, weapon.hand or "Right")
+		local model = attach(character, weapon.model, weapon.hand or "Right", drawn)
 		if model then
 			model.Parent = folder
 		end
 	end
 	local shieldItem = Items.ById[character:GetAttribute("Shield") :: any]
 	if shieldItem and shieldItem.shield then
-		local model = attach(character, shieldItem.shield.model, "Left")
+		local model = attach(character, shieldItem.shield.model, "Left", drawn)
 		if model then
 			model.Parent = folder
 		end
@@ -99,6 +158,9 @@ local function watch(entity: Entity)
 		refresh(character)
 	end)
 	character:GetAttributeChangedSignal("Shield"):Connect(function()
+		refresh(character)
+	end)
+	character:GetAttributeChangedSignal("Drawn"):Connect(function()
 		refresh(character)
 	end)
 	refresh(character)

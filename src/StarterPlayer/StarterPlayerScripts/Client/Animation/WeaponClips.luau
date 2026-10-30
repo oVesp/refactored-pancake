@@ -22,13 +22,14 @@ local connections: { RBXScriptConnection } = {}
 
 --[=[
 	Local character's weapon idle (docs/systems/weapons.md, Animations): while a weapon with idle
-	clips is held, its standing idle replaces the default one, and the legless variant plays
+	clips is drawn, its standing idle replaces the default one, and the legless variant plays
 	while moving so walk and run keep their legs. Attacks and guard clips play above both.
 ]=]
 local WeaponClips = {}
 
 local function refresh(character: Model, humanoid: Humanoid)
-	local weapon = character:GetAttribute("Weapon")
+	-- Sheathed (out of combat mode) the default idle and walk play.
+	local weapon = if character:GetAttribute("Drawn") == true then character:GetAttribute("Weapon") else nil
 	local moving = humanoid.MoveDirection.Magnitude > 0.1 and humanoid.WalkSpeed > MOVING_SPEED
 	for name, pair in pairs_ do
 		local active = name == weapon
@@ -74,6 +75,7 @@ local function load(character: Model)
 		refresh(character, humanoid)
 	end
 	table.insert(connections, character:GetAttributeChangedSignal("Weapon"):Connect(update))
+	table.insert(connections, character:GetAttributeChangedSignal("Drawn"):Connect(update))
 	table.insert(connections, humanoid:GetPropertyChangedSignal("MoveDirection"):Connect(update))
 	update()
 end

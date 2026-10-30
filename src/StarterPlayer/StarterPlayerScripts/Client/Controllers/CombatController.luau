@@ -530,6 +530,37 @@ function CombatController.SetGuard(on: boolean)
 	NetClient.Fire("SetGuard", on)
 end
 
+--[=[
+	Draws the held weapon when it is sheathed: switches to combat mode, which tells the server.
+	Returns true when the press only drew (it is consumed); false when nothing was sheathed.
+]=]
+function CombatController.DrawIfSheathed(): boolean
+	if CameraController.InCombat() then
+		return false
+	end
+	local model = player.Character
+	local holdsGear = CombatController.Weapon().id ~= Weapons.Default or hasShield()
+	if not model or not holdsGear then
+		return false
+	end
+	CameraController.SetCombat(true)
+	return true
+end
+
+-- Tells the server the combat mode so it can draw or sheathe the held models, and waits out the swap.
+local function syncCombatMode(on: boolean, lock: boolean)
+	NetClient.Fire("SetCombatMode", on)
+	if lock then
+		lockedUntil = math.max(lockedUntil, os.clock() + Tuning.Combat.DrawLock)
+	end
+	if not on then
+		CombatController.CancelDraw()
+		if guarding then
+			CombatController.SetGuard(false)
+		end
+	end
+end
+
 --[=[ Starts or stops running (the server sets the walk speed). ]=]
 function CombatController.SetRun(on: boolean)
 	NetClient.Fire("SetRun", on)
@@ -636,6 +667,16 @@ function CombatController.Start()
 	end)
 	GuardClips.Start()
 	WeaponClips.Start()
+	CameraController.Changed:Connect(function(on: boolean)
+		syncCombatMode(on, true)
+	end)
+	-- A new character starts sheathed on the server: tell it the mode the camera is in.
+	player.CharacterAdded:Connect(function()
+		syncCombatMode(CameraController.InCombat(), false)
+	end)
+	if CameraController.InCombat() then
+		syncCombatMode(true, false)
+	end
 	-- Old sequence numbers never resolve on success; trim them so the table stays small.
 	task.spawn(function()
 		while true do

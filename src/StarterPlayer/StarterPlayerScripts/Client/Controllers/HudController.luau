@@ -32,6 +32,7 @@ local REJECT_TEXT: { [string]: string } = {
 	Cooldown = "Not ready",
 	Disabled = "You cannot act",
 	Busy = "Already casting",
+	Sheathed = "Weapon sheathed",
 	Dodge = "Cannot dodge",
 	NoTarget = "No target",
 	Range = "Out of range",

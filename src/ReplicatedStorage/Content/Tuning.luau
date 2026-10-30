@@ -91,6 +91,8 @@ return table.freeze({
 			`lunge` studs over `LungeSeconds` at the start; a dodge cancels the swing and its recovery.
 		]=]
 		Commit = table.freeze({ MoveMultiplier = 0.3, LungeSeconds = 0.12 }),
+		--[=[ Seconds a player cannot act after drawing or sheathing the weapon (combat mode toggle). ]=]
+		DrawLock = 0.3,
 		--[=[ Guard without a shield; a shield brings its own values (Content/Items `shield`). ]=]
 		Guard = table.freeze({ DamageMultiplier = 0.4, ParryWindow = 0.25, StaminaPerHit = 10, Arc = 120 }),
 		--[=[

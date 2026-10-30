@@ -85,6 +85,9 @@ local function onAttack(_: string, state: Enum.UserInputState): Enum.ContextActi
 		return Enum.ContextActionResult.Pass
 	end
 	if state == Enum.UserInputState.Begin then
+		if CombatController.DrawIfSheathed() then
+			return sink()
+		end
 		if CombatController.Weapon().drawn then
 			CombatController.ReleaseDraw()
 		else
@@ -107,6 +110,9 @@ local function onHeavy(_: string, state: Enum.UserInputState, input: InputObject
 	if state == Enum.UserInputState.Begin then
 		if input.UserInputType == Enum.UserInputType.MouseButton2 and not CameraController.InCombat() then
 			return Enum.ContextActionResult.Pass
+		end
+		if CombatController.DrawIfSheathed() then
+			return sink()
 		end
 		if drawn then
 			CombatController.StartDraw()
@@ -150,6 +156,9 @@ end
 
 local function onGuard(_: string, state: Enum.UserInputState): Enum.ContextActionResult
 	if state == Enum.UserInputState.Begin then
+		if CombatController.DrawIfSheathed() then
+			return sink()
+		end
 		CombatController.SetGuard(true)
 	elseif state == Enum.UserInputState.End or state == Enum.UserInputState.Cancel then
 		CombatController.SetGuard(false)

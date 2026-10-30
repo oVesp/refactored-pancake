@@ -736,6 +736,12 @@ local function stopDraw(entity: Entity)
 	end
 end
 
+-- A held weapon or shield is only usable while drawn (combat mode); bare fists need no drawing.
+local function isSheathed(entity: Entity): boolean
+	local holdsGear = entity.weapon ~= Weapons.Default or entity.shieldGuard ~= nil
+	return holdsGear and entity.model:GetAttribute("Drawn") ~= true
+end
+
 local function handleUseSkill(
 	player: Player,
 	skillId: string,
@@ -761,6 +767,10 @@ local function handleUseSkill(
 	end
 	if StatusService.IsDisabled(caster) then
 		reject(player, seq, "Disabled")
+		return
+	end
+	if skill.source == "Basic" and isSheathed(caster) then
+		reject(player, seq, "Sheathed")
 		return
 	end
 	if caster.casting or caster.lockedUntil - os.clock() > LATENCY_SLACK then
@@ -892,7 +902,7 @@ local function handleGuard(player: Player, on: boolean)
 	if not entity or not entity.alive then
 		return
 	end
-	if on and (entity.casting or StatusService.IsDisabled(entity) or entity.stamina <= 0) then
+	if on and (isSheathed(entity) or entity.casting or StatusService.IsDisabled(entity) or entity.stamina <= 0) then
 		on = false
 	end
 	local weapon = Weapons.ById[entity.weapon] or Weapons.ById[Weapons.Default]
@@ -926,6 +936,20 @@ local function handleDraw(player: Player, on: boolean)
 		entity.model:SetAttribute("Drawing", true)
 		StatService.Recompute(entity)
 	end
+end
+
+-- Combat mode draws or sheathes the held weapon; sheathing drops the guard and any bow draw.
+local function handleCombatMode(player: Player, on: boolean)
+	local entity = EntityService.ForPlayer(player)
+	if not entity or not entity.alive or (entity.model:GetAttribute("Drawn") == true) == on then
+		return
+	end
+	entity.model:SetAttribute("Drawn", on)
+	if not on then
+		stopDraw(entity)
+		handleGuard(player, false)
+	end
+	entity.lockedUntil = math.max(entity.lockedUntil, os.clock() + Tuning.Combat.DrawLock)
 end
 
 local dodgeReadyAt: { [Player]: number } = {}
@@ -974,6 +998,11 @@ function SkillService.Init(deps: { [string]: any })
 	NetServer.Connect("SetGuard", function(player: Player, on: boolean)
 		withLatency(player, function()
 			handleGuard(player, on)
+		end)
+	end)
+	NetServer.Connect("SetCombatMode", function(player: Player, on: boolean)
+		withLatency(player, function()
+			handleCombatMode(player, on)
 		end)
 	end)
 	NetServer.Connect("SetDraw", function(player: Player, on: boolean)
