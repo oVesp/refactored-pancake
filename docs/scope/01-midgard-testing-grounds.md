@@ -74,7 +74,7 @@ All three are **base classes** (cap 15). Level cap here is 5. Stats per §3.1, n
 
 | Class | Role | Resource | Stat lean | Damage types |
 |---|---|---|---|---|
-| **Fighter** | General physical damage, any weapon | Stamina for class skills, Focus for Disciplines | HP, Physical Attack, Agility | Physical |
+| **Fighter** | General physical damage, every weapon but the wand | Stamina for class skills, Focus for Disciplines | HP, Physical Attack, Agility | Physical |
 | **Mage** | Ranged damage, control | MP | MP, Magic Attack, Agility | Force, water (elemental damage starts at Tier 2) |
 | **Healer** | Support, holy damage | MP | MP, Magic Defense, Resistance | Holy |
 
