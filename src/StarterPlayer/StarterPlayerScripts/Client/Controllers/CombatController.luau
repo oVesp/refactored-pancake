@@ -12,6 +12,7 @@ local Formulas = require(ReplicatedStorage.Shared.Formulas)
 local Hotbar = require(ReplicatedStorage.Shared.Hotbar)
 local Loadout = require(ReplicatedStorage.Shared.Loadout)
 local GuardClips = require(script.Parent.Parent.Animation.GuardClips)
+local WeaponClips = require(script.Parent.Parent.Animation.WeaponClips)
 local NetClient = require(ReplicatedStorage.Shared.Net.Client)
 local Signal = require(ReplicatedStorage.Shared.Signal)
 local Skills = require(ReplicatedStorage.Content.Skills)
@@ -634,6 +635,7 @@ function CombatController.Start()
 		drawSkill = nil
 	end)
 	GuardClips.Start()
+	WeaponClips.Start()
 	-- Old sequence numbers never resolve on success; trim them so the table stays small.
 	task.spawn(function()
 		while true do

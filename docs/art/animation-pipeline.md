@@ -79,5 +79,6 @@ A set's rig block stays `pending-import` until the mesh is in Studio and the set
 | Goblin | fbx | Goblin Scout, `assets/original/characters/mobs/Goblin Scout/Export/Animations` (Action Forge clips remapped by the owner) | `tools/world/goblin_scout_import.rbxm`; exports match Studio's own import of the same clips within 0.0005 degrees |
 | Skeleton | studio | Uploaded from Studio by the owner | n/a |
 | Combat | rbxanim | `assets/blender/combat_r15/*.rbxanim` | stock R15 |
+| Sword | studio | Owner-authored sword and shield clips uploaded from Studio; the committed KeyframeSequences are exports of the uploaded clips (`AnimationClipProvider`, `HttpService` to a local receiver) | stock R15 |
 
 Goblin Scout placeholder mapping: Idle `idle_loop`, Walk `walk_loop`, Run `jog_fwd_loop`, Attack `sword_regular_a`, Throw `overhandthrow`, Hit `hit_chest`, Death `death01`. Where a source has a `.001` duplicate, the file without the suffix is canonical. The Scout clips are in place: `root.x` carries the hip motion only.

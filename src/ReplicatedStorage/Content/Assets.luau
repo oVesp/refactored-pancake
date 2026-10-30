@@ -149,6 +149,12 @@ local Animations: { [string]: AnimationAsset } = {
 	SkeletonWalk = { id = "rbxassetid://88182025210616", keyframes = "SkeletonWalk" },
 	SkeletonAttack = { id = "rbxassetid://78738563687931", keyframes = "SkeletonScratch" },
 	SkeletonDeath = { id = "rbxassetid://96632426840141", keyframes = "SkeletonDefeat" },
+	BasicSwordSlash1 = { id = "rbxassetid://84409040482136", keyframes = "BasicSwordSlash1" },
+	BasicSwordSlash2 = { id = "rbxassetid://104365583971619", keyframes = "BasicSwordSlash2" },
+	BasicSwordSlash3 = { id = "rbxassetid://92205821610809", keyframes = "BasicSwordSlash3" },
+	BasicSwordIdle = { id = "rbxassetid://75413599382020", keyframes = "BasicSwordIdle" },
+	BasicSwordIdleNoLegs = { id = "rbxassetid://86017222558865", keyframes = "BasicSwordIdleNoLegs" },
+	ShieldBlock = { id = "rbxassetid://114807209446225", keyframes = "ShieldBlock" },
 	-- END generated
 }
 

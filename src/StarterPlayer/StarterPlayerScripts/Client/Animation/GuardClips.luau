@@ -12,27 +12,35 @@ local FADE_OUT = 0.15
 local player = Players.LocalPlayer
 
 local hold: AnimationTrack? = nil
+local shieldHold: AnimationTrack? = nil
 local parry: AnimationTrack? = nil
 local guardConnection: RBXScriptConnection? = nil
+local shieldConnection: RBXScriptConnection? = nil
 
 --[=[
-	Local character's guard clips (docs/systems/combat.md, Animation): GuardHold loops while the
+	Local character's guard clips (docs/systems/combat.md, Animation): GuardHold (ShieldBlock with a shield) loops while the
 	server-set `Guarding` attribute is true, and GuardParry plays when `ShowParry` names this
 	character as the defender. Effects for the parry belong to VfxController.
 ]=]
 local GuardClips = {}
 
-local function refresh(character: Model)
-	local track = hold
+local function drive(track: AnimationTrack?, on: boolean)
 	if not track then
 		return
 	end
-	local guarding = character:GetAttribute("Guarding") == true
-	if guarding and not track.IsPlaying then
+	if on and not track.IsPlaying then
 		track:Play(FADE_IN)
-	elseif not guarding and track.IsPlaying then
+	elseif not on and track.IsPlaying then
 		track:Stop(FADE_OUT)
 	end
+end
+
+local function refresh(character: Model)
+	local guarding = character:GetAttribute("Guarding") == true
+	-- A held shield raises its own one-arm clip; without one the two-forearm guard plays.
+	local shielded = character:GetAttribute("Shield") ~= nil and shieldHold ~= nil
+	drive(hold, guarding and not shielded)
+	drive(shieldHold, guarding and shielded)
 end
 
 local function load(character: Model)
@@ -40,18 +48,25 @@ local function load(character: Model)
 		guardConnection:Disconnect()
 		guardConnection = nil
 	end
-	hold, parry = nil, nil
+	if shieldConnection then
+		shieldConnection:Disconnect()
+		shieldConnection = nil
+	end
+	hold, shieldHold, parry = nil, nil, nil
 	local humanoid = character:WaitForChild("Humanoid", 10)
 	local animator = humanoid and humanoid:WaitForChild("Animator", 10)
 	if not animator or not animator:IsA("Animator") or character ~= player.Character then
 		return
 	end
 	hold = Clips.Load(animator, "GuardHold", Enum.AnimationPriority.Action, true)
+	shieldHold = Clips.Load(animator, "ShieldBlock", Enum.AnimationPriority.Action, true)
 	-- Above the hold so the deflection reads while guard is still up.
 	parry = Clips.Load(animator, "GuardParry", Enum.AnimationPriority.Action2, false)
-	guardConnection = character:GetAttributeChangedSignal("Guarding"):Connect(function()
+	local changed = function()
 		refresh(character)
-	end)
+	end
+	guardConnection = character:GetAttributeChangedSignal("Guarding"):Connect(changed)
+	shieldConnection = character:GetAttributeChangedSignal("Shield"):Connect(changed)
 	refresh(character)
 end
 
