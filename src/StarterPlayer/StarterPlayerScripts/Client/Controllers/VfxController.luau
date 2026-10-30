@@ -193,7 +193,7 @@ local function launch(info: { [string]: any }, skill: any)
 		part = Particles.Anchor(start)
 		recipe.projectile(part)
 	else
-		part = neon(Vector3.new(0.8, 0.8, 2.4), start, skillColor(info.skillId), 0)
+		part = neon(Vector3.new(0.8, 0.8, 2.4) * (skill.projectileScale or 1), start, skillColor(info.skillId), 0)
 		recipe = nil
 	end
 	local id = info.id

@@ -183,6 +183,7 @@ local list: { Types.SkillDef } = {
 		drawn = true,
 		rearBonus = 0.5,
 		damage = { type = "physical", base = 12, stat = "PhysAtk", ratio = 1.1 },
+		animation = "BasicStrike",
 		description = "Bow: hold to draw, release to shoot. Full draw for full damage; release right at full draw for a perfect shot.",
 	},
 	-- Staff: magic-imbued melee chain, and a charged arcane bolt on heavy.
@@ -237,6 +238,7 @@ local list: { Types.SkillDef } = {
 		speed = 90,
 		cost = { resource = "Stamina", amount = 10 },
 		damage = { type = "force", base = 12, stat = "MagAtk", ratio = 1.1 },
+		animation = "BasicHeavyStrike",
 		description = "Staff heavy attack: a charged arcane bolt. Costs no MP.",
 	},
 	-- Wand: no melee; a three-bolt spell chain that slows the caster like a swing, and a cast blast
@@ -256,6 +258,7 @@ local list: { Types.SkillDef } = {
 		speed = 120,
 		damage = { type = "force", base = 5, stat = "MagAtk", ratio = 0.55 },
 		chainNext = "wand_bolt_2",
+		animation = "BasicStrike",
 		description = "Wand light attack: first bolt of the chain. Costs no MP.",
 	},
 	{
@@ -273,6 +276,7 @@ local list: { Types.SkillDef } = {
 		speed = 120,
 		damage = { type = "force", base = 5, stat = "MagAtk", ratio = 0.55 },
 		chainNext = "wand_bolt_3",
+		animation = "BasicStrike2",
 		description = "Wand light attack: second bolt of the chain. Costs no MP.",
 	},
 	{
@@ -289,6 +293,8 @@ local list: { Types.SkillDef } = {
 		range = 90,
 		speed = 120,
 		damage = { type = "force", base = 7.5, stat = "MagAtk", ratio = 0.8 },
+		projectileScale = 1.6,
+		animation = "BasicStrike3",
 		description = "Wand light attack: a heavier closing bolt. Costs no MP.",
 	},
 	{
@@ -304,6 +310,7 @@ local list: { Types.SkillDef } = {
 		speed = 90,
 		cost = { resource = "Stamina", amount = 10 },
 		damage = { type = "force", base = 14, stat = "MagAtk", ratio = 1.3 },
+		animation = "BasicHeavyStrike",
 		description = "Wand heavy attack: a cast arcane blast; moving cancels it. Costs no MP.",
 	},
 	-- Shield: light attack while guarding.

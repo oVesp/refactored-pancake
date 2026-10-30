@@ -28,6 +28,7 @@ local log = Logger.new("DevService")
 local AvatarService: any
 local CombatService: any
 local EntityService: any
+local DataService: any
 local InventoryService: any
 local ProgressionService: any
 local SpawnService: any
@@ -269,10 +270,34 @@ local function createCommands()
 	folder.Parent = TextChatService
 end
 
+-- Basic weapons every dev profile holds, one of each (docs/systems/weapons.md).
+local DEV_WEAPONS = { "rusty_sword", "hunting_bow", "acolyte_staff", "apprentice_wand", "wooden_shield" }
+
+-- Grants the dev the basic weapons their profile does not hold yet.
+local function grantDevWeapons(player: Player)
+	local profile = DataService.WaitForProfile(player)
+	if not profile or player.Parent == nil then
+		return
+	end
+	for _, itemId in DEV_WEAPONS do
+		local owned = false
+		for _, entry in profile.inventory do
+			if entry.id == itemId then
+				owned = true
+				break
+			end
+		end
+		if not owned then
+			InventoryService.Grant(player, itemId, 1)
+		end
+	end
+end
+
 function DevService.Init(deps: { [string]: any })
 	AvatarService = deps.AvatarService
 	CombatService = deps.CombatService
 	EntityService = deps.EntityService
+	DataService = deps.DataService
 	InventoryService = deps.InventoryService
 	ProgressionService = deps.ProgressionService
 	SpawnService = deps.SpawnService
@@ -285,6 +310,9 @@ function DevService.Start()
 
 	local function onPlayerAdded(player: Player)
 		player:SetAttribute("IsDev", DevService.IsDev(player))
+		if DevService.IsDev(player) then
+			task.spawn(grantDevWeapons, player)
+		end
 	end
 	Players.PlayerAdded:Connect(onPlayerAdded)
 	for _, player in Players:GetPlayers() do

@@ -94,6 +94,8 @@ export type SkillDef = {
 	radius: number?,
 	angle: number?,
 	speed: number?,
+	--[=[ Projectiles only: size multiplier of the client's bolt visual (a chain's closing bolt is larger). ]=]
+	projectileScale: number?,
 	damage: (Amount & { type: string })?,
 	heal: Amount?,
 	shield: Amount?,

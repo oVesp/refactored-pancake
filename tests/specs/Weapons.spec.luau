@@ -66,6 +66,12 @@ return {
 			Expect.equal(bolt.range, 90, `{id} range`)
 		end
 		Expect.truthy(Skills.wand_bolt_3.damage.base > Skills.wand_bolt.damage.base, "closing bolt hits harder")
+		local clips = {}
+		for _, id in chain do
+			Expect.truthy(Skills[id].animation, `{id} plays a clip`)
+			Expect.equal(clips[Skills[id].animation], nil, `{id}: each step its own clip`)
+			clips[Skills[id].animation] = true
+		end
 		local blast = Skills[wand.heavy]
 		Expect.truthy(blast.castTime and blast.castTime > 0, "blast has a cast time")
 		Expect.truthy(blast.cooldown and blast.cooldown >= blast.castTime, "blast cooldown")
