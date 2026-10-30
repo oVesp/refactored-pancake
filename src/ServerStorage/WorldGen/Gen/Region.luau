@@ -157,7 +157,7 @@ end
 function Region.point(ctx: Context, x: number, z: number): (Continent.Sample, number)
 	local p = ctx.sample(Continent.toUnit(ctx.template, x, z))
 	local config = ctx.template.camp
-	local inner = config.radius + 12
+	local inner = config.radius + 6
 	local weight = 0
 	for _, camp in ctx.camps do
 		local d = math.sqrt((camp.x - x) ^ 2 + (camp.z - z) ^ 2)
@@ -239,16 +239,16 @@ function Region.column(
 	local regionDef = template.regions[point.owner]
 	local biome = template.biomes[regionDef.biome]
 	local material = biome.grass
+	local bare = (camp or 0) > 0.999 -- trodden ground inside a camp's palisade
 	if point.water and point.region == Continent.SEA then
 		material = if point.offshore < 0.06 then biome.sand else "Mud"
-	elseif point.water or (camp or 0) > 0.6 then
-		-- Lake beds, and trodden camp grounds.
+	elseif point.water then
 		material = "Mud"
 	elseif point.shore < 0.12 and point.pad < 0.5 then
 		material = biome.sand
-	elseif point.mountain > 0.55 or slope > 4.5 then
+	elseif not bare and (point.mountain > 0.55 or slope > 4.5) then
 		material = if point.height > SNOW_LINE then "Snow" else biome.rock
-	elseif Region.roadDistance(ctx, x, z) < ROAD_HALF or ctx.patches(x, z) > 0.55 then
+	elseif bare or Region.roadDistance(ctx, x, z) < ROAD_HALF or ctx.patches(x, z) > 0.55 then
 		material = biome.ground
 	end
 	return { height = point.height, water = point.water, material = material, owned = owned }
