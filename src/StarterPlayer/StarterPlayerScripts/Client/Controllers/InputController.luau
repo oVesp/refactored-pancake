@@ -10,7 +10,6 @@ local Disciplines = require(ReplicatedStorage.Content.Disciplines)
 local Gait = require(ReplicatedStorage.Shared.Gait)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 
-local HEAVY_HOLD_SECONDS = 0.35
 local HOTBAR_KEYS = {
 	Enum.KeyCode.One,
 	Enum.KeyCode.Two,
@@ -25,8 +24,8 @@ local TOUCH_SLOTS = 4
 
 --[=[
 	Input bindings through ContextActionService (remappable later, gamepad and touch buttons
-	included). Tap attack = light, hold = heavy; with a bow, hold draws and release shoots; while
-	guarding with a shield, attack bashes. Tab / R3 / Target button cycle the target lock. Left Alt /
+	included). Mouse 1 / R1 = light attack, Mouse 2 (combat mode) / R2 = heavy; with a bow, holding
+	heavy aims and draws and light shoots; while guarding with a shield, light bashes. Tab / R3 / Target button cycle the target lock. Left Alt /
 	D-pad up / the Combat button toggle combat mode (CameraController).
 	Double-tap W runs until W is released or the character stops moving.
 	Screens: B spellbook, I inventory, C sheet, F2 debug.
@@ -38,7 +37,6 @@ local TargetController: any
 local CameraController: any
 local UIController: any
 
-local attackPressedAt: number? = nil
 local gait = Gait.new()
 local sentRunning = false
 
@@ -83,29 +81,49 @@ end
 local function onAttack(_: string, state: Enum.UserInputState): Enum.ContextActionResult
 	if UIController.IsWorldOpen() then
 		-- Clicks belong to the floating menu while one holds the camera.
-		attackPressedAt = nil
+		CombatController.CancelDraw()
+		return Enum.ContextActionResult.Pass
+	end
+	if state == Enum.UserInputState.Begin then
+		if CombatController.Weapon().drawn then
+			CombatController.ReleaseDraw()
+		else
+			CombatController.Attack(false)
+		end
+	elseif state == Enum.UserInputState.Cancel then
+		CombatController.CancelDraw()
+	end
+	return sink()
+end
+
+-- Heavy attack (bow: hold to aim and draw). Mouse 2 rotates the exploration camera, so it only
+-- belongs to combat mode; the pad trigger and touch button work in both.
+local function onHeavy(_: string, state: Enum.UserInputState, input: InputObject): Enum.ContextActionResult
+	if UIController.IsWorldOpen() then
 		CombatController.CancelDraw()
 		return Enum.ContextActionResult.Pass
 	end
 	local drawn = CombatController.Weapon().drawn
 	if state == Enum.UserInputState.Begin then
-		attackPressedAt = os.clock()
+		if input.UserInputType == Enum.UserInputType.MouseButton2 and not CameraController.InCombat() then
+			return Enum.ContextActionResult.Pass
+		end
 		if drawn then
 			CombatController.StartDraw()
-		end
-	elseif state == Enum.UserInputState.End and attackPressedAt then
-		local held = os.clock() - attackPressedAt
-		attackPressedAt = nil
-		if drawn then
-			CombatController.ReleaseDraw()
 		else
-			CombatController.Attack(held >= HEAVY_HOLD_SECONDS)
+			CombatController.Attack(true)
 		end
-	elseif state == Enum.UserInputState.Cancel then
-		attackPressedAt = nil
+	elseif drawn then
 		CombatController.CancelDraw()
 	end
 	return sink()
+end
+
+local function bindAttack()
+	ContextActionService:BindAction("Attack", onAttack, true, Enum.UserInputType.MouseButton1, Enum.KeyCode.ButtonR1)
+	ContextActionService:SetTitle("Attack", "Attack")
+	ContextActionService:BindAction("Heavy", onHeavy, true, Enum.UserInputType.MouseButton2, Enum.KeyCode.ButtonR2)
+	ContextActionService:SetTitle("Heavy", "Heavy")
 end
 
 local function onSlot(index: number)
@@ -150,8 +168,7 @@ function InputController.Start()
 	UserInputService.InputBegan:Connect(onForwardInput)
 	UserInputService.InputEnded:Connect(onForwardInput)
 	RunService.Heartbeat:Connect(stopWhenIdle)
-	ContextActionService:BindAction("Attack", onAttack, true, Enum.UserInputType.MouseButton1, Enum.KeyCode.ButtonR2)
-	ContextActionService:SetTitle("Attack", "Attack")
+	bindAttack()
 	ContextActionService:BindAction(
 		"Dodge",
 		onPress(CombatController.Dodge),
@@ -251,15 +268,9 @@ function InputController.Start()
 	UIController.ModalChanged:Connect(function(_, isOpen: boolean)
 		if isOpen then
 			ContextActionService:UnbindAction("Attack")
+			ContextActionService:UnbindAction("Heavy")
 		else
-			ContextActionService:BindAction(
-				"Attack",
-				onAttack,
-				true,
-				Enum.UserInputType.MouseButton1,
-				Enum.KeyCode.ButtonR2
-			)
-			ContextActionService:SetTitle("Attack", "Attack")
+			bindAttack()
 		end
 	end)
 end

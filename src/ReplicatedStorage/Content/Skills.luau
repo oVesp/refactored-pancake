@@ -184,7 +184,7 @@ local list: { Types.SkillDef } = {
 		rearBonus = 0.5,
 		damage = { type = "physical", base = 12, stat = "PhysAtk", ratio = 1.1 },
 		animation = "BasicStrike",
-		description = "Bow: hold to draw, release to shoot. Full draw for full damage; release right at full draw for a perfect shot.",
+		description = "Bow: hold heavy to aim and draw, attack to shoot. Full draw for full damage; release right at full draw for a perfect shot.",
 	},
 	-- Staff: magic-imbued melee chain, and a charged arcane bolt on heavy.
 	{

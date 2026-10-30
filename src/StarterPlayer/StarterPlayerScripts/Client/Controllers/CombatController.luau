@@ -439,9 +439,14 @@ end
 ]=]
 function CombatController.Attack(heavy: boolean)
 	local weapon = CombatController.Weapon()
-	if guarding and hasShield() then
+	if guarding and hasShield() and not heavy then
 		CombatController.UseSkill(Weapons.ShieldBash)
-	elseif heavy and weapon.heavy then
+		return
+	end
+	if guarding then
+		CombatController.SetGuard(false)
+	end
+	if heavy and weapon.heavy then
 		CombatController.UseSkill(weapon.heavy)
 	elseif not weapon.drawn then
 		CombatController.UseSkill(weapon.light)
