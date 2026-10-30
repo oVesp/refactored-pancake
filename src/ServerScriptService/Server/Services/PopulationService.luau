@@ -67,7 +67,7 @@ local function points(list: { { number } }): { Vector3 }
 end
 
 local function isNight(): boolean
-	return DayCycle.IsNight(DayCycle.ClockAt(workspace:GetServerTimeNow()))
+	return DayCycle.IsNight(DayCycle.Now())
 end
 
 local function timeFits(time: ("Day" | "Night")?): boolean

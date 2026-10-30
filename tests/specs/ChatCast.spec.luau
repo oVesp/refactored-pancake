@@ -52,7 +52,7 @@ return {
 	end,
 	["dev skills are granted only to developers"] = function()
 		local ids = DevSkills.Ids(Skills)
-		Expect.equal(#ids, 6, "six dev skills")
+		Expect.equal(#ids, 8, "eight dev skills")
 		for _, id in ids do
 			local skill = Skills[id]
 			Expect.equal(skill.delivery, "Dev", `{id} delivery`)
@@ -60,8 +60,8 @@ return {
 		end
 		Expect.equal(#DevSkills.Grant({ "light" }, false, Skills), 1, "non-dev unchanged")
 		local granted = DevSkills.Grant({ "light" }, true, Skills)
-		Expect.equal(#granted, 7, "dev gets them all")
-		Expect.equal(#DevSkills.Grant(granted, true, Skills), 7, "no duplicates")
+		Expect.equal(#granted, 9, "dev gets them all")
+		Expect.equal(#DevSkills.Grant(granted, true, Skills), 9, "no duplicates")
 	end,
 	["dev skills resolve from chat only for developers"] = function()
 		local dev = DevSkills.Grant({}, true, Skills)

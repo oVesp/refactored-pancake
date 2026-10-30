@@ -1377,6 +1377,29 @@ local list: { Types.SkillDef } = {
 		chatArg = true,
 		description = 'Teleport to a zone or the Pylon: say "Gate <zone>" or "Gate Pylon". No zone returns to the inn.',
 	},
+	{
+		id = "dev_control_weather",
+		name = "Control Weather",
+		kind = "Active",
+		source = "Dev",
+		delivery = "Dev",
+		targets = "Self",
+		cooldown = 1,
+		devEffect = "ControlWeather",
+		chatArg = true,
+		description = 'Set the time of day for everyone: say "Control Weather Day", "Control Weather Night" or "Control Weather Reset". No argument flips day and night.',
+	},
+	{
+		id = "dev_night_vision",
+		name = "Night Vision",
+		kind = "Active",
+		source = "Dev",
+		delivery = "Dev",
+		targets = "Self",
+		cooldown = 0.5,
+		devEffect = "NightVision",
+		description = "Toggle night vision: the dark is lit for you alone.",
+	},
 }
 
 local byId: { [string]: Types.SkillDef } = {}

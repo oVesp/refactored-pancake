@@ -207,9 +207,22 @@ SpellEffects.strike_2 = { swing = punch("PunchJab"), hit = "PunchImpact" }
 SpellEffects.strike_3 = { swing = punch("PunchFinisher"), hit = "PunchImpactHeavy", hitstop = 0.085 }
 
 -- Weapon basics (Content/Weapons): placeholder looks built from existing templates.
-SpellEffects.sword_slash = { swing = cleaveSwing }
-SpellEffects.sword_slash_2 = { swing = cleaveSwing }
-SpellEffects.sword_slash_3 = { swing = cleaveSwing, hitstop = 0.085 }
+-- Sword chain (Content/Skills): the cleave crescent turned to the clip's cut. `roll` tilts it about the
+-- look axis (0 level, 90 upright) and `lift` raises it from the waist.
+local function slash(roll: number, lift: number): (origin: Vector3, aim: Vector3) -> ()
+	return function(origin, aim)
+		local look = flatLook(origin, aim)
+		if not look then
+			return
+		end
+		local at = origin + look * 1.6 + Vector3.new(0, lift, 0)
+		Effects.Play("CleaveSwipe", CFrame.lookAt(at, at + look) * CFrame.Angles(0, 0, math.rad(roll)))
+	end
+end
+
+SpellEffects.sword_slash = { swing = slash(-40, 1.2) } -- diagonal, top right to bottom left
+SpellEffects.sword_slash_2 = { swing = slash(0, 0.8) } -- horizontal, left to right
+SpellEffects.sword_slash_3 = { swing = slash(90, 1.4), hitstop = 0.085 } -- vertical chop
 SpellEffects.staff_strike = { swing = cleaveSwing }
 SpellEffects.staff_strike_2 = { swing = cleaveSwing, hitstop = 0.085 }
 SpellEffects.shield_bash = { swing = punch("PunchFinisher"), hit = "PunchImpactHeavy", hitstop = 0.085 }

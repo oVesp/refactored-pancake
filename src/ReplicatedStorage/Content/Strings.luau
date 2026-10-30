@@ -58,5 +58,9 @@ return table.freeze({
 	DiscernNoTarget = "Select a target to discern.",
 	DetectLife = "Detect Life: %d living beings nearby.",
 	Gated = "Gate opened to %s.",
+	WeatherSet = "The sky turns to %s.",
+	WeatherUnknown = "Say day, night or reset.",
+	NightVisionOn = "Night vision on.",
+	NightVisionOff = "Night vision off.",
 	GateUnknown = "Unknown destination. Zones: %s",
 })

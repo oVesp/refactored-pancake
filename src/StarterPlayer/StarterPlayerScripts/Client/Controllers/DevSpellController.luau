@@ -3,6 +3,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local Maid = require(ReplicatedStorage.Shared.Maid)
@@ -10,6 +11,7 @@ local NetClient = require(ReplicatedStorage.Shared.Net.Client)
 
 local FLY_SPEED = 40
 local DETECT_FILL = Color3.fromRGB(120, 255, 140)
+local VISION_FADE = 0.4
 
 local player = Players.LocalPlayer
 
@@ -20,6 +22,7 @@ local player = Players.LocalPlayer
 local DevSpellController = {}
 
 local flight = Maid.new()
+local vision: ColorCorrectionEffect? = nil
 
 local function vertical(): number
 	local up = if UserInputService:IsKeyDown(Enum.KeyCode.Space) then 1 else 0
@@ -54,6 +57,41 @@ local function startFlying(character: Model)
 	end))
 end
 
+-- Night vision lifts the dark for this player only. The effect lives under the camera so it never
+-- mixes with the atmosphere's own ColorCorrection in Lighting.
+local function setNightVision(on: boolean)
+	local camera = workspace.CurrentCamera
+	if on and not vision and camera then
+		local effect = Instance.new("ColorCorrectionEffect")
+		effect.Name = "NightVision"
+		effect.Brightness = 0
+		effect.Contrast = 0
+		effect.Saturation = 0
+		effect.TintColor = Color3.new(1, 1, 1)
+		effect.Parent = camera
+		TweenService:Create(effect, TweenInfo.new(VISION_FADE), {
+			Brightness = 0.28,
+			Contrast = 0.12,
+			Saturation = -0.35,
+			TintColor = Color3.fromRGB(170, 255, 190),
+		}):Play()
+		vision = effect
+	elseif not on and vision then
+		local effect = vision
+		vision = nil
+		local fade = TweenService:Create(effect, TweenInfo.new(VISION_FADE), {
+			Brightness = 0,
+			Contrast = 0,
+			Saturation = 0,
+			TintColor = Color3.new(1, 1, 1),
+		})
+		fade.Completed:Once(function()
+			effect:Destroy()
+		end)
+		fade:Play()
+	end
+end
+
 local function watchCharacter(character: Model)
 	stopFlying()
 	local function update()
@@ -63,6 +101,10 @@ local function watchCharacter(character: Model)
 		end
 	end
 	character:GetAttributeChangedSignal("Flying"):Connect(update)
+	character:GetAttributeChangedSignal("NightVision"):Connect(function()
+		setNightVision(character:GetAttribute("NightVision") == true)
+	end)
+	setNightVision(character:GetAttribute("NightVision") == true)
 	update()
 end
 

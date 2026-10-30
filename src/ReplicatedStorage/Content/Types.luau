@@ -154,8 +154,17 @@ export type SkillDef = {
 	--[=[ Passive: overrides `charges` and `selfEffects` of another skill (`skill`) while granted. ]=]
 	upgrade: { skill: string, charges: number?, selfEffects: { Effect }? }?,
 	--[=[ Dev skills only (delivery `Dev`): the server-side debug effect it runs (Server/DevSkillEffects). ]=]
-	devEffect: ("Fly" | "LifeEssence" | "ManaEssence" | "DiscernEnemy" | "DetectLife" | "Gate")?,
-	--[=[ Chat casting may follow the name with an argument (Gate: the destination). ]=]
+	devEffect: (
+		"Fly"
+		| "LifeEssence"
+		| "ManaEssence"
+		| "DiscernEnemy"
+		| "DetectLife"
+		| "Gate"
+		| "ControlWeather"
+		| "NightVision"
+	)?,
+	--[=[ Chat casting may follow the name with an argument (Gate: the destination, Control Weather: day, night or reset). ]=]
 	chatArg: boolean?,
 	--[=[ Summon delivery: family id in `Content/Summons`. ]=]
 	summon: string?,

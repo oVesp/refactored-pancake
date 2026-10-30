@@ -2,7 +2,9 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Atmosphere = require(ReplicatedStorage.Content.Atmosphere)
 local ChatCast = require(ReplicatedStorage.Shared.ChatCast)
+local DayCycle = require(ReplicatedStorage.Shared.DayCycle)
 local DevService = require(script.Parent.Services.DevService)
 local Logger = require(ReplicatedStorage.Shared.Logger)
 local NetServer = require(ReplicatedStorage.Shared.Net.Server)
@@ -22,6 +24,9 @@ local log = Logger.new("DevSkillEffects")
 
 local EntityService: any
 local ZoneService: any
+
+local DAY_HOUR = 12
+local NIGHT_HOUR = 0
 
 --[=[
 	Server-side effects of dev skills (delivery `Dev`, docs/systems/dev-tools.md). SkillService
@@ -149,6 +154,39 @@ local function gate(caster: Entity, arg: string?)
 	notify(caster, "Gated", if toPylon then "the Pylon" else Zones.ById[zoneId].name)
 end
 
+-- Moves the shared world clock to `hour` (or back to the natural cycle with nil) through the
+-- workspace `ClockShift` attribute that DayCycle.Now reads.
+local function setClock(hour: number?)
+	if not hour then
+		workspace:SetAttribute("ClockShift", nil)
+		return
+	end
+	local cycle = Atmosphere.DayLength
+	local shift = DayCycle.SecondsAt(hour) - (workspace:GetServerTimeNow() % cycle)
+	workspace:SetAttribute("ClockShift", shift)
+end
+
+local function controlWeather(caster: Entity, arg: string?)
+	local request = if arg and arg ~= "" then arg else if DayCycle.IsNight(DayCycle.Now()) then "day" else "night"
+	if request == "day" then
+		setClock(DAY_HOUR)
+	elseif request == "night" then
+		setClock(NIGHT_HOUR)
+	elseif request == "reset" then
+		setClock(nil)
+	else
+		notify(caster, "WeatherUnknown")
+		return
+	end
+	notify(caster, "WeatherSet", if request == "reset" then "its natural course" else request)
+end
+
+local function nightVision(caster: Entity)
+	local on = not caster.model:GetAttribute("NightVision")
+	caster.model:SetAttribute("NightVision", if on then true else nil)
+	notify(caster, if on then "NightVisionOn" else "NightVisionOff")
+end
+
 --[=[
 	Runs a dev skill's effect. `target` is the caster's chosen target (any living entity) or nil;
 	`arg` is the normalized chat argument (Gate's destination).
@@ -172,6 +210,10 @@ function DevSkillEffects.Resolve(caster: Entity, skill: any, target: Entity?, ar
 		detectLife(caster)
 	elseif effect == "Gate" then
 		gate(caster, arg)
+	elseif effect == "ControlWeather" then
+		controlWeather(caster, arg)
+	elseif effect == "NightVision" then
+		nightVision(caster)
 	end
 end
 

@@ -86,6 +86,11 @@ return {
 		end
 		near(nightSamples / samples, Atmosphere.NightShare, 0.002, "night share")
 	end,
+	["SecondsAt inverts ClockAt"] = function()
+		for _, hour in { 0, 3.5, 6, 12, 17.9, 18, 21, 23.9 } do
+			near(DayCycle.ClockAt(DayCycle.SecondsAt(hour)), hour, 1e-6, `hour {hour}`)
+		end
+	end,
 	["light is continuous across the day"] = function()
 		local previous = AtmosphereBlend.LightAt(0)
 		for k = 1, 2400 do

@@ -60,7 +60,7 @@ local function apply(dt: number)
 	end
 	local target = AtmosphereBlend.Mix(AtmosphereBlend.Weights(camera.CFrame.Position))
 	current = if current then blendToward(current, target, 1 - math.exp(-Atmosphere.Smoothing * dt)) else target
-	local clock = DayCycle.ClockAt(workspace:GetServerTimeNow())
+	local clock = DayCycle.Now()
 	local light = AtmosphereBlend.LightAt(clock)
 	local mood = AtmosphereBlend.Lit(current :: Mood, light)
 
