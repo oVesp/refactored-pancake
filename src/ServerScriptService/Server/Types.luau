@@ -92,6 +92,8 @@ export type Entity = {
 	grudges: { [Entity]: true },
 	tauntedBy: Entity?,
 	lastHitBy: Entity?,
+	--[=[ Summons only: the player entity they serve; kills credit it. ]=]
+	owner: Entity?,
 	--[=[ Combat traits from granted passives (players; empty for NPCs). ]=]
 	traits: Formulas.Traits,
 	--[=[ Weapon type Weapon Proficiency applies to. ]=]

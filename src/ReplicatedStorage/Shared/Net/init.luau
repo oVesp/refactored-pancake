@@ -59,10 +59,18 @@ local Remotes: { [string]: RemoteSpec } = {
 		direction = "ClientToServer",
 		rateLimit = { capacity = 10, perSecond = 8 },
 		validate = function(...)
-			local skillId, aim, seq, target = ...
+			-- `arg`: the summon a Summon delivery raises.
+			local skillId, aim, seq, target, arg = ...
 			local count = select("#", ...)
 			local targetOk = target == nil or (typeof(target) == "Instance" and target:IsA("Model"))
-			return (count == 3 or count == 4) and isId(skillId) and isFiniteVector(aim) and isCount(seq) and targetOk
+			local argOk = arg == nil or isId(arg)
+			return count >= 3
+				and count <= 5
+				and isId(skillId)
+				and isFiniteVector(aim)
+				and isCount(seq)
+				and targetOk
+				and argOk
 		end,
 	},
 	SetGuard = {

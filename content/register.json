@@ -277,6 +277,36 @@
 			"notes": "Weapon types: generic names (fists, sword, bow, staff, wand)."
 		},
 		{
+			"id": "content:Summons",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Summons.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Summon families: generic undead names (zombie, skeleton)."
+		},
+		{
+			"id": "ui:SummonPicker",
+			"type": "ui",
+			"path": "src/StarterGui/SummonPicker.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Picker shown when a summon skill has more than one option."
+		},
+		{
+			"id": "ui:SummonOption",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiTemplates/SummonOption.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "One option button in the summon picker."
+		},
+		{
 			"id": "weapon:Sword",
 			"type": "model",
 			"path": "src/ReplicatedStorage/Weapons/Sword.model.json",
@@ -384,7 +414,7 @@
 			"license": "project",
 			"owner": "dev",
 			"status": "draft",
-			"notes": "Skinned skeleton on a Humanoid, written by tools/world/build.luau from tools/world/skeleton_import.rbxm."
+			"notes": "Skinned skeleton on a Humanoid, written by tools/world/build.luau from tools/world/skeleton_import.rbxm. Also the placeholder body of the Zombie (Content/Enemies), which has no asset of its own yet."
 		},
 		{
 			"id": "data:SkeletonImport",

@@ -79,4 +79,19 @@ return {
 		Expect.equal(migrated.classes[2].id, "mage")
 		Expect.equal(migrated.proficiency, "")
 	end,
+	["migrates schema 4 to no discoveries"] = function()
+		local profile = Profile.new() :: any
+		profile.schemaVersion = 4
+		profile.discoveries = nil
+		local migrated = Profile.Migrate(profile)
+		Expect.equal(migrated.schemaVersion, Profile.SchemaVersion)
+		Expect.equal(next(migrated.discoveries), nil)
+		Expect.truthy(Profile.IsSerializable(migrated))
+	end,
+	["a new profile has discovered nothing, and discoveries serialize"] = function()
+		local profile = Profile.new()
+		Expect.equal(next(profile.discoveries), nil)
+		profile.discoveries.skeleton = true
+		Expect.truthy(Profile.IsSerializable(profile))
+	end,
 }

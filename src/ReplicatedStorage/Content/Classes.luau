@@ -41,7 +41,15 @@ local Classes: { [string]: Types.ClassDef } = {
 		line = "arcane",
 		growth = { MaxHp = 8, MaxMp = 15, MagAtk = 5, Agility = 2, MagDef = 1, Resistance = 1 },
 		grants = { "arcane_line", "mana_flow", "blink", "elemental_focus", "overcharge" },
-		spellList = { "light", "magic_arrow", "destruction_water", "sleep", "quick_march", "arcane_shield" },
+		spellList = {
+			"light",
+			"magic_arrow",
+			"destruction_water",
+			"sleep",
+			"quick_march",
+			"arcane_shield",
+			"create_undead",
+		},
 		weapons = { "fists", "sword", "bow", "staff", "wand" },
 	},
 	healer = {

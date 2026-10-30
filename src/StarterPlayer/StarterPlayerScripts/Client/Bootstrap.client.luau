@@ -27,6 +27,7 @@ local CONTROLLER_ORDER = {
 	"PromptController",
 	"DragController",
 	"HudController",
+	"SummonController",
 	"SpellbookController",
 	"InventoryController",
 	"TrainerController",

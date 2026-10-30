@@ -47,6 +47,7 @@ export type NewEntity = {
 	name: string,
 	level: number,
 	tags: Types.Tags,
+	owner: Entity?,
 }
 
 --[=[ Registers a model as a combat entity. Stats are filled by StatService on Added. ]=]
@@ -58,6 +59,7 @@ function EntityService.Register(info: NewEntity): Entity
 		root = info.root,
 		kind = info.kind,
 		player = info.player,
+		owner = info.owner,
 		team = info.team,
 		defId = info.defId,
 		name = info.name,

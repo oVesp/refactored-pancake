@@ -13,6 +13,8 @@ local Items = require(ReplicatedStorage.Content.Items)
 local Logger = require(ReplicatedStorage.Shared.Logger)
 local NetServer = require(ReplicatedStorage.Shared.Net.Server)
 local Skills = require(ReplicatedStorage.Content.Skills)
+local SummonFamilies = require(ReplicatedStorage.Content.Summons)
+local Summons = require(ReplicatedStorage.Shared.Summons)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 local DevService = require(script.Parent.DevService)
 local Types = require(script.Parent.Parent.Types)
@@ -96,6 +98,7 @@ function ProgressionService.Snapshot(player: Player): { [string]: any }?
 		hotbar = prunedHotbar(profile, DevService.IsDev(player)),
 		inventory = profile.inventory,
 		equipment = profile.equipment,
+		discoveries = profile.discoveries,
 	}
 end
 
@@ -316,6 +319,20 @@ local function bindTrainer(instance: Instance)
 	end
 end
 
+-- Records a kill of a new enemy type; a summon option it opens is announced.
+local function discover(player: Player, id: string, name: string)
+	local profile = DataService.Get(player)
+	if not profile or profile.discoveries[id] then
+		return
+	end
+	DataService.Update(player, function(p: any)
+		p.discoveries[id] = true
+	end, "discoveries")
+	if Summons.Unlocks(SummonFamilies.ById, id) then
+		notify(player, "SummonUnlocked", name)
+	end
+end
+
 local function onDied(victim: Entity, killer: Entity?)
 	if victim.kind == "Npc" and killer and killer.kind == "Player" and killer.player then
 		local def = Enemies.ById[victim.defId]
@@ -329,6 +346,7 @@ local function onDied(victim: Entity, killer: Entity?)
 				Tuning.Progression.KillXpMax
 			)
 			ProgressionService.GrantXp(killer.player, amount)
+			discover(killer.player, victim.defId, def.name)
 		end
 	elseif victim.kind == "Player" and victim.player then
 		local player = victim.player

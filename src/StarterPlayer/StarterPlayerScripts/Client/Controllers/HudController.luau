@@ -35,6 +35,7 @@ local REJECT_TEXT: { [string]: string } = {
 	Dodge = "Cannot dodge",
 	NoTarget = "No target",
 	Range = "Out of range",
+	Summon = "SummonUnavailable",
 }
 
 --[=[

@@ -479,7 +479,7 @@ end
 -- Attributes clients read for targeting: people can be aimed at outside safe zones (Attackable)
 -- and join the soft target once they fight a player (Provoked).
 local function publishAttackable(brain: Brain)
-	if brain.monster then
+	if brain.monster or brain.entity.owner then
 		return
 	end
 	local entity = brain.entity
@@ -559,7 +559,10 @@ local function follow(brain: Brain, leader: Entity, now: number)
 	local humanoid = entity.humanoid :: Humanoid
 	local leaderHumanoid = leader.humanoid :: Humanoid
 	-- Pace is set after the state: entering Travel resets it to the plain walk.
-	local leaderWalk = leaderHumanoid.WalkSpeed / leader.pace * Tuning.Npc.PatrolSpeedMultiplier
+	-- A patrol leader strolls at the patrol pace; a player leader moves at full speed.
+	local leaderWalk = if leader.kind == "Player"
+		then leaderHumanoid.WalkSpeed
+		else leaderHumanoid.WalkSpeed / leader.pace * Tuning.Npc.PatrolSpeedMultiplier
 	StatService.SetPace(entity, Tasks.FollowPace(gap, leaderWalk, humanoid.WalkSpeed / entity.pace, settings))
 	moveTo(brain, destination, now)
 end
@@ -697,6 +700,10 @@ local function think(brain: Brain, now: number)
 		setState(brain, "Aggro")
 	end
 	publishAttackable(brain)
+	-- A summon's home is its owner: the leash and every walk back follow them.
+	if entity.owner then
+		brain.home = entity.owner.root.Position
+	end
 	if StatusService.IsDisabled(entity) or entity.casting then
 		stop(brain)
 		return
@@ -707,15 +714,20 @@ local function think(brain: Brain, now: number)
 
 	if brain.state == "Return" then
 		if fromHome <= ARRIVE_DISTANCE + 2 then
-			StatusService.Clear(entity)
-			StatService.Refill(entity)
+			-- A summon back at its owner keeps its wounds; it lasts one duration anyway.
+			if not entity.owner then
+				StatusService.Clear(entity)
+				StatService.Refill(entity)
+			end
 			SquadService.ResetMorale(brain.member)
 			setState(brain, "Idle")
 		else
-			StatService.SetHp(
-				entity,
-				entity.hp + entity.stats.MaxHp * Tuning.Npc.ReturnRegenPerSecond * Tuning.Npc.ThinkInterval
-			)
+			if not entity.owner then
+				StatService.SetHp(
+					entity,
+					entity.hp + entity.stats.MaxHp * Tuning.Npc.ReturnRegenPerSecond * Tuning.Npc.ThinkInterval
+				)
+			end
 			moveTo(brain, brain.home, now)
 		end
 		return

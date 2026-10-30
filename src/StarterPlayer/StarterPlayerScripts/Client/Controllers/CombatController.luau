@@ -15,6 +15,8 @@ local GuardClips = require(script.Parent.Parent.Animation.GuardClips)
 local NetClient = require(ReplicatedStorage.Shared.Net.Client)
 local Signal = require(ReplicatedStorage.Shared.Signal)
 local Skills = require(ReplicatedStorage.Content.Skills)
+local SummonFamilies = require(ReplicatedStorage.Content.Summons)
+local Summons = require(ReplicatedStorage.Shared.Summons)
 local Targeting = require(ReplicatedStorage.Shared.Targeting)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 local Types = require(ReplicatedStorage.Content.Types)
@@ -49,6 +51,8 @@ CombatController.HotbarChanged = Signal.new() :: Signal.Signal<{ [number]: Slot 
 CombatController.Rejected = Signal.new() :: Signal.Signal<string, string>
 --[=[ Fires `(skillId, aim)` when a use is sent (local feedback). ]=]
 CombatController.Used = Signal.new() :: Signal.Signal<string, Vector3>
+--[=[ Fires `(skillId, options)` when a summon skill with more than one option is pressed (SummonController). ]=]
+CombatController.SummonPrompted = Signal.new() :: Signal.Signal<string, { string }>
 --[=[ Fires when the bow reaches full draw: releasing within `PerfectWindow` is a perfect shot. ]=]
 CombatController.DrawReady = Signal.new() :: Signal.Signal<>
 
@@ -66,6 +70,7 @@ local lockedUntil = 0
 local swingId: string? = nil
 local swingEndsAt = 0
 local queued: string? = nil
+local queuedArg: string? = nil
 local queuedUntil = 0
 local hotbar: { [number]: Slot } = {}
 local chainLast: string? = nil
@@ -275,7 +280,8 @@ end
 
 -- Sends the use now. Returns false while the character is stunned or still casting.
 -- `chatText`: the chat message that cast it, sent instead of the id (chat casting).
-local function send(skillId: string, chatText: string?): boolean
+-- `arg`: the summon a Summon delivery raises.
+local function send(skillId: string, chatText: string?, arg: string?): boolean
 	local skill = skillOf(skillId)
 	local model, root = character()
 	if not skill or not model or not root or waitFor(skillId) > 0 then
@@ -319,7 +325,7 @@ local function send(skillId: string, chatText: string?): boolean
 	if chatText then
 		NetClient.Fire("CastSpellByName", chatText, aim, seq, target)
 	else
-		NetClient.Fire("UseSkill", skillId, aim, seq, target)
+		NetClient.Fire("UseSkill", skillId, aim, seq, target, arg)
 	end
 	CombatController.Used:Fire(skillId, aim)
 	return true
@@ -330,9 +336,10 @@ end
 	`QueueWindow` of becoming ready is queued (one at a time, the latest press wins) and sent the
 	moment it is, which buffers presses made during a swing's recovery. The light attack entry continues the chain: it
 	uses the last hit's `chainNext` within Tuning.Combat.Chain.Window, else starts over. A skill the
-	held weapon draws starts the draw; releasing the slot shoots it (`ReleaseSlot`).
+	held weapon draws starts the draw; releasing the slot shoots it (`ReleaseSlot`). A summon skill
+	with more than one option asks SummonController first, which comes back with `arg`.
 ]=]
-function CombatController.UseSkill(skillId: string)
+function CombatController.UseSkill(skillId: string, arg: string?)
 	if skillId == CombatController.Weapon().light then
 		skillId = Chain.Next(Skills.ById, skillId, chainLast, chainAt, os.clock(), Tuning.Combat.Chain.Window)
 	end
@@ -344,12 +351,21 @@ function CombatController.UseSkill(skillId: string)
 		CombatController.StartDraw(skillId)
 		return
 	end
+	if skill.summon and not arg then
+		local snapshot = ProfileController.Get()
+		local options = Summons.Options(SummonFamilies.ById[skill.summon], snapshot and snapshot.discoveries or {})
+		if #options > 1 then
+			CombatController.SummonPrompted:Fire(skillId, options)
+			return
+		end
+	end
 	local wait = waitFor(skillId)
 	if wait <= 0 then
 		queued = nil
-		send(skillId)
+		send(skillId, nil, arg)
 	elseif wait <= Tuning.Combat.Gcd.QueueWindow then
 		queued = skillId
+		queuedArg = arg
 		queuedUntil = os.clock() + wait + QUEUE_GRACE
 	end
 end
@@ -595,7 +611,7 @@ function CombatController.Start()
 		if not skillId then
 			return
 		end
-		if os.clock() > queuedUntil or (waitFor(skillId) <= 0 and send(skillId)) then
+		if os.clock() > queuedUntil or (waitFor(skillId) <= 0 and send(skillId, nil, queuedArg)) then
 			queued = nil
 		end
 	end)

@@ -20,6 +20,7 @@ local Tuning = require(ReplicatedStorage.Content.Tuning)
 local Weapons = require(ReplicatedStorage.Content.Weapons)
 local DevService = require(script.Parent.DevService)
 local DevSkillEffects = require(script.Parent.Parent.DevSkillEffects)
+local SummonService = require(script.Parent.SummonService)
 local Types = require(script.Parent.Parent.Types)
 
 type Entity = Types.Entity
@@ -519,6 +520,8 @@ local function resolve(caster: Entity, skill: SkillDef, aim: Vector3, target: En
 		local arg = devArgs[caster]
 		devArgs[caster] = nil
 		DevSkillEffects.Resolve(caster, skill, target, arg)
+	elseif delivery == "Summon" then
+		SummonService.Cast(caster, skill.summon)
 	end
 	if delivery ~= "Projectile" and delivery ~= "Target" and delivery ~= "Dev" then
 		broadcast({
@@ -821,6 +824,10 @@ local function handleUseSkill(
 	else
 		target = nil
 	end
+	if skill.summon and not SummonService.Choose(player, profile, skill.summon, arg) then
+		reject(player, seq, "Summon")
+		return
+	end
 	-- Instant actions pay now; casts check now and pay when they complete.
 	local cost: { resource: "Mp" | "Stamina", amount: number }? = nil
 	if skill.cost then
@@ -872,7 +879,7 @@ end
 
 --[=[
 	Runs a player's skill use through the same checks as `UseSkill` (chat casting uses it).
-	`arg` is a dev skill's chat argument.
+	`arg` is a dev skill's chat argument, or the summon a Summon delivery raises.
 ]=]
 function SkillService.Use(player: Player, skillId: string, aim: Vector3, seq: number, target: Model?, arg: string?)
 	withLatency(player, function()
@@ -956,11 +963,14 @@ function SkillService.Init(deps: { [string]: any })
 	StatusService = deps.StatusService
 	DevSkillEffects.Init(deps)
 
-	NetServer.Connect("UseSkill", function(player: Player, skillId: string, aim: Vector3, seq: number, target: Model?)
-		withLatency(player, function()
-			handleUseSkill(player, skillId, aim, seq, target)
-		end)
-	end)
+	NetServer.Connect(
+		"UseSkill",
+		function(player: Player, skillId: string, aim: Vector3, seq: number, target: Model?, arg: string?)
+			withLatency(player, function()
+				handleUseSkill(player, skillId, aim, seq, target, arg)
+			end)
+		end
+	)
 	NetServer.Connect("SetGuard", function(player: Player, on: boolean)
 		withLatency(player, function()
 			handleGuard(player, on)

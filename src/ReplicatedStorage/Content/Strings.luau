@@ -11,6 +11,8 @@ return table.freeze({
 	ClassCapped = "That class is at its cap.",
 	UnknownClass = "Unknown class.",
 	LearnedSpell = "Learned %s.",
+	SummonUnlocked = "New summon discovered: %s.",
+	SummonUnavailable = "You cannot raise that yet.",
 	SpellPickReady = "You can learn %d new spell(s). Open the spellbook (B).",
 	TierLocked = "That spell's Tier is still locked.",
 	NoPick = "No spell pick left for that class.",

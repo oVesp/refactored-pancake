@@ -63,6 +63,7 @@ export type Delivery =
 	| "Object"
 	| "Dev"
 	| "Leap"
+	| "Summon"
 
 export type SkillDef = {
 	id: string,
@@ -154,6 +155,8 @@ export type SkillDef = {
 	devEffect: ("Fly" | "LifeEssence" | "ManaEssence" | "DiscernEnemy" | "DetectLife" | "Gate")?,
 	--[=[ Chat casting may follow the name with an argument (Gate: the destination). ]=]
 	chatArg: boolean?,
+	--[=[ Summon delivery: family id in `Content/Summons`. ]=]
+	summon: string?,
 	description: string,
 }
 
@@ -192,6 +195,21 @@ export type StatusDef = {
 	fillsRhythm: boolean?,
 	--[=[ When it runs out (not when cleared), the bearer gets that skill's self effects for free. ]=]
 	expireSkill: string?,
+}
+
+--[=[ Who a summon skill may raise (docs/systems/ai-and-spawning.md, Summons). ]=]
+export type SummonFamily = {
+	id: string,
+	--[=[ Always available; the first is the default. ]=]
+	base: { string },
+	--[=[ Available once the player has discovered them. ]=]
+	pool: { string },
+	--[=[ Most of this family one caster keeps at once; also capped by Tuning.Summons.MaxPerCaster. ]=]
+	cap: number,
+	--[=[ Seconds a summon lasts. ]=]
+	duration: number,
+	--[=[ Added to the caster's level for the summon's level. ]=]
+	levelOffset: number,
 }
 
 export type Summon = {

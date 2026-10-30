@@ -41,6 +41,9 @@ local Loot: { [string]: { Drop } } = {
 		{ item = "minor_mana_potion", chance = 0.1, min = 1, max = 1 },
 		{ item = "rusty_sword", chance = 0.03, min = 1, max = 1 },
 	},
+	zombie = {
+		{ item = "minor_health_potion", chance = 0.1, min = 1, max = 1 },
+	},
 	goblin_chieftain = {
 		{ item = "goblin_trophy", chance = 1, min = 3, max = 5 },
 		{ item = "minor_health_potion", chance = 1, min = 2, max = 3 },

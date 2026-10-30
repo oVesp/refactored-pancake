@@ -1,0 +1,55 @@
+{
+	"className": "TextButton",
+	"properties": {
+		"Size": {
+			"UDim2": [
+				[0, 124],
+				[0, 34]
+			]
+		},
+		"BackgroundColor3": [0.145, 0.176, 0.227],
+		"BorderSizePixel": 0,
+		"Text": "",
+		"TextColor3": [0.941, 0.867, 0.69],
+		"FontFace": {
+			"Font": {
+				"family": "rbxasset://fonts/families/AccanthisADFStd.json",
+				"weight": "Bold",
+				"style": "Normal"
+			}
+		},
+		"TextSize": 15,
+		"AutoButtonColor": true
+	},
+	"children": [
+		{
+			"name": "UICorner",
+			"className": "UICorner",
+			"properties": {
+				"CornerRadius": {
+					"UDim": [0, 3]
+				}
+			}
+		},
+		{
+			"name": "Edge",
+			"className": "UIStroke",
+			"properties": {
+				"Color": [0.549, 0.471, 0.325],
+				"Thickness": 1,
+				"Transparency": 0.3,
+				"ApplyStrokeMode": "Border"
+			}
+		},
+		{
+			"name": "Bind_Stroke",
+			"className": "UIStroke",
+			"properties": {
+				"Color": [0.941, 0.867, 0.69],
+				"Thickness": 2,
+				"ApplyStrokeMode": "Border",
+				"Enabled": false
+			}
+		}
+	]
+}

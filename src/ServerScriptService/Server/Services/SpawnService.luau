@@ -8,6 +8,7 @@ local ServerStorage = game:GetService("ServerStorage")
 
 local Appearance = require(ReplicatedStorage.Content.Appearance)
 local Avatar = require(ReplicatedStorage.Shared.Avatar)
+local Factions = require(ReplicatedStorage.Content.Factions)
 local Logger = require(ReplicatedStorage.Shared.Logger)
 local Names = require(ReplicatedStorage.Content.Names)
 local NpcDefs = require(ReplicatedStorage.Shared.NpcDefs)
@@ -47,6 +48,12 @@ export type Options = {
 	wander: number?,
 	--[=[ Share of max HP to start with (a group coming back into view keeps its wounds). ]=]
 	hp: number?,
+	--[=[ Faction instead of the definition's (a summon takes its caster's). ]=]
+	team: Factions.FactionId?,
+	--[=[ The player entity a summon serves. ]=]
+	owner: Entity?,
+	--[=[ Leash radius instead of the definition's. ]=]
+	leash: number?,
 }
 
 -- The ground under a spawn point: terrain or generated world geometry (terraced plots, the camp
@@ -156,7 +163,7 @@ function SpawnService.Spawn(npcId: string, level: number, position: Vector3, opt
 	model:PivotTo(
 		CFrame.new(position + Vector3.new(0, height, 0)) * CFrame.Angles(0, random:NextNumber(0, math.pi * 2), 0)
 	)
-	local team = def.team or "Goblins"
+	local team = opts.team or def.team or "Goblins"
 	model:AddTag(if Relations.IsMonster(team) then "Enemy" else "Npc")
 	model.Parent = npcFolder
 	root:SetNetworkOwner(nil)
@@ -171,6 +178,7 @@ function SpawnService.Spawn(npcId: string, level: number, position: Vector3, opt
 		name = name,
 		level = level,
 		tags = def.tags,
+		owner = opts.owner,
 	})
 	model:SetAttribute("Elite", def.elite == true)
 	StatService.Recompute(entity)
@@ -178,7 +186,7 @@ function SpawnService.Spawn(npcId: string, level: number, position: Vector3, opt
 	if opts.hp and opts.hp < 1 then
 		StatService.SetHp(entity, math.max(1, entity.stats.MaxHp * opts.hp))
 	end
-	AIService.Attach(entity, opts.home or position, def.leashRadius, opts.wander)
+	AIService.Attach(entity, opts.home or position, opts.leash or def.leashRadius, opts.wander)
 	return entity
 end
 

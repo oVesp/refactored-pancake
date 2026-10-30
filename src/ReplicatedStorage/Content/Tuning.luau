@@ -182,6 +182,21 @@ return table.freeze({
 	}),
 
 	--[=[ Cascading tasks and leader following (docs/systems/ai-and-spawning.md, Tasks). Studs. ]=]
+	--[=[ Summon skills (docs/systems/ai-and-spawning.md, Summons). Studs and seconds. ]=]
+	Summons = table.freeze({
+		--[=[ Most summons of any family one caster keeps at once. ]=]
+		MaxPerCaster = 3,
+		--[=[ Leash around the owner: a summon past it drops its fight and walks back. ]=]
+		Leash = 45,
+		--[=[ A summon this far from its owner is brought back to them. ]=]
+		TeleportDistance = 90,
+		--[=[ Studs behind the caster where a summon appears. ]=]
+		SpawnBack = 5,
+		SweepInterval = 0.5,
+		--[=[ Seconds the picker stays open without a choice. ]=]
+		PickerSeconds = 4,
+	}),
+
 	Tasks = table.freeze({
 		--[=[ Shared/Tasks.FollowSettings: the loose clump behind a leader. Pace comes from the leader. ]=]
 		Follow = table.freeze({

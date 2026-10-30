@@ -31,6 +31,7 @@ local SERVICE_ORDER = {
 	"SquadService",
 	"AIService",
 	"SpawnService",
+	"SummonService",
 	"GroupService",
 	"PopulationService",
 	"DevService",

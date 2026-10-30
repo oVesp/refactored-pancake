@@ -34,6 +34,17 @@ Pure logic: `Shared/Tasks.luau` (specs in `tests/specs/Tasks.spec.luau`). Tuning
 - **Squads.** Brains with the same `SetSquad` key (a GroupService group) fight together, however far apart: when one is hit or picks a new target, the others gain threat on that enemy (and the grudge, if it is a player).
 - **Safe zones.** No NPC targets a player inside a safe zone. A monster `/spawn`ed next to a player in the village therefore stands idle; the command says so.
 
+## Summons
+
+Data: `Content/Summons.luau` (families), `Tuning.Summons`. Pure rule: `Shared/Summons.luau` (specs in `tests/specs/Summons.spec.luau`). Server: `SummonService`. Client: `SummonController`, the `SummonPicker` screen and the `SummonOption` template.
+
+- **Options.** A skill with the `Summon` delivery names a family through `summon`. The caster may raise the family's `base`, plus each `pool` entry in the profile's `discoveries`. Create Undead: base Zombie; pool Zombie, Skeleton.
+- **Discovery.** Getting kill credit on an enemy records its id in `discoveries` (`ProgressionService`). A kill that opens a summon option shows a toast. A summon's kill credits its owner (`CombatService` resolves it before `Died` fires), so XP, loot and discovery all follow.
+- **Casting.** With one option the press casts it. With more, the press opens the picker with the last choice marked: clicking an option casts it and pressing the skill again casts the marked one. It closes after `PickerSeconds`. The choice travels as the fifth `UseSkill` argument, or after the name in chat (`Create Undead Skeleton`); the server refuses anything outside the options (reject reason `Summon`) before paying. A cast naming none uses the player's last choice this session, else the first option.
+- **Limits.** One summon per cast at the caster's level + `levelOffset`, for `duration` seconds. A caster keeps at most the family's `cap`, and never more than `MaxPerCaster`; another cast replaces the oldest. Death, leaving or the end of the duration removes them; the last two use `SpawnService.Despawn`, so they leave no corpse.
+- **Allegiance.** A summon spawns on the caster's faction with `entity.owner` set. `CombatService.MayAttack` only lets its real enemies hit it, so its owner, other players and their area attacks pass through it while hostile factions fight it on sight. It publishes no `Attackable`, so the client never aims at it. Ally skills can target it.
+- **Behaviour.** It reuses the enemy brain. `FollowLeader` trails the owner at the owner's speed (`SetLeader`), `wander` is 0 and its stance is Neutral. Its home is the owner, so `Leash` is measured from them: past it, it drops its fight and walks back. Unlike other NPCs it does not heal on the way back or on arrival. It takes targets the usual way (threat, then nearest hostile within `aggroRadius`), and every hit the owner lands adds threat on the victim, with a grudge if their factions are not hostile. Hits on the owner already pull in nearby allies. A summon farther than `TeleportDistance` is brought back behind the owner.
+
 ## Group combat
 
 One general system for every enemy, configured per enemy in `EnemyDef.combat` (`Content/Types`) with defaults in `Tuning.Swarm`. Pure logic lives in `Shared/Swarm.luau` (unit-tested under Lune); `SquadService` owns the live state; `AIService` asks it before acting.

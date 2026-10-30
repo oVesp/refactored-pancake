@@ -846,6 +846,25 @@ local list: { Types.SkillDef } = {
 		description = "Move about 20% faster.",
 	},
 
+	{
+		id = "create_undead",
+		name = "Create Undead",
+		kind = "Active",
+		source = "Spell",
+		number = 23,
+		tier = 1,
+		line = "arcane",
+		delivery = "Summon",
+		targets = "Self",
+		gcd = true,
+		cooldown = 12,
+		castTime = 2.5,
+		cost = { resource = "Mp", amount = 14 },
+		summon = "undead",
+		chatArg = true,
+		description = "Raise an undead servant: a zombie, or any undead you have destroyed before.",
+	},
+
 	-- Divine spells. Tier 2+ spells, Glow and Purify Water stay off the M0.5 class list (Content/Classes).
 	{
 		id = "glow",
@@ -1134,6 +1153,22 @@ local list: { Types.SkillDef } = {
 		angle = 90,
 		damage = { type = "physical", base = 4, stat = "PhysAtk", ratio = 0.5 },
 		description = "Skeleton claw swipe.",
+	},
+
+	-- Zombie
+	{
+		id = "zombie_claw",
+		name = "Claw",
+		kind = "Active",
+		source = "Enemy",
+		delivery = "Melee",
+		targets = "Enemy",
+		cooldown = 2.4,
+		windup = 0.6,
+		range = 6,
+		angle = 90,
+		damage = { type = "physical", base = 5, stat = "PhysAtk", ratio = 0.5 },
+		description = "Slow rotting swipe.",
 	},
 
 	-- Guards, caravan guards and travelers (Content/Npcs)

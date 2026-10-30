@@ -34,9 +34,11 @@ export type Profile = {
 	--[=[ Hotbar layout, `HOTBAR_SIZE` encoded slots (`Shared/Hotbar`); `""` is empty. ]=]
 	hotbar: { string },
 	nextUid: number,
+	--[=[ Enemy ids this character has killed; unlocks summon options (Shared/Summons). ]=]
+	discoveries: { [string]: boolean },
 }
 
-local SCHEMA_VERSION = 4
+local SCHEMA_VERSION = 5
 -- Keep in step with Shared/Hotbar.Size (checked by Profile.spec).
 local HOTBAR_SIZE = 8
 
@@ -66,6 +68,7 @@ function Profile.new(starter: { { id: string, count: number } }?): Profile
 		equipment = {},
 		hotbar = table.create(HOTBAR_SIZE, ""),
 		nextUid = 1,
+		discoveries = {},
 	}
 	for _, entry in (starter or {}) :: { { id: string, count: number } } do
 		table.insert(profile.inventory, { uid = profile.nextUid, id = entry.id, count = entry.count })
@@ -100,6 +103,10 @@ function Profile.Migrate(data: Profile): Profile
 		end
 		data.proficiency = ""
 		data.schemaVersion = 4
+	end
+	if data.schemaVersion < 5 then
+		data.discoveries = {}
+		data.schemaVersion = 5
 	end
 	return data
 end

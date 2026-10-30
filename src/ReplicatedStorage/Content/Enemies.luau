@@ -3,7 +3,7 @@
 local Types = require(script.Parent.Types)
 
 --[=[
-	Goblins (scope 01, section 5) and the Skeleton. `base` is level-1 stats; `growth` is added per
+	Goblins (scope 01, section 5), the Skeleton and the Zombie. `base` is level-1 stats; `growth` is added per
 	level above 1. Rabble is placed in the world. Warband (level 7+) is data-only in M0.5 and spawns
 	via /spawn.
 ]=]
@@ -139,6 +139,27 @@ local list: { Types.EnemyDef } = {
 		xp = 13,
 		scale = 1,
 		color = Color3.fromRGB(99, 95, 98),
+		template = "Skeleton",
+		team = "Undead",
+		combat = { slot = "Melee", roles = { Pressure = 1 }, morale = false },
+	},
+	{
+		-- Placeholder body: the Skeleton rig and clips until a zombie model exists.
+		id = "zombie",
+		name = "Zombie",
+		tier = "Rabble",
+		levelMin = 1,
+		levelMax = 3,
+		base = { MaxHp = 60, PhysAtk = 6, PhysDef = 5, MagDef = 2, Agility = 3 },
+		growth = { MaxHp = 15, PhysAtk = 2, PhysDef = 1 },
+		tags = { resist = { "poison" }, vulnerable = { "holy" } },
+		skills = { "zombie_claw" },
+		aggroRadius = 24,
+		leashRadius = 60,
+		moveSpeed = 10,
+		xp = 11,
+		scale = 1,
+		color = Color3.fromRGB(96, 112, 84),
 		template = "Skeleton",
 		team = "Undead",
 		combat = { slot = "Melee", roles = { Pressure = 1 }, morale = false },

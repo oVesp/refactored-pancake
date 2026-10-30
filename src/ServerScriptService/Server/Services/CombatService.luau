@@ -60,6 +60,10 @@ end
 	against any NPC outside safe zones. NPCs inside a safe zone only fight hostile factions.
 ]=]
 function CombatService.MayAttack(source: Entity, target: Entity): boolean
+	if target.owner then
+		-- A summon is on its owner's side: only its real enemies may hit it.
+		return EntityService.AreEnemies(source, target)
+	end
 	if source.kind == "Player" and target.kind == "Npc" and not Relations.Hostile(source.team, target.team) then
 		return not ZoneService.IsSafe(target.root.Position)
 	end
@@ -92,7 +96,8 @@ local function die(target: Entity, killer: Entity?)
 	if target.humanoid then
 		target.humanoid.Health = 0
 	end
-	CombatService.Died:Fire(target, killer)
+	-- A summon's kill belongs to its owner: XP, loot and discovery all follow.
+	CombatService.Died:Fire(target, if killer and killer.owner then killer.owner else killer)
 end
 
 --[=[ Kills an entity outright (falls, dev commands). ]=]
