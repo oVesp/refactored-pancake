@@ -34,6 +34,8 @@ local SERVICE_ORDER = {
 	"SummonService",
 	"GroupService",
 	"PopulationService",
+	"ShopService",
+	"QuestService",
 	"DevService",
 	"ChatCastService",
 }

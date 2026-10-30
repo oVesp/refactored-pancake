@@ -189,6 +189,17 @@ return table.freeze({
 		LoseTargetGrace = 5,
 	}),
 
+	--[=[ Quest board and shops (docs/systems/economy.md). Studs. ]=]
+	Quests = table.freeze({
+		--[=[ A quest party spawns this far from the board. ]=]
+		SpawnMin = 150,
+		SpawnMax = 300,
+		--[=[ Players use the board and shop vendors within this distance. ]=]
+		Reach = 16,
+		--[=[ Idle patrol radius of a quest party around its spot. ]=]
+		PartyWander = 14,
+	}),
+
 	--[=[ Cascading tasks and leader following (docs/systems/ai-and-spawning.md, Tasks). Studs. ]=]
 	--[=[ Summon skills (docs/systems/ai-and-spawning.md, Summons). Studs and seconds. ]=]
 	Summons = table.freeze({

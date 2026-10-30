@@ -207,6 +207,26 @@
 			"notes": "Generic role names (villager, guard, merchant, traveler), plain descriptive (game-design.md 2)."
 		},
 		{
+			"id": "content:Quests",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Quests.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Goblin extermination quests on the guild board; plain descriptive names (game-design.md 2)."
+		},
+		{
+			"id": "content:Shop",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Shop.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Inn stock and prices; plain descriptive names (game-design.md 2)."
+		},
+		{
 			"id": "content:Zones",
 			"type": "data",
 			"path": "src/ReplicatedStorage/Content/Zones.luau",
@@ -699,6 +719,46 @@
 			"owner": "dev",
 			"status": "draft",
 			"notes": "Trainer panel shown in the world while talking to a trainer."
+		},
+		{
+			"id": "ui:Shop",
+			"type": "ui",
+			"path": "src/StarterGui/Shop.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Shop panel shown in the world beside a vendor (docs/systems/economy.md)."
+		},
+		{
+			"id": "ui:QuestBoard",
+			"type": "ui",
+			"path": "src/StarterGui/QuestBoard.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Quest board panel shown in the world at the guild hall's board (docs/systems/economy.md)."
+		},
+		{
+			"id": "ui:RigShop",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiRigs/Shop.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "World-menu rig: where the Shop panel stands relative to the vendor and how large it is."
+		},
+		{
+			"id": "ui:RigQuestBoard",
+			"type": "ui",
+			"path": "src/ReplicatedStorage/UiRigs/QuestBoard.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "World-menu rig: where the QuestBoard panel stands relative to the board and how large it is."
 		},
 		{
 			"id": "ui:RigInventory",

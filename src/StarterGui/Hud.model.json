@@ -2054,6 +2054,60 @@
 					}
 				},
 				{
+					"name": "Bind_GoldText",
+					"className": "TextLabel",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									0,
+									90
+								],
+								[
+									0,
+									16
+								]
+							]
+						},
+						"BackgroundTransparency": 1,
+						"Text": "",
+						"TextColor3": [
+							0.941,
+							0.867,
+							0.69
+						],
+						"FontFace": {
+							"Font": {
+								"family": "rbxasset://fonts/families/BuilderSans.json",
+								"weight": "Bold",
+								"style": "Normal"
+							}
+						},
+						"TextSize": 13,
+						"TextXAlignment": "Right",
+						"TextYAlignment": "Center",
+						"TextWrapped": true,
+						"Position": {
+							"UDim2": [
+								[
+									0,
+									238
+								],
+								[
+									0,
+									99
+								]
+							]
+						},
+						"TextStrokeTransparency": 0.6,
+						"TextStrokeColor3": [
+							0.051,
+							0.063,
+							0.086
+						]
+					}
+				},
+				{
 					"name": "Bind_Statuses",
 					"className": "Frame",
 					"properties": {
@@ -4272,7 +4326,7 @@
 					]
 				},
 				"BackgroundTransparency": 1,
-				"Text": "LMB attack \u00b7 RMB heavy \u00b7 1-8 skills \u00b7 Q dodge \u00b7 F guard \u00b7 Z/X disciplines \u00b7 B spells \u00b7 I bag \u00b7 C sheet \u00b7 Alt draw / sheathe \u00b7 Tab lock target",
+				"Text": "LMB attack · RMB heavy · 1-8 skills · Q dodge · F guard · Z/X disciplines · B spells · I bag · C sheet · Alt draw / sheathe · Tab lock target",
 				"TextColor3": [
 					0.682,
 					0.706,

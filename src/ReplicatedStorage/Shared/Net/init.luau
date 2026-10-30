@@ -156,6 +156,25 @@ local Remotes: { [string]: RemoteSpec } = {
 			return arity(1, ...) and typeof((...)) == "Instance"
 		end,
 	},
+	--[=[ `(vendor body, item id, count)`: buys from the vendor's shop (ShopService validates). ]=]
+	BuyItem = {
+		direction = "ClientToServer",
+		rateLimit = { capacity = 6, perSecond = 3 },
+		validate = function(...)
+			local body, itemId, count = ...
+			return arity(3, ...) and typeof(body) == "Instance" and isId(itemId) and isCount(count)
+		end,
+	},
+	--[=[ `(board body, action, quest id)`: action is "Accept", "Turn" or "Abandon". ]=]
+	QuestAction = {
+		direction = "ClientToServer",
+		rateLimit = { capacity = 4, perSecond = 1 },
+		validate = function(...)
+			local body, action, questId = ...
+			local actionOk = action == "Accept" or action == "Turn" or action == "Abandon"
+			return arity(3, ...) and typeof(body) == "Instance" and actionOk and (questId == "" or isId(questId))
+		end,
+	},
 	UseItem = {
 		direction = "ClientToServer",
 		rateLimit = { capacity = 6, perSecond = 3 },
@@ -210,6 +229,10 @@ local Remotes: { [string]: RemoteSpec } = {
 	SendDeathState = { direction = "ServerToClient" },
 	SendDevLog = { direction = "ServerToClient" },
 	OpenTrainer = { direction = "ServerToClient" },
+	--[=[ `(vendor body)`: open the shop screen at a vendor. ]=]
+	OpenShop = { direction = "ServerToClient" },
+	--[=[ `(board body)`: open the quest board screen. ]=]
+	OpenQuestBoard = { direction = "ServerToClient" },
 	ShowGain = { direction = "ServerToClient" },
 	--[=[ `(models, seconds)`: Detect Life results, highlighted for the caster only. ]=]
 	ShowDetectedLife = { direction = "ServerToClient" },

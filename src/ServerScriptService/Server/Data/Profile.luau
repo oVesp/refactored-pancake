@@ -11,6 +11,12 @@ export type ItemStack = {
 	count: number,
 }
 
+--[=[ The quest a character has taken: its id and the kills counted toward it. ]=]
+export type ActiveQuest = {
+	id: string,
+	kills: number,
+}
+
 export type Profile = {
 	schemaVersion: number,
 	--[=[ False until the character creator has run (docs/systems/character-creation.md). ]=]
@@ -36,9 +42,15 @@ export type Profile = {
 	nextUid: number,
 	--[=[ Enemy ids this character has killed; unlocks summon options (Shared/Summons). ]=]
 	discoveries: { [string]: boolean },
+	--[=[ Coins: earned from quests, spent at shops (docs/systems/economy.md). ]=]
+	gold: number,
+	--[=[ The one quest in progress; nil when none. ]=]
+	quest: ActiveQuest?,
 }
 
-local SCHEMA_VERSION = 5
+local SCHEMA_VERSION = 6
+-- Coins a new character (or an older save, on migration) starts with.
+local STARTING_GOLD = 25
 -- Keep in step with Shared/Hotbar.Size (checked by Profile.spec).
 local HOTBAR_SIZE = 8
 
@@ -46,6 +58,7 @@ local Profile = {}
 
 Profile.SchemaVersion = SCHEMA_VERSION
 Profile.HotbarSize = HOTBAR_SIZE
+Profile.StartingGold = STARTING_GOLD
 
 --[=[
 	Returns a fresh profile for a new character, holding `starter` items. Persistent state only;
@@ -69,6 +82,7 @@ function Profile.new(starter: { { id: string, count: number } }?): Profile
 		hotbar = table.create(HOTBAR_SIZE, ""),
 		nextUid = 1,
 		discoveries = {},
+		gold = STARTING_GOLD,
 	}
 	for _, entry in (starter or {}) :: { { id: string, count: number } } do
 		table.insert(profile.inventory, { uid = profile.nextUid, id = entry.id, count = entry.count })
@@ -107,6 +121,10 @@ function Profile.Migrate(data: Profile): Profile
 	if data.schemaVersion < 5 then
 		data.discoveries = {}
 		data.schemaVersion = 5
+	end
+	if data.schemaVersion < 6 then
+		data.gold = STARTING_GOLD
+		data.schemaVersion = 6
 	end
 	return data
 end
@@ -185,6 +203,18 @@ function Profile.AddItem(profile: Profile, itemId: string, count: number, stackS
 		remaining -= add
 	end
 	return remaining
+end
+
+--[=[ True when `count` of an item would fit: room in its stacks plus free inventory slots. ]=]
+function Profile.CanFit(profile: Profile, stackSize: number, itemId: string, count: number, capacity: number): boolean
+	local room = 0
+	for _, stack in profile.inventory do
+		if stack.id == itemId and stack.count < stackSize then
+			room += stackSize - stack.count
+		end
+	end
+	room += math.max(0, capacity - #profile.inventory) * stackSize
+	return room >= count
 end
 
 --[=[ Removes one item from a stack, dropping the stack when empty and clearing equipment that pointed at it. ]=]

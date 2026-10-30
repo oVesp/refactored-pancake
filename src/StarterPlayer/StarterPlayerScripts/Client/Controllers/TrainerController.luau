@@ -57,9 +57,6 @@ local function render()
 	elseif kind == "Discipline" then
 		UIController.SetText(bound.Bind_Info, "Learn every Discipline taught here.")
 		primary.Text = "Learn Disciplines"
-	else
-		UIController.SetText(bound.Bind_Info, "The vendor is closed in this build.")
-		primary.Visible = false
 	end
 end
 

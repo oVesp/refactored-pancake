@@ -88,6 +88,27 @@ return {
 		Expect.equal(next(migrated.discoveries), nil)
 		Expect.truthy(Profile.IsSerializable(migrated))
 	end,
+	["migrates schema 5 to the starting gold and no quest"] = function()
+		local profile = Profile.new() :: any
+		profile.schemaVersion = 5
+		profile.gold = nil
+		local migrated = Profile.Migrate(profile)
+		Expect.equal(migrated.schemaVersion, Profile.SchemaVersion)
+		Expect.equal(migrated.gold, Profile.StartingGold)
+		Expect.equal(migrated.quest, nil)
+		Expect.truthy(Profile.IsSerializable(migrated))
+	end,
+	["a quest serializes in the profile"] = function()
+		local profile = Profile.new()
+		profile.quest = { id = "thin_the_raiders", kills = 2 }
+		Expect.truthy(Profile.IsSerializable(profile))
+	end,
+	["CanFit counts stack room and free slots"] = function()
+		local profile = Profile.new({ { id = "bread", count = 19 } })
+		Expect.truthy(Profile.CanFit(profile, 20, "bread", 1, 1), "last slot of a stack")
+		Expect.equal(Profile.CanFit(profile, 20, "bread", 2, 1), false, "no free slot")
+		Expect.truthy(Profile.CanFit(profile, 20, "bread", 21, 2), "stack room plus a free slot")
+	end,
 	["a new profile has discovered nothing, and discoveries serialize"] = function()
 		local profile = Profile.new()
 		Expect.equal(next(profile.discoveries), nil)

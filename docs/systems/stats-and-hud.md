@@ -6,6 +6,7 @@ Code: `Server/Services/StatService.luau`, `Server/Services/NeedsService.luau`, `
 - `StarterCharacterScripts/Health` replaces Roblox's default regeneration so nothing else writes health.
 - Screens are declarative `.model.json` ScreenGuis; repeated rows clone `ReplicatedStorage.UiTemplates`. `UIController.Bind` resolves `Bind_` children and errors at startup listing any that are missing. Controllers only read attributes and snapshots.
 - The HUD target frame follows `TargetController.Changed` (lock or soft target) and reads the target's `DisplayName`, `Level`, `Elite`, `Hp`, `MaxHp` and `Casting` attributes. The Notices panel hides itself when empty. The hotbar always lays out its 8 slots from the profile's `hotbar` (empty slots are faded) and hides only when every slot is empty and the spellbook is closed.
+- Gold: the snapshot's `gold` shows in `Bind_GoldText` beside the Focus line ([economy](economy.md)).
 - `PromptController` sets every `ProximityPrompt` to the Custom style on the client and draws the `InteractPrompt` card beside the object; the server side of prompts is unchanged.
 
 ## Hunger and thirst

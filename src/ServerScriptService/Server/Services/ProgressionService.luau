@@ -99,6 +99,8 @@ function ProgressionService.Snapshot(player: Player): { [string]: any }?
 		inventory = profile.inventory,
 		equipment = profile.equipment,
 		discoveries = profile.discoveries,
+		gold = profile.gold,
+		quest = profile.quest,
 	}
 end
 
@@ -305,8 +307,6 @@ local function requestTrain(player: Player, body: Instance)
 		end
 	elseif kind == "Discipline" then
 		DisciplineService.LearnAll(player)
-	elseif kind == "Vendor" then
-		notify(player, "VendorClosed")
 	end
 end
 
@@ -314,7 +314,12 @@ local function bindTrainer(instance: Instance)
 	local prompt = instance:FindFirstChildOfClass("ProximityPrompt")
 	if prompt then
 		prompt.Triggered:Connect(function(player)
-			NetServer.Fire("OpenTrainer", player, instance)
+			-- Vendors open the shop screen; every other trainer opens the trainer panel.
+			NetServer.Fire(
+				if instance:GetAttribute("TrainerType") == "Vendor" then "OpenShop" else "OpenTrainer",
+				player,
+				instance
+			)
 		end)
 	end
 end

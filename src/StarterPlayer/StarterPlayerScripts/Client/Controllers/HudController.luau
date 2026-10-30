@@ -219,6 +219,7 @@ end
 local function renderProfile(snapshot: { [string]: any })
 	setText("Bind_NameText", if snapshot.name ~= "" then snapshot.name else player.DisplayName)
 	setText("Bind_LevelText", tostring(snapshot.level))
+	setText("Bind_GoldText", string.format("%d g", snapshot.gold or 0))
 	if snapshot.xpNeed then
 		fill(bound.Bind_XpFill, bound.Bind_XpText, snapshot.xpInto, snapshot.xpNeed, "XP %d / %d")
 	else
@@ -383,6 +384,7 @@ function HudController.Start()
 		"Bind_ThirstFill",
 		"Bind_ThirstText",
 		"Bind_FocusText",
+		"Bind_GoldText",
 		"Bind_NameText",
 		"Bind_LevelText",
 		"Bind_ZoneText",

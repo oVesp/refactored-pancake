@@ -20,7 +20,7 @@ Data: `Content/Npcs.luau` (same shape as `Content/Enemies`; `Shared/NpcDefs.Get`
 - `template = "Human"`: `SpawnService` builds an R15 body from a random `Appearance` look in one of the def's `outfits`, removes its stock Animate script and sets `AnimSet = "Human"`; the display name is a given name from `Content/Names` plus the role.
 - Clips: `HumanIdle/Walk/Run` are Roblox stock clips (`Assets.Stock`), `HumanAttack/Throw` alias `BasicStrike` (`Assets.AnimAliases`). `EnemyAnimationController` animates models tagged `Enemy` or `Npc`.
 - Civilians (villagers, merchants) have morale always below `fleeBelow`: they run home from any monster they see.
-- Merchants carry a `Trade` prompt that opens the vendor panel through the trainer flow; it answers *VendorClosed* until there is a currency and a Studio-authored shop UI.
+- Merchants carry a `Trade` prompt that opens the vendor panel through the trainer flow; it opens the shop screen ([economy](economy.md)).
 
 ## Population
 
