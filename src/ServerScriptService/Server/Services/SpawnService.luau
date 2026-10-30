@@ -271,10 +271,11 @@ local function resetDummies()
 	end
 end
 
---[=[ Dev: spawns an NPC near a position, outside any group. ]=]
+--[=[ Dev: spawns an NPC near a position, outside any group. It ignores safe zones, for testing in the Dev Yard. ]=]
 function SpawnService.DevSpawn(npcId: string, level: number, position: Vector3): Entity?
 	local entity = SpawnService.Spawn(npcId, level, position)
 	if entity then
+		entity.ignoreSafeZone = true
 		table.insert(devSpawned, entity)
 	end
 	return entity

@@ -57,7 +57,8 @@ end
 
 --[=[
 	True when `source` may aim at or hit `target`: enemies (factions or grudges), and a player
-	against any NPC outside safe zones. NPCs inside a safe zone only fight hostile factions.
+	against any NPC outside safe zones. NPCs inside a safe zone only fight hostile factions, except
+	dev spawns (`ignoreSafeZone`).
 ]=]
 function CombatService.MayAttack(source: Entity, target: Entity): boolean
 	if target.owner then
@@ -65,7 +66,7 @@ function CombatService.MayAttack(source: Entity, target: Entity): boolean
 		return EntityService.AreEnemies(source, target)
 	end
 	if source.kind == "Player" and target.kind == "Npc" and not Relations.Hostile(source.team, target.team) then
-		return not ZoneService.IsSafe(target.root.Position)
+		return target.ignoreSafeZone or not ZoneService.IsSafe(target.root.Position)
 	end
 	return EntityService.AreEnemies(source, target)
 end
@@ -78,7 +79,8 @@ function CombatService.CanHarm(source: Entity?, target: Entity): boolean
 	if source and not CombatService.MayAttack(source, target) then
 		return false
 	end
-	if target.kind == "Player" and ZoneService.IsSafe(target.root.Position) then
+	local exempt = source ~= nil and source.ignoreSafeZone
+	if target.kind == "Player" and not exempt and ZoneService.IsSafe(target.root.Position) then
 		return false
 	end
 	return true

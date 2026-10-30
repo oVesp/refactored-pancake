@@ -2,7 +2,7 @@
 
 Code: `Server/Services/DevService.luau`, `ServerStorage/ContentServerOnly/DevAllowlist.luau`; client `DebugController`.
 
-- Chat commands (`TextChatCommand`): `/level n`, `/xp n`, `/class add|remove <class>`, `/spawn <enemy> [level] [count]`, `/clear`, `/god`, `/heal`, `/kill`, `/damage n`, `/give <item> [n]`, `/needs <hunger> [thirst]`, `/latency ms` (Studio only).
+- Chat commands (`TextChatCommand`): `/level n`, `/xp n`, `/class add|remove <class>`, `/spawn <enemy> [level] [count]` (these NPCs ignore safe zones, so they fight in the Dev Yard), `/clear`, `/god`, `/heal`, `/kill`, `/damage n`, `/give <item> [n]`, `/needs <hunger> [thirst]`, `/latency ms` (Studio only).
 - Allowed in Studio or for allowlisted UserIds; others get a refusal toast and a throttled warning. Commands are rate-limited.
 - `ServerStorage.RunDevCommand` (BindableFunction, Studio only) runs the same handlers for automation, such as Studio MCP playtests.
 - Dev players get one of each basic weapon and the wooden shield on join when their profile lacks it (`docs/systems/weapons.md`, Dev kit).

@@ -184,9 +184,14 @@ local function moveTo(brain: Brain, destination: Vector3, now: number)
 	end
 end
 
+-- True when a safe zone protects `point` from this brain; dev spawns ignore safe zones.
+local function shielded(brain: Brain, point: Vector3): boolean
+	return not brain.entity.ignoreSafeZone and ZoneService.IsSafe(point)
+end
+
 -- Monsters never step into a safe zone; civilians and guards live there.
 local function forbidden(brain: Brain, point: Vector3): boolean
-	return brain.monster and ZoneService.IsSafe(point)
+	return brain.monster and shielded(brain, point)
 end
 
 local function near(position: Vector3, radius: number): { Entity }
@@ -217,7 +222,7 @@ local function validTarget(brain: Brain, target: Entity?): boolean
 	if target.kind == "Dummy" or forbidden(brain, target.root.Position) then
 		return false
 	end
-	if target.kind == "Player" and ZoneService.IsSafe(target.root.Position) then
+	if target.kind == "Player" and shielded(brain, target.root.Position) then
 		return false
 	end
 	return (flat(target.root.Position) - flat(brain.home)).Magnitude <= brain.leash + 10
@@ -251,7 +256,7 @@ local function pickTarget(brain: Brain): Entity?
 			if not hostile then
 				continue
 			end
-			if other.alive and not ZoneService.IsSafe(other.root.Position) then
+			if other.alive and not shielded(brain, other.root.Position) then
 				EntityService.Provoke(entity, other)
 			end
 		end
@@ -484,7 +489,7 @@ local function publishAttackable(brain: Brain)
 	end
 	local entity = brain.entity
 	local target = brain.target
-	entity.model:SetAttribute("Attackable", not ZoneService.IsSafe(entity.root.Position))
+	entity.model:SetAttribute("Attackable", not shielded(brain, entity.root.Position))
 	entity.model:SetAttribute("Provoked", target ~= nil and target.kind == "Player")
 end
 
@@ -642,6 +647,7 @@ local function summon(brain: Brain)
 				{ home = brain.home }
 			)
 			if spawned then
+				spawned.ignoreSafeZone = entity.ignoreSafeZone
 				SpawnService.TrackSummon(spawned)
 			end
 		end

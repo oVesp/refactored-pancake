@@ -142,9 +142,9 @@ local commands: { [string]: Handler } = {
 		end
 		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 		local safe = root and root:IsA("BasePart") and ZoneService.IsSafe(root.Position)
-		-- NPCs never target a player inside a safe zone, which looks like a broken brain.
+		-- Other NPCs never target a player here, so say why this one can.
 		return `Spawned {count} {enemyId} at level {level}`
-			.. if safe then " (safe zone: it will not attack you here)" else ""
+			.. if safe then " (safe zone: dev spawns fight here anyway; other NPCs still will not)" else ""
 	end,
 	clear = function()
 		return `Cleared {SpawnService.ClearDevSpawned()} dev spawns`

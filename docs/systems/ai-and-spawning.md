@@ -32,7 +32,7 @@ Pure logic: `Shared/Tasks.luau` (specs in `tests/specs/Tasks.spec.luau`). Tuning
 - **Stance.** `stance` sets the attitude to players: `Hostile` attacks on sight, `Neutral` ignores them until attacked. Default by faction: monsters Hostile, everyone else Neutral. It does not change how factions treat each other: a Neutral soldier still attacks goblins on sight.
 - **Attacking people.** Outside safe zones a player can attack any NPC (`CombatService.MayAttack`, used by `CanHarm` and every `SkillService` target check). NPCs in a safe zone only fight hostile factions. A player who hits a non-hostile NPC starts a grudge (`EntityService.Provoke`) that makes `AreEnemies` true both ways; a Hostile-stance NPC takes one when it sees a player. `startReturn` forgives. NPCs publish `Attackable` (outside a safe zone) and `Provoked` (fighting a player): the client's soft target takes only provoked people, so it never lands on a bystander, while a lock (Tab, tap) takes any attackable one. Melee and area hits land on any attackable NPC in reach, so a careless swing starts a fight.
 - **Squads.** Brains with the same `SetSquad` key (a GroupService group) fight together, however far apart: when one is hit or picks a new target, the others gain threat on that enemy (and the grudge, if it is a player).
-- **Safe zones.** No NPC targets a player inside a safe zone. A monster `/spawn`ed next to a player in the village therefore stands idle; the command says so.
+- **Safe zones.** No NPC targets a player inside a safe zone, except dev spawns: `/spawn` sets `Entity.ignoreSafeZone`, so that NPC and its summons enter, fight and can be hit in any safe zone, by its stance (a Neutral person still waits to be attacked). The command says so.
 
 ## Summons
 

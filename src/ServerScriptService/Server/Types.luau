@@ -58,6 +58,8 @@ export type Entity = {
 	shield: number,
 	alive: boolean,
 	god: boolean,
+	--[=[ Dev spawns (/spawn): fights and can be fought inside safe zones. ]=]
+	ignoreSafeZone: boolean,
 	lastCombatAt: number,
 	--[=[ HP and MP regen multiplier from hunger and thirst (NeedsService); 1 when fed. ]=]
 	regenScale: number,

@@ -74,6 +74,7 @@ function EntityService.Register(info: NewEntity): Entity
 		shield = 0,
 		alive = true,
 		god = false,
+		ignoreSafeZone = false,
 		lastCombatAt = -math.huge,
 		regenScale = 1,
 		cooldowns = {},
