@@ -89,7 +89,23 @@ return table.freeze({
 			`lunge` studs over `LungeSeconds` at the start; a dodge cancels the swing and its recovery.
 		]=]
 		Commit = table.freeze({ MoveMultiplier = 0.3, LungeSeconds = 0.12 }),
+		--[=[ Guard without a shield; a shield brings its own values (Content/Items `shield`). ]=]
 		Guard = table.freeze({ DamageMultiplier = 0.4, ParryWindow = 0.25, StaminaPerHit = 10, Arc = 120 }),
+		--[=[
+			Bow draw (docs/systems/weapons.md, Bow; Shared/Archery). Seconds of drawing: below MinDraw
+			the release shoots nothing; damage grows from MinScale to full at FullDraw; a release within
+			PerfectWindow after that adds PerfectBonus. The archer moves at DrawMoveMultiplier while
+			drawing. Hits within RearArc degrees of the target's back get the skill's `rearBonus`.
+		]=]
+		Bow = table.freeze({
+			MinDraw = 0.25,
+			FullDraw = 0.85,
+			PerfectWindow = 0.2,
+			MinScale = 0.35,
+			PerfectBonus = 0.5,
+			DrawMoveMultiplier = 0.45,
+			RearArc = 120,
+		}),
 		Dodge = table.freeze({ Invulnerable = 0.3, Cooldown = 1, StaminaCost = 20, Distance = 14 }),
 		--[=[ Max seconds a player's hit check may rewind target positions (lag compensation). ]=]
 		MaxRewind = 0.25,

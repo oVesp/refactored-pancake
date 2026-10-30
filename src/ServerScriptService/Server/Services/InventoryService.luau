@@ -4,10 +4,12 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
 local Items = require(ReplicatedStorage.Content.Items)
+local Loadout = require(ReplicatedStorage.Shared.Loadout)
 local Loot = require(ServerStorage.ContentServerOnly.Loot)
 local NetServer = require(ReplicatedStorage.Shared.Net.Server)
 local Profile = require(script.Parent.Parent.Data.Profile)
 local Types = require(script.Parent.Parent.Types)
+local Weapons = require(ReplicatedStorage.Content.Weapons)
 
 type Entity = Types.Entity
 
@@ -65,10 +67,16 @@ local function equip(player: Player, uid: number)
 	if not def then
 		return
 	end
+	-- Two hands: a two-handed weapon and a shield push each other off (docs/systems/weapons.md).
+	local current = Loadout.Of(profile, Items.ById, Weapons.ById, Weapons.Default).weapon
+	local displaced = Loadout.Displaced(def.kind, def, current, Weapons.ById)
 	for slot, kind in Items.Slots do
 		if kind == def.kind then
 			DataService.Update(player, function(p: any)
 				p.equipment[slot] = uid
+				for _, other in displaced do
+					p.equipment[other] = nil
+				end
 			end, "equipment")
 			return
 		end

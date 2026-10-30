@@ -3,17 +3,22 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
+local Archery = require(ReplicatedStorage.Shared.Archery)
 local Chain = require(ReplicatedStorage.Shared.Chain)
 local Formulas = require(ReplicatedStorage.Shared.Formulas)
 local Hotbar = require(ReplicatedStorage.Shared.Hotbar)
+local Loadout = require(ReplicatedStorage.Shared.Loadout)
 local GuardClips = require(script.Parent.Parent.Animation.GuardClips)
 local NetClient = require(ReplicatedStorage.Shared.Net.Client)
 local Signal = require(ReplicatedStorage.Shared.Signal)
 local Skills = require(ReplicatedStorage.Content.Skills)
 local Targeting = require(ReplicatedStorage.Shared.Targeting)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
+local Types = require(ReplicatedStorage.Content.Types)
+local Weapons = require(ReplicatedStorage.Content.Weapons)
 
 local AIM_RANGE = 300
 local PAD_AIM_DISTANCE = 30
@@ -22,10 +27,12 @@ local DODGE_SECONDS = 0.2
 local QUEUE_GRACE = 0.5
 -- Studs a melee lunge stops short of the aim point.
 local LUNGE_STOP_SHORT = 3
+-- Over-the-shoulder camera while drawing the bow: offset (studs), field of view and blend time.
+local DRAW_CAMERA_OFFSET = Vector3.new(2, 0.6, 0)
+local DRAW_FOV = 55
+local DRAW_CAMERA_SECONDS = 0.2
 
 local player = Players.LocalPlayer
--- Light attack chain, entry first (Shared/Chain).
-local LIGHT_CHAIN = Chain.Members(Skills.ById, Skills.Basic.Light)
 
 export type Slot = {
 	kind: "Skill" | "Discipline",
@@ -35,7 +42,7 @@ export type Slot = {
 --[=[
 	Client side of combat: aim, predicted cooldowns, GCD and animation lock, a one-action input
 	queue, `UseSkill` with sequence numbers and rollback on `RejectSkill` or an interrupted cast,
-	the light attack chain, guard and dodge. Each delivery reads the target from TargetController its own
+	the equipped weapon's basic attacks (light chain, heavy, bow draw, shield bash), guard and dodge. Each delivery reads the target from TargetController its own
 	way (docs/systems/combat.md, Targeting). The server decides every outcome (game-design.md 5.5).
 ]=]
 local CombatController = {}
@@ -46,6 +53,8 @@ CombatController.HotbarChanged = Signal.new() :: Signal.Signal<{ [number]: Slot 
 CombatController.Rejected = Signal.new() :: Signal.Signal<string, string>
 --[=[ Fires `(skillId, aim)` when a use is sent (local feedback). ]=]
 CombatController.Used = Signal.new() :: Signal.Signal<string, Vector3>
+--[=[ Fires when the bow reaches full draw: releasing within `PerfectWindow` is a perfect shot. ]=]
+CombatController.DrawReady = Signal.new() :: Signal.Signal<>
 
 local ProfileController: any
 local TargetController: any
@@ -64,6 +73,11 @@ local queuedUntil = 0
 local hotbar: { [number]: Slot } = {}
 local chainLast: string? = nil
 local chainAt = 0
+local guarding = false
+-- os.clock() when the current bow draw started.
+local drawStartedAt: number? = nil
+local drawFov: number? = nil
+local drawConnection: RBXScriptConnection? = nil
 
 local function character(): (Model?, BasePart?, Humanoid?)
 	local model = player.Character
@@ -95,6 +109,20 @@ function CombatController.GetAim(): Vector3
 		return root.Position + flat * PAD_AIM_DISTANCE
 	end
 	return Vector3.zero
+end
+
+--[=[ Weapon type the local character holds (its `Weapon` attribute), fists when unarmed. ]=]
+function CombatController.Weapon(): Types.WeaponDef
+	local id = player.Character and player.Character:GetAttribute("Weapon")
+	return Weapons.ById[if type(id) == "string" then id else Weapons.Default] or Weapons.ById[Weapons.Default]
+end
+
+local function hasShield(): boolean
+	return player.Character ~= nil and player.Character:GetAttribute("Shield") ~= nil
+end
+
+local function lightChain(): { string }
+	return Chain.Members(Skills.ById, CombatController.Weapon().light)
 end
 
 local function positionOf(model: Model?): Vector3?
@@ -185,7 +213,7 @@ end
 -- hit, the previous hit's cooldown.
 local function waitFor(skillId: string): number
 	local wait = math.max(CombatController.Remaining(skillId), lockedUntil - os.clock())
-	if chainLast and table.find(LIGHT_CHAIN, skillId) then
+	if chainLast and table.find(lightChain(), skillId) then
 		wait = math.max(wait, CombatController.Remaining(chainLast))
 	end
 	return wait
@@ -218,10 +246,10 @@ local function lunge(skill: any, root: BasePart, aim: Vector3)
 	end)
 end
 
--- Heavy Strike windup as the server computes it (HeavySpeed shortens it).
+-- Swing windup as the server computes it (HeavySpeed shortens weapon heavy attacks).
 local function windupOf(skill: any): number
 	local windup = skill.windup or 0
-	if skill.id == Skills.Basic.Heavy then
+	if skill.heavy then
 		local speed = player.Character and player.Character:GetAttribute("Extra_HeavySpeed")
 		windup *= math.max(0.1, 1 - (if type(speed) == "number" then speed else 0))
 	end
@@ -253,7 +281,7 @@ local function send(skillId: string): boolean
 		gcdStartedAt = now
 		gcdReadyAt = now + hasted(Tuning.Combat.Gcd.Base)
 	end
-	if table.find(LIGHT_CHAIN, skillId) then
+	if table.find(lightChain(), skillId) then
 		chainLast = skillId
 		chainAt = now
 	end
@@ -281,7 +309,7 @@ end
 	uses the last hit's `chainNext` within Tuning.Combat.Chain.Window, else starts over.
 ]=]
 function CombatController.UseSkill(skillId: string)
-	if skillId == Skills.Basic.Light then
+	if skillId == CombatController.Weapon().light then
 		skillId = Chain.Next(Skills.ById, skillId, chainLast, chainAt, os.clock(), Tuning.Combat.Chain.Window)
 	end
 	local skill = Skills.ById[skillId]
@@ -305,7 +333,7 @@ local function rollback(skillId: string)
 	if skill and skill.gcd then
 		gcdReadyAt = 0
 	end
-	if table.find(LIGHT_CHAIN, skillId) then
+	if table.find(lightChain(), skillId) then
 		chainLast = nil
 	end
 	lockedUntil = 0
@@ -335,8 +363,99 @@ function CombatController.Hotbar(): { [number]: Slot }
 	return hotbar
 end
 
---[=[ Starts or stops guarding. ]=]
+--[=[
+	Light or heavy attack with the equipped weapon (docs/systems/weapons.md): the shield bash while
+	guarding with a shield, else the weapon's heavy or light chain. Bow shots go through the draw.
+]=]
+function CombatController.Attack(heavy: boolean)
+	local weapon = CombatController.Weapon()
+	if guarding and hasShield() then
+		CombatController.UseSkill(Weapons.ShieldBash)
+	elseif heavy and weapon.heavy then
+		CombatController.UseSkill(weapon.heavy)
+	elseif not weapon.drawn then
+		CombatController.UseSkill(weapon.light)
+	end
+end
+
+local function endDrawCamera()
+	if drawConnection then
+		drawConnection:Disconnect()
+		drawConnection = nil
+	end
+	local _, _, humanoid = character()
+	local camera = workspace.CurrentCamera
+	local tween = TweenInfo.new(DRAW_CAMERA_SECONDS)
+	if humanoid then
+		humanoid.AutoRotate = true
+		TweenService:Create(humanoid, tween, { CameraOffset = Vector3.zero }):Play()
+	end
+	if camera and drawFov then
+		TweenService:Create(camera, tween, { FieldOfView = drawFov }):Play()
+	end
+	drawFov = nil
+end
+
+--[=[ Starts drawing the bow: over-the-shoulder camera, the archer faces the camera and slows down. ]=]
+function CombatController.StartDraw()
+	local _, root, humanoid = character()
+	local camera = workspace.CurrentCamera
+	if drawStartedAt or not root or not humanoid or not camera or not CombatController.Weapon().drawn then
+		return
+	end
+	if guarding or waitFor(CombatController.Weapon().light) > 0 then
+		return
+	end
+	drawStartedAt = os.clock()
+	NetClient.Fire("SetDraw", true)
+	local tween = TweenInfo.new(DRAW_CAMERA_SECONDS)
+	drawFov = camera.FieldOfView
+	humanoid.AutoRotate = false
+	TweenService:Create(humanoid, tween, { CameraOffset = DRAW_CAMERA_OFFSET }):Play()
+	TweenService:Create(camera, tween, { FieldOfView = DRAW_FOV }):Play()
+	local announced = false
+	drawConnection = RunService.RenderStepped:Connect(function()
+		local look = camera.CFrame.LookVector
+		face(root, root.Position + Vector3.new(look.X, 0, look.Z))
+		if not announced and drawStartedAt and os.clock() - drawStartedAt >= Tuning.Combat.Bow.FullDraw then
+			announced = true
+			CombatController.DrawReady:Fire()
+		end
+	end)
+end
+
+--[=[ Releases the bow: shoots if the draw was long enough, otherwise lowers it. ]=]
+function CombatController.ReleaseDraw()
+	local startedAt = drawStartedAt
+	if not startedAt then
+		return
+	end
+	drawStartedAt = nil
+	endDrawCamera()
+	local scale = Archery.DrawScale(os.clock() - startedAt, Tuning.Combat.Bow)
+	if scale <= 0 or not send(CombatController.Weapon().light) then
+		NetClient.Fire("SetDraw", false)
+	end
+end
+
+--[=[ Lowers the bow without shooting. ]=]
+function CombatController.CancelDraw()
+	if drawStartedAt then
+		drawStartedAt = nil
+		endDrawCamera()
+		NetClient.Fire("SetDraw", false)
+	end
+end
+
+--[=[ Starts or stops guarding; weapons that cannot guard need a shield. ]=]
 function CombatController.SetGuard(on: boolean)
+	if on and not Loadout.CanGuard(CombatController.Weapon(), hasShield()) then
+		return
+	end
+	if on then
+		CombatController.CancelDraw()
+	end
+	guarding = on
 	NetClient.Fire("SetGuard", on)
 end
 
@@ -347,6 +466,7 @@ function CombatController.Dodge()
 		return
 	end
 	queued = nil
+	CombatController.CancelDraw()
 	-- Dodge cancels a swing in progress and its recovery.
 	if swingId and os.clock() < swingEndsAt then
 		CombatController.Rejected:Fire(swingId, "Dodge")
@@ -425,6 +545,15 @@ function CombatController.Start()
 		end
 	end)
 	ProfileController.Changed:Connect(rebuildHotbar)
+	player.CharacterAdded:Connect(function()
+		guarding = false
+		if drawConnection then
+			drawConnection:Disconnect()
+			drawConnection = nil
+		end
+		drawStartedAt = nil
+		drawFov = nil
+	end)
 	GuardClips.Start()
 	-- Old sequence numbers never resolve on success; trim them so the table stays small.
 	task.spawn(function()

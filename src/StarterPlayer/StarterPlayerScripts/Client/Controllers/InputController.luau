@@ -4,7 +4,6 @@ local ContextActionService = game:GetService("ContextActionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Disciplines = require(ReplicatedStorage.Content.Disciplines)
-local Skills = require(ReplicatedStorage.Content.Skills)
 
 local HEAVY_HOLD_SECONDS = 0.35
 local HOTBAR_KEYS = {
@@ -21,7 +20,8 @@ local TOUCH_SLOTS = 4
 
 --[=[
 	Input bindings through ContextActionService (remappable later, gamepad and touch buttons
-	included). Tap attack = light, hold = heavy. Tab / R3 / Target button cycle the target lock.
+	included). Tap attack = light, hold = heavy; with a bow, hold draws and release shoots; while
+	guarding with a shield, attack bashes. Tab / R3 / Target button cycle the target lock.
 	Screens: B spellbook, I inventory, C sheet, F2 debug.
 ]=]
 local InputController = {}
@@ -40,14 +40,26 @@ local function onAttack(_: string, state: Enum.UserInputState): Enum.ContextActi
 	if UIController.IsWorldOpen() then
 		-- Clicks belong to the floating menu while one holds the camera.
 		attackPressedAt = nil
+		CombatController.CancelDraw()
 		return Enum.ContextActionResult.Pass
 	end
+	local drawn = CombatController.Weapon().drawn
 	if state == Enum.UserInputState.Begin then
 		attackPressedAt = os.clock()
+		if drawn then
+			CombatController.StartDraw()
+		end
 	elseif state == Enum.UserInputState.End and attackPressedAt then
 		local held = os.clock() - attackPressedAt
 		attackPressedAt = nil
-		CombatController.UseSkill(if held >= HEAVY_HOLD_SECONDS then Skills.Basic.Heavy else Skills.Basic.Light)
+		if drawn then
+			CombatController.ReleaseDraw()
+		else
+			CombatController.Attack(held >= HEAVY_HOLD_SECONDS)
+		end
+	elseif state == Enum.UserInputState.Cancel then
+		attackPressedAt = nil
+		CombatController.CancelDraw()
 	end
 	return sink()
 end

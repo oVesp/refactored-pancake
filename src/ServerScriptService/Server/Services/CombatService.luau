@@ -192,8 +192,7 @@ function CombatService.DealDamage(
 	local traits = source.traits
 	local proficient = traits.proficiency ~= nil
 		and spec.type == "physical"
-		and source.weaponFamily ~= nil
-		and source.weaponFamily == source.proficiencyFamily
+		and source.weapon == source.proficiencyFamily
 	local proficiency = if proficient and traits.proficiency then traits.proficiency else nil
 	local rhythm = traits.rhythm
 	local stacks = 0
@@ -234,17 +233,23 @@ function CombatService.DealDamage(
 		return 0
 	end
 
+	-- A shield replaces the bare guard's values (docs/systems/weapons.md, Shields).
 	local guard = Tuning.Combat.Guard
+	local shield = target.shieldGuard
+	local arc = if shield then shield.arc else guard.Arc
+	local parryWindow = if shield then shield.parryWindow else guard.ParryWindow
+	local staminaPerHit = if shield then shield.staminaPerHit else guard.StaminaPerHit
+	local damageMultiplier = if shield then shield.damageMultiplier else guard.DamageMultiplier
 	local blocked = false
-	if target.guardSince and inFront(target, source, guard.Arc) then
-		if now - target.guardSince <= guard.ParryWindow then
+	if target.guardSince and inFront(target, source, arc) then
+		if now - target.guardSince <= parryWindow then
 			show(target, 0, "parried", false)
 			NetServer.FireAll("ShowParry", target.model, source.model)
 			StatusService.Apply(source, "stun", PARRY_STAGGER, nil, target)
 			return 0
 		end
-		if StatService.Spend(target, "Stamina", guard.StaminaPerHit) then
-			amount = math.max(1, math.floor(amount * guard.DamageMultiplier + 0.5))
+		if StatService.Spend(target, "Stamina", staminaPerHit) then
+			amount = math.floor(amount * damageMultiplier + 0.5)
 			blocked = true
 		else
 			target.guardSince = nil

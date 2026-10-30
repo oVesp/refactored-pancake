@@ -1,0 +1,207 @@
+{
+	"className": "Model",
+	"children": [
+		{
+			"name": "Handle",
+			"className": "Part",
+			"properties": {
+				"Size": [
+					0.25,
+					1,
+					0.25
+				],
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							0,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				},
+				"Color": [
+					0.2745,
+					0.1961,
+					0.1373
+				],
+				"Material": "Wood",
+				"Shape": "Block",
+				"Anchored": true,
+				"CanCollide": false,
+				"CastShadow": true,
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth"
+			},
+			"children": [
+				{
+					"name": "Grip",
+					"className": "Attachment"
+				}
+			]
+		},
+		{
+			"name": "Pommel",
+			"className": "Part",
+			"properties": {
+				"Size": [
+					0.35,
+					0.35,
+					0.35
+				],
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							-0.6,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				},
+				"Color": [
+					0.4314,
+					0.4314,
+					0.4627
+				],
+				"Material": "Metal",
+				"Shape": "Ball",
+				"Anchored": true,
+				"CanCollide": false,
+				"CastShadow": true,
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth"
+			}
+		},
+		{
+			"name": "Guard",
+			"className": "Part",
+			"properties": {
+				"Size": [
+					1.2,
+					0.2,
+					0.3
+				],
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							0.6,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				},
+				"Color": [
+					0.4314,
+					0.4314,
+					0.4627
+				],
+				"Material": "Metal",
+				"Shape": "Block",
+				"Anchored": true,
+				"CanCollide": false,
+				"CastShadow": true,
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth"
+			}
+		},
+		{
+			"name": "Blade",
+			"className": "Part",
+			"properties": {
+				"Size": [
+					0.12,
+					3.2,
+					0.4
+				],
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							2.3,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				},
+				"Color": [
+					0.7255,
+					0.7451,
+					0.7843
+				],
+				"Material": "Metal",
+				"Shape": "Block",
+				"Anchored": true,
+				"CanCollide": false,
+				"CastShadow": true,
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth"
+			}
+		}
+	]
+}

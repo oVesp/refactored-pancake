@@ -267,6 +267,66 @@
 			"notes": "Placeholder names, plain descriptive (game-design.md 2)."
 		},
 		{
+			"id": "content:Weapons",
+			"type": "data",
+			"path": "src/ReplicatedStorage/Content/Weapons.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Weapon types: generic names (fists, sword, bow, staff, wand)."
+		},
+		{
+			"id": "weapon:Sword",
+			"type": "model",
+			"path": "src/ReplicatedStorage/Weapons/Sword.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Placeholder held model built from Roblox parts; replace with a final mesh."
+		},
+		{
+			"id": "weapon:Bow",
+			"type": "model",
+			"path": "src/ReplicatedStorage/Weapons/Bow.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Placeholder held model built from Roblox parts; replace with a final mesh."
+		},
+		{
+			"id": "weapon:Staff",
+			"type": "model",
+			"path": "src/ReplicatedStorage/Weapons/Staff.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Placeholder held model built from Roblox parts; replace with a final mesh."
+		},
+		{
+			"id": "weapon:Wand",
+			"type": "model",
+			"path": "src/ReplicatedStorage/Weapons/Wand.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Placeholder held model built from Roblox parts; replace with a final mesh."
+		},
+		{
+			"id": "weapon:Shield",
+			"type": "model",
+			"path": "src/ReplicatedStorage/Weapons/Shield.model.json",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Placeholder held model built from Roblox parts; replace with a final mesh."
+		},
+		{
 			"id": "content:Population",
 			"type": "data",
 			"path": "src/ServerStorage/ContentServerOnly/Population.luau",

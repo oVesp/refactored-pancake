@@ -98,6 +98,14 @@ export type SkillDef = {
 		Tuning.Combat.Chain.Window of this one (Shared/Chain).
 	]=]
 	chainNext: string?,
+	--[=[ Weapon heavy attack: `HeavySpeed` shortens its windup. ]=]
+	heavy: boolean?,
+	--[=[ Bow shot: needs a draw (`SetDraw`) and scales with it (Shared/Archery, Tuning.Combat.Bow). ]=]
+	drawn: boolean?,
+	--[=[ Projectile only: downward acceleration in studs/s², so long shots must be aimed high. ]=]
+	gravity: number?,
+	--[=[ Extra outgoing damage multiplier when the hit lands on the target's back (Shared/Archery). ]=]
+	rearBonus: number?,
 	--[=[ Melee only: hits at most this many enemies in the arc, nearest first. ]=]
 	maxTargets: number?,
 	--[=[ Added to the caster's crit chance for this skill's hits. ]=]
@@ -219,10 +227,48 @@ export type EnemyDef = {
 	combat: CombatDef?,
 }
 
+--[=[
+	A weapon type (Content/Weapons, docs/systems/weapons.md): which basic attacks the light and
+	heavy attack buttons use while it is equipped, how many hands it takes and whether it can guard
+	without a shield.
+]=]
+export type WeaponDef = {
+	id: string,
+	name: string,
+	hands: "One" | "Two",
+	--[=[ Entry of the light attack chain (`chainNext`). ]=]
+	light: string,
+	--[=[ Held attack; absent for weapons whose light attack is held (bow draw). ]=]
+	heavy: string?,
+	--[=[ The light attack is held to draw and released to shoot (`SkillDef.drawn`). ]=]
+	drawn: boolean?,
+	--[=[ Can guard (F) without a shield. ]=]
+	guard: boolean,
+	--[=[ Child of ReplicatedStorage.Weapons welded to the character; none for fists. ]=]
+	model: string?,
+	--[=[ Hand the model is held in. ]=]
+	hand: ("Right" | "Left")?,
+}
+
+--[=[ Guard values a shield uses in place of `Tuning.Combat.Guard` (docs/systems/weapons.md). ]=]
+export type ShieldDef = {
+	--[=[ Share of a blocked hit's damage that still lands (0 = full block). ]=]
+	damageMultiplier: number,
+	parryWindow: number,
+	staminaPerHit: number,
+	--[=[ Full width of the blocking arc in degrees. ]=]
+	arc: number,
+	model: string,
+}
+
 export type ItemDef = {
 	id: string,
 	name: string,
-	kind: "Weapon" | "Armor" | "Consumable" | "Material",
+	kind: "Weapon" | "Shield" | "Armor" | "Consumable" | "Material",
+	--[=[ Weapons only: the weapon type (Content/Weapons). ]=]
+	weapon: string?,
+	--[=[ Shields only. ]=]
+	shield: ShieldDef?,
 	grade: number,
 	capacity: number,
 	modifiers: StatBlock?,

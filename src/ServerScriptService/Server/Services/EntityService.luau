@@ -9,6 +9,7 @@ local Logger = require(ReplicatedStorage.Shared.Logger)
 local Relations = require(ReplicatedStorage.Shared.Relations)
 local Signal = require(ReplicatedStorage.Shared.Signal)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
+local Weapons = require(ReplicatedStorage.Content.Weapons)
 local Types = require(script.Parent.Parent.Types)
 
 type Entity = Types.Entity
@@ -78,6 +79,11 @@ function EntityService.Register(info: NewEntity): Entity
 		casting = nil,
 		castToken = 0,
 		guardSince = nil,
+		weapon = Weapons.Default,
+		shieldGuard = nil,
+		drawSince = nil,
+		drawBonus = 0,
+		pace = 1,
 		chainLast = nil,
 		chainAt = 0,
 		commitUntil = 0,
@@ -88,7 +94,6 @@ function EntityService.Register(info: NewEntity): Entity
 		tauntedBy = nil,
 		lastHitBy = nil,
 		traits = { critEffects = {}, upgrades = {} },
-		weaponFamily = nil,
 		proficiencyFamily = nil,
 		rhythmStacks = 0,
 		rhythmAt = -math.huge,

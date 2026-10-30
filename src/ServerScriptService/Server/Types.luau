@@ -2,6 +2,7 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local ContentTypes = require(ReplicatedStorage.Content.Types)
 local Factions = require(ReplicatedStorage.Content.Factions)
 local Formulas = require(ReplicatedStorage.Shared.Formulas)
 local Swarm = require(ReplicatedStorage.Shared.Swarm)
@@ -66,6 +67,16 @@ export type Entity = {
 	casting: Cast?,
 	castToken: number,
 	guardSince: number?,
+	--[=[ Equipped weapon type (Content/Weapons); NPCs keep the default. Set by StatService.Recompute. ]=]
+	weapon: string,
+	--[=[ Guard values of the equipped shield, replacing Tuning.Combat.Guard. ]=]
+	shieldGuard: ContentTypes.ShieldDef?,
+	--[=[ os.clock() when the current bow draw started (`SetDraw`). ]=]
+	drawSince: number?,
+	--[=[ Outgoing damage bonus of the arrow being released, consumed when it resolves. ]=]
+	drawBonus: number,
+	--[=[ Walk speed multiplier from gait: a running player, a patrolling NPC. ]=]
+	pace: number,
 	--[=[ Last light chain hit this entity used and its os.clock() (Shared/Chain). ]=]
 	chainLast: string?,
 	chainAt: number,
@@ -79,8 +90,6 @@ export type Entity = {
 	lastHitBy: Entity?,
 	--[=[ Combat traits from granted passives (players; empty for NPCs). ]=]
 	traits: Formulas.Traits,
-	--[=[ Weapon type (Content/Weapons) of the equipped weapon item, nil when unarmed. ]=]
-	weaponFamily: string?,
 	--[=[ Weapon type Weapon Proficiency applies to. ]=]
 	proficiencyFamily: string?,
 	--[=[ Battle Rhythm stacks and os.clock() of the last hit that counted. ]=]

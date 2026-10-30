@@ -21,6 +21,9 @@
 			"Vfx": {
 				"$path": "src/ReplicatedStorage/Vfx"
 			},
+			"Weapons": {
+				"$path": "src/ReplicatedStorage/Weapons"
+			},
 			"ForgeVFX": {
 				"$path": "vendor/ForgeVFX/ForgeVFX.rbxm"
 			}

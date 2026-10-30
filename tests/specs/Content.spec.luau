@@ -82,6 +82,10 @@ return {
 		Expect.truthy(math.abs(precise.base - light.base * 1.4) < 1e-6, "Precise Attack base is 140%")
 		Expect.truthy(math.abs(precise.ratio - light.ratio * 1.4) < 1e-6, "Precise Attack ratio is 140%")
 		Expect.equal(Skills.disengage.cooldown, 15)
+		local weapons = Loader.load(Content .. "Weapons").ById
+		for _, weaponId in Loader.load(Content .. "Tuning").Combat.ProficiencyWeapons do
+			Expect.truthy(weapons[weaponId], `proficiency weapon {weaponId}`)
+		end
 	end,
 	["reserved Warrior candidates stay defined but ungranted"] = function()
 		for _, skillId in { "cleave", "charge", "war_cry" } do
@@ -184,11 +188,6 @@ return {
 		local first, last = Skills[members[1]], Skills[members[3]]
 		Expect.truthy(last.damage.base > first.damage.base, "finisher hits harder")
 		Expect.truthy(last.cooldown > first.cooldown, "finisher recovers longer")
-		for id, skill in Skills do
-			if skill.chainNext then
-				Expect.truthy(table.find(members, id), `{id}: chainNext outside the light chain`)
-			end
-		end
 	end,
 	["guard clips are in the manifest"] = function()
 		Expect.truthy(Animations.GuardHold, "GuardHold")

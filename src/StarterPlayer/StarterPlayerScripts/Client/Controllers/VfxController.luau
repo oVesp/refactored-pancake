@@ -36,6 +36,8 @@ local DAMAGE_COLORS: { [string]: Color3 } = {
 }
 
 local PARRY_COLOR = Color3.fromRGB(255, 210, 110)
+-- Flash on the bow hand at full draw: the perfect release window opens.
+local DRAW_READY_COLOR = Color3.fromRGB(255, 225, 140)
 
 local TELEGRAPH_COLOR = Color3.fromRGB(255, 70, 50)
 
@@ -200,13 +202,17 @@ local function launch(info: { [string]: any }, skill: any)
 	local position: Vector3 = info.origin
 	local direction: Vector3 = info.direction
 	local homing: Instance? = info.homing
+	-- Arrows fall like the server's (`gravity`); speed along the path grows as they drop.
+	local velocity = direction * info.speed
+	local fall = Vector3.new(0, -(info.gravity or 0), 0)
 	local connection: RBXScriptConnection
 	connection = RunService.RenderStepped:Connect(function(dt)
 		if not part.Parent or not projectiles[id] then
 			connection:Disconnect()
 			return
 		end
-		local step = info.speed * dt
+		velocity += fall * dt
+		local step = velocity.Magnitude * dt
 		travelled += step
 		if travelled >= info.range then
 			connection:Disconnect()
@@ -220,6 +226,8 @@ local function launch(info: { [string]: any }, skill: any)
 			if offset.Magnitude > 1e-3 then
 				direction = offset.Unit
 			end
+		else
+			direction = velocity.Unit
 		end
 		position += direction * step
 		part.CFrame = CFrame.lookAt(position, position + direction)
@@ -471,6 +479,12 @@ function VfxController.Start()
 	NetClient.Connect("ShowDamage", onDamage)
 	NetClient.Connect("ShowParry", onParry)
 	CombatController.Used:Connect(onUsed)
+	CombatController.DrawReady:Connect(function()
+		local hand = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("LeftHand")
+		if hand and hand:IsA("BasePart") then
+			burst(hand.Position, 0.8, DRAW_READY_COLOR)
+		end
+	end)
 	CombatController.Rejected:Connect(function(skillId: string)
 		local track = skillTracks[skillId]
 		if track and track.IsPlaying then

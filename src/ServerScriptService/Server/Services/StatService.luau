@@ -8,10 +8,12 @@ local Constants = require(ReplicatedStorage.Shared.Constants)
 local Formulas = require(ReplicatedStorage.Shared.Formulas)
 local NpcDefs = require(ReplicatedStorage.Shared.NpcDefs)
 local Items = require(ReplicatedStorage.Content.Items)
+local Loadout = require(ReplicatedStorage.Shared.Loadout)
 local Logger = require(ReplicatedStorage.Shared.Logger)
 local Skills = require(ReplicatedStorage.Content.Skills)
 local Statuses = require(ReplicatedStorage.Content.Statuses)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
+local Weapons = require(ReplicatedStorage.Content.Weapons)
 local Types = require(script.Parent.Parent.Types)
 
 type Entity = Types.Entity
@@ -67,6 +69,9 @@ local function statusModifiers(entity: Entity): ({ Formulas.StatBlock }, number)
 	end
 	if entity.commitUntil > os.clock() then
 		moveMultiplier *= Tuning.Combat.Commit.MoveMultiplier
+	end
+	if entity.drawSince then
+		moveMultiplier *= Tuning.Combat.Bow.DrawMoveMultiplier
 	end
 	return blocks, moveMultiplier
 end
@@ -134,11 +139,15 @@ function StatService.Recompute(entity: Entity)
 				table.insert(modifiers, block)
 			end
 			entity.level = StatService.LevelFromProfile(profile)
+			local held = Loadout.Of(profile, Items.ById, Weapons.ById, Weapons.Default)
+			entity.weapon = held.weapon.id
+			entity.shieldGuard = held.shield
+			entity.model:SetAttribute("Weapon", held.weapon.id)
+			entity.model:SetAttribute("Shield", held.shieldId)
 			entity.traits = Formulas.CollectTraits(Formulas.GrantedSkills(classes, Classes.ById), Skills.ById)
-			entity.weaponFamily = Formulas.EquippedWeapon(profile.equipment, profile.inventory, Items.ById)
 			entity.proficiencyFamily = Formulas.ProficiencyFamily(
 				profile.proficiency,
-				entity.weaponFamily,
+				Formulas.EquippedWeapon(profile.equipment, profile.inventory, Items.ById),
 				Tuning.Combat.ProficiencyWeapons[1]
 			)
 			writeCharges(entity)

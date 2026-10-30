@@ -1,0 +1,208 @@
+{
+	"className": "Model",
+	"children": [
+		{
+			"name": "Handle",
+			"className": "Part",
+			"properties": {
+				"Size": [
+					0.2,
+					0.2,
+					0.2
+				],
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							0,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				},
+				"Color": [
+					0.2745,
+					0.1961,
+					0.1373
+				],
+				"Material": "SmoothPlastic",
+				"Shape": "Block",
+				"Anchored": true,
+				"CanCollide": false,
+				"CastShadow": true,
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth",
+				"Transparency": 1
+			},
+			"children": [
+				{
+					"name": "Grip",
+					"className": "Attachment"
+				}
+			]
+		},
+		{
+			"name": "Board",
+			"className": "Part",
+			"properties": {
+				"Size": [
+					0.3,
+					3,
+					3
+				],
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							0.35,
+							0
+						],
+						"orientation": [
+							[
+								0.0,
+								-1.0,
+								0
+							],
+							[
+								1.0,
+								0.0,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				},
+				"Color": [
+					0.4706,
+					0.3216,
+					0.1961
+				],
+				"Material": "WoodPlanks",
+				"Shape": "Cylinder",
+				"Anchored": true,
+				"CanCollide": false,
+				"CastShadow": true,
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth"
+			}
+		},
+		{
+			"name": "Rim",
+			"className": "Part",
+			"properties": {
+				"Size": [
+					0.25,
+					3.2,
+					3.2
+				],
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							0.33,
+							0
+						],
+						"orientation": [
+							[
+								0.0,
+								-1.0,
+								0
+							],
+							[
+								1.0,
+								0.0,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				},
+				"Color": [
+					0.4314,
+					0.4314,
+					0.4627
+				],
+				"Material": "Metal",
+				"Shape": "Cylinder",
+				"Anchored": true,
+				"CanCollide": false,
+				"CastShadow": true,
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth"
+			}
+		},
+		{
+			"name": "Boss",
+			"className": "Part",
+			"properties": {
+				"Size": [
+					0.7,
+					0.7,
+					0.7
+				],
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							0.55,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				},
+				"Color": [
+					0.4314,
+					0.4314,
+					0.4627
+				],
+				"Material": "Metal",
+				"Shape": "Ball",
+				"Anchored": true,
+				"CanCollide": false,
+				"CastShadow": true,
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth"
+			}
+		}
+	]
+}

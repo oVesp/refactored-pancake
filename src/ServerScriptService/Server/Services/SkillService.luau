@@ -5,14 +5,18 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Archery = require(ReplicatedStorage.Shared.Archery)
 local Chain = require(ReplicatedStorage.Shared.Chain)
 local Classes = require(ReplicatedStorage.Content.Classes)
 local Formulas = require(ReplicatedStorage.Shared.Formulas)
+local Items = require(ReplicatedStorage.Content.Items)
+local Loadout = require(ReplicatedStorage.Shared.Loadout)
 local Logger = require(ReplicatedStorage.Shared.Logger)
 local NetServer = require(ReplicatedStorage.Shared.Net.Server)
 local Skills = require(ReplicatedStorage.Content.Skills)
 local Statuses = require(ReplicatedStorage.Content.Statuses)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
+local Weapons = require(ReplicatedStorage.Content.Weapons)
 local Types = require(script.Parent.Parent.Types)
 
 type Entity = Types.Entity
@@ -28,8 +32,6 @@ local MAX_AIM_DISTANCE = 300
 local LATENCY_SLACK = 0.05
 -- Seconds a chain hit may arrive past Tuning.Combat.Chain.Window (network jitter).
 local CHAIN_SLACK = 0.15
--- Light attack chain, entry first (Shared/Chain).
-local LIGHT_CHAIN = Chain.Members(Skills.ById, Skills.Basic.Light)
 
 local log = Logger.new("SkillService")
 
@@ -76,10 +78,13 @@ local function refreshWorldFilter()
 	worldParams.FilterDescendantsInstances = exclude
 end
 
---[=[ Active skills a player may use: basic attacks, granted class actives and known spells. ]=]
+--[=[
+	Active skills a player may use: the equipped weapon's basic attacks (plus the shield bash),
+	granted class actives and known spells.
+]=]
 function SkillService.KnownActives(profile: any): { string }
-	local known = table.clone(LIGHT_CHAIN)
-	table.insert(known, Skills.Basic.Heavy)
+	local held = Loadout.Of(profile, Items.ById, Weapons.ById, Weapons.Default)
+	local known = Loadout.Basics(Skills.ById, held.weapon, held.shield ~= nil, Weapons.ShieldBash)
 	for _, skillId in Formulas.GrantedSkills(profile.classes, Classes.ById) do
 		local skill = Skills.ById[skillId]
 		if skill and skill.kind == "Active" then
@@ -124,6 +129,12 @@ local function spellBonus(caster: Entity, skill: SkillDef): number
 end
 
 local function hitEnemy(caster: Entity, target: Entity, skill: SkillDef, bonus: number, mods: any?)
+	if skill.rearBonus then
+		local look = target.root.CFrame.LookVector
+		if Archery.FromBehind(target.root.Position, look, caster.root.Position, Tuning.Combat.Bow.RearArc) then
+			bonus += skill.rearBonus
+		end
+	end
 	if skill.damage then
 		local dealt = CombatService.DealDamage(caster, target, skill.damage, skill.id, bonus, mods)
 		if dealt <= 0 and not CombatService.CanHarm(caster, target) then
@@ -292,13 +303,19 @@ local function launchProjectile(caster: Entity, skill: SkillDef, aim: Vector3, b
 		direction = direction,
 		speed = skill.speed,
 		range = skill.range,
+		gravity = skill.gravity,
 	})
 
+	-- Arrows fall (`gravity`); the path length still ends at `range`.
+	local velocity = direction * skill.speed
+	local fall = Vector3.new(0, -(skill.gravity or 0), 0)
 	local travelled = 0
 	local position = origin
 	local connection: RBXScriptConnection
 	connection = RunService.Heartbeat:Connect(function(dt)
-		local step = math.min(skill.speed * dt, skill.range - travelled)
+		velocity += fall * dt
+		direction = velocity.Unit
+		local step = math.min(velocity.Magnitude * dt, skill.range - travelled)
 		local nextPosition = position + direction * step
 
 		local wall = workspace:Raycast(position, direction * step, worldParams)
@@ -407,6 +424,10 @@ local function resolve(caster: Entity, skill: SkillDef, aim: Vector3, target: En
 	end
 	local nextBonus, mods = spendNextHit(caster, skill)
 	bonus += nextBonus
+	if skill.drawn then
+		bonus += caster.drawBonus
+		caster.drawBonus = 0
+	end
 
 	local delivery = skill.delivery
 	local origin = caster.root.Position
@@ -513,7 +534,7 @@ local function castDuration(caster: Entity, skill: SkillDef): (number, boolean)
 	end
 	if skill.windup then
 		local windup = skill.windup
-		if skill.id == Skills.Basic.Heavy then
+		if skill.heavy then
 			windup *= math.max(0.1, 1 - (caster.extras.HeavySpeed or 0))
 		end
 		return windup, false
@@ -686,6 +707,15 @@ local function reject(player: Player, seq: number, reason: string)
 	NetServer.Fire("RejectSkill", player, seq, reason)
 end
 
+-- Ends a bow draw (shot, cancel, guard, dodge or interrupt) and restores walk speed.
+local function stopDraw(entity: Entity)
+	if entity.drawSince then
+		entity.drawSince = nil
+		entity.model:SetAttribute("Drawing", nil)
+		StatService.Recompute(entity)
+	end
+end
+
 local function handleUseSkill(player: Player, skillId: string, aim: Vector3, seq: number, targetModel: Model?)
 	local caster = EntityService.ForPlayer(player)
 	local profile = DataService.Get(player)
@@ -711,7 +741,8 @@ local function handleUseSkill(player: Player, skillId: string, aim: Vector3, seq
 		return
 	end
 	-- Light chain: each hit waits out the previous hit's cooldown and must follow it in order.
-	local chained = table.find(LIGHT_CHAIN, skillId) ~= nil
+	local weapon = Weapons.ById[caster.weapon] or Weapons.ById[Weapons.Default]
+	local chained = Chain.Contains(Skills.ById, weapon.light, skillId)
 	if chained then
 		local last = caster.chainLast
 		if last and SkillService.CooldownRemaining(caster, last) > LATENCY_SLACK then
@@ -719,7 +750,7 @@ local function handleUseSkill(player: Player, skillId: string, aim: Vector3, seq
 			return
 		end
 		local window = Tuning.Combat.Chain.Window + CHAIN_SLACK
-		if not Chain.Allowed(Skills.ById, Skills.Basic.Light, last, caster.chainAt, skillId, os.clock(), window) then
+		if not Chain.Allowed(Skills.ById, weapon.light, last, caster.chainAt, skillId, os.clock(), window) then
 			reject(player, seq, "Chain")
 			return
 		end
@@ -727,6 +758,17 @@ local function handleUseSkill(player: Player, skillId: string, aim: Vector3, seq
 	if (aim - caster.root.Position).Magnitude > MAX_AIM_DISTANCE then
 		reject(player, seq, "Range")
 		return
+	end
+	-- Bow: the shot needs a draw long enough to fire; its strength comes from the draw time.
+	local drawBonus = 0
+	if skill.drawn then
+		local scale = Archery.DrawScale(os.clock() - (caster.drawSince or math.huge), Tuning.Combat.Bow)
+		if scale <= 0 then
+			stopDraw(caster)
+			reject(player, seq, "Draw")
+			return
+		end
+		drawBonus = scale - 1
 	end
 	-- The client's target is a suggestion: it must still be alive, on the right side and in range.
 	local target = if targetModel then EntityService.Get(targetModel) else nil
@@ -772,6 +814,10 @@ local function handleUseSkill(player: Player, skillId: string, aim: Vector3, seq
 		caster.guardSince = nil
 		caster.model:SetAttribute("Guarding", false)
 	end
+	stopDraw(caster)
+	if skill.drawn then
+		caster.drawBonus = drawBonus
+	end
 	if chained then
 		caster.chainLast = skillId
 		caster.chainAt = os.clock()
@@ -796,8 +842,37 @@ local function handleGuard(player: Player, on: boolean)
 	if on and (entity.casting or StatusService.IsDisabled(entity) or entity.stamina <= 0) then
 		on = false
 	end
+	local weapon = Weapons.ById[entity.weapon] or Weapons.ById[Weapons.Default]
+	if on and not Loadout.CanGuard(weapon, entity.shieldGuard ~= nil) then
+		on = false
+	end
+	if on then
+		stopDraw(entity)
+	end
 	entity.guardSince = if on then os.clock() else nil
 	entity.model:SetAttribute("Guarding", on)
+end
+
+-- Starts or cancels a bow draw. Only a drawn weapon draws, and not while busy or guarding.
+local function handleDraw(player: Player, on: boolean)
+	local entity = EntityService.ForPlayer(player)
+	if not entity or not entity.alive then
+		return
+	end
+	local weapon = Weapons.ById[entity.weapon]
+	local busy = entity.casting ~= nil
+		or entity.guardSince ~= nil
+		or entity.lockedUntil - os.clock() > LATENCY_SLACK
+		or StatusService.IsDisabled(entity)
+	if not on or not weapon or not weapon.drawn or busy then
+		stopDraw(entity)
+		return
+	end
+	if not entity.drawSince then
+		entity.drawSince = os.clock()
+		entity.model:SetAttribute("Drawing", true)
+		StatService.Recompute(entity)
+	end
 end
 
 local dodgeReadyAt: { [Player]: number } = {}
@@ -820,7 +895,8 @@ local function handleDodge(player: Player, direction: Vector3, seq: number)
 	end
 	dodgeReadyAt[player] = now + dodge.Cooldown
 	entity.invulnerableUntil = now + dodge.Invulnerable
-	-- Dodge cancels a swing in its windup (Interrupt) or recovery.
+	-- Dodge cancels a swing in its windup (Interrupt) or recovery, and a bow draw.
+	stopDraw(entity)
 	SkillService.Interrupt(entity)
 	entity.lockedUntil = now
 	endCommit(entity)
@@ -843,6 +919,11 @@ function SkillService.Init(deps: { [string]: any })
 			handleGuard(player, on)
 		end)
 	end)
+	NetServer.Connect("SetDraw", function(player: Player, on: boolean)
+		withLatency(player, function()
+			handleDraw(player, on)
+		end)
+	end)
 	NetServer.Connect("Dodge", function(player: Player, direction: Vector3, seq: number)
 		withLatency(player, function()
 			handleDodge(player, direction, seq)
@@ -859,6 +940,7 @@ function SkillService.Start()
 		end
 	end)
 	StatusService.Interrupted:Connect(function(entity: Entity)
+		stopDraw(entity)
 		if SkillService.Interrupt(entity) then
 			log:Debug("Interrupted %s", entity.name)
 		end

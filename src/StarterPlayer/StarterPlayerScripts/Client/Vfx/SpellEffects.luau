@@ -206,6 +206,14 @@ SpellEffects.strike = { swing = punch("PunchJab"), hit = "PunchImpact" }
 SpellEffects.strike_2 = { swing = punch("PunchJab"), hit = "PunchImpact" }
 SpellEffects.strike_3 = { swing = punch("PunchFinisher"), hit = "PunchImpactHeavy", hitstop = 0.085 }
 
+-- Weapon basics (Content/Weapons): placeholder looks built from existing templates.
+SpellEffects.sword_slash = { swing = cleaveSwing }
+SpellEffects.sword_slash_2 = { swing = cleaveSwing }
+SpellEffects.sword_slash_3 = { swing = cleaveSwing, hitstop = 0.085 }
+SpellEffects.staff_strike = { swing = cleaveSwing }
+SpellEffects.staff_strike_2 = { swing = cleaveSwing, hitstop = 0.085 }
+SpellEffects.shield_bash = { swing = punch("PunchFinisher"), hit = "PunchImpactHeavy", hitstop = 0.085 }
+
 local function scatter(center: Vector3, radius: number): Vector3
 	local angle = math.random() * math.pi * 2
 	local distance = math.sqrt(math.random()) * radius
@@ -290,6 +298,8 @@ SpellEffects.heavy_strike = {
 		end)
 	end,
 }
+
+SpellEffects.sword_heavy = SpellEffects.heavy_strike
 
 -- Dash: a blurred streak along the path, kicked-up dust at the start, a crunch on arrival.
 local function dashStreak(from: Vector3, to: Vector3, color: ColorSequence, width: number)
