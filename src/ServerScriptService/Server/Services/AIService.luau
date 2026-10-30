@@ -103,6 +103,8 @@ local function setState(brain: Brain, state: State)
 	if brain.state ~= state then
 		brain.state = state
 		brain.entity.model:SetAttribute("AiState", state)
+		local calm = state == "Patrol" or state == "Travel"
+		StatService.SetPace(brain.entity, if calm then Tuning.Npc.PatrolSpeedMultiplier else 1)
 	end
 end
 

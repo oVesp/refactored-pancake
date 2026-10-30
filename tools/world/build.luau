@@ -319,13 +319,16 @@ local scoutOrigin = scoutRig.CFrame.Position
 -- Humanoid layout: root centre one stud above the hips, hips one stud above the ground.
 local goblinHip = 1
 local goblinRootHeight = goblinHip + 1
+-- The skinned mesh renders this far below the import's RootPart (its bones sit under the static mesh
+-- bounds), so the rig is raised by it to put the soles on the ground. Measured in Studio.
+local goblinRigLift = 1.75
 
 local goblin = model(nil, "Goblin")
 -- Streams in whole, so clients see the rig and Animator together with the Enemy tag.
 goblin.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
 goblin:SetAttribute("AnimSet", "Goblin")
--- The import stands about 3.75 studs; this brings a level-1 raider to about 4 studs.
-goblin:SetAttribute("BaseScale", 1.05)
+-- The import stands about 3.75 studs; this brings a level-1 raider (scale 0.75) to about 4.4 studs.
+goblin:SetAttribute("BaseScale", 1.575)
 local root = part(
 	goblin,
 	"HumanoidRootPart",
@@ -340,14 +343,14 @@ local root = part(
 )
 
 scoutRig.Name = "Rig"
-scoutRig.CFrame = at(0, 0, 0)
+scoutRig.CFrame = at(0, goblinRigLift, 0)
 scoutRig.Transparency = 1
 scoutRig.Anchored = false
 scoutRig.CanCollide = false
 scoutRig.CanQuery = false
 scoutRig.Massless = true
 scoutRig.Parent = goblin
-make("Motor6D", { Name = "Root", Part0 = root, Part1 = scoutRig, C0 = at(0, -goblinRootHeight, 0) }, root)
+make("Motor6D", { Name = "Root", Part0 = root, Part1 = scoutRig, C0 = at(0, goblinRigLift - goblinRootHeight, 0) }, root)
 
 for _, child in scout:GetChildren() do
 	if child.ClassName ~= "MeshPart" then
@@ -363,7 +366,7 @@ for _, child in scout:GetChildren() do
 		HasSkinnedMesh = true,
 		InitialSize = child.InitialSize,
 		Size = child.Size,
-		CFrame = child.CFrame - scoutOrigin,
+		CFrame = child.CFrame - scoutOrigin + Vector3.new(0, goblinRigLift, 0),
 		Anchored = false,
 		CanCollide = false,
 		CanQuery = false,

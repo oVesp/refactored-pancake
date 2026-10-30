@@ -160,6 +160,8 @@ return table.freeze({
 	Npc = table.freeze({
 		ThinkInterval = 0.25,
 		PatrolRadius = 14,
+		--[=[ Walk speed multiplier while patrolling or travelling out of combat. ]=]
+		PatrolSpeedMultiplier = 0.45,
 		PathRecompute = 1,
 		ReturnRegenPerSecond = 0.25,
 	}),
@@ -177,7 +179,7 @@ return table.freeze({
 		--[=[ A nest sends no squad while a player is this close, so nobody sees one appear. ]=]
 		HiddenRadius = 160,
 		MaxBodies = 80,
-		AbstractSpeed = 0.7,
+		AbstractSpeed = 0.4,
 		--[=[ The leader walks this far ahead along its route. ]=]
 		Lookahead = 12,
 		--[=[ The leader waits while a follower is farther than this from its slot. ]=]

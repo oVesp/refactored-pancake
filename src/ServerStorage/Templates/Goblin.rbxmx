@@ -2,7 +2,7 @@
   <Item class="Model" referent="0">
     <Properties>
       <string name="Name">Goblin</string>
-      <BinaryString name="AttributesSerialize">AgAAAAcAAABBbmltU2V0AgYAAABHb2JsaW4JAAAAQmFzZVNjYWxlBs3MzMzMzPA/</BinaryString>
+      <BinaryString name="AttributesSerialize">AgAAAAcAAABBbmltU2V0AgYAAABHb2JsaW4JAAAAQmFzZVNjYWxlBjMzMzMzM/k/</BinaryString>
       <token name="ModelStreamingMode">1</token>
       <Ref name="PrimaryPart">1</Ref>
     </Properties>
@@ -40,7 +40,7 @@
           <string name="Name">Root</string>
           <CoordinateFrame name="C0">
             <X>0</X>
-            <Y>-2</Y>
+            <Y>-0.25</Y>
             <Z>0</Z>
             <R00>1</R00>
             <R01>0</R01>
@@ -73,7 +73,7 @@
         <token name="BottomSurfaceInput">0</token>
         <CoordinateFrame name="CFrame">
           <X>0</X>
-          <Y>0</Y>
+          <Y>1.75</Y>
           <Z>0</Z>
           <R00>1</R00>
           <R01>0</R01>
@@ -2000,7 +2000,7 @@
         <bool name="Anchored">false</bool>
         <CoordinateFrame name="CFrame">
           <X>0</X>
-          <Y>1.8634796</Y>
+          <Y>3.6134796</Y>
           <Z>-0.14755249</Z>
           <R00>1</R00>
           <R01>0</R01>
@@ -2091,7 +2091,7 @@
         <bool name="Anchored">false</bool>
         <CoordinateFrame name="CFrame">
           <X>-0.06272888</X>
-          <Y>2.351822</Y>
+          <Y>4.101822</Y>
           <Z>-0.1109314</Z>
           <R00>1</R00>
           <R01>0</R01>
@@ -2182,7 +2182,7 @@
         <bool name="Anchored">false</bool>
         <CoordinateFrame name="CFrame">
           <X>-0.000015258789</X>
-          <Y>1.8665314</Y>
+          <Y>3.6165314</Y>
           <Z>-0.3061676</Z>
           <R00>1</R00>
           <R01>0</R01>
@@ -2273,7 +2273,7 @@
         <bool name="Anchored">false</bool>
         <CoordinateFrame name="CFrame">
           <X>-0.001663208</X>
-          <Y>1.9203186</Y>
+          <Y>3.6703186</Y>
           <Z>-0.52104187</Z>
           <R00>1</R00>
           <R01>0</R01>
@@ -2364,7 +2364,7 @@
         <bool name="Anchored">false</bool>
         <CoordinateFrame name="CFrame">
           <X>-0.1574707</X>
-          <Y>2.6530762</Y>
+          <Y>4.403076</Y>
           <Z>-0.07998657</Z>
           <R00>1</R00>
           <R01>0</R01>
@@ -2455,7 +2455,7 @@
         <bool name="Anchored">false</bool>
         <CoordinateFrame name="CFrame">
           <X>0</X>
-          <Y>3.3234406</Y>
+          <Y>5.0734406</Y>
           <Z>-0.47071838</Z>
           <R00>1</R00>
           <R01>0</R01>
@@ -2546,7 +2546,7 @@
         <bool name="Anchored">false</bool>
         <CoordinateFrame name="CFrame">
           <X>0</X>
-          <Y>2.9811707</Y>
+          <Y>4.7311707</Y>
           <Z>-0.52326965</Z>
           <R00>1</R00>
           <R01>0</R01>
@@ -2637,7 +2637,7 @@
         <bool name="Anchored">false</bool>
         <CoordinateFrame name="CFrame">
           <X>0.00015258789</X>
-          <Y>2.0764313</Y>
+          <Y>3.8264313</Y>
           <Z>-0.09373474</Z>
           <R00>1</R00>
           <R01>0</R01>
@@ -2728,7 +2728,7 @@
         <bool name="Anchored">false</bool>
         <CoordinateFrame name="CFrame">
           <X>0</X>
-          <Y>3.046753</Y>
+          <Y>4.796753</Y>
           <Z>-0.5302124</Z>
           <R00>1</R00>
           <R01>0</R01>
@@ -2819,7 +2819,7 @@
         <bool name="Anchored">false</bool>
         <CoordinateFrame name="CFrame">
           <X>0.000030517578</X>
-          <Y>1.2945557</Y>
+          <Y>3.0445557</Y>
           <Z>-0.13484192</Z>
           <R00>1</R00>
           <R01>0</R01>
