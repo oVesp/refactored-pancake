@@ -3,6 +3,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
+local Classes = require(ReplicatedStorage.Content.Classes)
 local Items = require(ReplicatedStorage.Content.Items)
 local Loadout = require(ReplicatedStorage.Shared.Loadout)
 local Loot = require(ServerStorage.ContentServerOnly.Loot)
@@ -68,6 +69,10 @@ local function equip(player: Player, uid: number)
 	if not def then
 		return
 	end
+	if not Loadout.CanEquip(profile.classes, def, Classes.ById) then
+		notify(player, "WeaponNotAllowed")
+		return
+	end
 	-- Two hands: a two-handed weapon and a shield push each other off (docs/systems/weapons.md).
 	local current = Loadout.Of(profile, Items.ById, Weapons.ById, Weapons.Default).weapon
 	local displaced = Loadout.Displaced(def.kind, def, current, Weapons.ById)
@@ -91,6 +96,18 @@ local function unequip(player: Player, slot: string)
 	DataService.Update(player, function(p: any)
 		p.equipment[slot] = nil
 	end, "equipment")
+end
+
+-- Losing the class that allowed the held weapon (dev RemoveClass, SetLevel) unequips it.
+local function dropForbiddenWeapon(player: Player)
+	local profile = DataService.Get(player)
+	local uid = profile and profile.equipment.weapon
+	local stack = profile and uid and Profile.FindStack(profile, uid)
+	local def = stack and Items.ById[stack.id]
+	if profile and def and not Loadout.CanEquip(profile.classes, def, Classes.ById) then
+		unequip(player, "weapon")
+		notify(player, "WeaponUnequipped")
+	end
 end
 
 local function use(player: Player, uid: number)
@@ -138,6 +155,7 @@ function InventoryService.Init(deps: { [string]: any })
 end
 
 function InventoryService.Start()
+	DataService.Changed:Connect(dropForbiddenWeapon)
 	CombatService.Died:Connect(function(victim: Entity, killer: Entity?)
 		if victim.kind == "Npc" and killer and killer.player then
 			rollLoot(killer.player, victim.defId)

@@ -129,9 +129,10 @@ export type SkillDef = {
 	critChance: number?,
 	--[=[
 		The skill attacks with the equipped weapon: it takes on the weapon's light attack with damage
-		times `scale` (Loadout.Attack), so it needs no delivery or damage of its own.
+		times `scale` (Loadout.Attack), so it needs no delivery or damage of its own. `type` and `stat`
+		replace the light attack's damage type and scaling stat, whatever the weapon.
 	]=]
-	weaponAttack: { scale: number }?,
+	weaponAttack: { scale: number, type: string?, stat: string? }?,
 	--[=[ Set by Loadout.Attack: the light attack whose visuals a `weaponAttack` use shows. ]=]
 	shownAs: string?,
 	--[=[ Self only: restores these fractions of max HP and Stamina. ]=]
@@ -166,6 +167,8 @@ export type ClassDef = {
 	growth: StatBlock,
 	grants: { string },
 	spellList: { string },
+	--[=[ Weapon types (Content/Weapons) the class may equip; any one class allowing it is enough (Loadout.CanEquip). ]=]
+	weapons: { string },
 }
 
 export type StatusDef = {

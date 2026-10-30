@@ -5,7 +5,7 @@ local Types = require(script.Parent.Types)
 --[=[
 	Starter classes (docs/systems/classes.md; scope 01, section 4). `grants[n]` is the class skill granted at
 	class level n; caster levels also grant spell picks from `spellList` (Magic.SpellPicksPerLevel).
-	`growth` is added once per class level.
+	`growth` is added once per class level. `weapons` lists the weapon types the class may equip.
 ]=]
 local Classes: { [string]: Types.ClassDef } = {
 	fighter = {
@@ -32,6 +32,7 @@ local Classes: { [string]: Types.ClassDef } = {
 			"battle_trance",
 		},
 		spellList = {},
+		weapons = { "fists", "sword", "bow", "staff" },
 	},
 	mage = {
 		id = "mage",
@@ -41,6 +42,7 @@ local Classes: { [string]: Types.ClassDef } = {
 		growth = { MaxHp = 8, MaxMp = 15, MagAtk = 5, Agility = 2, MagDef = 1, Resistance = 1 },
 		grants = { "arcane_line", "mana_flow", "blink", "elemental_focus", "overcharge" },
 		spellList = { "light", "magic_arrow", "destruction_water", "sleep", "quick_march", "arcane_shield" },
+		weapons = { "fists", "sword", "bow", "staff", "wand" },
 	},
 	healer = {
 		id = "healer",
@@ -50,6 +52,7 @@ local Classes: { [string]: Types.ClassDef } = {
 		growth = { MaxHp = 10, MaxMp = 14, MagAtk = 3, MagDef = 3, Resistance = 3 },
 		grants = { "divine_line", "gentle_hands", "rebuke", "devotion", "lay_on_hands" },
 		spellList = { "mend", "create_water", "anti_evil_protection", "smite" },
+		weapons = { "fists", "sword", "bow", "staff", "wand" },
 	},
 }
 

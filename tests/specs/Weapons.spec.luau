@@ -7,6 +7,7 @@ local Loader = require("../Loader")
 local Content = "src/ReplicatedStorage/Content/"
 local Weapons = Loader.load(Content .. "Weapons")
 local Items = Loader.load(Content .. "Items")
+local Classes = Loader.load(Content .. "Classes").ById
 local Skills = Loader.load(Content .. "Skills").ById
 local Tuning = Loader.load(Content .. "Tuning")
 local Animations = Loader.load(Content .. "Assets").Animations
@@ -132,7 +133,8 @@ return {
 			Expect.equal(used.recovery, light.recovery, `{id}: recovery`)
 			Expect.equal(used.speed, light.speed, `{id}: speed`)
 			Expect.equal(used.drawn, light.drawn, `{id}: draw`)
-			Expect.equal(used.damage.type, light.damage.type, `{id}: damage type`)
+			Expect.equal(used.damage.type, "physical", `{id}: always physical`)
+			Expect.equal(used.damage.stat, "PhysAtk", `{id}: always scales with PhysAtk`)
 			Expect.truthy(math.abs(used.damage.base - light.damage.base * scale) < 1e-6, `{id}: base`)
 			Expect.truthy(math.abs(used.damage.ratio - light.damage.ratio * scale) < 1e-6, `{id}: ratio`)
 			Expect.equal(used.gcd, true, `{id}: on the GCD`)
@@ -142,11 +144,38 @@ return {
 			Expect.equal(used.chainNext, nil, `{id}: outside the chain`)
 		end
 		Expect.equal(Skills.bow_shot.damage.base, 12, "the light attack itself is untouched")
+		Expect.equal(Skills.staff_strike.damage.type, "force", "the staff's own attack stays force")
+		Expect.equal(Skills.wand_bolt.damage.stat, "MagAtk", "the wand's own attack stays MagAtk")
 		Expect.equal(
 			Loadout.Attack(Skills, Skills.strike, Weapons.ById.sword),
 			Skills.strike,
 			"other skills pass through"
 		)
+	end,
+	["every class lists real weapon types; only the fighter lacks the wand"] = function()
+		for id, class in Classes do
+			for _, weaponId in class.weapons do
+				Expect.truthy(Weapons.ById[weaponId], `{id}: {weaponId}`)
+			end
+			for weaponId in Weapons.ById do
+				local allowed = table.find(class.weapons, weaponId) ~= nil
+				Expect.equal(allowed, not (id == "fighter" and weaponId == "wand"), `{id}: {weaponId}`)
+			end
+		end
+	end,
+	["a weapon needs any class that allows it"] = function()
+		local wand = Items.ById.apprentice_wand
+		local sword = Items.ById.rusty_sword
+		local fighter = { id = "fighter", level = 1 }
+		local mage = { id = "mage", level = 1 }
+		Expect.equal(Loadout.CanEquip({ fighter }, wand, Classes), false, "fighter refuses the wand")
+		Expect.truthy(Loadout.CanEquip({ fighter }, sword, Classes), "fighter takes the sword")
+		Expect.truthy(Loadout.CanEquip({ mage }, wand, Classes), "mage takes the wand")
+		Expect.truthy(Loadout.CanEquip({ fighter, mage }, wand, Classes), "multiclass takes the wand")
+		Expect.equal(Loadout.CanEquip({}, sword, Classes), false, "no class, no weapon")
+		Expect.equal(Loadout.CanEquip({ { id = "retired", level = 1 } }, sword, Classes), false, "unknown class")
+		Expect.truthy(Loadout.CanEquip({ fighter }, Items.ById.wooden_shield, Classes), "shields are open")
+		Expect.truthy(Loadout.CanEquip({}, Items.ById.minor_health_potion, Classes), "non-weapons are open")
 	end,
 	["guarding needs a guarding weapon or a shield"] = function()
 		Expect.truthy(Loadout.CanGuard(Weapons.ById.sword, false), "sword")

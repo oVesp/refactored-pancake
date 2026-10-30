@@ -60,8 +60,8 @@ end
 
 --[=[
 	The skill as used with `weapon`: a `weaponAttack` skill takes on the first hit of the weapon's
-	light attack (delivery, reach, timing, draw) with damage times `scale`; its own fields win and it
-	stays out of the chain. Any other skill comes back as it is.
+	light attack (delivery, reach, timing, draw) with damage times `scale`, of its `type` and `stat`
+	when set; its own fields win and it stays out of the chain. Any other skill comes back as it is.
 ]=]
 function Loadout.Attack(skills: SkillMap, skill: any, weapon: Types.WeaponDef): any
 	local attack = skill.weaponAttack
@@ -79,7 +79,30 @@ function Loadout.Attack(skills: SkillMap, skill: any, weapon: Types.WeaponDef): 
 	resolved.damage = table.clone(light.damage)
 	resolved.damage.base *= attack.scale
 	resolved.damage.ratio *= attack.scale
+	resolved.damage.type = attack.type or light.damage.type
+	resolved.damage.stat = attack.stat or light.damage.stat
 	return resolved
+end
+
+--[=[
+	True when any of `classes` (profile entries) allows `item`'s weapon type. Only weapons are
+	restricted: every other item passes, and no classes allow no weapon.
+]=]
+function Loadout.CanEquip(
+	classes: { { id: string } },
+	item: Types.ItemDef,
+	classDefs: { [string]: Types.ClassDef }
+): boolean
+	if item.kind ~= "Weapon" or not item.weapon then
+		return true
+	end
+	for _, entry in classes do
+		local class = classDefs[entry.id]
+		if class and table.find(class.weapons, item.weapon) then
+			return true
+		end
+	end
+	return false
 end
 
 --[=[ True when the holder can guard: a shield, or a weapon that guards on its own. ]=]

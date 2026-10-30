@@ -354,9 +354,9 @@ local list: { Types.SkillDef } = {
 		gcd = true,
 		maxTargets = 1,
 		critChance = 0.15,
-		weaponAttack = { scale = 1.4 },
+		weaponAttack = { scale = 1.4, type = "physical", stat = "PhysAtk" },
 		animation = "BasicStrike",
-		description = "Single-target attack with your weapon: 140% damage, +15% crit chance.",
+		description = "Single-target physical attack with your weapon: 140% damage, +15% crit chance.",
 	},
 	{
 		id = "combat_conditioning",

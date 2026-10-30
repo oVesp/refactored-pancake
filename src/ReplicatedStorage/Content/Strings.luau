@@ -21,6 +21,8 @@ return table.freeze({
 	DisciplinesKnown = "You already know every Discipline taught here.",
 	NoFocus = "Not enough Focus capacity.",
 	InventoryFull = "Inventory full.",
+	WeaponNotAllowed = "None of your classes can use that weapon.",
+	WeaponUnequipped = "Your weapon was unequipped: none of your classes can use it.",
 	Died = "You were defeated. XP debt: %d.",
 	VendorClosed = "The vendor is closed in this build.",
 	Kindled = "The brazier catches fire.",

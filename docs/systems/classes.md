@@ -23,7 +23,7 @@ Categories are tags on a class (`Martial` for physical-damage classes; casting l
 
 | Class | Tier | Cap | Category | Requirements | Role |
 |---|---|---|---|---|---|
-| **Fighter** | Base | 15 | Martial | none (starter) | General physical damage, any weapon |
+| **Fighter** | Base | 15 | Martial | none (starter) | General physical damage, every weapon but the wand |
 | **Warrior** | High | 10 | Martial | Fighter ≥ 5; more TBD | Melee physical damage |
 | **Ranger** | High | 10 | Martial | Fighter ≥ 5; more TBD | Ranged physical damage |
 
@@ -33,7 +33,7 @@ Warrior and Ranger are Fighter's specializations. Weapon-specific skills (area s
 
 Base class for every physical damage dealer. Stamina resource. Stat lean: Physical Attack, Agility, Max HP. Physical damage only.
 
-**Weapon rule:** Fighter skills are weapon-agnostic. Each active either modifies the next attack or buffs the Fighter; damage is delivered by the equipped weapon's own attack (melee hit or projectile). Weapon families: **Sword, Bow**.
+**Weapon rule:** Fighter skills are weapon-agnostic. Each active either modifies the next attack or buffs the Fighter; damage is delivered by the equipped weapon's own attack (melee hit or projectile). Weapon families: **Sword, Bow**. Fighters cannot equip wands (`Content/Classes` `weapons`, [weapons](weapons.md)); a multiclass Fighter with a class that allows the wand can.
 
 | Lv | Skill | Kind | Effect |
 |---|---|---|---|
@@ -63,4 +63,4 @@ Naming: the skill is **Gather Strength**, not "Focus", because Focus is the Disc
 - Every damage bonus (Gather Strength, Proficiency, Battle Rhythm, Finishing Instinct, Exposed, Battle Trance, Overcharge) adds into one outgoing bonus; Precise Attack's 140% scales the hit itself.
 - Gather Strength and Disengage are spent by the next damaging skill use, shared by every target of that use.
 - Battle Trance halves skill Stamina costs only, not dodge or guard. Exposed keeps the last Fighter that applied it as its source.
-- Precise Attack (`weaponAttack`, `Loadout.Attack`) is the first hit of the equipped weapon's light attack at 140% with +15% crit, on the GCD and outside the chain: a swing with sword, staff or fists, a wand bolt, an arrow with the bow. With the bow the slot works like the attack button: hold to draw, release to shoot, with the same draw scaling. Its damage type is the weapon's, so staff and wand hits are `force` and earn no Weapon Proficiency.
+- Precise Attack (`weaponAttack`, `Loadout.Attack`) is the first hit of the equipped weapon's light attack at 140% with +15% crit, on the GCD and outside the chain: a swing with sword, staff or fists, a wand bolt, an arrow with the bow. With the bow the slot works like the attack button: hold to draw, release to shoot, with the same draw scaling. It is always physical damage scaled by PhysAtk (`weaponAttack.type`, `weaponAttack.stat`), staff and wand included. Staff and wand hits earn no Weapon Proficiency because neither is a proficiency weapon.
