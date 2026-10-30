@@ -40,7 +40,8 @@
 		},
 		"StarterPlayer": {
 			"$properties": {
-				"LoadCharacterAppearance": false
+				"LoadCharacterAppearance": false,
+				"EnableMouseLockOption": false
 			},
 			"StarterPlayerScripts": {
 				"Client": {
