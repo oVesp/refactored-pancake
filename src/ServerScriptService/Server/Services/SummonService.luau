@@ -83,7 +83,8 @@ function SummonService.Cast(caster: Entity, familyId: string)
 	local list = active[player] or {}
 	active[player] = list
 	while #list >= math.min(family.cap, settings.MaxPerCaster) do
-		SpawnService.Despawn(list[1].entity)
+		local oldest = table.remove(list, 1) :: Active
+		SpawnService.Despawn(oldest.entity)
 	end
 	local spot = caster.root.CFrame * CFrame.new(0, 0, settings.SpawnBack)
 	local entity = SpawnService.Spawn(id, Summons.Level(family, caster.level), spot.Position, {

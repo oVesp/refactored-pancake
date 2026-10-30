@@ -52,6 +52,7 @@ local combat = false
 local modalOpen = false
 local aiming = false
 local cursorLocked = false
+local cursorFree = false
 local turning = false
 local baseFov: number? = nil
 
@@ -115,7 +116,7 @@ local function step(dt: number)
 	end
 
 	-- Only the transitions touch the cursor and AutoRotate, so exploration keeps Roblox's own camera.
-	local lockCursor = combat and not menu
+	local lockCursor = combat and not menu and not cursorFree
 	if lockCursor then
 		UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
 	elseif cursorLocked then
@@ -167,6 +168,11 @@ end
 --[=[ Narrows the view and pushes the camera further over the shoulder while the bow is drawn. ]=]
 function CameraController.SetAiming(on: boolean)
 	aiming = on
+end
+
+--[=[ Frees the combat cursor while a small HUD choice is open (the summon picker). ]=]
+function CameraController.SetCursorFree(on: boolean)
+	cursorFree = on
 end
 
 function CameraController.Init(deps: { [string]: any })

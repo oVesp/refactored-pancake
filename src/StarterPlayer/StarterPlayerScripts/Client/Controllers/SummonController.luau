@@ -9,10 +9,12 @@ local Tuning = require(ReplicatedStorage.Content.Tuning)
 --[=[
 	The summon picker (docs/systems/ai-and-spawning.md, Summons): pressing a summon skill with more
 	than one option opens it, with the last choice marked. Choosing an option casts it; pressing the
-	skill again casts the marked one. The server validates the choice.
+	skill again casts the marked one. The combat cursor is free while it is open. The server validates
+	the choice.
 ]=]
 local SummonController = {}
 
+local CameraController: any
 local CombatController: any
 local UIController: any
 
@@ -28,6 +30,7 @@ local function close()
 	openSkill = nil
 	openToken += 1
 	screen.Enabled = false
+	CameraController.SetCursorFree(false)
 	rows:Clean()
 	UIController.ClearRows(bound.Bind_Options)
 end
@@ -58,6 +61,7 @@ local function open(skillId: string, options: { string })
 	end
 	openSkill = skillId
 	screen.Enabled = true
+	CameraController.SetCursorFree(true)
 	local token = openToken
 	task.delay(Tuning.Summons.PickerSeconds, function()
 		if token == openToken then
@@ -76,6 +80,7 @@ local function onPrompt(skillId: string, options: { string })
 end
 
 function SummonController.Init(deps: { [string]: any })
+	CameraController = deps.CameraController
 	CombatController = deps.CombatController
 	UIController = deps.UIController
 end
