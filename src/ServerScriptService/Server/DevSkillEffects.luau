@@ -108,8 +108,10 @@ local function zoneNamed(arg: string): string?
 	return nil
 end
 
+local PYLON = "pylon"
+
 local function zoneList(): string
-	local names = {}
+	local names = { "Pylon" }
 	for _, zone in Zones.ById do
 		table.insert(names, zone.name)
 	end
@@ -118,9 +120,12 @@ local function zoneList(): string
 end
 
 local function gate(caster: Entity, arg: string?)
-	local zoneId = if arg and arg ~= "" then zoneNamed(arg) else Zones.RespawnZone
+	local toPylon = arg == PYLON
+	local zoneId = if toPylon then PYLON elseif arg and arg ~= "" then zoneNamed(arg) else Zones.RespawnZone
 	local anchor: Vector3? = nil
-	if zoneId == Zones.RespawnZone then
+	if toPylon then
+		anchor = ZoneService.PylonPoint()
+	elseif zoneId == Zones.RespawnZone then
 		local spawn = ZoneService.RespawnPoint()
 		anchor = if spawn then spawn.Position else nil
 	end
@@ -141,7 +146,7 @@ local function gate(caster: Entity, arg: string?)
 		EntityService.NoteTeleport(caster.player)
 	end
 	caster.model:PivotTo(CFrame.new(destination) * caster.root.CFrame.Rotation)
-	notify(caster, "Gated", Zones.ById[zoneId].name)
+	notify(caster, "Gated", if toPylon then "the Pylon" else Zones.ById[zoneId].name)
 end
 
 --[=[

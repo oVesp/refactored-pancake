@@ -68,14 +68,48 @@ function ZoneService.Anchor(id: string): Vector3?
 	return nil
 end
 
---[=[ The respawn point in the respawn zone, if the map has one. ]=]
-function ZoneService.RespawnPoint(): SpawnLocation?
-	for _, instance in CollectionService:GetTagged("RespawnPoint") do
+local function spawnTagged(tag: string): SpawnLocation?
+	for _, instance in CollectionService:GetTagged(tag) do
 		if instance:IsA("SpawnLocation") then
 			return instance
 		end
 	end
 	return nil
+end
+
+--[=[ The inn's spawn point, where players come back after dying, if the map has one. ]=]
+function ZoneService.RespawnPoint(): SpawnLocation?
+	return spawnTagged("RespawnPoint")
+end
+
+--[=[ The dock's spawn point, where players arrive when they join, if the map has one. ]=]
+function ZoneService.ArrivalPoint(): SpawnLocation?
+	return spawnTagged("ArrivalSpawn")
+end
+
+--[=[
+	Where Gate lands at the Pylon: its `Arrival` part when it has one, else ten studs south of
+	the tagged model. Nil when the map has no Pylon.
+]=]
+function ZoneService.PylonPoint(): Vector3?
+	for _, instance in CollectionService:GetTagged("Pylon") do
+		if instance:IsA("PVInstance") then
+			local arrival = instance:FindFirstChild("Arrival", true)
+			if arrival and arrival:IsA("BasePart") then
+				return arrival.Position
+			end
+			return instance:GetPivot().Position + Vector3.new(0, 0, 10)
+		end
+	end
+	return nil
+end
+
+--[=[ Sends a player's next spawn to the inn (after a death); joining spawns at the dock. ]=]
+function ZoneService.UseRespawnPoint(player: Player)
+	local respawn = ZoneService.RespawnPoint()
+	if respawn then
+		player.RespawnLocation = respawn
+	end
 end
 
 function ZoneService.Init(_deps: { [string]: any })
@@ -86,16 +120,16 @@ function ZoneService.Init(_deps: { [string]: any })
 end
 
 function ZoneService.Start()
-	local respawn = ZoneService.RespawnPoint()
-	Players.PlayerAdded:Connect(function(player)
-		if respawn then
-			player.RespawnLocation = respawn
+	-- Joining lands at the dock; dying sends the next spawn to the inn (AvatarService).
+	local function arrive(player: Player)
+		local point = ZoneService.ArrivalPoint() or ZoneService.RespawnPoint()
+		if point then
+			player.RespawnLocation = point
 		end
-	end)
+	end
+	Players.PlayerAdded:Connect(arrive)
 	for _, player in Players:GetPlayers() do
-		if respawn then
-			player.RespawnLocation = respawn
-		end
+		arrive(player)
 	end
 
 	task.spawn(function()

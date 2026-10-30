@@ -13,6 +13,7 @@ local log = Logger.new("AvatarService")
 
 local DataService: any
 local ProgressionService: any
+local ZoneService: any
 
 -- Tag on the creation stage's pedestal.
 local STAGE_TAG = "CreatorStage"
@@ -58,6 +59,7 @@ local function onCharacterAdded(player: Player, character: Model)
 		humanoid.DisplayName = profile.name
 	end
 	humanoid.Died:Connect(function()
+		ZoneService.UseRespawnPoint(player)
 		respawnLater(player, character)
 	end)
 end
@@ -145,6 +147,7 @@ end
 function AvatarService.Init(deps: { [string]: any })
 	DataService = deps.DataService
 	ProgressionService = deps.ProgressionService
+	ZoneService = deps.ZoneService
 end
 
 function AvatarService.Start()

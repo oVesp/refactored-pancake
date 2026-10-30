@@ -1375,7 +1375,7 @@ local list: { Types.SkillDef } = {
 		cooldown = 1,
 		devEffect = "Gate",
 		chatArg = true,
-		description = 'Teleport to a zone: say "Gate <zone>". No zone returns to the respawn point.',
+		description = 'Teleport to a zone or the Pylon: say "Gate <zone>" or "Gate Pylon". No zone returns to the inn.',
 	},
 }
 
