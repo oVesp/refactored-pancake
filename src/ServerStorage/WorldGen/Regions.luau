@@ -6,7 +6,7 @@
 
 	```lua
 	local Regions = require(game.ServerStorage.WorldGen.Regions)
-	Regions.Build("verdant")        -- terrain, sea, roads, props and site markers; runs in the background
+	Regions.Build("verdant")        -- terrain, sea, roads, props, goblin camps and site markers; in the background
 	Regions.Status("verdant")       -- "terrain 120/310", ..., "done in 95s"
 	Regions.View("verdant", 1)      -- camera position and target over the region, 1-4 from N/E/S/W, 5 overhead
 	```
@@ -41,13 +41,16 @@ local FLOOR_Y = -96 -- terrain is filled down to here
 local FLUSH = 400 -- parts parented per frame
 local ROOT = "World"
 local LIBRARY = "WorldProps" -- ServerStorage folder of prop templates (tools/blender/world_props.py)
+local VILLAGE_KIT = "VillageKit" -- ServerStorage folder of village-kit templates (tools/blender/village_kit.py)
+local WORLD_TAG = "WorldTag" -- template attribute naming the tag a placed copy receives
 
 local Regions = {}
 
 local cached: Region.Context? = nil
 local function context(): Region.Context
 	if not cached then
-		cached = Region.context(Template)
+		local manifest = script.Parent:FindFirstChild("VillageManifest")
+		cached = Region.context(Template, nil, if manifest then require(manifest :: ModuleScript) :: any else nil)
 	end
 	return cached :: Region.Context
 end
@@ -123,11 +126,14 @@ local function writeBlock(ctx: Region.Context, index: number, bx: number, bz: nu
 	-- Samples with a one-column border, for slopes.
 	local n = BLOCK + 2
 	local points: { Continent.Sample } = table.create(n * n)
+	local camps: { number } = table.create(n * n)
 	for iz = 0, n - 1 do
 		for ix = 0, n - 1 do
 			local x = wx0 + (ix - 1) * VOXEL + VOXEL / 2
 			local z = wz0 + (iz - 1) * VOXEL + VOXEL / 2
-			points[iz * n + ix + 1] = ctx.sample(Continent.toUnit(Template, x, z))
+			local point, camp = Region.point(ctx, x, z)
+			points[iz * n + ix + 1] = point
+			camps[iz * n + ix + 1] = camp
 		end
 	end
 	local columns: { Region.Column } = table.create(BLOCK * BLOCK)
@@ -145,7 +151,7 @@ local function writeBlock(ctx: Region.Context, index: number, bx: number, bz: nu
 			)
 			local x = wx0 + ix * VOXEL + VOXEL / 2
 			local z = wz0 + iz * VOXEL + VOXEL / 2
-			local column = Region.column(ctx, index, x, z, p, slope)
+			local column = Region.column(ctx, index, x, z, p, slope, camps[k])
 			columns[iz * BLOCK + ix + 1] = column
 			if column.owned then
 				mine += 1
@@ -201,14 +207,11 @@ end
 
 local missingWarned: { [string]: boolean } = {}
 
-local function placeProps(folder: Folder, specs: { Region.PropSpec })
+local function placeProps(folder: Folder, specs: { Region.PropSpec }, name: string)
 	local library = ServerStorage:FindFirstChild(LIBRARY)
-	if not library then
-		log:Warn("ServerStorage.%s is missing; region builds bare", LIBRARY)
-		return
-	end
+	local kit = ServerStorage:FindFirstChild(VILLAGE_KIT)
 	local group = Instance.new("Folder")
-	group.Name = "Props"
+	group.Name = name
 	group.Parent = folder
 	local pending: { BasePart } = {}
 	local function flush()
@@ -219,11 +222,11 @@ local function placeProps(folder: Folder, specs: { Region.PropSpec })
 		task.wait()
 	end
 	for _, spec in specs do
-		local template = library:FindFirstChild(spec.asset)
+		local template = (library and library:FindFirstChild(spec.asset)) or (kit and kit:FindFirstChild(spec.asset))
 		if not template or not template:IsA("Model") then
 			if not missingWarned[spec.asset] then
 				missingWarned[spec.asset] = true
-				log:Warn("prop template %s missing from ServerStorage.%s", spec.asset, LIBRARY)
+				log:Warn("template %s missing from ServerStorage.%s and .%s", spec.asset, LIBRARY, VILLAGE_KIT)
 			end
 			continue
 		end
@@ -233,6 +236,12 @@ local function placeProps(folder: Folder, specs: { Region.PropSpec })
 			if source:IsA("BasePart") then
 				local offset = pivot:ToObjectSpace(source.CFrame)
 				local part = source:Clone()
+				-- Gameplay parts (the brazier's bowl) carry their tag on the template as an attribute,
+				-- so the template itself is never a spell target.
+				local tag = part:GetAttribute(WORLD_TAG)
+				if type(tag) == "string" then
+					part:AddTag(tag)
+				end
 				part.Size = source.Size * spec.scale
 				part.CFrame = target * CFrame.new(offset.Position * spec.scale) * offset.Rotation
 				table.insert(pending, part)
@@ -297,7 +306,9 @@ local function build(id: string): boolean
 	folder.Name = id
 	folder.Parent = root()
 	setStatus(id, "props")
-	placeProps(folder, Region.props(ctx, id))
+	placeProps(folder, Region.props(ctx, id), "Props")
+	setStatus(id, "camps")
+	placeProps(folder, Region.camps(ctx, id), "Camps")
 	placeMarkers(folder, Region.markers(ctx, id))
 	local took = math.floor(os.clock() - started)
 	setStatus(id, `done in {took}s`)

@@ -3,6 +3,7 @@
 -- Region builds (src/ServerStorage/WorldGen/Gen/Region, docs/systems/world-generation.md).
 local fs = require("@lune/fs")
 local roblox = require("@lune/roblox")
+local serde = require("@lune/serde")
 
 local Expect = require("../Expect")
 local Loader = require("../Loader")
@@ -61,6 +62,41 @@ return {
 			end
 		end
 		Expect.truthy(found, "no sea within 300 studs south of the village")
+	end,
+
+	["goblin camps stand on level, dry ground with no trees inside"] = function()
+		local manifest = serde.decode("json", fs.readFile("content/world/village.json"))
+		local ctx = Region.context(Template, nil, manifest)
+		Expect.truthy(#ctx.camps >= 3, `only {#ctx.camps} camps`)
+		local radius = Template.camp.radius
+		for _, camp in ctx.camps do
+			for a = 0, 7 do
+				for _, r in { 0, radius * 0.5, radius } do
+					local x = camp.x + math.sin(a * math.pi / 4) * r
+					local z = camp.z + math.cos(a * math.pi / 4) * r
+					local point = Region.point(ctx, x, z)
+					Expect.truthy(point.water == nil, `{camp.id}: water at ({x}, {z})`)
+					Expect.truthy(math.abs(point.height - camp.y) < 0.5, `{camp.id}: ground {point.height} vs {camp.y}`)
+				end
+			end
+		end
+		local slice = ctx.camps[1]
+		for _, camp in ctx.camps do
+			if camp.id == "goblin-camp" then
+				slice = camp
+			end
+		end
+		Expect.equal(slice.id, "goblin-camp")
+		Expect.truthy(math.abs(slice.x) < 60 and math.abs(slice.z + 660) < 60, "slice camp off the Map's GoblinCamp")
+		for _, prop in Region.props(ctx, "verdant") do
+			for _, camp in ctx.camps do
+				Expect.truthy(
+					(prop.x - camp.x) ^ 2 + (prop.z - camp.z) ^ 2 > radius * radius,
+					`{prop.asset} inside {camp.id}`
+				)
+			end
+		end
+		Expect.truthy(#Region.camps(ctx, "verdant") > 0, "verdant camps are not dressed")
 	end,
 
 	["approved regions are unchanged"] = function()

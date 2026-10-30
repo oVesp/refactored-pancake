@@ -6,7 +6,7 @@ This replaced the zone-graph world (village, fields and goblin camp in one centr
 
 Originality: the sketch is the owner's own; region names and placeholder site names are generic. No layout, landmark, location name or unique feature of another game is copied (game-design §2).
 
-Code: `src/ServerStorage/WorldGen/Continent.luau` (template), `Gen/Continent.luau` (pure generator and point query, runs in Lune and Studio), `Gen/Region.luau` (one region at stud scale, pure), `Regions.luau` (Studio builder), `Gen/Hash.luau` (hashing and noise). Tools: `tools/worldgen/continent.luau`, `tools/worldgen/region.luau`. Tests: `tests/specs/Continent.spec.luau`, `tests/specs/Region.spec.luau`.
+Code: `src/ServerStorage/WorldGen/Continent.luau` (template), `Gen/Continent.luau` (pure generator and point query, runs in Lune and Studio), `Gen/Region.luau` (one region at stud scale, pure), `Gen/Camp.luau` (goblin camp layout), `Regions.luau` (Studio builder), `Gen/Hash.luau` (hashing and noise). Tools: `tools/worldgen/continent.luau`, `tools/worldgen/region.luau`. Tests: `tests/specs/Continent.spec.luau`, `tests/specs/Region.spec.luau`.
 
 ## Template (`Continent.luau`)
 
@@ -66,7 +66,8 @@ Each region is built and approved on its own (owner, 2026-10-29). Verdant Greens
 - **Ownership**: a region owns every 4-stud column whose sample names it as `owner`: its land, its lakes and the sea out to `offshore` anchor reaches from its coast. Sea farther out is not built yet.
 - **Columns** (`Region.column`): ground and water from the sample; material from the biome: beach sand near the coastline, rock on mountains and slopes over 4.5 studs per column (snow above 250 studs), bare ground on roads (7 studs either side of the smoothed road line) and in large noise patches, grass elsewhere; sand and mud under water.
 - **Props** (`Region.props`): trees on a jittered lattice at the biome density inside groves (noise mask covering `groves` of the ground), a few loners, bushes around trees, boulders on a coarser lattice. Kept off water, beaches, mountains, roads, pads and uneven ground. Each is a clone of a `ServerStorage.WorldProps` variant.
-- **Sites**: neon placeholder pillars until settlements are dressed.
+- **Goblin camps** (owner, 2026-10-29: dress with a few goblin camps): `camp` sites owned by Goblins. Verdant Greens has the starter slice's camp, fixed on the Map's GoblinCamp zone 660 studs north of the Harbor, plus `camps = 2` placed by the generator (`spacing.camp` from any site). `Region.point` levels the ground to the camp centre's height inside the palisade and eases it back over `camp.flatten` studs; the ground there is mud and no props grow. `Gen/Camp.luau` lays each camp out from village-kit models: a palisade ring of `camp.radius` studs whose gate faces the nearest settlement, two gate towers, tents on an inner ring opening to the centre, the brazier (its bowl gets the `Kindleable` tag from the template's `WorldTag` attribute) and the dais opposite the gate, crates and a wagon. Camps have no goblins yet.
+- **Sites**: other sites are neon placeholder pillars until they are dressed.
 - **Studio** (`Regions.luau`): `Regions.Build(id)` runs in the background; it reads each 256-stud terrain block near the region, replaces only owned columns and writes it back, then places props and markers under `Workspace.World/<id>`. `Regions.Status(id)` reports progress; Verdant Greens takes about 50 seconds. `Regions.View(id, k)` frames the region from the N/E/S/W edge or above.
 - **Report**: `lune run tools/worldgen/region <id>` prints bounds, prop count, sites and the fingerprint, and writes `build/region-<id>.png` (8 studs per pixel).
 
@@ -102,7 +103,8 @@ Roblox compatibility fixes, all in the script:
 
 ## Not built yet
 
-- **Settlements**: sites are placeholder pillars. The Harbor village dressing (houses, docks, fields, orchard, goblin camp) is the next pass for Verdant Greens.
+- **Settlements**: towns, the Harbor and other sites are placeholder pillars; only goblin camps are dressed.
+- **Camp population**: camps have no goblin nests yet (`ContentServerOnly/Population`).
 - **Open sea**: sea beyond each region's offshore band is not built.
 - **Population**: `ContentServerOnly/Population` is empty. Garrisons, patrols, caravans and nests come back per site and road once regions are built.
 - **The Map**: `Workspace.Map` (spawn, trainers, vendor, dev yard, creation stage) stands on the Harbor village pads at the origin.

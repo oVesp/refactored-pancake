@@ -435,8 +435,8 @@ local function placeSites(template: Template, seed: number, res: number, map: Ma
 				end
 			end
 		end
-		for _, kind in { "town", "poi", "dungeon" } do
-			local want = (region :: any)[kind .. "s"] :: number
+		for _, kind in { "town", "poi", "dungeon", "camp" } do
+			local want = ((region :: any)[kind .. "s"] or 0) :: number
 			local pool = if kind == "dungeon" then any else open
 			local spacing = (template.spacing :: any)[kind] :: number
 			local placed = 0
@@ -453,7 +453,7 @@ local function placeSites(template: Template, seed: number, res: number, map: Ma
 						name = "",
 						kind = kind,
 						region = region.id,
-						owner = if kind == "town" then region.owner else nil,
+						owner = if kind == "town" then region.owner elseif kind == "camp" then "Goblins" else nil,
 						u = u,
 						v = v,
 						cell = k,

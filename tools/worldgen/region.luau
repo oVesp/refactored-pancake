@@ -6,6 +6,7 @@
 -- top-down view at 8 studs per pixel with ground, water, roads, props and sites.
 local fs = require("@lune/fs")
 local process = require("@lune/process")
+local serde = require("@lune/serde")
 
 local Loader = require("../../tests/Loader")
 local Png = require("./Png")
@@ -16,7 +17,8 @@ local template = Loader.load("src/ServerStorage/WorldGen/Continent")
 
 local id = process.args[1] or "verdant"
 local started = os.clock()
-local ctx = Region.context(template)
+local manifest = serde.decode("json", fs.readFile("content/world/village.json"))
+local ctx = Region.context(template, nil, manifest)
 local index = Region.index(ctx, id)
 local bounds = Region.bounds(ctx, id)
 print(string.format("context %.1fs; bounds %d %d %d %d", os.clock() - started, table.unpack(bounds)))
@@ -24,6 +26,13 @@ print(string.format("context %.1fs; bounds %d %d %d %d", os.clock() - started, t
 started = os.clock()
 local props = Region.props(ctx, id)
 print(string.format("%d props in %.1fs", #props, os.clock() - started))
+local camps = Region.camps(ctx, id)
+print(string.format("%d camp pieces", #camps))
+for _, camp in ctx.camps do
+	if camp.region == id then
+		print(string.format("  camp     %-22s x %6d z %6d y %5.1f", camp.id, camp.x, camp.z, camp.y))
+	end
+end
 for _, marker in Region.markers(ctx, id) do
 	print(string.format("  %-8s %-22s x %6d z %6d y %5.1f", marker.kind, marker.id, marker.x, marker.z, marker.y))
 end
@@ -51,8 +60,8 @@ local previous: { number } = {}
 for j = 0, nz - 1 do
 	for i = 0, nx - 1 do
 		local x, z = bounds[1] + i * STEP, bounds[2] + j * STEP
-		local p = ctx.sample(Continent.toUnit(template, x, z))
-		local column = Region.column(ctx, index, x, z, p, math.abs(p.height - (previous[i] or p.height)) / 2)
+		local p, camp = Region.point(ctx, x, z)
+		local column = Region.column(ctx, index, x, z, p, math.abs(p.height - (previous[i] or p.height)) / 2, camp)
 		previous[i] = p.height
 		local c = COLORS[column.material] or { 128, 128, 128 }
 		local shade = math.clamp(0.75 + column.height / 400, 0.6, 1.3)
@@ -70,6 +79,9 @@ end
 for _, prop in props do
 	local px, py = math.floor((prop.x - bounds[1]) / STEP), math.floor((prop.z - bounds[2]) / STEP)
 	put(px, py, if string.find(prop.asset, "Boulder") then { 150, 150, 150 } else { 30, 70, 40 })
+end
+for _, spec in camps do
+	put(math.floor((spec.x - bounds[1]) / STEP), math.floor((spec.z - bounds[2]) / STEP), { 120, 70, 40 })
 end
 for _, marker in Region.markers(ctx, id) do
 	local px, py = math.floor((marker.x - bounds[1]) / STEP), math.floor((marker.z - bounds[2]) / STEP)

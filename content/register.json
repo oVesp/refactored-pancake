@@ -3125,6 +3125,16 @@
 			"notes": "Pure region build data: owned columns and materials, props, site markers and the approval fingerprint."
 		},
 		{
+			"id": "worldgen:Camp",
+			"type": "tool",
+			"path": "src/ServerStorage/WorldGen/Gen/Camp.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Goblin camp layout from village-kit models: palisade ring, gate towers, tents, brazier, dais, clutter."
+		},
+		{
 			"id": "worldgen:Regions",
 			"type": "tool",
 			"path": "src/ServerStorage/WorldGen/Regions.luau",

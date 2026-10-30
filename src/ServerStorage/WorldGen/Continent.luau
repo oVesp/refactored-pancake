@@ -26,9 +26,10 @@ export type Region = {
 	towns: number,
 	pois: number,
 	dungeons: number,
+	camps: number?, -- goblin camps (Gen/Camp)
 }
 
-export type SiteKind = "capital" | "city" | "town" | "harbor" | "poi" | "dungeon" | "portal"
+export type SiteKind = "capital" | "city" | "town" | "harbor" | "poi" | "dungeon" | "portal" | "camp"
 
 export type Site = {
 	id: string,
@@ -88,7 +89,7 @@ local Continent = {
 	coast = { reach = 1.45, amp = 0.25, scale = 0.09, octaves = 4 },
 	warp = { amp = 0.05, scale = 0.16 }, -- bends region borders
 	ridge = { width = 0.03, noise = 0.6 }, -- mountain bands along `ridges` borders
-	spacing = { town = 0.06, poi = 0.035, dungeon = 0.04 }, -- minimum distance from any other site
+	spacing = { town = 0.06, poi = 0.035, dungeon = 0.04, camp = 0.04 }, -- minimum distance from any other site
 	roads = { extra = 1.35, mountain = 9, slope = 6, reuse = 0.45 },
 
 	-- Preview colours of what is not a biome.
@@ -275,6 +276,18 @@ local Continent = {
 		},
 	} :: { [string]: Biome },
 
+	-- Goblin camps (Gen/Camp): palisade ring of `radius` studs, ground flattened under it and eased
+	-- back over `flatten` studs. Village-kit models are `kitScale` studs per kit metre.
+	camp = {
+		radius = 86,
+		gateWidth = 2,
+		tents = 7,
+		tentRing = 52,
+		flatten = 60,
+		clutter = { Crate = 8, Wagon = 1 },
+	},
+	kitScale = 3.2,
+
 	-- Low-poly prop library (ServerStorage.WorldProps, tools/blender/world_props.py): each placement
 	-- is `<prefix><two-digit variant>`; templates are already scaled to `height`.
 	props = {
@@ -407,6 +420,7 @@ local Continent = {
 			towns = 3,
 			pois = 2,
 			dungeons = 1,
+			camps = 2,
 		},
 		{
 			id = "forests",
@@ -500,6 +514,16 @@ local Continent = {
 			region = "verdant",
 			owner = "Adventurers",
 			at = { 0.205, 0.815 }, -- the origin
+			fixed = true,
+		},
+		{
+			-- The starter slice's camp, on the Map's GoblinCamp zone north of the Harbor.
+			id = "goblin-camp",
+			name = "Goblin Camp",
+			kind = "camp",
+			region = "verdant",
+			owner = "Goblins",
+			at = { 0.205, 0.815 - 660 / 20480 },
 			fixed = true,
 		},
 		{

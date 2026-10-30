@@ -10,6 +10,7 @@
 	same point query.
 ]=]
 
+local Camp = require(script.Parent.Camp)
 local Continent = require(script.Parent.Continent)
 local Hash = require(script.Parent.Hash)
 
@@ -23,7 +24,11 @@ export type Context = {
 	roads: { { { number } } }, -- smoothed polylines in studs
 	buckets: { [number]: { { number } } }, -- road segments { x0, z0, x1, z1 } by bucket
 	patches: Hash.Fbm, -- bare-ground patches
+	camps: { CampSite }, -- every goblin camp on the continent, in studs
+	manifest: any?, -- village kit manifest (content/world/village.json); nil: camps are not dressed
 }
+
+export type CampSite = { id: string, region: string, x: number, z: number, y: number, gate: number }
 
 export type Column = {
 	height: number, -- ground in studs
@@ -62,10 +67,40 @@ local function chaikin(points: { { number } }, passes: number): { { number } }
 	return out
 end
 
---[=[ Generates the continent once and prepares the stud-scale lookups. ]=]
-function Region.context(template: Template, seed: number?): Context
+--[=[
+	Generates the continent once and prepares the stud-scale lookups. `manifest` is the village kit
+	manifest; without it camps flatten their ground but are not dressed.
+]=]
+function Region.context(template: Template, seed: number?, manifest: any?): Context
 	local s = seed or template.seed
 	local map = Continent.generate(template, s)
+	local sample = Continent.sampler(template, s)
+	-- Camps: ground height at the centre; the gate faces the nearest settlement.
+	local camps: { CampSite } = {}
+	for _, site in map.sites do
+		if site.kind == "camp" then
+			local x, z = Continent.toStuds(template, site.u, site.v)
+			local best, gate = math.huge, 0
+			for _, other in map.sites do
+				if
+					other.kind == "town"
+					or other.kind == "harbor"
+					or other.kind == "capital"
+					or other.kind == "city"
+				then
+					local ox, oz = Continent.toStuds(template, other.u, other.v)
+					local d = (ox - x) ^ 2 + (oz - z) ^ 2
+					if d < best then
+						best, gate = d, math.atan2(ox - x, oz - z)
+					end
+				end
+			end
+			table.insert(
+				camps,
+				{ id = site.id, region = site.region, x = x, z = z, y = sample(site.u, site.v).height, gate = gate }
+			)
+		end
+	end
 	local roads: { { { number } } } = {}
 	local buckets: { [number]: { { number } } } = {}
 	for _, road in map.roads do
@@ -101,11 +136,41 @@ function Region.context(template: Template, seed: number?): Context
 		template = template,
 		seed = s,
 		map = map,
-		sample = Continent.sampler(template, s),
+		sample = sample,
 		roads = roads,
 		buckets = buckets,
 		patches = Hash.fbm(Hash.named(s, "patches"), 320, 3),
+		camps = camps,
+		manifest = manifest,
 	}
+end
+
+local function smooth(t: number): number
+	t = math.clamp(t, 0, 1)
+	return t * t * (3 - 2 * t)
+end
+
+--[=[
+	The continent sample at studs `x`, `z` with the camp grounds levelled, and how far inside a camp
+	the point is (1 inside the palisade, easing to 0 over `camp.flatten`).
+]=]
+function Region.point(ctx: Context, x: number, z: number): (Continent.Sample, number)
+	local p = ctx.sample(Continent.toUnit(ctx.template, x, z))
+	local config = ctx.template.camp
+	local inner = config.radius + 12
+	local weight = 0
+	for _, camp in ctx.camps do
+		local d = math.sqrt((camp.x - x) ^ 2 + (camp.z - z) ^ 2)
+		if d < inner + config.flatten then
+			local w = 1 - smooth((d - inner) / config.flatten)
+			if w > weight and not p.water then
+				weight = w
+				p = table.clone(p)
+				p.height = p.height + (camp.y - p.height) * w
+			end
+		end
+	end
+	return p, weight
 end
 
 --[=[ Index of a region id in the template. ]=]
@@ -166,7 +231,8 @@ function Region.column(
 	x: number,
 	z: number,
 	point: Continent.Sample,
-	slope: number
+	slope: number,
+	camp: number?
 ): Column
 	local template = ctx.template
 	local owned = point.owner == index and (point.region ~= Continent.SEA or point.offshore < template.offshore)
@@ -175,7 +241,8 @@ function Region.column(
 	local material = biome.grass
 	if point.water and point.region == Continent.SEA then
 		material = if point.offshore < 0.06 then biome.sand else "Mud"
-	elseif point.water then
+	elseif point.water or (camp or 0) > 0.6 then
+		-- Lake beds, and trodden camp grounds.
 		material = "Mud"
 	elseif point.shore < 0.12 and point.pad < 0.5 then
 		material = biome.sand
@@ -204,9 +271,8 @@ function Region.props(ctx: Context, id: string): { PropSpec }
 	local out: { PropSpec } = {}
 
 	local function ground(x: number, z: number): number?
-		local u, v = Continent.toUnit(template, x, z)
-		local p = ctx.sample(u, v)
-		if p.owner ~= index or p.water or p.shore < 0.3 or p.mountain > 0.3 or p.pad > 0.02 then
+		local p, camp = Region.point(ctx, x, z)
+		if p.owner ~= index or p.water or p.shore < 0.3 or p.mountain > 0.3 or p.pad > 0.02 or camp > 0 then
 			return nil
 		end
 		if Region.roadDistance(ctx, x, z) < ROAD_HALF + 6 then
@@ -215,7 +281,7 @@ function Region.props(ctx: Context, id: string): { PropSpec }
 		-- Flat enough under the trunk.
 		local low, high = p.height, p.height
 		for _, o in { { 6, 0 }, { -6, 0 }, { 0, 6 }, { 0, -6 } } do
-			local q = ctx.sample(Continent.toUnit(template, x + o[1], z + o[2]))
+			local q = Region.point(ctx, x + o[1], z + o[2])
 			low, high = math.min(low, q.height), math.max(high, q.height)
 		end
 		if high - low > 6 then
@@ -314,10 +380,27 @@ end
 function Region.markers(ctx: Context, id: string): { Marker }
 	local out: { Marker } = {}
 	for _, site in ctx.map.sites do
-		if site.region == id then
+		if site.region == id and site.kind ~= "camp" then
 			local x, z = Continent.toStuds(ctx.template, site.u, site.v)
 			local p = ctx.sample(site.u, site.v)
 			table.insert(out, { id = site.id, name = site.name, kind = site.kind, x = x, y = p.height, z = z })
+		end
+	end
+	return out
+end
+
+--[=[ Village-kit placements for the region's goblin camps (empty without a manifest). ]=]
+function Region.camps(ctx: Context, id: string): { PropSpec }
+	local out: { PropSpec } = {}
+	if not ctx.manifest then
+		return out
+	end
+	for _, camp in ctx.camps do
+		if camp.region == id then
+			local site = { x = camp.x, z = camp.z, y = camp.y, gate = camp.gate, seed = Hash.named(ctx.seed, camp.id) }
+			for _, spec in Camp.layout(ctx.manifest, ctx.template.kitScale, site, ctx.template.camp) do
+				table.insert(out, spec)
+			end
 		end
 	end
 	return out
@@ -335,8 +418,8 @@ function Region.fingerprint(ctx: Context, id: string): string
 	local step = 32
 	for x = math.floor(bounds[1] / step) * step, bounds[3], step do
 		for z = math.floor(bounds[2] / step) * step, bounds[4], step do
-			local point = ctx.sample(Continent.toUnit(ctx.template, x, z))
-			local column = Region.column(ctx, index, x, z, point, 0)
+			local point, camp = Region.point(ctx, x, z)
+			local column = Region.column(ctx, index, x, z, point, 0, camp)
 			if column.owned then
 				h = Hash.u32(h, math.round(column.height * 2), math.round((column.water or -999) * 2))
 				h = Hash.named(h, column.material)
@@ -353,6 +436,14 @@ function Region.fingerprint(ctx: Context, id: string): string
 	end
 	for _, marker in Region.markers(ctx, id) do
 		h = Hash.u32(Hash.named(h, marker.id), math.round(marker.x), math.round(marker.z))
+	end
+	for _, spec in Region.camps(ctx, id) do
+		h = Hash.u32(
+			Hash.named(h, spec.asset),
+			math.round(spec.x * 10),
+			math.round(spec.z * 10),
+			math.round(spec.yaw * 100)
+		)
 	end
 	return string.format("%08x", h)
 end
