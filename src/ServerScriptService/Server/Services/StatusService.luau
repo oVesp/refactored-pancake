@@ -36,7 +36,7 @@ local function publish(entity: Entity)
 	end
 	table.sort(ids)
 	entity.model:SetAttribute("Statuses", table.concat(ids, ","))
-	entity.model:SetAttribute("Stunned", entity.statuses.stun ~= nil or entity.statuses.fear ~= nil)
+	entity.model:SetAttribute("Stunned", StatusService.IsDisabled(entity))
 	StatService.Recompute(entity)
 end
 
@@ -143,12 +143,12 @@ function StatusService.Clear(entity: Entity)
 	end
 end
 
---[=[ True while the entity cannot act (stun, fear). ]=]
+--[=[ True while the entity cannot act (stun, fear, sleep). ]=]
 function StatusService.IsDisabled(entity: Entity): boolean
-	return entity.statuses.stun ~= nil or entity.statuses.fear ~= nil
+	return entity.statuses.stun ~= nil or entity.statuses.fear ~= nil or entity.statuses.sleep ~= nil
 end
 
---[=[ True while the entity cannot move (root, stun, fear). ]=]
+--[=[ True while the entity cannot move (root, stun, fear, sleep). ]=]
 function StatusService.IsImmobile(entity: Entity): boolean
 	return entity.statuses.root ~= nil or StatusService.IsDisabled(entity)
 end

@@ -40,7 +40,7 @@ local Classes: { [string]: Types.ClassDef } = {
 		line = "arcane",
 		growth = { MaxHp = 8, MaxMp = 15, MagAtk = 5, Agility = 2, MagDef = 1, Resistance = 1 },
 		grants = { "arcane_line", "mana_flow", "blink", "elemental_focus", "overcharge" },
-		spellList = { "light", "kindle", "spark", "firebolt", "frost_shard", "flame_fan", "ice_patch", "arcane_shield" },
+		spellList = { "light", "magic_arrow", "destruction_water", "sleep", "quick_march", "arcane_shield" },
 	},
 	healer = {
 		id = "healer",
@@ -49,7 +49,7 @@ local Classes: { [string]: Types.ClassDef } = {
 		line = "divine",
 		growth = { MaxHp = 10, MaxMp = 14, MagAtk = 3, MagDef = 3, Resistance = 3 },
 		grants = { "divine_line", "gentle_hands", "rebuke", "devotion", "lay_on_hands" },
-		spellList = { "glow", "purify_water", "mend", "smite", "cleanse", "renew", "shelter", "bless" },
+		spellList = { "mend", "create_water", "anti_evil_protection", "smite" },
 	},
 }
 

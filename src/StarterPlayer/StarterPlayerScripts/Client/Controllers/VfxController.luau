@@ -16,6 +16,7 @@ local SpellEffects = require(script.Parent.Parent.Vfx.SpellEffects)
 
 local TYPE_COLORS: { [string]: Color3 } = {
 	physical = Color3.fromRGB(230, 230, 230),
+	force = Color3.fromRGB(170, 140, 255),
 	fire = Color3.fromRGB(255, 120, 40),
 	cold = Color3.fromRGB(140, 210, 255),
 	lightning = Color3.fromRGB(255, 240, 120),

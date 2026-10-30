@@ -116,6 +116,9 @@ local function landDamage(
 	end
 
 	StatService.SetHp(target, target.hp - remaining)
+	if target.statuses.sleep then
+		StatusService.Remove(target, "sleep")
+	end
 	local kind = if blocked then "blocked" elseif remaining < amount then "shielded" else "damage"
 	show(target, amount, kind, crit, skillId, source)
 	CombatService.Damaged:Fire(target, amount, damageType, source, crit, skillId)
@@ -147,6 +150,11 @@ export type DamageSpec = {
 	stat: string,
 	ratio: number,
 }
+
+--[=[ Evil creatures are the ones holy damage hurts more (undead, demons); Anti-Evil Protection keys on it. ]=]
+function CombatService.IsEvil(entity: Entity): boolean
+	return Formulas.TypeMultiplier("holy", entity.tags, Tuning.Combat.TypeMultiplier) > 1
+end
 
 --[=[ Per-hit crit adjustments from the skill and the attacker's next-hit statuses. ]=]
 export type HitMods = {
@@ -255,6 +263,11 @@ function CombatService.DealDamage(
 			target.guardSince = nil
 			target.model:SetAttribute("Guarding", false)
 		end
+	end
+
+	local ward = target.statuses.anti_evil
+	if ward and CombatService.IsEvil(source) then
+		amount = math.max(1, math.floor(amount * (1 - ward.magnitude) + 0.5))
 	end
 
 	if rhythm then

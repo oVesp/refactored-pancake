@@ -17,7 +17,18 @@ export type StatName =
 
 export type StatBlock = { [string]: number }
 
-export type DamageType = "physical" | "fire" | "cold" | "lightning" | "acid" | "holy" | "negative" | "poison" | "mental"
+export type DamageType =
+	"physical"
+	| "force"
+	| "fire"
+	| "cold"
+	| "water"
+	| "lightning"
+	| "acid"
+	| "holy"
+	| "negative"
+	| "poison"
+	| "mental"
 
 export type Tags = {
 	resist: { string }?,
@@ -90,6 +101,9 @@ export type SkillDef = {
 	selfEffects: { Effect }?,
 	knockback: number?,
 	objectTag: string?,
+	--[=[ Object spells: attribute set true on the object and the `Strings` notice sent to the caster. ]=]
+	objectAttribute: string?,
+	objectNotice: string?,
 	modifiers: StatBlock?,
 	--[=[ Key in `Assets.Animations` for the caster's clip; markers `Windup`/`Hit` are cosmetic cues. ]=]
 	animation: string?,
@@ -143,7 +157,7 @@ export type ClassDef = {
 export type StatusDef = {
 	id: string,
 	name: string,
-	kind: "Dot" | "Hot" | "Move" | "Stun" | "Root" | "Taunt" | "Shield" | "Stats" | "Light",
+	kind: "Dot" | "Hot" | "Move" | "Stun" | "Root" | "Taunt" | "Shield" | "Stats" | "Light" | "Ward",
 	harmful: boolean,
 	damageType: string?,
 	tickInterval: number?,

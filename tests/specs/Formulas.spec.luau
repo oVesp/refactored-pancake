@@ -123,11 +123,17 @@ return {
 	end,
 	["spell picks: one per level, only from own list"] = function()
 		local classes = { { id = "mage", level = 2 }, { id = "fighter", level = 1 } }
-		local ok, _, payer = Formulas.CanLearnSpell(classes, {}, "spark", Classes, Skills, Tuning.Magic)
+		local ok, _, payer = Formulas.CanLearnSpell(classes, {}, "magic_arrow", Classes, Skills, Tuning.Magic)
 		Expect.truthy(ok)
 		Expect.equal(payer, "mage")
-		local okFull, reasonFull =
-			Formulas.CanLearnSpell(classes, { "spark", "firebolt" }, "frost_shard", Classes, Skills, Tuning.Magic)
+		local okFull, reasonFull = Formulas.CanLearnSpell(
+			classes,
+			{ "magic_arrow", "destruction_water" },
+			"sleep",
+			Classes,
+			Skills,
+			Tuning.Magic
+		)
 		Expect.equal(okFull, false)
 		Expect.equal(reasonFull, "NoPick")
 		local okOther, reasonOther = Formulas.CanLearnSpell(classes, {}, "mend", Classes, Skills, Tuning.Magic)

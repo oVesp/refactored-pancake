@@ -18,6 +18,7 @@ local Loot = Loader.load("src/ServerStorage/ContentServerOnly/Loot")
 local Animations = Loader.load(Content .. "Assets").Animations
 local Basic = Loader.load(Content .. "Skills").Basic
 local Chain = Loader.load("src/ReplicatedStorage/Shared/Chain")
+local Strings = Loader.load(Content .. "Strings")
 
 local function checkEffects(owner: string, effects: { any }?)
 	for _, effect in effects or {} do
@@ -51,6 +52,14 @@ return {
 				Expect.truthy(spell and spell.source == "Spell", `{id}: spell {spellId}`)
 				Expect.equal(spell.line, class.line, `{spellId} line`)
 				Expect.truthy(spell.tier <= 1, `{spellId} must be Tier 0-1 in M0.5`)
+			end
+		end
+	end,
+	["object spells name a tag and a known notice"] = function()
+		for id, skill in Skills do
+			if skill.delivery == "Object" then
+				Expect.truthy(type(skill.objectTag) == "string", `{id}: objectTag`)
+				Expect.truthy(skill.objectNotice == nil or Strings[skill.objectNotice], `{id}: objectNotice`)
 			end
 		end
 	end,

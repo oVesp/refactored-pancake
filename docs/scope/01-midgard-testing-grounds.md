@@ -75,7 +75,7 @@ All three are **base classes** (cap 15). Level cap here is 5. Stats per §3.1, n
 | Class | Role | Resource | Stat lean | Damage types |
 |---|---|---|---|---|
 | **Fighter** | General physical damage, any weapon | Stamina for class skills, Focus for Disciplines | HP, Physical Attack, Agility | Physical |
-| **Mage** | Ranged damage, control | MP | MP, Magic Attack, Agility | Fire, cold, lightning |
+| **Mage** | Ranged damage, control | MP | MP, Magic Attack, Agility | Force, water (elemental damage starts at Tier 2) |
 | **Healer** | Support, holy damage | MP | MP, Magic Defense, Resistance | Holy |
 
 ### 4.1 Class level grants
@@ -91,7 +91,7 @@ Every class level grants **one class skill**, either **Active** (hotbar) or **Pa
 | 1 | Arcane Line | Passive | Opens the arcane casting line (Tier 0–1) | Casting-line ceiling rule |
 | 2 | Mana Flow | Passive | +MP regen | Resource regen modifier |
 | 3 | Blink | Active | Short teleport | Server movement validation |
-| 4 | Elemental Focus | Passive | +burn/slow chance | Proc-on-hit passives |
+| 4 | Elemental Focus | Passive | +burn/slow chance (no Tier 0–1 spell applies them since the canon trim; rework pending) | Proc-on-hit passives |
 | 5 | Overcharge | Active | Next spell +damage, +cost | Buff consumed by next cast |
 
 **Healer** (+1 spell pick per level)
@@ -106,31 +106,25 @@ Every class level grants **one class skill**, either **Active** (hotbar) or **Pa
 
 ### 4.2 Spell lists (Tiers 0–1)
 
-8 spells per caster class; 5 picks by level 5, so the list always offers choice.
+Canon names and canon power scale (§3.2 *Canon power scale*): at least one spell per tradition plus the essentials (Light, Light Healing, Create Water). Mage has 6 spells for 5 picks; Healer has 4, so a level-5 Healer knows the whole list.
 
-| Mage | Tier | Delivery | Tests |
-|---|---|---|---|
-| Light | 0 | Self | Utility cost rule |
-| Kindle | 0 | Target object | Interactable world props |
-| Spark | 1 | Projectile | Free-aim skillshot |
-| Firebolt | 1 | Target (homing) | Burn status, targeted spell |
-| Frost Shard | 1 | Target (homing) | Slow status |
-| Flame Fan | 1 | Cone | Cone hit shape |
-| Ice Patch | 1 | Ground target | Ground AoE, root |
-| Arcane Shield | 1 | Self | Damage absorb |
+| Mage | Tier | Tradition | Delivery | Tests |
+|---|---|---|---|---|
+| Light | 0 | Lifestyle | Self | Utility cost rule |
+| Magic Arrow | 1 | Force | Target (homing), never misses | Basic targeted spell |
+| Destruction Water | 1 | Elemental (water) | Projectile, knockback | Free-aim skillshot, knockback |
+| Sleep | 1 | Control | Target (homing), cast | Disable that breaks on damage |
+| Quick March | 1 | Enhancement | Self | Move-speed buff |
+| Arcane Shield | 1 | Protection | Self | Damage absorb |
 
-| Healer | Tier | Delivery | Tests |
-|---|---|---|---|
-| Glow | 0 | Ally | Utility cost rule |
-| Purify Water | 0 | Target object | Interactable world props |
-| Mend | 1 | Ally | Direct heal, ally targeting |
-| Smite | 1 | Target (homing) | Holy damage |
-| Cleanse | 1 | Ally | Remove poison/bleed |
-| Renew | 1 | Ally | Heal over time |
-| Shelter | 1 | Ally | Shield, friendly-target rules |
-| Bless | 1 | Ally | Minor stat buff |
+| Healer | Tier | Tradition | Delivery | Tests |
+|---|---|---|---|---|
+| Light Healing | 1 | Healing | Ally | Direct heal, ally targeting |
+| Create Water | 1 | Lifestyle | Target object | Interactable world props |
+| Anti-Evil Protection | 1 | Protection | Ally | Damage reduction against evil (holy-vulnerable) attackers |
+| Smite | 1 | Holy | Target (homing) | Holy damage |
 
-Moved to Tier 2+ (M1 or later): chaining lightning, area heal-and-smite, resurrection.
+Kept in `Content/Skills` off the lists: Kindle, Glow, Purify Water (Tier 0); Spark, Firebolt, Frost Shard, Cleanse, Renew, Shelter, Bless (Tier 2); Flame Fan, Ice Patch (Tier 3). Moved to Tier 2+ (M1 or later): chaining lightning, area heal-and-smite, resurrection. Summons follow the summon system.
 
 ### 4.3 Disciplines (D3)
 

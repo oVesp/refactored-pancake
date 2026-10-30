@@ -407,8 +407,8 @@ local function useObject(caster: Entity, skill: SkillDef, aim: Vector3)
 			(child :: any).Enabled = true
 		end
 	end
-	local key = if skill.objectTag == "Kindleable" then "Kindled" else "Purified"
-	best:SetAttribute(if key == "Kindled" then "Lit" else "Purified", true)
+	local key = skill.objectNotice or (if skill.objectTag == "Kindleable" then "Kindled" else "Purified")
+	best:SetAttribute(skill.objectAttribute or (if key == "Kindled" then "Lit" else "Purified"), true)
 	if caster.player then
 		NetServer.Fire("Notify", caster.player, key, {})
 	end

@@ -25,6 +25,7 @@ return table.freeze({
 	VendorClosed = "The vendor is closed in this build.",
 	Kindled = "The brazier catches fire.",
 	Purified = "The water runs clear.",
+	WaterCreated = "Clean water fills it.",
 	EnteredZone = "%s (%s)",
 	CastNoResource = "Not enough resource to finish the cast.",
 	DevOnly = "Dev command refused.",

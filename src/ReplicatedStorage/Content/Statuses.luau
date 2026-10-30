@@ -5,8 +5,9 @@ local Types = require(script.Parent.Types)
 --[=[
 	Status effects (game-design.md 3.5). Magnitude and duration come from the applying effect.
 	Dot/Hot magnitude = amount per tick; Move magnitude = fraction of speed removed.
-	`modifiers` on Stats statuses use the same keys as passives.
-	`cleanse` is not a status; applying it removes every status in `Cleansable`.
+	`modifiers` on Stats statuses use the same keys as passives; `magnitudeStat` adds the magnitude to one.
+	Ward magnitude = fraction of damage removed from evil attackers (CombatService.IsEvil).
+	`sleep` ends on any damage. `cleanse` is not a status; applying it removes every status in `Cleansable`.
 ]=]
 local list: { Types.StatusDef } = {
 	{ id = "burn", name = "Burning", kind = "Dot", harmful = true, damageType = "fire", tickInterval = 1 },
@@ -17,6 +18,7 @@ local list: { Types.StatusDef } = {
 	{ id = "root", name = "Rooted", kind = "Root", harmful = true },
 	{ id = "stun", name = "Stunned", kind = "Stun", harmful = true },
 	{ id = "fear", name = "Afraid", kind = "Stun", harmful = true },
+	{ id = "sleep", name = "Asleep", kind = "Stun", harmful = true },
 	{ id = "taunt", name = "Taunted", kind = "Taunt", harmful = true },
 	{ id = "shield", name = "Shielded", kind = "Shield", harmful = false },
 	{ id = "light", name = "Lit", kind = "Light", harmful = false },
@@ -28,6 +30,8 @@ local list: { Types.StatusDef } = {
 		harmful = false,
 		modifiers = { SpellDamage = 0.4, SpellCost = 0.5 },
 	},
+	{ id = "quick_march", name = "Quick March", kind = "Stats", harmful = false, modifiers = { MoveSpeedPct = 0.2 } },
+	{ id = "anti_evil", name = "Anti-Evil Protection", kind = "Ward", harmful = false },
 	{ id = "bless", name = "Blessed", kind = "Stats", harmful = false, modifiers = { PhysAtk = 5, MagAtk = 5 } },
 	{ id = "hexed", name = "Hexed", kind = "Stats", harmful = true, modifiers = { DamageDone = -0.15 } },
 	{
@@ -90,5 +94,5 @@ return table.freeze({
 	ById = table.freeze(byId),
 	Cleansable = table.freeze({ "poison", "bleed", "burn" }),
 	--[=[ Statuses that interrupt a cast in progress when applied. ]=]
-	Interrupts = table.freeze({ "stun", "fear" }),
+	Interrupts = table.freeze({ "stun", "fear", "sleep" }),
 })
