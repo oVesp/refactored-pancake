@@ -3,17 +3,34 @@
 local Types = require(script.Parent.Types)
 
 --[=[
-	Classes available in M0.5 (scope 01, section 4). `grants[n]` is the class skill granted at
+	Starter classes (docs/systems/classes.md; scope 01, section 4). `grants[n]` is the class skill granted at
 	class level n; caster levels also grant spell picks from `spellList` (Magic.SpellPicksPerLevel).
 	`growth` is added once per class level.
 ]=]
 local Classes: { [string]: Types.ClassDef } = {
-	warrior = {
-		id = "warrior",
-		name = "Warrior",
+	fighter = {
+		id = "fighter",
+		name = "Fighter",
 		cap = 15,
-		growth = { MaxHp = 20, MaxMp = 2, PhysAtk = 4, PhysDef = 3, Agility = 1, MagDef = 1 },
-		grants = { "cleave", "hardy", "charge", "weapon_training", "war_cry" },
+		categories = { "Martial" },
+		growth = { MaxHp = 18, MaxMp = 2, PhysAtk = 4, PhysDef = 2, Agility = 3, MagDef = 1 },
+		grants = {
+			"weapon_proficiency_1",
+			"precise_attack",
+			"combat_conditioning",
+			"gather_strength",
+			"second_wind",
+			"weapon_proficiency_2",
+			"heightened_senses",
+			"battle_rhythm",
+			"disengage",
+			"exploit_weakness",
+			"weapon_proficiency_3",
+			"gather_strength_2",
+			"keen_reflexes",
+			"finishing_instinct",
+			"battle_trance",
+		},
 		spellList = {},
 	},
 	mage = {
@@ -37,7 +54,7 @@ local Classes: { [string]: Types.ClassDef } = {
 }
 
 --[=[ Display and hotbar order. ]=]
-local ORDER = { "warrior", "mage", "healer" }
+local ORDER = { "fighter", "mage", "healer" }
 
 return table.freeze({
 	ById = table.freeze(Classes),

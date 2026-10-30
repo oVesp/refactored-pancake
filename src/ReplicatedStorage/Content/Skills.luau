@@ -6,7 +6,7 @@ local Types = require(script.Parent.Types)
 	Every active and passive skill: basic attacks, class grants, spells and enemy skills
 	(scope 01, sections 4 and 5). Names are placeholders. Ranges are studs, times seconds.
 	`damage`/`heal`/`shield` amount = base + stat * ratio. Timing (docs/systems/combat.md): spells
-	and Cleave are `gcd` (shared global cooldown, plus `cooldown` when they have their own); other
+	and Precise Attack are `gcd` (shared global cooldown, plus `cooldown` when they have their own); other
 	class actives are off-GCD with their own `cooldown`; basic attacks and enemy skills sit outside
 	the GCD. The light attack is a three-hit chain (strike, strike_2, strike_3) linked by `chainNext`.
 ]=]
@@ -88,7 +88,163 @@ local list: { Types.SkillDef } = {
 		description = "Slow heavy attack.",
 	},
 
-	-- Warrior
+	-- Fighter (docs/systems/classes.md). Actives modify the next attack or buff the Fighter.
+	{
+		id = "weapon_proficiency_1",
+		name = "Weapon Proficiency I",
+		kind = "Passive",
+		source = "Class",
+		proficiency = { damage = 0.1 },
+		description = "+10% damage with your chosen weapon family.",
+	},
+	{
+		id = "precise_attack",
+		name = "Precise Attack",
+		kind = "Active",
+		source = "Class",
+		delivery = "Melee",
+		targets = "Enemy",
+		gcd = true,
+		range = 7,
+		angle = 100,
+		maxTargets = 1,
+		critChance = 0.15,
+		-- 140% of the light attack's first hit (Skills.Basic.Light).
+		damage = { type = "physical", base = 8.4, stat = "PhysAtk", ratio = 0.84 },
+		animation = "BasicStrike",
+		description = "Single-target attack with your weapon: 140% damage, +15% crit chance.",
+	},
+	{
+		id = "combat_conditioning",
+		name = "Combat Conditioning",
+		kind = "Passive",
+		source = "Class",
+		modifiers = { MaxStamina = 20, StaminaRegenPct = 0.15 },
+		description = "+20 max Stamina, +15% Stamina regen.",
+	},
+	{
+		id = "gather_strength",
+		name = "Gather Strength",
+		kind = "Active",
+		source = "Class",
+		delivery = "Self",
+		targets = "Self",
+		cooldown = 20,
+		cost = { resource = "Stamina", amount = 25 },
+		selfEffects = { { status = "empowered", duration = 8, magnitude = 0.5 } },
+		description = "Your next attack or skill within 8 s deals +50% damage.",
+	},
+	{
+		id = "second_wind",
+		name = "Second Wind",
+		kind = "Active",
+		source = "Class",
+		delivery = "Self",
+		targets = "Self",
+		cooldown = 60,
+		restore = { Stamina = 0.4, Hp = 0.1 },
+		description = "Restore 40% Stamina and 10% max HP.",
+	},
+	{
+		id = "weapon_proficiency_2",
+		name = "Weapon Proficiency II",
+		kind = "Passive",
+		source = "Class",
+		proficiency = { damage = 0.2 },
+		description = "Weapon family damage bonus rises to +20%.",
+	},
+	{
+		id = "heightened_senses",
+		name = "Heightened Senses",
+		kind = "Active",
+		source = "Class",
+		delivery = "Self",
+		targets = "Self",
+		cooldown = 45,
+		cost = { resource = "Stamina", amount = 30 },
+		selfEffects = { { status = "heightened_senses", duration = 8, magnitude = 0.4 } },
+		description = "+40% Agility for 8 s.",
+	},
+	{
+		id = "battle_rhythm",
+		name = "Battle Rhythm",
+		kind = "Passive",
+		source = "Class",
+		rhythm = { window = 3, perStack = 0.02, maxStacks = 5 },
+		description = "Each hit within 3 s of the last: +2% damage, stacks to 5.",
+	},
+	{
+		id = "disengage",
+		name = "Disengage",
+		kind = "Active",
+		source = "Class",
+		delivery = "Leap",
+		targets = "Self",
+		cooldown = 15,
+		range = 12,
+		selfEffects = { { status = "poised", duration = 3 } },
+		description = "Leap backward; your next attack within 3 s is a guaranteed crit.",
+	},
+	{
+		id = "exploit_weakness",
+		name = "Exploit Weakness",
+		kind = "Passive",
+		source = "Class",
+		critEffects = { { status = "exposed", duration = 5, magnitude = 0.1 } },
+		description = "Your crits expose the target: it takes +10% physical damage from you for 5 s.",
+	},
+	{
+		id = "weapon_proficiency_3",
+		name = "Weapon Proficiency III",
+		kind = "Passive",
+		source = "Class",
+		proficiency = { damage = 0.3, critDamage = 0.15 },
+		description = "Weapon family damage bonus rises to +30%, and +15% crit damage with it.",
+	},
+	{
+		id = "gather_strength_2",
+		name = "Gather Strength II",
+		kind = "Passive",
+		source = "Class",
+		upgrade = {
+			skill = "gather_strength",
+			charges = 2,
+			selfEffects = { { status = "empowered", duration = 8, magnitude = 0.75 } },
+		},
+		description = "Gather Strength holds 2 charges; its bonus rises to +75%.",
+	},
+	{
+		id = "keen_reflexes",
+		name = "Keen Reflexes",
+		kind = "Passive",
+		source = "Class",
+		upgrade = {
+			skill = "heightened_senses",
+			selfEffects = { { status = "heightened_senses", duration = 12, magnitude = 0.6 } },
+		},
+		description = "Heightened Senses lasts 12 s and grants +60% Agility.",
+	},
+	{
+		id = "finishing_instinct",
+		name = "Finishing Instinct",
+		kind = "Passive",
+		source = "Class",
+		modifiers = { ExecuteDamage = 0.25 },
+		description = "+25% damage to targets below 30% HP.",
+	},
+	{
+		id = "battle_trance",
+		name = "Battle Trance",
+		kind = "Active",
+		source = "Class",
+		delivery = "Self",
+		targets = "Self",
+		cooldown = 120,
+		selfEffects = { { status = "battle_trance", duration = 12 } },
+		description = "12 s: +25% damage, Stamina costs halved, Battle Rhythm at 5 stacks; a free Gather Strength when it ends.",
+	},
+
+	-- Reserved: Warrior high-class candidates (Fighter 5, docs/systems/classes.md); no class grants them yet
 	{
 		id = "cleave",
 		name = "Cleave",
@@ -104,14 +260,6 @@ local list: { Types.SkillDef } = {
 		description = "Wide arc hitting every enemy in front.",
 	},
 	{
-		id = "hardy",
-		name = "Hardy",
-		kind = "Passive",
-		source = "Class",
-		modifiers = { MaxHpPct = 0.1, PhysDef = 5 },
-		description = "+10% max HP, +5 physical defense.",
-	},
-	{
 		id = "charge",
 		name = "Charge",
 		kind = "Active",
@@ -124,14 +272,6 @@ local list: { Types.SkillDef } = {
 		damage = { type = "physical", base = 8, stat = "PhysAtk", ratio = 0.6 },
 		effects = { { status = "stun", duration = 0.75 } },
 		description = "Rush your target and stun it.",
-	},
-	{
-		id = "weapon_training",
-		name = "Weapon Training",
-		kind = "Passive",
-		source = "Class",
-		modifiers = { PhysAtk = 6, HeavySpeed = 0.4 },
-		description = "+6 physical attack; heavy attacks wind up 40% faster.",
 	},
 	{
 		id = "war_cry",

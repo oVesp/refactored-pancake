@@ -11,6 +11,7 @@ local Formulas = require(ReplicatedStorage.Shared.Formulas)
 local Logger = require(ReplicatedStorage.Shared.Logger)
 local NetServer = require(ReplicatedStorage.Shared.Net.Server)
 local Skills = require(ReplicatedStorage.Content.Skills)
+local Statuses = require(ReplicatedStorage.Content.Statuses)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 local Types = require(script.Parent.Parent.Types)
 
@@ -122,9 +123,9 @@ local function spellBonus(caster: Entity, skill: SkillDef): number
 	return 0
 end
 
-local function hitEnemy(caster: Entity, target: Entity, skill: SkillDef, bonus: number)
+local function hitEnemy(caster: Entity, target: Entity, skill: SkillDef, bonus: number, mods: any?)
 	if skill.damage then
-		local dealt = CombatService.DealDamage(caster, target, skill.damage, skill.id, bonus)
+		local dealt = CombatService.DealDamage(caster, target, skill.damage, skill.id, bonus, mods)
 		if dealt <= 0 and not CombatService.CanHarm(caster, target) then
 			return
 		end
@@ -133,6 +134,47 @@ local function hitEnemy(caster: Entity, target: Entity, skill: SkillDef, bonus: 
 	if skill.knockback then
 		CombatService.Knockback(target, caster.root.Position, skill.knockback)
 	end
+end
+
+--[=[ Self effects of a skill for this caster, after upgrade passives (Formulas.CollectTraits). ]=]
+local function selfEffectsOf(caster: Entity, skill: SkillDef): { any }
+	local upgrade = caster.traits.upgrades[skill.id]
+	return (upgrade and upgrade.selfEffects) or skill.selfEffects or {}
+end
+
+local function chargesOf(caster: Entity, skill: SkillDef): number
+	local upgrade = caster.traits.upgrades[skill.id]
+	return (upgrade and upgrade.charges) or skill.charges or 1
+end
+
+local function applySelfEffects(caster: Entity, skill: SkillDef)
+	for _, effect in selfEffectsOf(caster, skill) do
+		StatusService.Apply(caster, effect.status, effect.duration or 1, effect.magnitude, caster)
+	end
+end
+
+-- Spends the caster's next-hit statuses (Gather Strength, Disengage) on a damaging skill.
+-- Returns the outgoing bonus and crit mods every hit of this use shares.
+local function spendNextHit(caster: Entity, skill: SkillDef): (number, any?)
+	if not skill.damage then
+		return 0, if skill.critChance then { critChance = skill.critChance } else nil
+	end
+	local bonus = 0
+	local mods = { critChance = skill.critChance, forceCrit = false }
+	for id, status in table.clone(caster.statuses) do
+		local def = Statuses.ById[id]
+		local nextHit = def and def.nextHit
+		if nextHit then
+			if nextHit.damage then
+				bonus += status.magnitude
+			end
+			if nextHit.crit then
+				mods.forceCrit = true
+			end
+			StatusService.Consume(caster, id)
+		end
+	end
+	return bonus, mods
 end
 
 local function supportAlly(caster: Entity, target: Entity, skill: SkillDef)
@@ -223,7 +265,20 @@ local function teleport(caster: Entity, destination: Vector3, faceToward: Vector
 	caster.model:PivotTo(cframe)
 end
 
-local function launchProjectile(caster: Entity, skill: SkillDef, aim: Vector3, bonus: number)
+-- Moves the caster up to `distance` studs along flat `direction`, stopping short of walls, and
+-- faces it along `facing` (Blink forward, Leap backward).
+local function travelAlong(caster: Entity, direction: Vector3, distance: number, facing: Vector3)
+	if distance <= 1 then
+		return
+	end
+	local origin = caster.root.Position
+	local wall = workspace:Raycast(origin, direction * distance, worldParams)
+	local travel = if wall then math.max(0, (wall.Position - origin).Magnitude - 2.5) else distance
+	local destination = groundBelow(origin + direction * travel)
+	teleport(caster, destination + Vector3.new(0, origin.Y - groundBelow(origin).Y, 0), destination + facing * 100)
+end
+
+local function launchProjectile(caster: Entity, skill: SkillDef, aim: Vector3, bonus: number, mods: any?)
 	local origin = caster.root.Position + Vector3.new(0, CAST_ORIGIN_HEIGHT, 0)
 	local toAim = aim - origin
 	local direction = if toAim.Magnitude > 1e-3 then toAim.Unit else caster.root.CFrame.LookVector
@@ -256,7 +311,7 @@ local function launchProjectile(caster: Entity, skill: SkillDef, aim: Vector3, b
 			if (p - closest).Magnitude <= PROJECTILE_RADIUS + ENTITY_RADIUS then
 				connection:Disconnect()
 				impact(id, closest, "hit")
-				hitEnemy(caster, other, skill, bonus)
+				hitEnemy(caster, other, skill, bonus, mods)
 				return
 			end
 		end
@@ -272,7 +327,7 @@ end
 
 -- Homing spell: chases one target, cannot hit anyone else, stops on walls and gives up after
 -- HomingRangeFactor x range (Tuning.Targeting).
-local function launchHoming(caster: Entity, skill: SkillDef, target: Entity, bonus: number)
+local function launchHoming(caster: Entity, skill: SkillDef, target: Entity, bonus: number, mods: any?)
 	local origin = caster.root.Position + Vector3.new(0, CAST_ORIGIN_HEIGHT, 0)
 	local toTarget = target.root.Position - origin
 	local id = castId()
@@ -303,7 +358,7 @@ local function launchHoming(caster: Entity, skill: SkillDef, target: Entity, bon
 		if offset.Magnitude <= step + PROJECTILE_RADIUS + ENTITY_RADIUS then
 			connection:Disconnect()
 			impact(id, target.root.Position, "hit")
-			hitEnemy(caster, target, skill, bonus)
+			hitEnemy(caster, target, skill, bonus, mods)
 			return
 		end
 		local direction = offset.Unit
@@ -350,33 +405,42 @@ local function resolve(caster: Entity, skill: SkillDef, aim: Vector3, target: En
 	if bonus > 0 then
 		StatusService.Consume(caster, "overcharge")
 	end
+	local nextBonus, mods = spendNextHit(caster, skill)
+	bonus += nextBonus
 
 	local delivery = skill.delivery
 	local origin = caster.root.Position
 	local shownTarget: Model? = nil
 	if delivery == "Melee" or delivery == "Cone" then
-		for _, victim in arcTargets(caster, aim, skill.range, skill.angle) do
-			hitEnemy(caster, victim, skill, bonus)
+		local victims = arcTargets(caster, aim, skill.range, skill.angle)
+		if skill.maxTargets and #victims > skill.maxTargets then
+			table.sort(victims, function(a, b)
+				return (a.root.Position - origin).Magnitude < (b.root.Position - origin).Magnitude
+			end)
+			victims = table.move(victims, 1, skill.maxTargets, 1, {})
+		end
+		for _, victim in victims do
+			hitEnemy(caster, victim, skill, bonus, mods)
 		end
 	elseif delivery == "SelfArea" then
 		for _, victim in areaTargets(caster, skill, origin, skill.radius) do
 			if skill.targets == "Ally" then
 				supportAlly(caster, victim, skill)
 			else
-				hitEnemy(caster, victim, skill, bonus)
+				hitEnemy(caster, victim, skill, bonus, mods)
 			end
 		end
 	elseif delivery == "Ground" then
 		local offset = flat(aim - origin)
 		local center = if offset.Magnitude > skill.range then origin + offset.Unit * skill.range else aim
 		for _, victim in areaTargets(caster, skill, center, skill.radius) do
-			hitEnemy(caster, victim, skill, bonus)
+			hitEnemy(caster, victim, skill, bonus, mods)
 		end
 	elseif delivery == "Projectile" then
-		launchProjectile(caster, skill, aim, bonus)
+		launchProjectile(caster, skill, aim, bonus, mods)
 	elseif delivery == "Target" then
 		if target and validEnemy(caster, target, skill) then
-			launchHoming(caster, skill, target, bonus)
+			launchHoming(caster, skill, target, bonus, mods)
 		else
 			impact(0, origin, "miss")
 		end
@@ -388,26 +452,32 @@ local function resolve(caster: Entity, skill: SkillDef, aim: Vector3, target: En
 		if skill.shield then
 			supportAlly(caster, caster, skill)
 		end
+		local restore = skill.restore
+		if restore and restore.Hp then
+			CombatService.Heal(caster, caster, caster.stats.MaxHp * restore.Hp)
+		end
+		if restore and restore.Stamina then
+			StatService.Restore(caster, "Stamina", caster.maxStamina * restore.Stamina)
+		end
 	elseif delivery == "Dash" then
 		if target and validEnemy(caster, target, skill) then
 			local away = flat(origin - target.root.Position)
 			local offset = if away.Magnitude > 1e-3 then away.Unit * 3.5 else Vector3.new(0, 0, 3.5)
 			teleport(caster, target.root.Position + offset, target.root.Position)
-			hitEnemy(caster, target, skill, bonus)
+			hitEnemy(caster, target, skill, bonus, mods)
 		end
 	elseif delivery == "Blink" then
 		local offset = flat(aim - origin)
-		local distance = math.min(offset.Magnitude, skill.range)
-		if distance > 1 then
-			local direction = offset.Unit
-			local wall = workspace:Raycast(origin, direction * distance, worldParams)
-			local travel = if wall then math.max(0, (wall.Position - origin).Magnitude - 2.5) else distance
-			local destination = groundBelow(origin + direction * travel)
-			teleport(
-				caster,
-				destination + Vector3.new(0, origin.Y - groundBelow(origin).Y, 0),
-				origin + direction * 100
-			)
+		if offset.Magnitude > 1 then
+			travelAlong(caster, offset.Unit, math.min(offset.Magnitude, skill.range), offset.Unit)
+		end
+	elseif delivery == "Leap" then
+		local forward = flat(aim - origin)
+		if forward.Magnitude < 1e-3 then
+			forward = flat(caster.root.CFrame.LookVector)
+		end
+		if forward.Magnitude > 1e-3 then
+			travelAlong(caster, -forward.Unit, skill.range, forward.Unit)
 		end
 	elseif delivery == "Object" then
 		useObject(caster, skill, aim)
@@ -423,9 +493,7 @@ local function resolve(caster: Entity, skill: SkillDef, aim: Vector3, target: En
 		})
 	end
 
-	for _, effect in (skill.selfEffects or {}) :: { any } do
-		StatusService.Apply(caster, effect.status, effect.duration or 1, effect.magnitude, caster)
-	end
+	applySelfEffects(caster, skill)
 end
 
 local function hasted(caster: Entity, seconds: number): number
@@ -503,7 +571,7 @@ function SkillService.Cast(
 	local now = os.clock()
 	local timing = Tuning.Combat.Gcd
 	if skill.cooldown then
-		caster.cooldowns[skillId] = now + skill.cooldown
+		caster.cooldowns[skillId] = Formulas.ChargeSpend(caster.cooldowns[skillId] or 0, now, skill.cooldown)
 	end
 	if skill.gcd then
 		caster.gcdReadyAt = now + hasted(caster, timing.Base)
@@ -591,7 +659,7 @@ function SkillService.Interrupt(caster: Entity): boolean
 		caster.gcdReadyAt = now
 	end
 	if skill and skill.cooldown then
-		caster.cooldowns[cast.skillId] = now
+		caster.cooldowns[cast.skillId] = math.max(now, (caster.cooldowns[cast.skillId] or now) - skill.cooldown)
 	end
 	caster.model:SetAttribute("Casting", nil)
 	impact(0, caster.root.Position, "interrupt")
@@ -602,8 +670,12 @@ end
 --[=[ Seconds until a skill is ready for an entity: its own cooldown and, for `gcd` skills, the GCD. ]=]
 function SkillService.CooldownRemaining(caster: Entity, skillId: string): number
 	local now = os.clock()
-	local remaining = (caster.cooldowns[skillId] or 0) - now
 	local skill = Skills.ById[skillId]
+	local remaining = (caster.cooldowns[skillId] or 0) - now
+	if skill and skill.cooldown then
+		remaining =
+			Formulas.ChargeReadyIn(caster.cooldowns[skillId] or 0, now, skill.cooldown, chargesOf(caster, skill))
+	end
 	if skill and skill.gcd then
 		remaining = math.max(remaining, caster.gcdReadyAt - now)
 	end
@@ -682,6 +754,9 @@ local function handleUseSkill(player: Player, skillId: string, aim: Vector3, seq
 			amount *= 1 + caster.extras.SpellCost
 		end
 		local resource: "Mp" | "Stamina" = skill.cost.resource
+		if resource == "Stamina" then
+			amount *= math.max(0, 1 + caster.extras.StaminaCost)
+		end
 		local available = if resource == "Mp" then caster.mp else caster.stamina
 		if available < amount then
 			reject(player, seq, "Resource")
@@ -776,6 +851,13 @@ function SkillService.Init(deps: { [string]: any })
 end
 
 function SkillService.Start()
+	StatusService.Expired:Connect(function(entity: Entity, statusId: string)
+		local def = Statuses.ById[statusId]
+		local skill = def and def.expireSkill and Skills.ById[def.expireSkill]
+		if skill and entity.alive then
+			applySelfEffects(entity, skill)
+		end
+	end)
 	StatusService.Interrupted:Connect(function(entity: Entity)
 		if SkillService.Interrupt(entity) then
 			log:Debug("Interrupted %s", entity.name)

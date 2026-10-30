@@ -55,6 +55,9 @@ local function statusModifiers(entity: Entity): ({ Formulas.StatBlock }, number)
 			if def.modifiers then
 				table.insert(blocks, def.modifiers)
 			end
+			if def.magnitudeStat then
+				table.insert(blocks, { [def.magnitudeStat] = status.magnitude })
+			end
 			if def.kind == "Move" then
 				moveMultiplier *= math.clamp(1 - status.magnitude, 0, 1)
 			elseif def.kind == "Root" or def.kind == "Stun" then
@@ -66,6 +69,26 @@ local function statusModifiers(entity: Entity): ({ Formulas.StatBlock }, number)
 		moveMultiplier *= Tuning.Combat.Commit.MoveMultiplier
 	end
 	return blocks, moveMultiplier
+end
+
+-- Skills whose cooldown may hold more than one charge; their count is mirrored as `Charges_<id>`.
+local chargeSkills: { string } = {}
+for id, skill in Skills.ById do
+	local target = if skill.upgrade and skill.upgrade.charges
+		then skill.upgrade.skill
+		elseif skill.charges then id
+		else nil
+	if target and not table.find(chargeSkills, target) then
+		table.insert(chargeSkills, target)
+	end
+end
+
+local function writeCharges(entity: Entity)
+	for _, id in chargeSkills do
+		local upgrade = entity.traits.upgrades[id]
+		local charges = (upgrade and upgrade.charges) or Skills.ById[id].charges or 1
+		entity.model:SetAttribute("Charges_" .. id, if charges > 1 then charges else nil)
+	end
 end
 
 local function playerModifiers(profile: any): { Formulas.StatBlock }
@@ -111,6 +134,14 @@ function StatService.Recompute(entity: Entity)
 				table.insert(modifiers, block)
 			end
 			entity.level = StatService.LevelFromProfile(profile)
+			entity.traits = Formulas.CollectTraits(Formulas.GrantedSkills(classes, Classes.ById), Skills.ById)
+			entity.weaponFamily = Formulas.EquippedWeapon(profile.equipment, profile.inventory, Items.ById)
+			entity.proficiencyFamily = Formulas.ProficiencyFamily(
+				profile.proficiency,
+				entity.weaponFamily,
+				Tuning.Combat.ProficiencyWeapons[1]
+			)
+			writeCharges(entity)
 		end
 	else
 		local def = NpcDefs.Get(entity.defId)
@@ -134,7 +165,7 @@ function StatService.Recompute(entity: Entity)
 	})
 	entity.stats = stats
 	entity.extras = extras
-	entity.maxStamina = Tuning.Base.MaxStamina
+	entity.maxStamina = Tuning.Base.MaxStamina + extras.MaxStamina
 
 	if previousMaxHp and stats.MaxHp > previousMaxHp and entity.alive then
 		entity.hp += stats.MaxHp - previousMaxHp
@@ -206,10 +237,12 @@ function StatService.Spend(entity: Entity, resource: "Mp" | "Stamina", amount: n
 	return true
 end
 
---[=[ Restores MP or HP from items or effects. ]=]
-function StatService.Restore(entity: Entity, resource: "Hp" | "Mp", amount: number)
+--[=[ Restores HP, MP or Stamina from items or effects. ]=]
+function StatService.Restore(entity: Entity, resource: "Hp" | "Mp" | "Stamina", amount: number)
 	if resource == "Hp" then
 		entity.hp = math.min(entity.stats.MaxHp, entity.hp + amount)
+	elseif resource == "Stamina" then
+		entity.stamina = math.min(entity.maxStamina, entity.stamina + amount)
 	else
 		entity.mp = math.min(entity.stats.MaxMp, entity.mp + amount)
 	end
@@ -229,7 +262,10 @@ local function regenerate(dt: number)
 			changed = true
 		end
 		if entity.stamina < entity.maxStamina and entity.guardSince == nil then
-			entity.stamina = math.min(entity.maxStamina, entity.stamina + Tuning.Base.StaminaRegen * dt)
+			entity.stamina = math.min(
+				entity.maxStamina,
+				entity.stamina + Tuning.Base.StaminaRegen * (1 + entity.extras.StaminaRegenPct) * dt
+			)
 			changed = true
 		end
 		if entity.hp < entity.stats.MaxHp and now - entity.lastCombatAt > Tuning.Base.OutOfCombatDelay then

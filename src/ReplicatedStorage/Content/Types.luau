@@ -50,6 +50,7 @@ export type Delivery =
 	| "Dash"
 	| "Blink"
 	| "Object"
+	| "Leap"
 
 export type SkillDef = {
 	id: string,
@@ -97,6 +98,25 @@ export type SkillDef = {
 		Tuning.Combat.Chain.Window of this one (Shared/Chain).
 	]=]
 	chainNext: string?,
+	--[=[ Melee only: hits at most this many enemies in the arc, nearest first. ]=]
+	maxTargets: number?,
+	--[=[ Added to the caster's crit chance for this skill's hits. ]=]
+	critChance: number?,
+	--[=[ Self only: restores these fractions of max HP and Stamina. ]=]
+	restore: { Hp: number?, Stamina: number? }?,
+	--[=[ Uses of the cooldown held at once; each recharges in `cooldown` seconds. Default 1. ]=]
+	charges: number?,
+	--[=[
+		Passive: damage bonus (and crit damage bonus) with the chosen weapon family. Tiers override:
+		the highest granted tier counts (Formulas.CollectTraits).
+	]=]
+	proficiency: { damage: number, critDamage: number? }?,
+	--[=[ Passive: each hit within `window` seconds of the last adds `perStack` damage, up to `maxStacks`. ]=]
+	rhythm: { window: number, perStack: number, maxStacks: number }?,
+	--[=[ Passive: statuses the owner's crits apply to the target. ]=]
+	critEffects: { Effect }?,
+	--[=[ Passive: overrides `charges` and `selfEffects` of another skill (`skill`) while granted. ]=]
+	upgrade: { skill: string, charges: number?, selfEffects: { Effect }? }?,
 	description: string,
 }
 
@@ -104,6 +124,8 @@ export type ClassDef = {
 	id: string,
 	name: string,
 	cap: number,
+	--[=[ Category tags (docs/systems/classes.md, Unlock requirements), e.g. "Martial". ]=]
+	categories: { string }?,
 	line: string?,
 	growth: StatBlock,
 	grants: { string },
@@ -118,6 +140,19 @@ export type StatusDef = {
 	damageType: string?,
 	tickInterval: number?,
 	modifiers: StatBlock?,
+	--[=[ Stats only: the instance magnitude is added to this modifier key (e.g. AgilityPct). ]=]
+	magnitudeStat: string?,
+	--[=[
+		Spent by the owner's next damaging skill: `damage` adds the magnitude as outgoing bonus,
+		`crit` makes its hits crit.
+	]=]
+	nextHit: { damage: boolean?, crit: boolean? }?,
+	--[=[ The bearer takes +magnitude damage of this type from the status's source. ]=]
+	exposure: string?,
+	--[=[ Applying it fills the bearer's Battle Rhythm stacks. ]=]
+	fillsRhythm: boolean?,
+	--[=[ When it runs out (not when cleared), the bearer gets that skill's self effects for free. ]=]
+	expireSkill: string?,
 }
 
 export type Summon = {

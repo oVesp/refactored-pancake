@@ -189,13 +189,13 @@
       </Properties>
       <Item class="Model" referent="8">
         <Properties>
-          <string name="Name">Warrior Trainer</string>
+          <string name="Name">Fighter Trainer</string>
         </Properties>
         <Item class="Part" referent="9">
           <Properties>
             <string name="Name">Body</string>
             <bool name="Anchored">true</bool>
-            <BinaryString name="AttributesSerialize">AgAAAAcAAABDbGFzc0lkAgcAAAB3YXJyaW9yCwAAAFRyYWluZXJUeXBlAgUAAABDbGFzcw==</BinaryString>
+            <BinaryString name="AttributesSerialize">AgAAAAcAAABDbGFzc0lkAgcAAABmaWdodGVyCwAAAFRyYWluZXJUeXBlAgUAAABDbGFzcw==</BinaryString>
             <token name="BottomSurface">0</token>
             <CoordinateFrame name="CFrame">
               <X>-24</X>
@@ -224,10 +224,10 @@
           <Item class="ProximityPrompt" referent="10">
             <Properties>
               <string name="Name">TrainPrompt</string>
-              <string name="ActionText">Train Warrior</string>
+              <string name="ActionText">Train Fighter</string>
               <float name="HoldDuration">0.3</float>
               <float name="MaxActivationDistance">10</float>
-              <string name="ObjectText">Warrior Trainer</string>
+              <string name="ObjectText">Fighter Trainer</string>
               <bool name="RequiresLineOfSight">false</bool>
             </Properties>
           </Item>

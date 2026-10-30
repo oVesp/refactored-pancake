@@ -159,8 +159,14 @@ end
 function CombatController.Cooldown(skillId: string): (number, number)
 	local now = os.clock()
 	local skill = Skills.ById[skillId]
-	local own = math.max(0, (predictedReady[skillId] or 0) - now)
 	local total = if skill then skill.cooldown or 0 else 0
+	local charges = player.Character and player.Character:GetAttribute("Charges_" .. skillId)
+	local own = Formulas.ChargeReadyIn(
+		predictedReady[skillId] or 0,
+		now,
+		total,
+		if type(charges) == "number" then charges else 1
+	)
 	if skill and skill.gcd then
 		local gcd = math.max(0, gcdReadyAt - now)
 		if gcd > own then
@@ -241,7 +247,7 @@ local function send(skillId: string): boolean
 	seq += 1
 	pending[seq] = skillId
 	if skill.cooldown then
-		predictedReady[skillId] = now + skill.cooldown
+		predictedReady[skillId] = Formulas.ChargeSpend(predictedReady[skillId] or 0, now, skill.cooldown)
 	end
 	if skill.gcd then
 		gcdStartedAt = now

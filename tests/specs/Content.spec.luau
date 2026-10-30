@@ -41,7 +41,7 @@ return {
 	end,
 	["class grants and spell lists resolve"] = function()
 		for id, class in Classes do
-			Expect.equal(#class.grants, 5, `{id} grants per level`)
+			Expect.truthy(#class.grants >= 1 and #class.grants <= class.cap, `{id} grants per level within the cap`)
 			for _, skillId in class.grants do
 				local skill = Skills[skillId]
 				Expect.truthy(skill and skill.source == "Class", `{id}: grant {skillId}`)
@@ -62,7 +62,59 @@ return {
 					passives += 1
 				end
 			end
-			Expect.truthy(passives >= 2 and passives <= 3, `{id} passives: {passives}`)
+			Expect.truthy(passives >= 1 and passives < #class.grants, `{id} passives: {passives}`)
+		end
+	end,
+	["fighter is the first starter: 15 levels of physical, weapon-agnostic skills"] = function()
+		local fighter = Classes.fighter
+		Expect.equal(Loader.load(Content .. "Classes").Order[1], "fighter")
+		Expect.equal(fighter.cap, 15)
+		Expect.equal(#fighter.grants, 15)
+		Expect.truthy(fighter.categories and table.find(fighter.categories, "Martial"), "Martial category")
+		Expect.equal(#fighter.spellList, 0)
+		for _, skillId in fighter.grants do
+			local skill = Skills[skillId]
+			Expect.truthy(skill.damage == nil or skill.damage.type == "physical", `{skillId}: physical only`)
+			Expect.truthy(skill.cost == nil or skill.cost.resource == "Stamina", `{skillId}: Stamina`)
+		end
+		local light = Skills[Basic.Light].damage
+		local precise = Skills.precise_attack.damage
+		Expect.truthy(math.abs(precise.base - light.base * 1.4) < 1e-6, "Precise Attack base is 140%")
+		Expect.truthy(math.abs(precise.ratio - light.ratio * 1.4) < 1e-6, "Precise Attack ratio is 140%")
+		Expect.equal(Skills.disengage.cooldown, 15)
+	end,
+	["reserved Warrior candidates stay defined but ungranted"] = function()
+		for _, skillId in { "cleave", "charge", "war_cry" } do
+			Expect.truthy(Skills[skillId], skillId)
+			for id, class in Classes do
+				Expect.equal(table.find(class.grants, skillId), nil, `{id} grants reserved {skillId}`)
+			end
+		end
+		Expect.equal(Skills.hardy, nil)
+		Expect.equal(Skills.weapon_training, nil)
+	end,
+	["passive traits and fighter statuses resolve"] = function()
+		for id, skill in Skills do
+			checkEffects(id, skill.critEffects)
+			local upgrade = skill.upgrade
+			if upgrade then
+				Expect.equal(skill.kind, "Passive", `{id}: upgrades are passive`)
+				local target = Skills[upgrade.skill]
+				Expect.truthy(target and target.kind == "Active", `{id}: upgrades unknown {upgrade.skill}`)
+				Expect.truthy(upgrade.charges == nil or target.cooldown, `{id}: charges need a cooldown`)
+				checkEffects(id, upgrade.selfEffects)
+			end
+			if skill.restore then
+				Expect.equal(skill.delivery, "Self", `{id}: restore is a Self skill`)
+			end
+		end
+		for id, status in Statuses do
+			if status.expireSkill then
+				Expect.truthy(Skills[status.expireSkill], `{id}: expireSkill`)
+			end
+			if status.magnitudeStat then
+				Expect.equal(status.kind, "Stats", `{id}: magnitudeStat on a Stats status`)
+			end
 		end
 	end,
 	["active skills are complete"] = function()
@@ -97,7 +149,12 @@ return {
 				if skill.delivery == "Projectile" or skill.delivery == "Target" then
 					Expect.truthy(skill.speed and skill.range, `{id} projectile speed/range`)
 				end
-				if skill.delivery == "Target" or skill.delivery == "Dash" or skill.delivery == "Ally" then
+				if
+					skill.delivery == "Target"
+					or skill.delivery == "Dash"
+					or skill.delivery == "Ally"
+					or skill.delivery == "Leap"
+				then
 					Expect.truthy(skill.range, `{id} needs a range to validate its target`)
 				end
 				if skill.delivery == "Object" then

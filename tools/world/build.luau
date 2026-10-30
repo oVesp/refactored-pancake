@@ -148,12 +148,12 @@ make("SpawnLocation", {
 }, map)
 trainer(
 	npcFolder,
-	"Warrior Trainer",
+	"Fighter Trainer",
 	-24,
 	30,
 	rgb(150, 60, 50),
-	{ TrainerType = "Class", ClassId = "warrior" },
-	"Train Warrior"
+	{ TrainerType = "Class", ClassId = "fighter" },
+	"Train Fighter"
 )
 trainer(npcFolder, "Mage Trainer", 0, 38, rgb(60, 80, 160), { TrainerType = "Class", ClassId = "mage" }, "Train Mage")
 trainer(

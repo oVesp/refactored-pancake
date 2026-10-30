@@ -15,7 +15,7 @@ local list: { Types.ItemDef } = {
 		capacity = 10,
 		modifiers = { PhysAtk = 4 },
 		stack = 1,
-		description = "A village blade. Suits a Warrior.",
+		description = "A village blade. Suits a Fighter.",
 	},
 	{
 		id = "apprentice_wand",

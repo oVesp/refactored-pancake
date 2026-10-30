@@ -3,6 +3,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Factions = require(ReplicatedStorage.Content.Factions)
+local Formulas = require(ReplicatedStorage.Shared.Formulas)
 local Swarm = require(ReplicatedStorage.Shared.Swarm)
 
 export type Tags = {
@@ -76,6 +77,15 @@ export type Entity = {
 	threat: { [Entity]: number },
 	tauntedBy: Entity?,
 	lastHitBy: Entity?,
+	--[=[ Combat traits from granted passives (players; empty for NPCs). ]=]
+	traits: Formulas.Traits,
+	--[=[ Weapon type (Content/Weapons) of the equipped weapon item, nil when unarmed. ]=]
+	weaponFamily: string?,
+	--[=[ Weapon type Weapon Proficiency applies to. ]=]
+	proficiencyFamily: string?,
+	--[=[ Battle Rhythm stacks and os.clock() of the last hit that counted. ]=]
+	rhythmStacks: number,
+	rhythmAt: number,
 }
 
 --[=[ An enemy's place in group combat, owned by SquadService and held by its AI brain. ]=]

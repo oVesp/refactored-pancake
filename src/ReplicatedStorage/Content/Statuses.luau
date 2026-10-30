@@ -58,6 +58,27 @@ local list: { Types.StatusDef } = {
 		harmful = false,
 		modifiers = { PhysDef = 15, MagDef = 5 },
 	},
+
+	-- Fighter (docs/systems/classes.md)
+	{ id = "empowered", name = "Gathered Strength", kind = "Stats", harmful = false, nextHit = { damage = true } },
+	{ id = "poised", name = "Poised", kind = "Stats", harmful = false, nextHit = { crit = true } },
+	{
+		id = "heightened_senses",
+		name = "Heightened Senses",
+		kind = "Stats",
+		harmful = false,
+		magnitudeStat = "AgilityPct",
+	},
+	{ id = "exposed", name = "Exposed", kind = "Stats", harmful = true, exposure = "physical" },
+	{
+		id = "battle_trance",
+		name = "Battle Trance",
+		kind = "Stats",
+		harmful = false,
+		modifiers = { DamageDone = 0.25, StaminaCost = -0.5 },
+		fillsRhythm = true,
+		expireSkill = "gather_strength",
+	},
 }
 
 local byId: { [string]: Types.StatusDef } = {}

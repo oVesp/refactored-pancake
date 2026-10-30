@@ -10,6 +10,7 @@ local Enemies = require(ReplicatedStorage.Content.Enemies)
 local Disciplines = require(ReplicatedStorage.Content.Disciplines)
 local Formulas = require(ReplicatedStorage.Shared.Formulas)
 local Hotbar = require(ReplicatedStorage.Shared.Hotbar)
+local Items = require(ReplicatedStorage.Content.Items)
 local Logger = require(ReplicatedStorage.Shared.Logger)
 local NetServer = require(ReplicatedStorage.Shared.Net.Server)
 local Skills = require(ReplicatedStorage.Content.Skills)
@@ -160,6 +161,20 @@ function ProgressionService.SetLevel(player: Player, level: number)
 	end, "xp")
 end
 
+--[=[ Sets the Weapon Proficiency weapon type (Tuning.Combat.ProficiencyWeapons). Returns ok and a reason code. ]=]
+function ProgressionService.SetProficiency(player: Player, family: string): (boolean, string?)
+	if not table.find(Tuning.Combat.ProficiencyWeapons, family) then
+		return false, "UnknownFamily"
+	end
+	if not DataService.Get(player) then
+		return false, "NoProfile"
+	end
+	DataService.Update(player, function(p: any)
+		p.proficiency = family
+	end, "proficiency")
+	return true, nil
+end
+
 --[=[ Puts one unspent level into a class. Returns ok and a reason code. ]=]
 function ProgressionService.TrainClass(player: Player, classId: string): (boolean, string?)
 	local profile = DataService.Get(player)
@@ -187,8 +202,17 @@ function ProgressionService.TrainClass(player: Player, classId: string): (boolea
 			newLevel = 1
 		end
 		for _, skillId in Formulas.GrantedSkills(p.classes, Classes.ById) do
-			if not table.find(grantedBefore, skillId) and Skills.ById[skillId].kind == "Active" then
+			local skill = Skills.ById[skillId]
+			if not table.find(grantedBefore, skillId) and skill.kind == "Active" then
 				Hotbar.AutoPlace(p.hotbar, Hotbar.Encode("Skill", skillId))
+			end
+			-- The first Weapon Proficiency locks in the equipped weapon type (or the default).
+			if skill.proficiency and p.proficiency == "" then
+				p.proficiency = Formulas.ProficiencyFamily(
+					nil,
+					Formulas.EquippedWeapon(p.equipment, p.inventory, Items.ById),
+					Tuning.Combat.ProficiencyWeapons[1]
+				)
 			end
 		end
 	end, "classes")

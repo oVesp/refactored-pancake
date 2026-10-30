@@ -69,7 +69,7 @@ return {
 		Expect.equal(bare.FaceAccessory, "")
 	end,
 	["starter spells are Tier 0 or 1 from the class list and martial classes have none"] = function()
-		Expect.equal(#Avatar.StarterSpells("warrior"), 0)
+		Expect.equal(#Avatar.StarterSpells("fighter"), 0)
 		for _, classId in { "mage", "healer" } do
 			local spells = Avatar.StarterSpells(classId)
 			Expect.truthy(#spells > 0, classId)
@@ -95,9 +95,9 @@ return {
 		Expect.equal(select(2, Avatar.ValidateCreation(with({ classId = "paladin" }))), "UnknownClass")
 		Expect.equal(select(2, Avatar.ValidateCreation(with({ spellId = "" }))), "NeedSpell")
 		Expect.equal(select(2, Avatar.ValidateCreation(with({ spellId = "mend" }))), "NeedSpell")
-		local warrior = Avatar.DefaultCreation("warrior")
-		warrior.spellId = "light"
-		Expect.equal(select(2, Avatar.ValidateCreation(warrior)), "NotOnClassList")
+		local fighter = Avatar.DefaultCreation("fighter")
+		fighter.spellId = "light"
+		Expect.equal(select(2, Avatar.ValidateCreation(fighter)), "NotOnClassList")
 	end,
 	["rejects non-table and non-string input"] = function()
 		Expect.equal(Avatar.ValidateCreation(nil), false)

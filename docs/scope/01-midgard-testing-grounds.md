@@ -8,7 +8,7 @@ Status: **approved scope, revision 2; built 2026-10-24 (see §10).** Milestone *
 |---|---|
 | Realm | Midgard |
 | Level band | 1–5 |
-| Classes | Warrior, Mage, Healer |
+| Classes | Fighter, Mage, Healer |
 | Area | Farming Village and its fields |
 | Threat | Goblin Rabble (Lv 1–6). Goblin Warband (Lv 7+) is data-only here, spawned in the Dev Yard |
 | Place type | Single dev place: placeholder art, testing grounds |
@@ -74,7 +74,7 @@ All three are **base classes** (cap 15). Level cap here is 5. Stats per §3.1, n
 
 | Class | Role | Resource | Stat lean | Damage types |
 |---|---|---|---|---|
-| **Warrior** | Front line, melee | Stamina for class skills, Focus for Disciplines | HP, Physical Attack, Physical Defense | Physical |
+| **Fighter** | General physical damage, any weapon | Stamina for class skills, Focus for Disciplines | HP, Physical Attack, Agility | Physical |
 | **Mage** | Ranged damage, control | MP | MP, Magic Attack, Agility | Fire, cold, lightning |
 | **Healer** | Support, holy damage | MP | MP, Magic Defense, Resistance | Holy |
 
@@ -82,15 +82,7 @@ All three are **base classes** (cap 15). Level cap here is 5. Stats per §3.1, n
 
 Every class level grants **one class skill**, either **Active** (hotbar) or **Passive** (always on, applied by `StatService`/`SkillService` from data). Caster levels also grant **1 spell pick** from the class list (D2). Base stat growth per level comes from the class's stat lean, separate from these grants. Names are placeholders, plain descriptive (§2).
 
-**Warrior** (superseded: the starter becomes Fighter and Warrior a Fighter 5 specialization, [classes](../systems/classes.md); content migration pending)
-
-| Lv | Grant | Kind | Effect | Tests |
-|---|---|---|---|---|
-| 1 | Cleave | Active | Melee arc | Multi-target hit shapes |
-| 2 | Hardy | Passive | +Max HP %, +Physical Defense | Passive stat pipeline |
-| 3 | Charge | Active | Dash to target, short stun | Movement validation, stun |
-| 4 | Weapon Training | Passive | +Physical Attack, faster heavy attack | Passive modifying an action |
-| 5 | War Cry | Active | Area taunt + self buff | Aggro override |
+**Fighter**: 15 levels, the full table lives in [classes](../systems/classes.md#fighter). M0.5 reaches Fighter 5 (Weapon Proficiency I, Precise Attack, Combat Conditioning, Gather Strength, Second Wind). The old Warrior kit's Cleave, Charge and War Cry stay in `Content/Skills` as Warrior high-class candidates, granted by no class.
 
 **Mage** (+1 spell pick per level)
 
@@ -254,7 +246,7 @@ Verified by Studio playtest (single client, Studio) and Lune unit tests.
 | Exit criterion | Result |
 |---|---|
 | 1. Class pick at trainer, kill goblins, reach level 5 | Pass on desktop: trainer prompts train classes; kills grant XP; each class taken to level 5 in play (via `/level 5` plus the same `TrainClass` path the trainer uses). **Phone emulator not tested.** |
-| 2. Skills, passives, spells resolve server-side; rejects roll back | Pass: every Warrior, Mage and Healer active and all 16 spells fired in play with the expected damage, heal, shield, status, teleport or prop change; all 9 passives observed through `Stat_*`/`Extra_*` attributes; cooldown, unknown-skill and malformed calls rejected; the client clears its predicted cooldown on reject. |
+| 2. Skills, passives, spells resolve server-side; rejects roll back | Pass: every Fighter, Mage and Healer active and all 16 spells fired in play with the expected damage, heal, shield, status, teleport or prop change; all 9 passives observed through `Stat_*`/`Extra_*` attributes; cooldown, unknown-skill and malformed calls rejected; the client clears its predicted cooldown on reject. |
 | 3. Tier 2 refused at line level 7 | Pass in unit tests (`Formulas.spec`, allowed at 8); no Tier 2 content exists to try in play. |
 | 4. Rabble AI states, leash, respawn; Hexer interrupt | Pass: idle, patrol, aggro, attack, return observed; leash resets HP; Charge interrupts the Hexer's cast; Chieftain phase 2 summons two Raiders. |
 | 5. Multiclass with each template | Pass in unit tests for all four templates; 2+2+1 and 3+1+1 also exercised in play. |

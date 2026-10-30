@@ -148,17 +148,37 @@ export type DamageSpec = {
 	ratio: number,
 }
 
+--[=[ Per-hit crit adjustments from the skill and the attacker's next-hit statuses. ]=]
+export type HitMods = {
+	critChance: number?,
+	forceCrit: boolean?,
+}
+
+-- Extra damage the target takes of this type from `source` (Exposed).
+local function exposureFrom(source: Entity, target: Entity, damageType: string): number
+	local total = 0
+	for id, status in target.statuses do
+		local def = Statuses.ById[id]
+		if def and def.exposure == damageType and status.source == source then
+			total += status.magnitude
+		end
+	end
+	return total
+end
+
 --[=[
-	Resolves and lands one hit. `bonus` is an additive outgoing multiplier (e.g. Overcharge).
+	Resolves and lands one hit. `bonus` is an additive outgoing multiplier (e.g. Overcharge);
+	Weapon Proficiency, Battle Rhythm, Finishing Instinct and Exposed add to it (Formulas.HitBonus).
 	Guarding defenders facing the attacker take reduced damage, or none inside the parry window
-	(the attacker is staggered). Returns the damage dealt.
+	(the attacker is staggered). A crit applies the attacker's crit effects. Returns the damage dealt.
 ]=]
 function CombatService.DealDamage(
 	source: Entity,
 	target: Entity,
 	spec: DamageSpec,
 	skillId: string?,
-	bonus: number?
+	bonus: number?,
+	mods: HitMods?
 ): number
 	if not CombatService.CanHarm(source, target) then
 		return 0
@@ -168,6 +188,21 @@ function CombatService.DealDamage(
 		show(target, 0, "dodged", false)
 		return 0
 	end
+
+	local traits = source.traits
+	local proficient = traits.proficiency ~= nil
+		and spec.type == "physical"
+		and source.weaponFamily ~= nil
+		and source.weaponFamily == source.proficiencyFamily
+	local proficiency = if proficient and traits.proficiency then traits.proficiency else nil
+	local rhythm = traits.rhythm
+	local stacks = 0
+	if rhythm then
+		stacks = Formulas.RhythmStacks(source.rhythmStacks, source.rhythmAt, now, rhythm.window, rhythm.maxStacks)
+	end
+	local critChance =
+		Formulas.CritChance(source.stats.Agility or 0, Tuning.Combat.BaseCrit, Tuning.Combat.CritPerAgility)
+	critChance = if mods and mods.forceCrit then 1 else math.min(1, critChance + (mods and mods.critChance or 0))
 
 	local defense = if spec.type == "physical" then target.stats.PhysDef else target.stats.MagDef
 	local amount, crit = Formulas.ResolveDamage({
@@ -179,13 +214,19 @@ function CombatService.DealDamage(
 		targetLevel = target.level,
 		defense = defense or 0,
 		tags = target.tags,
-		critChance = Formulas.CritChance(
-			source.stats.Agility or 0,
-			Tuning.Combat.BaseCrit,
-			Tuning.Combat.CritPerAgility
-		),
+		critChance = critChance,
 		roll = random:NextNumber(),
-		bonus = (source.extras.DamageDone or 0) + (bonus or 0),
+		bonus = Formulas.HitBonus({
+			base = (source.extras.DamageDone or 0) + (bonus or 0),
+			proficiency = if proficiency then proficiency.damage else 0,
+			rhythmStacks = stacks,
+			perStack = if rhythm then rhythm.perStack else 0,
+			execute = source.extras.ExecuteDamage or 0,
+			targetHpFraction = target.hp / math.max(target.stats.MaxHp or 1, 1),
+			executeBelow = Tuning.Combat.ExecuteBelow,
+			exposure = exposureFrom(source, target, spec.type),
+		}),
+		critDamage = if proficiency then proficiency.critDamage else nil,
 	}, Tuning.Combat)
 
 	if amount == 0 then
@@ -211,7 +252,14 @@ function CombatService.DealDamage(
 		end
 	end
 
+	if rhythm then
+		source.rhythmStacks = stacks
+		source.rhythmAt = now
+	end
 	landDamage(target, amount, spec.type, source, crit, skillId, blocked)
+	if crit and #traits.critEffects > 0 then
+		CombatService.ApplyEffects(source, target, traits.critEffects)
+	end
 	return amount
 end
 

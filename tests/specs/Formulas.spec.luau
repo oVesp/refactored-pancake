@@ -122,7 +122,7 @@ return {
 		Expect.truthy(okAt8)
 	end,
 	["spell picks: one per level, only from own list"] = function()
-		local classes = { { id = "mage", level = 2 }, { id = "warrior", level = 1 } }
+		local classes = { { id = "mage", level = 2 }, { id = "fighter", level = 1 } }
 		local ok, _, payer = Formulas.CanLearnSpell(classes, {}, "spark", Classes, Skills, Tuning.Magic)
 		Expect.truthy(ok)
 		Expect.equal(payer, "mage")
@@ -135,20 +135,20 @@ return {
 		Expect.equal(reasonOther, "NotOnClassList")
 	end,
 	["training needs an unspent level and respects the class cap"] = function()
-		Expect.truthy(Formulas.CanTrain({}, "warrior", Classes, 1))
-		local ok, reason = Formulas.CanTrain({ { id = "warrior", level = 1 } }, "mage", Classes, 1)
+		Expect.truthy(Formulas.CanTrain({}, "fighter", Classes, 1))
+		local ok, reason = Formulas.CanTrain({ { id = "fighter", level = 1 } }, "mage", Classes, 1)
 		Expect.equal(ok, false)
 		Expect.equal(reason, "NoUnspentLevel")
-		local okCap, reasonCap = Formulas.CanTrain({ { id = "warrior", level = 15 } }, "warrior", Classes, 20)
+		local okCap, reasonCap = Formulas.CanTrain({ { id = "fighter", level = 15 } }, "fighter", Classes, 20)
 		Expect.equal(okCap, false)
 		Expect.equal(reasonCap, "ClassCapped")
 	end,
 	["each M0.5 template reaches 5 levels"] = function()
 		local templates = {
-			{ warrior = 5 },
-			{ warrior = 3, mage = 2 },
-			{ mage = 2, healer = 2, warrior = 1 },
-			{ healer = 3, mage = 1, warrior = 1 },
+			{ fighter = 5 },
+			{ fighter = 3, mage = 2 },
+			{ mage = 2, healer = 2, fighter = 1 },
+			{ healer = 3, mage = 1, fighter = 1 },
 		}
 		for _, template in templates do
 			local classes = {}
@@ -171,18 +171,19 @@ return {
 		end
 	end,
 	["granted skills follow class levels"] = function()
-		local granted = Formulas.GrantedSkills({ { id = "warrior", level = 2 }, { id = "mage", level = 1 } }, Classes)
-		Expect.equal(table.concat(granted, ","), "cleave,hardy,arcane_line")
+		local granted = Formulas.GrantedSkills({ { id = "fighter", level = 2 }, { id = "mage", level = 1 } }, Classes)
+		Expect.equal(table.concat(granted, ","), "weapon_proficiency_1,precise_attack,arcane_line")
 	end,
 	["stats combine growth, modifiers and percentages"] = function()
 		local stats, extras = Formulas.ComputeStats({
 			base = Tuning.Base.Stats,
-			classes = { { id = "warrior", level = 2 } },
+			classes = { { id = "fighter", level = 2 } },
 			classDefs = Classes,
-			modifiers = { { MaxHpPct = 0.1, PhysDef = 5 }, { MoveSpeedPct = 0.4 } },
+			modifiers = { { MaxHpPct = 0.1, PhysDef = 5 }, { MoveSpeedPct = 0.4 }, { AgilityPct = 0.4 } },
 		})
-		Expect.equal(stats.MaxHp, 154)
-		Expect.equal(stats.PhysDef, 21)
+		Expect.equal(stats.MaxHp, 150)
+		Expect.equal(stats.PhysDef, 19)
+		Expect.equal(stats.Agility, 22)
 		near(extras.MoveSpeedPct, 0.4, "move")
 		local weakened = Formulas.ComputeStats({
 			base = Tuning.Base.Stats,
@@ -191,6 +192,122 @@ return {
 			modifiers = { { AllStatsPct = -0.1 } },
 		})
 		Expect.equal(weakened.MaxHp, 90)
+	end,
+	["fighter grants all 15 levels, tiers of a passive override"] = function()
+		local fighter = Classes.fighter
+		Expect.equal(fighter.cap, 15)
+		Expect.equal(#fighter.grants, 15)
+		local function traitsAt(level: number)
+			return Formulas.CollectTraits(
+				Formulas.GrantedSkills({ { id = "fighter", level = level } }, Classes),
+				Skills
+			)
+		end
+		near(traitsAt(1).proficiency.damage, 0.1, "WP I")
+		near(traitsAt(6).proficiency.damage, 0.2, "WP II")
+		local top = traitsAt(15)
+		near(top.proficiency.damage, 0.3, "WP III")
+		near(top.proficiency.critDamage, 0.15, "WP III crit damage")
+		Expect.equal(top.upgrades.gather_strength.charges, 2)
+		near(top.upgrades.gather_strength.selfEffects[1].magnitude, 0.75, "GS II bonus")
+		near(top.upgrades.heightened_senses.selfEffects[1].magnitude, 0.6, "Keen Reflexes agility")
+		Expect.equal(top.upgrades.heightened_senses.selfEffects[1].duration, 12)
+		Expect.equal(top.critEffects[1].status, "exposed")
+		Expect.equal(traitsAt(11).upgrades.gather_strength, nil)
+	end,
+	["gather strength adds 50% to the next hit, additively"] = function()
+		local gather = Skills.gather_strength.selfEffects[1]
+		near(gather.magnitude, 0.5, "magnitude")
+		Expect.equal(gather.duration, 8)
+		local input = {
+			base = 6,
+			attackStat = 10,
+			ratio = 0.6,
+			damageType = "physical",
+			attackerLevel = 1,
+			targetLevel = 1,
+			defense = 0,
+			tags = {},
+			critChance = 0,
+			roll = 0.5,
+			bonus = 0,
+		}
+		local plain = Formulas.ResolveDamage(input, Tuning.Combat)
+		input.bonus = Formulas.HitBonus({
+			base = gather.magnitude,
+			proficiency = 0.1,
+			rhythmStacks = 0,
+			perStack = 0.02,
+			execute = 0,
+			targetHpFraction = 1,
+			executeBelow = 0.3,
+			exposure = 0,
+		})
+		Expect.equal(plain, 12)
+		Expect.equal(Formulas.ResolveDamage(input, Tuning.Combat), 19)
+	end,
+	["battle rhythm stacks within the window, caps and resets"] = function()
+		local rhythm = Skills.battle_rhythm.rhythm
+		local stacks, at = 0, -math.huge
+		for i = 1, 7 do
+			stacks = Formulas.RhythmStacks(stacks, at, i, rhythm.window, rhythm.maxStacks)
+			at = i
+		end
+		Expect.equal(stacks, rhythm.maxStacks)
+		Expect.equal(Formulas.RhythmStacks(stacks, at, at + rhythm.window + 0.1, rhythm.window, rhythm.maxStacks), 0)
+		Expect.equal(Formulas.RhythmStacks(0, -math.huge, 0, rhythm.window, rhythm.maxStacks), 0)
+	end,
+	["exposed, finishing instinct and rhythm add into one bonus"] = function()
+		local function bonus(hp: number): number
+			return Formulas.HitBonus({
+				base = 0,
+				proficiency = 0,
+				rhythmStacks = 5,
+				perStack = 0.02,
+				execute = 0.25,
+				targetHpFraction = hp,
+				executeBelow = 0.3,
+				exposure = 0.1,
+			})
+		end
+		near(bonus(0.5), 0.2, "healthy target")
+		near(bonus(0.29), 0.45, "below 30%")
+	end,
+	["crit damage adds to the crit multiplier"] = function()
+		local input = {
+			base = 100,
+			attackStat = 0,
+			ratio = 0,
+			damageType = "physical",
+			attackerLevel = 1,
+			targetLevel = 1,
+			defense = 0,
+			tags = {},
+			critChance = 1,
+			roll = 0.5,
+			bonus = 0,
+			critDamage = 0.15,
+		}
+		local amount, crit = Formulas.ResolveDamage(input, Tuning.Combat)
+		Expect.truthy(crit)
+		Expect.equal(amount, 165)
+	end,
+	["charges: a second use waits only once both are spent"] = function()
+		local readyAt = Formulas.ChargeSpend(0, 100, 20)
+		near(Formulas.ChargeReadyIn(readyAt, 100, 20, 2), 0, "second charge ready")
+		near(Formulas.ChargeReadyIn(readyAt, 100, 20, 1), 20, "single charge waits")
+		readyAt = Formulas.ChargeSpend(readyAt, 100, 20)
+		near(Formulas.ChargeReadyIn(readyAt, 100, 20, 2), 20, "both spent")
+		near(Formulas.ChargeReadyIn(readyAt, 125, 20, 2), 0, "one recharged")
+	end,
+	["proficiency weapon: choice, else equipped, else default"] = function()
+		local items = { rusty = { weapon = "sword" }, potion = {} }
+		local inventory = { { uid = 1, id = "rusty" }, { uid = 2, id = "potion" } }
+		Expect.equal(Formulas.EquippedWeapon({ weapon = 1 }, inventory, items), "sword")
+		Expect.equal(Formulas.EquippedWeapon({}, inventory, items), nil)
+		Expect.equal(Formulas.ProficiencyFamily("bow", "sword", "sword"), "bow")
+		Expect.equal(Formulas.ProficiencyFamily("", nil, "sword"), "sword")
+		Expect.equal(Formulas.ProficiencyFamily("", "bow", "sword"), "bow")
 	end,
 	["harmful status duration shrinks with resistance"] = function()
 		near(Formulas.StatusDuration(4, 100, true, 100), 2, "harmful")

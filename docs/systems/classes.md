@@ -1,6 +1,6 @@
 # Classes
 
-Class roster, unlock requirements and level progression. Rules shared by every class live in [game-design §3.6](../game-design.md); this doc holds the per-class design. Code (once migrated): `Content/Classes`, `Content/Skills`, `ProgressionService`.
+Class roster, unlock requirements and level progression. Rules shared by every class live in [game-design §3.6](../game-design.md); this doc holds the per-class design. Code: `Content/Classes`, `Content/Skills`, `Content/Statuses`, `Shared/Formulas` (traits, rhythm, bonuses, charges), `SkillService`, `CombatService`, `StatService`, `ProgressionService`.
 
 ## Unlock requirements
 
@@ -45,7 +45,7 @@ Base class for every physical damage dealer. Stamina resource. Stat lean: Physic
 | 6 | **Weapon Proficiency II** | Passive | Family damage bonus **+20%**. |
 | 7 | **Heightened Senses** | Active, oGCD | 30 Stamina, 45 s cooldown. **+40% Agility** for 8 s. |
 | 8 | **Battle Rhythm** | Passive | Each hit within 3 s of the last: +2% damage, stacks to 5. |
-| 9 | **Disengage** | Active, oGCD | Leap backward; the next attack within 3 s is a guaranteed crit. |
+| 9 | **Disengage** | Active, oGCD | 15 s cooldown. Leap 12 studs backward; the next attack within 3 s is a guaranteed crit. |
 | 10 | **Exploit Weakness** | Passive | Crits apply Exposed: the target takes +10% physical damage from you for 5 s. |
 | 11 | **Weapon Proficiency III** | Passive | Family damage bonus **+30%**, +15% crit damage with it. |
 | 12 | **Gather Strength II** | Passive | Gather Strength holds 2 charges; bonus +75%. |
@@ -56,3 +56,11 @@ Base class for every physical damage dealer. Stamina resource. Stat lean: Physic
 Shape: 1–5 core loop (open with Precise Attack, empower with Gather Strength, sustain with Second Wind); 6–10 tempo and defence; 11–15 upgrades and the signature. Fighter 5 unlocks Warrior and Ranger.
 
 Naming: the skill is **Gather Strength**, not "Focus", because Focus is the Disciplines resource (§3.3). No skill grants speed; Haste stays item-only (§3.4).
+
+**Implementation rules** (game-design §11 *Fighter replaces Warrior*):
+
+- Weapon Proficiency is chosen per character (`proficiency` in the profile, `/proficiency sword|bow` in Studio). It stores a weapon type from `Content/Weapons` (`Tuning.Combat.ProficiencyWeapons`: sword, bow), locks to the equipped item's `weapon` (else sword) when Proficiency I is granted, and applies only while a weapon of that type is equipped. Tiers override: the highest granted tier counts.
+- Every damage bonus (Gather Strength, Proficiency, Battle Rhythm, Finishing Instinct, Exposed, Battle Trance, Overcharge) adds into one outgoing bonus; Precise Attack's 140% scales the hit itself.
+- Gather Strength and Disengage are spent by the next damaging skill use, shared by every target of that use.
+- Battle Trance halves skill Stamina costs only, not dodge or guard. Exposed keeps the last Fighter that applied it as its source.
+- Precise Attack is a melee swing until weapon-aware attacks exist for bows.

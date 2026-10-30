@@ -96,6 +96,13 @@ return table.freeze({
 		--[=[ Extra studs allowed on range checks for latency. ]=]
 		RangeTolerance = 4,
 		InCombatSeconds = 6,
+		--[=[ HP fraction below which the `ExecuteDamage` bonus (Finishing Instinct) applies. ]=]
+		ExecuteBelow = 0.3,
+		--[=[
+			Weapon types (Content/Weapons) Weapon Proficiency may choose; the first is the fallback
+			when none is chosen or equipped (docs/systems/classes.md, Fighter).
+		]=]
+		ProficiencyWeapons = table.freeze({ "sword", "bow" }),
 	}),
 
 	--[=[ Soft target, lock and aim assist (docs/systems/combat.md, Targeting). Studs and degrees. ]=]

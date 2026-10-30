@@ -24,6 +24,11 @@ local EXTRA_NAMES = {
 	"SpellDamage",
 	"SpellCost",
 	"Haste",
+	"AgilityPct",
+	"MaxStamina",
+	"StaminaRegenPct",
+	"StaminaCost",
+	"ExecuteDamage",
 }
 Formulas.ExtraNames = table.freeze(EXTRA_NAMES)
 
@@ -87,6 +92,8 @@ export type DamageInput = {
 	roll: number,
 	--[=[ Additive outgoing bonus, e.g. 0.4 for +40%. ]=]
 	bonus: number,
+	--[=[ Added to the crit multiplier, e.g. 0.15 for Weapon Proficiency III. ]=]
+	critDamage: number?,
 }
 
 export type DamageConfig = {
@@ -110,7 +117,7 @@ function Formulas.ResolveDamage(input: DamageInput, config: DamageConfig): (numb
 	local raw = (input.base + input.attackStat * input.ratio) * math.max(0, 1 + input.bonus)
 	local amount = raw
 		* typeMult
-		* (if crit then config.CritMultiplier else 1)
+		* (if crit then config.CritMultiplier + (input.critDamage or 0) else 1)
 		* Formulas.LevelGapMultiplier(input.attackerLevel, input.targetLevel, config.LevelGapSoftness)
 		* Formulas.Mitigation(input.defense, config.DefenseConstant)
 
@@ -350,7 +357,7 @@ export type StatInput = {
 }
 
 --[=[
-	Final stats: base + class growth + flat modifiers, then MaxHpPct and AllStatsPct.
+	Final stats: base + class growth + flat modifiers, then per-stat `<Stat>Pct` extras and AllStatsPct.
 	Returns the nine stats and the extras (MoveSpeedPct, MpRegen, HealingDone, ...), extras default 0.
 ]=]
 function Formulas.ComputeStats(input: StatInput): (StatBlock, StatBlock)
@@ -382,7 +389,12 @@ function Formulas.ComputeStats(input: StatInput): (StatBlock, StatBlock)
 		end
 	end
 
-	stats.MaxHp *= 1 + extras.MaxHpPct
+	for _, name in STAT_NAMES do
+		local pct = extras[name .. "Pct"]
+		if pct then
+			stats[name] *= 1 + pct
+		end
+	end
 	if extras.AllStatsPct ~= 0 then
 		for _, name in STAT_NAMES do
 			stats[name] *= 1 + extras.AllStatsPct
@@ -393,6 +405,114 @@ function Formulas.ComputeStats(input: StatInput): (StatBlock, StatBlock)
 	end
 
 	return stats, extras
+end
+
+export type Traits = {
+	--[=[ Highest Weapon Proficiency tier granted. ]=]
+	proficiency: { damage: number, critDamage: number? }?,
+	rhythm: { window: number, perStack: number, maxStacks: number }?,
+	critEffects: { any },
+	--[=[ Skill id -> overrides from upgrade passives; later grants win per field. ]=]
+	upgrades: { [string]: { charges: number?, selfEffects: { any }? } },
+}
+
+--[=[
+	Combat traits from granted passives (Weapon Proficiency, Battle Rhythm, crit effects, skill
+	upgrades). Proficiency tiers override, they never add: the largest damage bonus counts.
+]=]
+function Formulas.CollectTraits(skillIds: { string }, skillDefs: { [string]: any }): Traits
+	local traits: Traits = { proficiency = nil, rhythm = nil, critEffects = {}, upgrades = {} }
+	for _, id in skillIds do
+		local skill = skillDefs[id]
+		if not skill or skill.kind ~= "Passive" then
+			continue
+		end
+		local proficiency = skill.proficiency
+		if proficiency and (not traits.proficiency or proficiency.damage > traits.proficiency.damage) then
+			traits.proficiency = proficiency
+		end
+		if skill.rhythm then
+			traits.rhythm = skill.rhythm
+		end
+		for _, effect in skill.critEffects or {} do
+			table.insert(traits.critEffects, effect)
+		end
+		local upgrade = skill.upgrade
+		if upgrade then
+			local previous = traits.upgrades[upgrade.skill]
+			traits.upgrades[upgrade.skill] = {
+				charges = upgrade.charges or (previous and previous.charges),
+				selfEffects = upgrade.selfEffects or (previous and previous.selfEffects),
+			}
+		end
+	end
+	return traits
+end
+
+--[=[ Battle Rhythm stacks after a hit at `now`: +1 (capped) within `window` of the last hit, else 0. ]=]
+function Formulas.RhythmStacks(stacks: number, lastAt: number, now: number, window: number, maxStacks: number): number
+	if now - lastAt <= window then
+		return math.min(maxStacks, stacks + 1)
+	end
+	return 0
+end
+
+export type HitBonusInput = {
+	--[=[ The attacker's DamageDone extra plus any skill bonus (Overcharge, Gather Strength). ]=]
+	base: number,
+	proficiency: number,
+	rhythmStacks: number,
+	perStack: number,
+	execute: number,
+	targetHpFraction: number,
+	executeBelow: number,
+	exposure: number,
+}
+
+--[=[ Outgoing damage bonus of one hit. Every source is additive into the single `bonus` term. ]=]
+function Formulas.HitBonus(input: HitBonusInput): number
+	local bonus = input.base + input.proficiency + input.rhythmStacks * input.perStack + input.exposure
+	if input.targetHpFraction < input.executeBelow then
+		bonus += input.execute
+	end
+	return bonus
+end
+
+--[=[ Seconds until a skill with `charges` has one ready; `readyAt` is when every charge is back. ]=]
+function Formulas.ChargeReadyIn(readyAt: number, now: number, cooldown: number, charges: number): number
+	return math.max(0, readyAt - now - (math.max(charges, 1) - 1) * cooldown)
+end
+
+--[=[ New `readyAt` after spending one charge at `now`. ]=]
+function Formulas.ChargeSpend(readyAt: number, now: number, cooldown: number): number
+	return math.max(readyAt, now) + cooldown
+end
+
+--[=[ Weapon type (Content/Weapons) of the equipped weapon item, or nil when unarmed. ]=]
+function Formulas.EquippedWeapon(
+	equipment: { [string]: number },
+	inventory: { { uid: number, id: string } },
+	itemDefs: { [string]: any }
+): string?
+	local uid = equipment.weapon
+	if not uid then
+		return nil
+	end
+	for _, stack in inventory do
+		if stack.uid == uid then
+			local item = itemDefs[stack.id]
+			return item and item.weapon
+		end
+	end
+	return nil
+end
+
+--[=[ The Weapon Proficiency weapon type: the stored choice, else the equipped type, else `default`. ]=]
+function Formulas.ProficiencyFamily(chosen: string?, equipped: string?, default: string): string
+	if chosen and chosen ~= "" then
+		return chosen
+	end
+	return equipped or default
 end
 
 --[=[ Harmful status durations shrink with Resistance; helpful ones do not. ]=]

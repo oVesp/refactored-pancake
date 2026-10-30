@@ -22,6 +22,8 @@ export type Profile = {
 	appearance: { [string]: string },
 	--[=[ Build path: classes in the order they were taken (game-design.md 3.1). ]=]
 	classes: { ClassEntry },
+	--[=[ Weapon type (Content/Weapons) Weapon Proficiency applies to ("sword" | "bow"); `""` until chosen. ]=]
+	proficiency: string,
 	xp: number,
 	xpDebt: number,
 	spells: { string },
@@ -34,7 +36,7 @@ export type Profile = {
 	nextUid: number,
 }
 
-local SCHEMA_VERSION = 3
+local SCHEMA_VERSION = 4
 -- Keep in step with Shared/Hotbar.Size (checked by Profile.spec).
 local HOTBAR_SIZE = 8
 
@@ -55,6 +57,7 @@ function Profile.new(starter: { { id: string, count: number } }?): Profile
 		heritage = "human",
 		appearance = {},
 		classes = {},
+		proficiency = "",
 		xp = 0,
 		xpDebt = 0,
 		spells = {},
@@ -87,6 +90,16 @@ function Profile.Migrate(data: Profile): Profile
 		data.heritage = "human"
 		data.appearance = {}
 		data.schemaVersion = 3
+	end
+	if data.schemaVersion < 4 then
+		-- Schema 3 saves may hold the retired `warrior` class; it maps to `fighter` (docs/systems/classes.md).
+		for _, entry in data.classes do
+			if entry.id == "warrior" then
+				entry.id = "fighter"
+			end
+		end
+		data.proficiency = ""
+		data.schemaVersion = 4
 	end
 	return data
 end

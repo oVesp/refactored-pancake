@@ -67,4 +67,16 @@ return {
 		Expect.equal(migrated.heritage, "human")
 		Expect.truthy(Profile.IsSerializable(migrated))
 	end,
+	["migrates schema 3 warriors to fighters with no proficiency chosen"] = function()
+		local profile = Profile.new() :: any
+		profile.schemaVersion = 3
+		profile.proficiency = nil
+		profile.classes = { { id = "warrior", level = 4 }, { id = "mage", level = 1 } }
+		local migrated = Profile.Migrate(profile)
+		Expect.equal(migrated.schemaVersion, Profile.SchemaVersion)
+		Expect.equal(migrated.classes[1].id, "fighter")
+		Expect.equal(migrated.classes[1].level, 4)
+		Expect.equal(migrated.classes[2].id, "mage")
+		Expect.equal(migrated.proficiency, "")
+	end,
 }

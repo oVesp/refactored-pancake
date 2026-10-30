@@ -26,6 +26,8 @@ local StatusService = {}
 StatusService.Ticked = Signal.new() :: Signal.Signal<Entity, string, number, Entity?>
 --[=[ Fires `(entity, statusId)` when a status is applied that interrupts casting. ]=]
 StatusService.Interrupted = Signal.new() :: Signal.Signal<Entity, string>
+--[=[ Fires `(entity, statusId)` when a status runs out (not when removed or cleared). ]=]
+StatusService.Expired = Signal.new() :: Signal.Signal<Entity, string>
 
 local function publish(entity: Entity)
 	local ids = {}
@@ -92,6 +94,11 @@ function StatusService.Apply(
 		entity.tauntedBy = source
 	elseif def.kind == "Light" then
 		setLight(entity, true)
+	end
+	local rhythm = entity.traits.rhythm
+	if def.fillsRhythm and rhythm then
+		entity.rhythmStacks = rhythm.maxStacks
+		entity.rhythmAt = now
 	end
 	if def.kind == "Stun" then
 		StatusService.Interrupted:Fire(entity, statusId)
@@ -163,6 +170,7 @@ local function tick()
 			local def = Statuses.ById[id]
 			if now >= status.expiresAt then
 				StatusService.Remove(entity, id)
+				StatusService.Expired:Fire(entity, id)
 			elseif def and (def.kind == "Dot" or def.kind == "Hot") and now >= status.nextTick then
 				status.nextTick += def.tickInterval or 1
 				StatusService.Ticked:Fire(entity, id, status.magnitude, status.source)

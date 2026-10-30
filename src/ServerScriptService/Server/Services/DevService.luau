@@ -94,7 +94,7 @@ local commands: { [string]: Handler } = {
 	newchar = function(player, args)
 		local classId = args[1] and string.lower(args[1])
 		if classId and not Classes.ById[classId] then
-			return "Usage: /newchar [warrior|mage|healer]"
+			return "Usage: /newchar [fighter|mage|healer]"
 		end
 		local ok, reason = AvatarService.CreateDefault(player, classId)
 		return if ok then "Created a default character" else `Cannot create: {reason}`
@@ -102,7 +102,7 @@ local commands: { [string]: Handler } = {
 	class = function(player, args)
 		local action, classId = args[1], args[2] and string.lower(args[2])
 		if not classId or not Classes.ById[classId] then
-			return "Usage: /class add|remove warrior|mage|healer"
+			return "Usage: /class add|remove fighter|mage|healer"
 		end
 		if action == "add" then
 			local ok, reason = ProgressionService.TrainClass(player, classId)
@@ -112,6 +112,11 @@ local commands: { [string]: Handler } = {
 			return `Removed {classId}`
 		end
 		return "Usage: /class add|remove <class>"
+	end,
+	proficiency = function(player, args)
+		local family = args[1] and string.lower(args[1]) or ""
+		local ok, reason = ProgressionService.SetProficiency(player, family)
+		return if ok then `Weapon Proficiency set to {family}` else `Usage: /proficiency sword|bow ({reason})`
 	end,
 	spawn = function(player, args)
 		local enemyId = args[1] and string.lower(args[1])

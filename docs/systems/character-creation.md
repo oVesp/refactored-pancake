@@ -9,7 +9,7 @@ Code: `Server/Services/AvatarService.luau`, `Shared/Avatar.luau`, client `Creato
 - The client opens the Creator screen while the snapshot says `created = false`, locks it (`UIController.SetLocked`: no other menu opens, it cannot be closed), hides the HUD and holds the camera on the stage.
 - Steps: Race, Body, Hair, Facial Hair, Outfit, Class, Spell (shown only for a caster class). The name sits under the character with previous / next / random. **Begin your journey** sends `CreateCharacter(creation)`.
 - The server checks it with `Avatar.ValidateCreation`, stores `name`, `heritage` and `appearance`, trains the starter class (the fresh level-1 profile has exactly one unspent level), learns the starter spell, sets `created = true` and respawns the character with the chosen look at the village. Refusals come back as `Notify` keys shown on the creator's status line.
-- Studio and tests skip the screen with the dev command `/newchar [warrior|mage|healer]` (also through `ServerStorage.RunDevCommand`).
+- Studio and tests skip the screen with the dev command `/newchar [fighter|mage|healer]` (also through `ServerStorage.RunDevCommand`).
 - Profiles are in memory until the persistent Data module lands, so the creator shows on every join.
 
 ## Rules
@@ -24,7 +24,7 @@ Code: `Server/Services/AvatarService.luau`, `Shared/Avatar.luau`, client `Creato
 | Hair colour | `Appearance.HairColors` | Black, Brown, Blonde, Red; one colour for hair and beard. |
 | Outfit | `Appearance.Outfits` | 9 classic Shirt + Pants pairs. |
 | Name | `Content/Names` | Placeholder list per gender until the name library exists; the server accepts only names in the list for the chosen gender. |
-| Class | `Classes.Order` | Any starter class (Warrior, Mage, Healer). |
+| Class | `Classes.Order` | Any starter class (Fighter, Mage, Healer); Fighter is first and the default. |
 | Spell | `Avatar.StarterSpells` | Casters pick exactly one spell (the level-1 pick, §3.2): the class list filtered by `Formulas.CanLearnSpell` on a level-1 build path, so Tiers 0–1. Martial classes send `""`. |
 
 ## Preview

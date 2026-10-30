@@ -87,6 +87,11 @@ function EntityService.Register(info: NewEntity): Entity
 		threat = {},
 		tauntedBy = nil,
 		lastHitBy = nil,
+		traits = { critEffects = {}, upgrades = {} },
+		weaponFamily = nil,
+		proficiencyFamily = nil,
+		rhythmStacks = 0,
+		rhythmAt = -math.huge,
 	}
 	entities[info.model] = entity
 	if info.player then
