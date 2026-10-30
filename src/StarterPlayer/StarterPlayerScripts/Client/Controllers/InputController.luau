@@ -1,9 +1,13 @@
 --!strict
 
 local ContextActionService = game:GetService("ContextActionService")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 local Disciplines = require(ReplicatedStorage.Content.Disciplines)
+local Tuning = require(ReplicatedStorage.Content.Tuning)
 
 local HEAVY_HOLD_SECONDS = 0.35
 local HOTBAR_KEYS = {
@@ -23,6 +27,7 @@ local TOUCH_SLOTS = 4
 	included). Tap attack = light, hold = heavy; with a bow, hold draws and release shoots; while
 	guarding with a shield, attack bashes. Tab / R3 / Target button cycle the target lock. Left Alt /
 	D-pad up / the Combat button toggle combat mode (CameraController).
+	Double-tap W runs until W is released or the character stops moving.
 	Screens: B spellbook, I inventory, C sheet, F2 debug.
 ]=]
 local InputController = {}
@@ -33,6 +38,47 @@ local CameraController: any
 local UIController: any
 
 local attackPressedAt: number? = nil
+local forwardTappedAt = -math.huge
+local running = false
+
+local function setRunning(on: boolean)
+	if running ~= on then
+		running = on
+		CombatController.SetRun(on)
+	end
+end
+
+-- W stays a movement key, so this listens beside the default controls instead of binding it.
+local function onForwardInput(input: InputObject, processed: boolean)
+	if input.KeyCode ~= Enum.KeyCode.W then
+		return
+	end
+	if input.UserInputState == Enum.UserInputState.Begin then
+		if processed then
+			return
+		end
+		local now = os.clock()
+		if now - forwardTappedAt <= Tuning.Base.Run.DoubleTapWindow then
+			setRunning(true)
+			forwardTappedAt = -math.huge
+		else
+			forwardTappedAt = now
+		end
+	elseif input.UserInputState == Enum.UserInputState.End then
+		setRunning(false)
+	end
+end
+
+local function stopWhenIdle()
+	if not running then
+		return
+	end
+	local character = Players.LocalPlayer.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if not humanoid or humanoid.Health <= 0 or humanoid.MoveDirection.Magnitude < 0.1 then
+		setRunning(false)
+	end
+end
 
 local function sink(): Enum.ContextActionResult
 	return Enum.ContextActionResult.Sink
@@ -101,6 +147,9 @@ function InputController.Init(deps: { [string]: any })
 end
 
 function InputController.Start()
+	UserInputService.InputBegan:Connect(onForwardInput)
+	UserInputService.InputEnded:Connect(onForwardInput)
+	RunService.Heartbeat:Connect(stopWhenIdle)
 	ContextActionService:BindAction("Attack", onAttack, true, Enum.UserInputType.MouseButton1, Enum.KeyCode.ButtonR2)
 	ContextActionService:SetTitle("Attack", "Attack")
 	ContextActionService:BindAction(

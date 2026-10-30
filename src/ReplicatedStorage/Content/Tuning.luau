@@ -48,6 +48,8 @@ return table.freeze({
 		StaminaRegen = 18,
 		MpRegen = 1.5,
 		MoveSpeed = 16,
+		--[=[ Double-tapping W within DoubleTapWindow seconds runs at SpeedMultiplier until W is released or the player stops. ]=]
+		Run = table.freeze({ DoubleTapWindow = 0.3, SpeedMultiplier = 1.5 }),
 		--[=[ Out-of-combat HP regen per second after OutOfCombatDelay seconds without damage. ]=]
 		HpRegenOutOfCombat = 4,
 		OutOfCombatDelay = 6,

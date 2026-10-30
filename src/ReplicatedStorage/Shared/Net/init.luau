@@ -80,6 +80,13 @@ local Remotes: { [string]: RemoteSpec } = {
 			return arity(1, ...) and type((...)) == "boolean"
 		end,
 	},
+	SetRun = {
+		direction = "ClientToServer",
+		rateLimit = { capacity = 6, perSecond = 4 },
+		validate = function(...)
+			return arity(1, ...) and type((...)) == "boolean"
+		end,
+	},
 	Dodge = {
 		direction = "ClientToServer",
 		rateLimit = { capacity = 3, perSecond = 2 },

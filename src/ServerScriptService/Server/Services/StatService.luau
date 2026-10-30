@@ -10,6 +10,7 @@ local NpcDefs = require(ReplicatedStorage.Shared.NpcDefs)
 local Items = require(ReplicatedStorage.Content.Items)
 local Loadout = require(ReplicatedStorage.Shared.Loadout)
 local Logger = require(ReplicatedStorage.Shared.Logger)
+local NetServer = require(ReplicatedStorage.Shared.Net.Server)
 local Skills = require(ReplicatedStorage.Content.Skills)
 local Statuses = require(ReplicatedStorage.Content.Statuses)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
@@ -198,15 +199,27 @@ function StatService.Recompute(entity: Entity)
 	local humanoid = entity.humanoid
 	if humanoid and entity.kind == "Player" then
 		local agilitySpeed = 1 + (stats.Agility - Tuning.Base.Stats.Agility) * Tuning.Combat.MoveSpeedPerAgility
-		humanoid.WalkSpeed = Tuning.Base.MoveSpeed * agilitySpeed * (1 + extras.MoveSpeedPct) * moveMultiplier
+		humanoid.WalkSpeed = Tuning.Base.MoveSpeed
+			* agilitySpeed
+			* (1 + extras.MoveSpeedPct)
+			* moveMultiplier
+			* entity.pace
 		humanoid.JumpPower = if moveMultiplier == 0 then 0 else 50
 	elseif humanoid then
 		local def = NpcDefs.Get(entity.defId)
 		local speed = if def then def.moveSpeed else 0
-		humanoid.WalkSpeed = speed * (1 + extras.MoveSpeedPct) * moveMultiplier
+		humanoid.WalkSpeed = speed * (1 + extras.MoveSpeedPct) * moveMultiplier * entity.pace
 	end
 
 	writePools(entity)
+end
+
+--[=[ Sets the gait walk speed multiplier (running, patrolling) and recomputes walk speed when it changes. ]=]
+function StatService.SetPace(entity: Entity, pace: number)
+	if entity.pace ~= pace then
+		entity.pace = pace
+		StatService.Recompute(entity)
+	end
 end
 
 --[=[ Fills HP, MP and Stamina to max. ]=]
@@ -331,6 +344,13 @@ end
 function StatService.Init(deps: { [string]: any })
 	DataService = deps.DataService
 	EntityService = deps.EntityService
+
+	NetServer.Connect("SetRun", function(player: Player, on: boolean)
+		local entity = EntityService.ForPlayer(player)
+		if entity and entity.alive then
+			StatService.SetPace(entity, if on then Tuning.Base.Run.SpeedMultiplier else 1)
+		end
+	end)
 end
 
 function StatService.Start()

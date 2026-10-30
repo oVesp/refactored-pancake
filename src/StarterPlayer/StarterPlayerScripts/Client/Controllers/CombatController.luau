@@ -475,6 +475,11 @@ function CombatController.SetGuard(on: boolean)
 	NetClient.Fire("SetGuard", on)
 end
 
+--[=[ Starts or stops running (the server sets the walk speed). ]=]
+function CombatController.SetRun(on: boolean)
+	NetClient.Fire("SetRun", on)
+end
+
 --[=[ Dodges along the move direction (or backward): local impulse, server grants i-frames. ]=]
 function CombatController.Dodge()
 	local _, root, humanoid = character()
