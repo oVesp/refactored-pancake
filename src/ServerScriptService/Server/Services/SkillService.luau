@@ -8,6 +8,7 @@ local RunService = game:GetService("RunService")
 local Archery = require(ReplicatedStorage.Shared.Archery)
 local Chain = require(ReplicatedStorage.Shared.Chain)
 local Classes = require(ReplicatedStorage.Content.Classes)
+local DevSkills = require(ReplicatedStorage.Shared.DevSkills)
 local Formulas = require(ReplicatedStorage.Shared.Formulas)
 local Items = require(ReplicatedStorage.Content.Items)
 local Loadout = require(ReplicatedStorage.Shared.Loadout)
@@ -17,6 +18,8 @@ local Skills = require(ReplicatedStorage.Content.Skills)
 local Statuses = require(ReplicatedStorage.Content.Statuses)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 local Weapons = require(ReplicatedStorage.Content.Weapons)
+local DevService = require(script.Parent.DevService)
+local DevSkillEffects = require(script.Parent.Parent.DevSkillEffects)
 local Types = require(script.Parent.Parent.Types)
 
 type Entity = Types.Entity
@@ -42,6 +45,8 @@ local StatService: any
 local StatusService: any
 
 local nextCastId = 0
+-- Chat argument of a dev skill use, read when it resolves (Gate's destination).
+local devArgs: { [Entity]: string } = {}
 local worldParams = RaycastParams.new()
 worldParams.FilterType = Enum.RaycastFilterType.Exclude
 
@@ -80,9 +85,9 @@ end
 
 --[=[
 	Active skills a player may use: the equipped weapon's basic attacks (plus the shield bash),
-	granted class actives and known spells.
+	granted class actives, known spells and, for developers, the dev skills.
 ]=]
-function SkillService.KnownActives(profile: any): { string }
+function SkillService.KnownActives(profile: any, isDev: boolean?): { string }
 	local held = Loadout.Of(profile, Items.ById, Weapons.ById, Weapons.Default)
 	local known = Loadout.Basics(Skills.ById, held.weapon, held.shield ~= nil, Weapons.ShieldBash)
 	for _, skillId in Formulas.GrantedSkills(profile.classes, Classes.ById) do
@@ -94,7 +99,7 @@ function SkillService.KnownActives(profile: any): { string }
 	for _, spellId in profile.spells do
 		table.insert(known, spellId)
 	end
-	return known
+	return DevSkills.Grant(known, isDev == true, Skills.ById)
 end
 
 local function enemiesOf(caster: Entity): { Entity }
@@ -502,8 +507,12 @@ local function resolve(caster: Entity, skill: SkillDef, aim: Vector3, target: En
 		end
 	elseif delivery == "Object" then
 		useObject(caster, skill, aim)
+	elseif delivery == "Dev" then
+		local arg = devArgs[caster]
+		devArgs[caster] = nil
+		DevSkillEffects.Resolve(caster, skill, target, arg)
 	end
-	if delivery ~= "Projectile" and delivery ~= "Target" then
+	if delivery ~= "Projectile" and delivery ~= "Target" and delivery ~= "Dev" then
 		broadcast({
 			kind = "Resolve",
 			caster = caster.model,
@@ -716,7 +725,14 @@ local function stopDraw(entity: Entity)
 	end
 end
 
-local function handleUseSkill(player: Player, skillId: string, aim: Vector3, seq: number, targetModel: Model?)
+local function handleUseSkill(
+	player: Player,
+	skillId: string,
+	aim: Vector3,
+	seq: number,
+	targetModel: Model?,
+	arg: string?
+)
 	local caster = EntityService.ForPlayer(player)
 	local profile = DataService.Get(player)
 	if not caster or not profile or not caster.alive then
@@ -724,7 +740,11 @@ local function handleUseSkill(player: Player, skillId: string, aim: Vector3, seq
 		return
 	end
 	local skill = Skills.ById[skillId]
-	if not skill or skill.kind ~= "Active" or not table.find(SkillService.KnownActives(profile), skillId) then
+	if
+		not skill
+		or skill.kind ~= "Active"
+		or not table.find(SkillService.KnownActives(profile, DevService.IsDev(player)), skillId)
+	then
 		reject(player, seq, "Unknown")
 		return
 	end
@@ -785,6 +805,11 @@ local function handleUseSkill(player: Player, skillId: string, aim: Vector3, seq
 		if not validAlly(caster, target, skill) then
 			target = nil
 		end
+	elseif skill.delivery == "Dev" then
+		-- Dev skills inspect any living entity, at any range.
+		if target and not target.alive then
+			target = nil
+		end
 	else
 		target = nil
 	end
@@ -822,6 +847,9 @@ local function handleUseSkill(player: Player, skillId: string, aim: Vector3, seq
 		caster.chainLast = skillId
 		caster.chainAt = os.clock()
 	end
+	if skill.delivery == "Dev" and arg then
+		devArgs[caster] = arg
+	end
 	SkillService.Cast(caster, skillId, aim, target, cost)
 end
 
@@ -832,6 +860,16 @@ local function withLatency(player: Player, fn: () -> ())
 	else
 		fn()
 	end
+end
+
+--[=[
+	Runs a player's skill use through the same checks as `UseSkill` (chat casting uses it).
+	`arg` is a dev skill's chat argument.
+]=]
+function SkillService.Use(player: Player, skillId: string, aim: Vector3, seq: number, target: Model?, arg: string?)
+	withLatency(player, function()
+		handleUseSkill(player, skillId, aim, seq, target, arg)
+	end)
 end
 
 local function handleGuard(player: Player, on: boolean)
@@ -908,6 +946,7 @@ function SkillService.Init(deps: { [string]: any })
 	EntityService = deps.EntityService
 	StatService = deps.StatService
 	StatusService = deps.StatusService
+	DevSkillEffects.Init(deps)
 
 	NetServer.Connect("UseSkill", function(player: Player, skillId: string, aim: Vector3, seq: number, target: Model?)
 		withLatency(player, function()

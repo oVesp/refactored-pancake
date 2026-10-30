@@ -14,6 +14,7 @@ local Logger = require(ReplicatedStorage.Shared.Logger)
 local NetServer = require(ReplicatedStorage.Shared.Net.Server)
 local Skills = require(ReplicatedStorage.Content.Skills)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
+local DevService = require(script.Parent.DevService)
 local Types = require(script.Parent.Parent.Types)
 
 type Entity = Types.Entity
@@ -50,9 +51,9 @@ end
 
 --[=[
 	True when the player may put this entry on the hotbar: a known active spell or class skill
-	(basic attacks have their own buttons) or a known Discipline.
+	(basic attacks have their own buttons), a dev skill for developers, or a known Discipline.
 ]=]
-local function canSlot(profile: any, kind: string, id: string): boolean
+local function canSlot(profile: any, kind: string, id: string, isDev: boolean): boolean
 	if kind == "Discipline" then
 		return Disciplines.ById[id] ~= nil and table.find(profile.disciplines, id) ~= nil
 	end
@@ -60,12 +61,12 @@ local function canSlot(profile: any, kind: string, id: string): boolean
 	if skill and skill.source == "Basic" then
 		return false
 	end
-	return table.find(SkillService.KnownActives(profile), id) ~= nil
+	return table.find(SkillService.KnownActives(profile, isDev), id) ~= nil
 end
 
-local function prunedHotbar(profile: any): { string }
+local function prunedHotbar(profile: any, isDev: boolean): { string }
 	return Hotbar.Prune(table.clone(profile.hotbar), function(kind, id)
-		return canSlot(profile, kind, id)
+		return canSlot(profile, kind, id, isDev)
 	end)
 end
 
@@ -90,9 +91,9 @@ function ProgressionService.Snapshot(player: Player): { [string]: any }?
 		disciplines = profile.disciplines,
 		picks = Formulas.SpellPicks(profile.classes, profile.spells, Classes.ById, Tuning.Magic.SpellPicksPerLevel),
 		ceilings = Formulas.TierCeilings(profile.classes, Classes.ById, Tuning.Magic),
-		actives = SkillService.KnownActives(profile),
+		actives = SkillService.KnownActives(profile, DevService.IsDev(player)),
 		granted = Formulas.GrantedSkills(profile.classes, Classes.ById),
-		hotbar = prunedHotbar(profile),
+		hotbar = prunedHotbar(profile, DevService.IsDev(player)),
 		inventory = profile.inventory,
 		equipment = profile.equipment,
 	}
@@ -241,7 +242,7 @@ function ProgressionService.RemoveClass(player: Player, classId: string)
 				end
 			end
 		end
-		p.hotbar = prunedHotbar(p)
+		p.hotbar = prunedHotbar(p, DevService.IsDev(player))
 	end, "classes")
 end
 
@@ -267,7 +268,7 @@ end
 --[=[ Puts a known entry into hotbar slot `index` (swapping if it is already on the bar), or clears the slot. ]=]
 local function setHotbarSlot(player: Player, index: number, kind: string, id: string)
 	local profile = DataService.Get(player)
-	if not profile or (kind ~= "" and not canSlot(profile, kind, id)) then
+	if not profile or (kind ~= "" and not canSlot(profile, kind, id, DevService.IsDev(player))) then
 		return
 	end
 	local entry = if kind == "" then "" else Hotbar.Encode(kind :: Hotbar.Kind, id)

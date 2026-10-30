@@ -33,6 +33,7 @@ local SERVICE_ORDER = {
 	"GroupService",
 	"PopulationService",
 	"DevService",
+	"ChatCastService",
 }
 
 local log = Logger.new("Bootstrap")

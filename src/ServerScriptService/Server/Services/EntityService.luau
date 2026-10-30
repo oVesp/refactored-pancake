@@ -222,7 +222,8 @@ local function checkMovement(now: number)
 		local position = entity.root.Position
 		local previous = movementSamples[player]
 		movementSamples[player] = { position = position, time = now }
-		if previous then
+		-- Dev flight (Fly) moves faster than walking on purpose.
+		if previous and not entity.model:GetAttribute("Flying") then
 			local elapsed = now - previous.time
 			local delta = position - previous.position
 			local horizontal = Vector3.new(delta.X, 0, delta.Z).Magnitude

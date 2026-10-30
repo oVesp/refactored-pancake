@@ -61,13 +61,14 @@ export type Delivery =
 	| "Dash"
 	| "Blink"
 	| "Object"
+	| "Dev"
 	| "Leap"
 
 export type SkillDef = {
 	id: string,
 	name: string,
 	kind: "Active" | "Passive",
-	source: "Basic" | "Class" | "Spell" | "Enemy",
+	source: "Basic" | "Class" | "Spell" | "Enemy" | "Dev",
 	tier: number?,
 	--[=[ Spells only: fixed entry number in the spellbook, unique across all spells. ]=]
 	number: number?,
@@ -141,6 +142,10 @@ export type SkillDef = {
 	critEffects: { Effect }?,
 	--[=[ Passive: overrides `charges` and `selfEffects` of another skill (`skill`) while granted. ]=]
 	upgrade: { skill: string, charges: number?, selfEffects: { Effect }? }?,
+	--[=[ Dev skills only (delivery `Dev`): the server-side debug effect it runs (Server/DevSkillEffects). ]=]
+	devEffect: ("Fly" | "LifeEssence" | "ManaEssence" | "DiscernEnemy" | "DetectLife" | "Gate")?,
+	--[=[ Chat casting may follow the name with an argument (Gate: the destination). ]=]
+	chatArg: boolean?,
 	description: string,
 }
 

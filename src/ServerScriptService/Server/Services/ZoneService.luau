@@ -58,6 +58,16 @@ function ZoneService.IsSafe(position: Vector3): boolean
 	return id ~= nil and Zones.ById[id].safe
 end
 
+--[=[ Center of a zone's first volume, or nil when the map has none for it. ]=]
+function ZoneService.Anchor(id: string): Vector3?
+	for _, volume in volumes do
+		if volume.id == id then
+			return volume.cframe.Position
+		end
+	end
+	return nil
+end
+
 --[=[ The respawn point in the respawn zone, if the map has one. ]=]
 function ZoneService.RespawnPoint(): SpawnLocation?
 	for _, instance in CollectionService:GetTagged("RespawnPoint") do

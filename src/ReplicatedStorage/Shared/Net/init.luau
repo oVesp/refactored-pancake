@@ -16,6 +16,7 @@ export type RemoteSpec = {
 }
 
 local MAX_ID_LENGTH = 40
+local MAX_CHAT_CAST = 80
 local MAX_COORDINATE = 1e5
 
 local function isId(value: any): boolean
@@ -159,6 +160,22 @@ local Remotes: { [string]: RemoteSpec } = {
 		end,
 	},
 
+	--[=[
+		`(text, aim, seq, target?)`: a chat message that names a known spell (Shared/ChatCast).
+		The server resolves the name again and runs the `UseSkill` path.
+	]=]
+	CastSpellByName = {
+		direction = "ClientToServer",
+		rateLimit = { capacity = 4, perSecond = 2 },
+		validate = function(...)
+			local text, aim, seq, target = ...
+			local count = select("#", ...)
+			local targetOk = target == nil or (typeof(target) == "Instance" and target:IsA("Model"))
+			local textOk = type(text) == "string" and #text > 0 and #text <= MAX_CHAT_CAST and utf8.len(text) ~= nil
+			return (count == 3 or count == 4) and textOk and isFiniteVector(aim) and isCount(seq) and targetOk
+		end,
+	},
+
 	SendProfileSnapshot = { direction = "ServerToClient" },
 	RejectSkill = { direction = "ServerToClient" },
 	ShowCast = { direction = "ServerToClient" },
@@ -171,6 +188,8 @@ local Remotes: { [string]: RemoteSpec } = {
 	SendDevLog = { direction = "ServerToClient" },
 	OpenTrainer = { direction = "ServerToClient" },
 	ShowGain = { direction = "ServerToClient" },
+	--[=[ `(models, seconds)`: Detect Life results, highlighted for the caster only. ]=]
+	ShowDetectedLife = { direction = "ServerToClient" },
 }
 
 for name, spec in Remotes do

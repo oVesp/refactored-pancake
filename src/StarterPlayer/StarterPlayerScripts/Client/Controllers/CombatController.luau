@@ -3,9 +3,11 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TextChatService = game:GetService("TextChatService")
 
 local Archery = require(ReplicatedStorage.Shared.Archery)
 local Chain = require(ReplicatedStorage.Shared.Chain)
+local ChatCast = require(ReplicatedStorage.Shared.ChatCast)
 local Formulas = require(ReplicatedStorage.Shared.Formulas)
 local Hotbar = require(ReplicatedStorage.Shared.Hotbar)
 local Loadout = require(ReplicatedStorage.Shared.Loadout)
@@ -141,6 +143,9 @@ end
 local function aimFor(skill: any, root: BasePart): (Vector3?, Model?)
 	local aim = CombatController.GetAim()
 	local delivery = skill.delivery
+	if delivery == "Dev" then
+		return aim, TargetController.Enemy() or TargetController.Ally(math.huge)
+	end
 	if delivery == "Melee" or delivery == "Cone" then
 		local look = root.CFrame.LookVector
 		local reach = math.max(skill.range or 0, LUNGE_STOP_SHORT + (skill.lunge or 0))
@@ -261,7 +266,8 @@ local function windupOf(skill: any): number
 end
 
 -- Sends the use now. Returns false while the character is stunned or still casting.
-local function send(skillId: string): boolean
+-- `chatText`: the chat message that cast it, sent instead of the id (chat casting).
+local function send(skillId: string, chatText: string?): boolean
 	local skill = Skills.ById[skillId]
 	local model, root = character()
 	if not skill or not model or not root or waitFor(skillId) > 0 then
@@ -302,7 +308,11 @@ local function send(skillId: string): boolean
 		local cast = if skill.castTime then hasted(skill.castTime) else 0
 		lockedUntil = now + math.max(cast, Tuning.Combat.Gcd.AnimationLock)
 	end
-	NetClient.Fire("UseSkill", skillId, aim, seq, target)
+	if chatText then
+		NetClient.Fire("CastSpellByName", chatText, aim, seq, target)
+	else
+		NetClient.Fire("UseSkill", skillId, aim, seq, target)
+	end
 	CombatController.Used:Fire(skillId, aim)
 	return true
 end
@@ -329,6 +339,24 @@ function CombatController.UseSkill(skillId: string)
 		queued = skillId
 		queuedUntil = os.clock() + wait + QUEUE_GRACE
 	end
+end
+
+--[=[
+	Casts the known spell a chat message names (Shared/ChatCast), if it is ready. Returns false
+	for ordinary chat. The server resolves the text again and decides.
+]=]
+function CombatController.CastByName(text: string): boolean
+	local snapshot = ProfileController.Get()
+	local skillId = snapshot and ChatCast.Resolve(text, snapshot.actives or {}, Skills.ById)
+	if not skillId then
+		return false
+	end
+	if waitFor(skillId) > 0 then
+		CombatController.Rejected:Fire(skillId, "Cooldown")
+	else
+		send(skillId, text)
+	end
+	return true
 end
 
 -- Gives back predicted timers after a rejected use or an interrupted cast.
@@ -534,6 +562,9 @@ function CombatController.Start()
 		end
 	end)
 	ProfileController.Changed:Connect(rebuildHotbar)
+	TextChatService.SendingMessage:Connect(function(message: TextChatMessage)
+		CombatController.CastByName(message.Text)
+	end)
 	player.CharacterAdded:Connect(function()
 		guarding = false
 		if drawConnection then

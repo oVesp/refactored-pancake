@@ -35,4 +35,13 @@ return table.freeze({
 	HeritageLocked = "That race is not available yet.",
 	BadName = "Pick a name from the list.",
 	NeedSpell = "Choose a starting spell.",
+	FlyOn = "Flight on. Space rises, Ctrl descends.",
+	FlyOff = "Flight off.",
+	LifeEssence = "%s: HP %d/%d",
+	ManaEssence = "%s: MP %d/%d",
+	DiscernEnemy = "%s: level %d %s (%s). HP %d/%d. Atk %d phys / %d mag. Def %d phys / %d mag.",
+	DiscernNoTarget = "Select a target to discern.",
+	DetectLife = "Detect Life: %d living beings nearby.",
+	Gated = "Gate opened to %s.",
+	GateUnknown = "Unknown destination. Zones: %s",
 })

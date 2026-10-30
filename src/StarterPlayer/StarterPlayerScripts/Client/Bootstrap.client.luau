@@ -37,6 +37,7 @@ local CONTROLLER_ORDER = {
 	"NameplateController",
 	"EnemyAnimationController",
 	"DebugController",
+	"DevSpellController",
 }
 
 local log = Logger.new("Bootstrap")
