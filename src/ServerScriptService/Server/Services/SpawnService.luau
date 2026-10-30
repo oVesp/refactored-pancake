@@ -137,8 +137,12 @@ end
 ]=]
 function SpawnService.Spawn(npcId: string, level: number, position: Vector3, options: Options?): Entity?
 	local def = NpcDefs.Get(npcId)
-	local model, name = if def then bodyFor(def) else nil, ""
-	if not def or not model then
+	if not def then
+		log:Warn("Cannot spawn %s", npcId)
+		return nil
+	end
+	local model, name = bodyFor(def)
+	if not model then
 		log:Warn("Cannot spawn %s", npcId)
 		return nil
 	end
