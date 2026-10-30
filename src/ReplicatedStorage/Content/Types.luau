@@ -116,6 +116,8 @@ export type SkillDef = {
 		Tuning.Combat.Chain.Window of this one (Shared/Chain).
 	]=]
 	chainNext: string?,
+	--[=[ Seconds after this hit's press within which the next press continues the chain; replaces Tuning.Combat.Chain.Window. Must exceed the cooldown. ]=]
+	chainWindow: number?,
 	--[=[ Weapon heavy attack: `HeavySpeed` shortens its windup. ]=]
 	heavy: boolean?,
 	--[=[ Bow shot: needs a draw (`SetDraw`) and scales with it (Shared/Archery, Tuning.Combat.Bow). ]=]

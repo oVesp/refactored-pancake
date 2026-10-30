@@ -31,14 +31,12 @@ end
 
 --[=[
 	The hit a light attack press uses now: the last hit's `chainNext` while the press is within
-	`window` seconds of it, else `entry`.
+	`window` seconds of it (the last hit's `chainWindow` replaces `window`), else `entry`.
 ]=]
 function Chain.Next(skills: SkillMap, entry: string, last: string?, lastAt: number, now: number, window: number): string
-	if last and now - lastAt <= window then
-		local skill = skills[last]
-		if skill and skill.chainNext then
-			return skill.chainNext
-		end
+	local skill = if last then skills[last] else nil
+	if skill and skill.chainNext and now - lastAt <= (skill.chainWindow or window) then
+		return skill.chainNext
 	end
 	return entry
 end
@@ -60,7 +58,7 @@ function Chain.Allowed(
 		return true
 	end
 	local skill = if last then skills[last] else nil
-	return skill ~= nil and skill.chainNext == skillId and now - lastAt <= window
+	return skill ~= nil and skill.chainNext == skillId and now - lastAt <= (skill.chainWindow or window)
 end
 
 return table.freeze(Chain)

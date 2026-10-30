@@ -102,6 +102,7 @@ local list: { Types.SkillDef } = {
 		targets = "Enemy",
 		-- Clip BasicSwordSlash1: 1 s, Hit at 0.68 s.
 		cooldown = 1,
+		chainWindow = 1.35,
 		windup = 0.68,
 		recovery = 0.32,
 		lunge = 1.5,
@@ -122,6 +123,7 @@ local list: { Types.SkillDef } = {
 		targets = "Enemy",
 		-- Clip BasicSwordSlash2: 1 s, Hit at 0.54 s.
 		cooldown = 1,
+		chainWindow = 1.35,
 		windup = 0.54,
 		recovery = 0.46,
 		lunge = 1.5,

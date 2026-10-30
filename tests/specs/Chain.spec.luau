@@ -40,4 +40,11 @@ return {
 		Expect.equal(Chain.Allowed(SKILLS, "a", "a", 5, "b", 6, 0.8), false, "too late")
 		Expect.equal(Chain.Allowed(SKILLS, "a", "c", 5, "b", 5.2, 0.8), false, "after the end")
 	end,
+	["a hit's own chain window replaces the default"] = function()
+		local slow = { a = { chainNext = "b", chainWindow = 1.35 }, b = {} }
+		Expect.equal(Chain.Next(slow, "a", "a", 10, 11.2, 0.8), "b", "past the default, inside its own")
+		Expect.equal(Chain.Next(slow, "a", "a", 10, 11.4, 0.8), "a", "past its own")
+		Expect.truthy(Chain.Allowed(slow, "a", "a", 5, "b", 6.2, 0.8), "allowed inside its own window")
+		Expect.equal(Chain.Allowed(slow, "a", "a", 5, "b", 6.4, 0.8), false, "too late for its own window")
+	end,
 }
