@@ -30,6 +30,7 @@ local CombatService: any
 local EntityService: any
 local DataService: any
 local InventoryService: any
+local NeedsService: any
 local ProgressionService: any
 local SpawnService: any
 local StatService: any
@@ -158,6 +159,16 @@ local commands: { [string]: Handler } = {
 			StatService.Refill(entity)
 		end
 		return "Refilled"
+	end,
+	needs = function(player, args)
+		local hunger = tonumber(args[1])
+		local thirst = tonumber(args[2]) or hunger
+		if not hunger or not thirst then
+			return "Usage: /needs <hunger> [thirst] (0-100)"
+		end
+		NeedsService.Set(player, "Hunger", hunger)
+		NeedsService.Set(player, "Thirst", thirst)
+		return `Hunger {NeedsService.Get(player, "Hunger")}, thirst {NeedsService.Get(player, "Thirst")}`
 	end,
 	latency = function(player, args)
 		if not RunService:IsStudio() then
@@ -299,6 +310,7 @@ function DevService.Init(deps: { [string]: any })
 	EntityService = deps.EntityService
 	DataService = deps.DataService
 	InventoryService = deps.InventoryService
+	NeedsService = deps.NeedsService
 	ProgressionService = deps.ProgressionService
 	SpawnService = deps.SpawnService
 	StatService = deps.StatService

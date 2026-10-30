@@ -278,7 +278,7 @@ local function regenerate(dt: number)
 			continue
 		end
 		local changed = false
-		local mpRate = Tuning.Base.MpRegen + entity.extras.MpRegen
+		local mpRate = (Tuning.Base.MpRegen + entity.extras.MpRegen) * entity.regenScale
 		if entity.mp < entity.stats.MaxMp then
 			entity.mp = math.min(entity.stats.MaxMp, entity.mp + mpRate * dt)
 			changed = true
@@ -291,7 +291,8 @@ local function regenerate(dt: number)
 			changed = true
 		end
 		if entity.hp < entity.stats.MaxHp and now - entity.lastCombatAt > Tuning.Base.OutOfCombatDelay then
-			entity.hp = math.min(entity.stats.MaxHp, entity.hp + Tuning.Base.HpRegenOutOfCombat * dt)
+			entity.hp =
+				math.min(entity.stats.MaxHp, entity.hp + Tuning.Base.HpRegenOutOfCombat * entity.regenScale * dt)
 			changed = true
 		end
 		if changed then

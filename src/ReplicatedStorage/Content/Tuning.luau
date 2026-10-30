@@ -150,6 +150,21 @@ return table.freeze({
 		CapacityPerLevels = 7,
 	}),
 
+	--[=[
+		Hunger and thirst (docs/systems/stats-and-hud.md, Hunger and thirst). Each runs from Max to 0
+		in SecondsToEmpty. Below LowThreshold of Max, HP and MP regen scale by LowRegenScale per need;
+		an empty need stops that regen and drains StarvingHpPerSecond HP, never below FloorHp.
+	]=]
+	Needs = table.freeze({
+		Max = 100,
+		SecondsToEmpty = table.freeze({ Hunger = 40 * 60, Thirst = 25 * 60 }),
+		LowThreshold = 0.25,
+		LowRegenScale = 0.5,
+		StarvingHpPerSecond = 0.5,
+		FloorHp = 1,
+		TickInterval = 1,
+	}),
+
 	Death = table.freeze({
 		--[=[ XP debt added on death, as a fraction of XP needed for the current level. ]=]
 		DebtFraction = 0.1,

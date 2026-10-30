@@ -19,6 +19,7 @@ local SERVICE_ORDER = {
 	"ZoneService",
 	"EntityService",
 	"StatService",
+	"NeedsService",
 	"StatusService",
 	"CombatService",
 	"SkillService",

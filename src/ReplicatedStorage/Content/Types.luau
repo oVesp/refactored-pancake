@@ -293,7 +293,8 @@ export type ItemDef = {
 	grade: number,
 	capacity: number,
 	modifiers: StatBlock?,
-	use: { hp: number?, mp: number? }?,
+	--[=[ What using a Consumable restores: HP, MP, hunger and thirst (0-100 scale). ]=]
+	use: { hp: number?, mp: number?, hunger: number?, thirst: number? }?,
 	stack: number,
 	description: string,
 }

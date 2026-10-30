@@ -16,6 +16,7 @@ type Entity = Types.Entity
 local CombatService: any
 local DataService: any
 local EntityService: any
+local NeedsService: any
 local StatService: any
 
 local random = Random.new()
@@ -117,12 +118,19 @@ local function use(player: Player, uid: number)
 	if def.use.mp then
 		StatService.Restore(entity, "Mp", def.use.mp)
 	end
+	if def.use.hunger then
+		NeedsService.Restore(player, "Hunger", def.use.hunger)
+	end
+	if def.use.thirst then
+		NeedsService.Restore(player, "Thirst", def.use.thirst)
+	end
 end
 
 function InventoryService.Init(deps: { [string]: any })
 	CombatService = deps.CombatService
 	DataService = deps.DataService
 	EntityService = deps.EntityService
+	NeedsService = deps.NeedsService
 	StatService = deps.StatService
 	NetServer.Connect("EquipItem", equip)
 	NetServer.Connect("UnequipSlot", unequip)

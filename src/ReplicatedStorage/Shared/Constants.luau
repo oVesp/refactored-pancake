@@ -9,6 +9,9 @@ return table.freeze({
 		MaxMp = "MaxMp",
 		Focus = "Focus",
 		MaxFocus = "MaxFocus",
+		--[=[ Hunger and thirst live on the Player, not the character, so they survive respawn. ]=]
+		Hunger = "Hunger",
+		Thirst = "Thirst",
 	}),
 
 	--[=[ Name of the folder in ReplicatedStorage that holds every remote. ]=]

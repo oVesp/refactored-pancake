@@ -125,6 +125,18 @@ local function renderPools(character: Model)
 	setText("Bind_FocusText", string.format("Focus %d / %d", num(Attributes.Focus), num(Attributes.MaxFocus)))
 end
 
+local function renderNeeds()
+	for _, kind in { "Hunger", "Thirst" } do
+		local value = player:GetAttribute(Attributes[kind])
+		local shown = if type(value) == "number" then value else Tuning.Needs.Max
+		local barFill = bound[`Bind_{kind}Fill`]
+		fill(barFill, bound[`Bind_{kind}Text`], shown, Tuning.Needs.Max, "%d")
+		barFill.BackgroundColor3 = if shown < Tuning.Needs.Max * Tuning.Needs.LowThreshold
+			then Theme.HpBright
+			else Theme.Gold
+	end
+end
+
 local function renderStatuses(character: Model)
 	UIController.ClearRows(bound.Bind_Statuses)
 	local raw = character:GetAttribute("Statuses")
@@ -353,6 +365,10 @@ function HudController.Start()
 		"Bind_MpText",
 		"Bind_StaminaFill",
 		"Bind_StaminaText",
+		"Bind_HungerFill",
+		"Bind_HungerText",
+		"Bind_ThirstFill",
+		"Bind_ThirstText",
 		"Bind_FocusText",
 		"Bind_NameText",
 		"Bind_LevelText",
@@ -387,6 +403,9 @@ function HudController.Start()
 	TargetController.Changed:Connect(renderTarget)
 	renderTarget(TargetController.Enemy(), TargetController.IsLocked())
 
+	player:GetAttributeChangedSignal(Attributes.Hunger):Connect(renderNeeds)
+	player:GetAttributeChangedSignal(Attributes.Thirst):Connect(renderNeeds)
+	renderNeeds()
 	player.CharacterAdded:Connect(watchCharacter)
 	if player.Character then
 		watchCharacter(player.Character)

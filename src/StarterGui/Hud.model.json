@@ -52,7 +52,7 @@
 								],
 								[
 									0,
-									84
+									92
 								]
 							]
 						},
@@ -1460,6 +1460,546 @@
 					]
 				},
 				{
+					"name": "HungerBar",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									0,
+									111
+								],
+								[
+									0,
+									10
+								]
+							]
+						},
+						"Position": {
+							"UDim2": [
+								[
+									0,
+									96
+								],
+								[
+									0,
+									85
+								]
+							]
+						},
+						"BackgroundColor3": [
+							0.051,
+							0.063,
+							0.086
+						],
+						"BackgroundTransparency": 0.1,
+						"BorderSizePixel": 0,
+						"ClipsDescendants": true
+					},
+					"children": [
+						{
+							"name": "UICorner",
+							"className": "UICorner",
+							"properties": {
+								"CornerRadius": {
+									"UDim": [
+										0,
+										3
+									]
+								}
+							}
+						},
+						{
+							"name": "UIStroke",
+							"className": "UIStroke",
+							"properties": {
+								"Color": [
+									0.549,
+									0.471,
+									0.325
+								],
+								"Thickness": 1,
+								"Transparency": 0.1,
+								"ApplyStrokeMode": "Border"
+							}
+						},
+						{
+							"name": "Bind_HungerFill",
+							"className": "Frame",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											1,
+											0
+										],
+										[
+											1,
+											0
+										]
+									]
+								},
+								"BackgroundColor3": [
+									0.824,
+									0.718,
+									0.514
+								],
+								"BorderSizePixel": 0
+							},
+							"children": [
+								{
+									"name": "UICorner",
+									"className": "UICorner",
+									"properties": {
+										"CornerRadius": {
+											"UDim": [
+												0,
+												3
+											]
+										}
+									}
+								},
+								{
+									"name": "UIGradient",
+									"className": "UIGradient",
+									"properties": {
+										"Color": {
+											"ColorSequence": {
+												"keypoints": [
+													{
+														"time": 0.0,
+														"color": [
+															1,
+															1,
+															1
+														]
+													},
+													{
+														"time": 1.0,
+														"color": [
+															0.72,
+															0.72,
+															0.72
+														]
+													}
+												]
+											}
+										},
+										"Rotation": 90
+									}
+								}
+							]
+						},
+						{
+							"name": "Sheen",
+							"className": "Frame",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											1,
+											0
+										],
+										[
+											0.45,
+											0
+										]
+									]
+								},
+								"BackgroundColor3": [
+									1,
+									1,
+									1
+								],
+								"BackgroundTransparency": 0.88,
+								"BorderSizePixel": 0,
+								"ZIndex": 2
+							}
+						},
+						{
+							"name": "Tag",
+							"className": "TextLabel",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											0,
+											60
+										],
+										[
+											1,
+											0
+										]
+									]
+								},
+								"BackgroundTransparency": 1,
+								"Text": "Hunger",
+								"TextColor3": [
+									0.902,
+									0.875,
+									0.812
+								],
+								"FontFace": {
+									"Font": {
+										"family": "rbxasset://fonts/families/BuilderSans.json",
+										"weight": "Bold",
+										"style": "Normal"
+									}
+								},
+								"TextSize": 10,
+								"TextXAlignment": "Left",
+								"TextYAlignment": "Center",
+								"TextWrapped": true,
+								"Position": {
+									"UDim2": [
+										[
+											0,
+											6
+										],
+										[
+											0,
+											0
+										]
+									]
+								},
+								"TextStrokeTransparency": 0.35,
+								"TextStrokeColor3": [
+									0.051,
+									0.063,
+									0.086
+								],
+								"ZIndex": 3
+							}
+						},
+						{
+							"name": "Bind_HungerText",
+							"className": "TextLabel",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											1,
+											-12
+										],
+										[
+											1,
+											0
+										]
+									]
+								},
+								"BackgroundTransparency": 1,
+								"Text": "",
+								"TextColor3": [
+									0.902,
+									0.875,
+									0.812
+								],
+								"FontFace": {
+									"Font": {
+										"family": "rbxasset://fonts/families/BuilderSans.json",
+										"weight": "Bold",
+										"style": "Normal"
+									}
+								},
+								"TextSize": 10,
+								"TextXAlignment": "Right",
+								"TextYAlignment": "Center",
+								"TextWrapped": true,
+								"Position": {
+									"UDim2": [
+										[
+											0,
+											6
+										],
+										[
+											0,
+											0
+										]
+									]
+								},
+								"TextStrokeTransparency": 0.35,
+								"TextStrokeColor3": [
+									0.051,
+									0.063,
+									0.086
+								],
+								"ZIndex": 3,
+								"Visible": true
+							}
+						}
+					]
+				},
+				{
+					"name": "ThirstBar",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									0,
+									111
+								],
+								[
+									0,
+									10
+								]
+							]
+						},
+						"Position": {
+							"UDim2": [
+								[
+									0,
+									213
+								],
+								[
+									0,
+									85
+								]
+							]
+						},
+						"BackgroundColor3": [
+							0.051,
+							0.063,
+							0.086
+						],
+						"BackgroundTransparency": 0.1,
+						"BorderSizePixel": 0,
+						"ClipsDescendants": true
+					},
+					"children": [
+						{
+							"name": "UICorner",
+							"className": "UICorner",
+							"properties": {
+								"CornerRadius": {
+									"UDim": [
+										0,
+										3
+									]
+								}
+							}
+						},
+						{
+							"name": "UIStroke",
+							"className": "UIStroke",
+							"properties": {
+								"Color": [
+									0.549,
+									0.471,
+									0.325
+								],
+								"Thickness": 1,
+								"Transparency": 0.1,
+								"ApplyStrokeMode": "Border"
+							}
+						},
+						{
+							"name": "Bind_ThirstFill",
+							"className": "Frame",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											1,
+											0
+										],
+										[
+											1,
+											0
+										]
+									]
+								},
+								"BackgroundColor3": [
+									0.824,
+									0.718,
+									0.514
+								],
+								"BorderSizePixel": 0
+							},
+							"children": [
+								{
+									"name": "UICorner",
+									"className": "UICorner",
+									"properties": {
+										"CornerRadius": {
+											"UDim": [
+												0,
+												3
+											]
+										}
+									}
+								},
+								{
+									"name": "UIGradient",
+									"className": "UIGradient",
+									"properties": {
+										"Color": {
+											"ColorSequence": {
+												"keypoints": [
+													{
+														"time": 0.0,
+														"color": [
+															1,
+															1,
+															1
+														]
+													},
+													{
+														"time": 1.0,
+														"color": [
+															0.72,
+															0.72,
+															0.72
+														]
+													}
+												]
+											}
+										},
+										"Rotation": 90
+									}
+								}
+							]
+						},
+						{
+							"name": "Sheen",
+							"className": "Frame",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											1,
+											0
+										],
+										[
+											0.45,
+											0
+										]
+									]
+								},
+								"BackgroundColor3": [
+									1,
+									1,
+									1
+								],
+								"BackgroundTransparency": 0.88,
+								"BorderSizePixel": 0,
+								"ZIndex": 2
+							}
+						},
+						{
+							"name": "Tag",
+							"className": "TextLabel",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											0,
+											60
+										],
+										[
+											1,
+											0
+										]
+									]
+								},
+								"BackgroundTransparency": 1,
+								"Text": "Thirst",
+								"TextColor3": [
+									0.902,
+									0.875,
+									0.812
+								],
+								"FontFace": {
+									"Font": {
+										"family": "rbxasset://fonts/families/BuilderSans.json",
+										"weight": "Bold",
+										"style": "Normal"
+									}
+								},
+								"TextSize": 10,
+								"TextXAlignment": "Left",
+								"TextYAlignment": "Center",
+								"TextWrapped": true,
+								"Position": {
+									"UDim2": [
+										[
+											0,
+											6
+										],
+										[
+											0,
+											0
+										]
+									]
+								},
+								"TextStrokeTransparency": 0.35,
+								"TextStrokeColor3": [
+									0.051,
+									0.063,
+									0.086
+								],
+								"ZIndex": 3
+							}
+						},
+						{
+							"name": "Bind_ThirstText",
+							"className": "TextLabel",
+							"properties": {
+								"Size": {
+									"UDim2": [
+										[
+											1,
+											-12
+										],
+										[
+											1,
+											0
+										]
+									]
+								},
+								"BackgroundTransparency": 1,
+								"Text": "",
+								"TextColor3": [
+									0.902,
+									0.875,
+									0.812
+								],
+								"FontFace": {
+									"Font": {
+										"family": "rbxasset://fonts/families/BuilderSans.json",
+										"weight": "Bold",
+										"style": "Normal"
+									}
+								},
+								"TextSize": 10,
+								"TextXAlignment": "Right",
+								"TextYAlignment": "Center",
+								"TextWrapped": true,
+								"Position": {
+									"UDim2": [
+										[
+											0,
+											6
+										],
+										[
+											0,
+											0
+										]
+									]
+								},
+								"TextStrokeTransparency": 0.35,
+								"TextStrokeColor3": [
+									0.051,
+									0.063,
+									0.086
+								],
+								"ZIndex": 3,
+								"Visible": true
+							}
+						}
+					]
+				},
+				{
 					"name": "Bind_FocusText",
 					"className": "TextLabel",
 					"properties": {
@@ -1501,7 +2041,7 @@
 								],
 								[
 									0,
-									94
+									99
 								]
 							]
 						},

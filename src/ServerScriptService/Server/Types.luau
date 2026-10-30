@@ -59,6 +59,8 @@ export type Entity = {
 	alive: boolean,
 	god: boolean,
 	lastCombatAt: number,
+	--[=[ HP and MP regen multiplier from hunger and thirst (NeedsService); 1 when fed. ]=]
+	regenScale: number,
 	cooldowns: { [string]: number },
 	--[=[ os.clock() when the shared global cooldown is ready again. ]=]
 	gcdReadyAt: number,
