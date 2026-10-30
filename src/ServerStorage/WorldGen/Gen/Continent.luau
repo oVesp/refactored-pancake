@@ -226,10 +226,8 @@ function Continent.sampler(template: Template, seed: number): Sampler
 		local reach = land + template.coast.amp * coastNoise(u, v)
 		local s = if inside then reach - d1 else -1
 		local bay = template.bay
-		local bayDepth = 1 - math.sqrt((x - bay.x) ^ 2 + (z - bay.z) ^ 2) / bay.r
-		if bayDepth > 0 then
-			s = math.min(s, -bayDepth * 0.4)
-		end
+		-- The bay caps the distance to the coastline, so its shores rise as gently as any coast.
+		s = math.min(s, (math.sqrt((x - bay.x) ^ 2 + (z - bay.z) ^ 2) / bay.r - 1) * 0.5)
 		-- The shore rise comes from the real coastline, so the land around the pads stays low.
 		local coastline = s
 		if pad > 0.5 then
