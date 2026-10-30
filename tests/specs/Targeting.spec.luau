@@ -27,6 +27,13 @@ local function at(key: string, x: number, z: number): any
 end
 
 return {
+	["a lock breaks on death, range or lost sight"] = function()
+		local t = Tuning.Targeting
+		Expect.truthy(Targeting.KeepLock(true, t.Range, t.Range, t.LockSightGrace, t.LockSightGrace), "holds")
+		Expect.equal(Targeting.KeepLock(false, 1, t.Range, 0, t.LockSightGrace), false, "dead")
+		Expect.equal(Targeting.KeepLock(true, t.Range + 1, t.Range, 0, t.LockSightGrace), false, "out of range")
+		Expect.equal(Targeting.KeepLock(true, 1, t.Range, t.LockSightGrace + 0.1, t.LockSightGrace), false, "unseen")
+	end,
 	["picks the enemy nearest the screen centre"] = function()
 		local pick = Targeting.Pick({ at("side", 12, -10), at("centre", 0, -20) }, options())
 		Expect.equal(pick, "centre", "pick")

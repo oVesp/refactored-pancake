@@ -134,9 +134,10 @@ end
 
 -- Aim point and target for a skill. Melee swings where the character faces (the camera yaw)
 -- and turns toward a close target in front of it (magnetism); skillshots stay free-aim through
--- the screen centre, with a small bend toward the target off the mouse; Target and Dash need an
--- enemy target; Ground lands on the target off the mouse; Ally takes the ally target (nil means
--- self). Returns nil aim when the skill cannot be used without a target.
+-- the screen centre, with a small bend toward the target off the mouse; a hard lock sends
+-- skillshots and Ground at the locked target; Target and Dash need an enemy target; Ground lands
+-- on the target off the mouse; Ally takes the ally target (nil means self). Returns nil aim when
+-- the skill cannot be used without a target.
 local function aimFor(skill: any, root: BasePart): (Vector3?, Model?)
 	local aim = CombatController.GetAim()
 	local delivery = skill.delivery
@@ -166,12 +167,14 @@ local function aimFor(skill: any, root: BasePart): (Vector3?, Model?)
 			face(root, enemyAt)
 			return enemyAt, nil
 		end
-	elseif delivery == "Projectile" and not TargetController.UsingMouse() then
-		if angle <= t.AimAssistDegrees or TargetController.IsLocked() then
+	elseif delivery == "Projectile" or delivery == "Ground" then
+		if TargetController.IsLocked() then
+			return enemyAt, nil
+		elseif TargetController.UsingMouse() then
+			return aim, nil
+		elseif delivery == "Ground" or angle <= t.AimAssistDegrees then
 			return enemyAt, nil
 		end
-	elseif delivery == "Ground" and not TargetController.UsingMouse() then
-		return enemyAt, nil
 	end
 	return aim, nil
 end

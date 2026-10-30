@@ -110,6 +110,20 @@ function Targeting.Next<K>(candidates: { Candidate<K> }, options: Options<K>, cu
 end
 
 --[=[ Angle in degrees between two directions projected on the ground plane. ]=]
+--[=[
+	True while a hard lock holds: the target is alive, within `range` studs and was last in line of
+	sight no more than `sightGrace` seconds ago (`unseenFor`).
+]=]
+function Targeting.KeepLock(
+	alive: boolean,
+	distance: number,
+	range: number,
+	unseenFor: number,
+	sightGrace: number
+): boolean
+	return alive and distance <= range and unseenFor <= sightGrace
+end
+
 function Targeting.FlatAngle(a: Vector3, b: Vector3): number
 	local fa = Vector3.new(a.X, 0, a.Z)
 	local fb = Vector3.new(b.X, 0, b.Z)

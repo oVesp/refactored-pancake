@@ -48,6 +48,7 @@ local ProfileController: any
 local CombatController: any
 local TargetController: any
 local DragController: any
+local CameraController: any
 
 local player = Players.LocalPlayer
 local characterMaid = Maid.new()
@@ -340,6 +341,7 @@ function HudController.Init(deps: { [string]: any })
 	CombatController = deps.CombatController
 	TargetController = deps.TargetController
 	DragController = deps.DragController
+	CameraController = deps.CameraController
 end
 
 function HudController.Start()
@@ -371,7 +373,16 @@ function HudController.Start()
 		"Bind_TargetHpFill",
 		"Bind_TargetHpText",
 		"Bind_TargetInfo",
+		"Bind_CombatMode",
 	})
+	local modeLabel = bound.Bind_CombatMode :: TextLabel
+	local exploreColor = modeLabel.TextColor3
+	local function renderMode(inCombat: boolean)
+		modeLabel.Text = if inCombat then "Combat mode" else "Exploration"
+		modeLabel.TextColor3 = if inCombat then Theme.Gold else exploreColor
+	end
+	CameraController.Changed:Connect(renderMode)
+	renderMode(CameraController.InCombat())
 	setText("Bind_NameText", player.DisplayName)
 	TargetController.Changed:Connect(renderTarget)
 	renderTarget(TargetController.Enemy(), TargetController.IsLocked())

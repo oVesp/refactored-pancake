@@ -125,6 +125,8 @@ return table.freeze({
 	Targeting = table.freeze({
 		--[=[ Max distance for the soft target and for keeping a lock. ]=]
 		Range = 60,
+		--[=[ Seconds a locked target may stay out of line of sight before the lock breaks. ]=]
+		LockSightGrace = 1,
 		--[=[ Half-angle around the camera centre where enemies can become the soft target. ]=]
 		ConeDegrees = 40,
 		--[=[ Score bonus that keeps the current target until another is clearly more central. ]=]

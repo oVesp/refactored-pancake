@@ -24,8 +24,9 @@ local player = Players.LocalPlayer
 --[=[
 	Client side of targeting (docs/systems/combat.md, Targeting). Keeps a soft enemy target (the
 	enemy nearest the screen centre, sticky so crowds do not flicker), an optional hard lock
-	(Tab / R3 cycles, tapping an enemy locks it) and picks ally targets for support skills. The
-	server re-validates every target it receives.
+	(Tab / R3 cycles, tapping an enemy locks it; CameraController frames it) and picks ally targets
+	for support skills. A lock breaks on death, beyond `Tuning.Targeting.Range` or after
+	`LockSightGrace` seconds out of sight. The server re-validates every target it receives.
 ]=]
 local TargetController = {}
 
@@ -42,6 +43,8 @@ local marker: BillboardGui
 local arrow: TextLabel
 local lastPointerWasMouse = UserInputService.MouseEnabled
 local refreshAt = 0
+-- os.clock() when the locked target was last in line of sight.
+local lockSeenAt = 0
 
 local function rootOf(model: Model?): BasePart?
 	local root = model and (model:FindFirstChild("HumanoidRootPart") or model.PrimaryPart)
@@ -158,11 +161,39 @@ local function render()
 	TargetController.Changed:Fire(target, isLocked)
 end
 
-local function refresh()
-	local range = Tuning.Targeting.Range
-	if locked and (not isAlive(locked) or not withinRange(locked, range)) then
-		locked = nil
+-- True when nothing blocks the line from the character's chest to the model.
+local function inSight(model: Model): boolean
+	local root, own = rootOf(model), ownRoot()
+	if not root or not own then
+		return false
 	end
+	local origin = own.Position + Vector3.new(0, 1.5, 0)
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = if player.Character then { player.Character, model } else { model }
+	return workspace:Raycast(origin, root.Position - origin, params) == nil
+end
+
+local function setLock(model: Model?)
+	locked = model
+	lockSeenAt = os.clock()
+end
+
+local function refresh()
+	local t = Tuning.Targeting
+	local current = locked
+	if current then
+		local now = os.clock()
+		if inSight(current) then
+			lockSeenAt = now
+		end
+		local root, own = rootOf(current), ownRoot()
+		local distance = if root and own then (root.Position - own.Position).Magnitude else math.huge
+		if not Targeting.KeepLock(isAlive(current), distance, t.Range, now - lockSeenAt, t.LockSightGrace) then
+			locked = nil
+		end
+	end
+	local range = t.Range
 	local opts = options(range, soft)
 	soft = if opts then Targeting.Pick(enemyCandidates(), opts) else nil
 	render()
@@ -186,13 +217,13 @@ end
 --[=[ Locks the next enemy in score order; past the last one it releases the lock. ]=]
 function TargetController.Cycle()
 	local opts = options(Tuning.Targeting.Range, nil)
-	locked = if opts then Targeting.Next(enemyCandidates(), opts, locked) else nil
+	setLock(if opts then Targeting.Next(enemyCandidates(), opts, locked) else nil)
 	render()
 end
 
 --[=[ Locks a specific enemy, or releases the lock when it is already locked. ]=]
 function TargetController.ToggleLock(model: Model)
-	locked = if locked == model then nil else model
+	setLock(if locked == model then nil else model)
 	render()
 end
 

@@ -21,13 +21,15 @@ local TOUCH_SLOTS = 4
 --[=[
 	Input bindings through ContextActionService (remappable later, gamepad and touch buttons
 	included). Tap attack = light, hold = heavy; with a bow, hold draws and release shoots; while
-	guarding with a shield, attack bashes. Tab / R3 / Target button cycle the target lock.
+	guarding with a shield, attack bashes. Tab / R3 / Target button cycle the target lock. Left Alt /
+	D-pad up / the Combat button toggle combat mode (CameraController).
 	Screens: B spellbook, I inventory, C sheet, F2 debug.
 ]=]
 local InputController = {}
 
 local CombatController: any
 local TargetController: any
+local CameraController: any
 local UIController: any
 
 local attackPressedAt: number? = nil
@@ -94,6 +96,7 @@ end
 function InputController.Init(deps: { [string]: any })
 	CombatController = deps.CombatController
 	TargetController = deps.TargetController
+	CameraController = deps.CameraController
 	UIController = deps.UIController
 end
 
@@ -118,6 +121,14 @@ function InputController.Start()
 		Enum.KeyCode.ButtonR3
 	)
 	ContextActionService:SetTitle("CycleTarget", "Target")
+	ContextActionService:BindAction(
+		"CombatMode",
+		onPress(CameraController.ToggleCombat),
+		true,
+		Enum.KeyCode.LeftAlt,
+		Enum.KeyCode.DPadUp
+	)
+	ContextActionService:SetTitle("CombatMode", "Combat")
 
 	for index, key in HOTBAR_KEYS do
 		ContextActionService:BindAction(`Slot{index}`, onSlot(index), index <= TOUCH_SLOTS, key)

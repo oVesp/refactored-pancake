@@ -2499,6 +2499,63 @@
 			]
 		},
 		{
+			"name": "Bind_CombatMode",
+			"className": "TextLabel",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							0,
+							270
+						],
+						[
+							0,
+							16
+						]
+					]
+				},
+				"Position": {
+					"UDim2": [
+						[
+							1,
+							-10
+						],
+						[
+							0,
+							52
+						]
+					]
+				},
+				"AnchorPoint": [
+					1,
+					0
+				],
+				"BackgroundTransparency": 1,
+				"Text": "Exploration",
+				"TextColor3": [
+					0.682,
+					0.706,
+					0.749
+				],
+				"FontFace": {
+					"Font": {
+						"family": "rbxasset://fonts/families/BuilderSans.json",
+						"weight": "Medium",
+						"style": "Normal"
+					}
+				},
+				"TextSize": 13,
+				"TextXAlignment": "Right",
+				"TextYAlignment": "Center",
+				"TextStrokeTransparency": 0.7,
+				"TextStrokeColor3": [
+					0.051,
+					0.063,
+					0.086
+				]
+			}
+		},
+		{
 			"name": "Bind_HintPanel",
 			"className": "Frame",
 			"properties": {
@@ -3675,7 +3732,7 @@
 					]
 				},
 				"BackgroundTransparency": 1,
-				"Text": "LMB attack (hold: heavy) \u00b7 1-8 skills \u00b7 Q dodge \u00b7 F guard \u00b7 Z/X disciplines \u00b7 B spells \u00b7 I bag \u00b7 C sheet",
+				"Text": "LMB attack (hold: heavy) \u00b7 1-8 skills \u00b7 Q dodge \u00b7 F guard \u00b7 Z/X disciplines \u00b7 B spells \u00b7 I bag \u00b7 C sheet \u00b7 Alt combat mode \u00b7 Tab lock target",
 				"TextColor3": [
 					0.682,
 					0.706,
