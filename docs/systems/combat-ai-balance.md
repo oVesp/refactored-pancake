@@ -89,9 +89,7 @@ Most single-enemy and stagger sources are practitioner or community material. Th
 
 ### 8. Tuning and tests
 
-- A pure-Lune simulation of `Swarm` and the new threat module can answer the balance questions directly: how many same-level Rabble can a DPS or a tank fight with given gear before dying, and how long is the opening after a Slinger shot. Treat "DPS survives 1 to 3, tank survives 5 to 8" as test targets.
-- All new numbers live in `Tuning.Threat`, `Tuning.Swarm.Poise` and `Tuning.Parry`, not in code.
-- Log through `Logger` only; add counters for parry breaks, aggro switches and times at full token budget, so tuning has data.
+**Done** (2026-10-31): the simulation ([AI](ai-and-spawning.md), Balance simulation), tuning tables and debug logs for parry breaks and aggro switches. Results against the targets: a DPS survives 5 to 7 same-level raiders (target 1 to 3: too easy), a tank 5 (target 5 to 8, but below the DPS, because without a tank kit it only trades damage for blocking). Every raider hit breaks its 0.2-share pool, so DPS hits stagger constantly. Tuning the numbers to the targets is an owner decision. Still open: a counter for time spent at the full token budget, and a Slinger opening measurement once the sim models space.
 
 ## Decisions (2026-10-31)
 
