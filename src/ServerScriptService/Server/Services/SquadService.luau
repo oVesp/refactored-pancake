@@ -50,6 +50,7 @@ SquadService.ProfileDefaults = table.freeze({
 	morale = Tuning.Swarm.Morale.Default,
 	poiseShare = Tuning.Swarm.Poise.DefaultShare,
 	parryPoise = Tuning.Parry.Poise,
+	plant = Tuning.Swarm.Ranged.Plant,
 }) :: Swarm.ProfileDefaults
 
 --[=[ Creates the squad record for an enemy; AIService keeps it on the brain. ]=]

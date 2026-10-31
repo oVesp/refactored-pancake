@@ -52,6 +52,10 @@ export type Profile = {
 	baseMaxHp: number,
 	--[=[ Share of the pool one same-level parry takes; 0 never breaks by parry. ]=]
 	parryPoise: number,
+	--[=[ Seconds planted after each attack (ranged enemies); 0 for none. ]=]
+	plant: number,
+	--[=[ Pressure and pause phases (Swarm.TempoPhase); nil attacks whenever it can. ]=]
+	tempo: { pressure: number, pause: number }?,
 }
 
 --[=[ Values an enemy's `combat` falls back on (from Tuning). ]=]
@@ -61,6 +65,8 @@ export type ProfileDefaults = {
 	--[=[ Default poise pool as a share of base max HP. ]=]
 	poiseShare: number,
 	parryPoise: number,
+	--[=[ Plant after each attack for enemies with `keepDistance`. ]=]
+	plant: number,
 }
 
 --[=[ True when a skill can interrupt a player's cast and is telegraphed: an enemy-targeted skill
@@ -108,6 +114,8 @@ function Swarm.Profile(
 		poiseMax = combat.poiseMax or defaults.poiseShare * baseMaxHp,
 		baseMaxHp = baseMaxHp,
 		parryPoise = combat.parryPoise or defaults.parryPoise,
+		plant = combat.plant or (if def.keepDistance then defaults.plant else 0),
+		tempo = combat.tempo,
 	}
 end
 

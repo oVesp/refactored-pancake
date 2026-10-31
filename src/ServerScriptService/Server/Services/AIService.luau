@@ -17,6 +17,7 @@ local Swarm = require(ReplicatedStorage.Shared.Swarm)
 local Tasks = require(ReplicatedStorage.Shared.Tasks)
 local Threat = require(ReplicatedStorage.Shared.Threat)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
+local Weapons = require(ReplicatedStorage.Content.Weapons)
 local Types = require(script.Parent.Parent.Types)
 
 type Entity = Types.Entity
@@ -73,6 +74,14 @@ type Brain = {
 	reachMax: number,
 	--[=[ os.clock() of the last think, for threat decay. ]=]
 	thoughtAt: number,
+	--[=[ `skill.weight` per entry of the definition's skills (Swarm.WeightedOrder). ]=]
+	weights: { number? },
+	--[=[ Shifts the tempo cycle (combat.tempo) so a pack does not pause together. ]=]
+	tempoOffset: number,
+	--[=[ Ranged enemies: planted (no movement) until this os.clock(); walking a retreat until retreatUntil. ]=]
+	plantUntil: number,
+	retreatUntil: number,
+	lastRetreatAt: number,
 	--[=[ Poise left in the pool and when it last took poise damage (it refills after Tuning.Swarm.Poise.RefillDelay). ]=]
 	poise: number,
 	poiseAt: number,
@@ -379,12 +388,30 @@ local function usable(brain: Brain, skill: any, target: Entity, distance: number
 	return nil, nil
 end
 
--- Picks the first ready skill in data order whose conditions hold and whose budget grants a
--- token. Returns skill id, aim and the entity it is aimed at.
-local function chooseSkill(brain: Brain, target: Entity, distance: number, now: number): (string?, Vector3?, Entity?)
-	for _, skillId in brain.def.skills do
+local function rollWeight(): number
+	return random:NextNumber()
+end
+
+-- Picks the first ready skill, in data order or by `weight` (Swarm.WeightedOrder), whose
+-- conditions hold and whose budget grants a token. Outside the tempo's pressure phase only ally
+-- skills count. Returns skill id, aim and the entity it is aimed at.
+local function chooseSkill(
+	brain: Brain,
+	target: Entity,
+	distance: number,
+	now: number,
+	pressing: boolean
+): (string?, Vector3?, Entity?)
+	local skills = brain.def.skills
+	for _, index in Swarm.WeightedOrder(brain.weights, #skills, rollWeight) do
+		local skillId = skills[index]
 		local skill = Skills.ById[skillId]
-		if not skill or reserved(brain, skillId) or SkillService.CooldownRemaining(brain.entity, skillId) > 0 then
+		if
+			not skill
+			or (not pressing and skill.targets ~= "Ally")
+			or reserved(brain, skillId)
+			or SkillService.CooldownRemaining(brain.entity, skillId) > 0
+		then
 			continue
 		end
 		local aim, aimedAt = usable(brain, skill, target, distance)
@@ -409,6 +436,39 @@ local function readyAttackKind(brain: Brain): Swarm.TokenKind?
 		end
 	end
 	return nil
+end
+
+-- A target that fights in melee: NPCs, and players whose weapon's light attack is a melee swing.
+local function meleeTarget(target: Entity): boolean
+	if target.kind ~= "Player" then
+		return true
+	end
+	local weapon = Weapons.ById[target.weapon] or Weapons.ById[Weapons.Default]
+	local light = weapon and Skills.ById[weapon.light]
+	return light ~= nil and light.delivery == "Melee"
+end
+
+-- A ranged enemy facing a melee target only walks away from it inside `keepDistance`, with no
+-- attack ready, once per RetreatCooldown and RetreatDistance at most. Returns where it may walk,
+-- or nil to hold its ground.
+local function rangedStep(brain: Brain, target: Entity, distance: number, destination: Vector3, now: number): Vector3?
+	local keep = brain.def.keepDistance
+	if not keep or not meleeTarget(target) then
+		return destination
+	end
+	if (flat(destination) - flat(target.root.Position)).Magnitude <= distance + 0.5 then
+		return destination
+	end
+	local settings = Tuning.Swarm.Ranged
+	local ready = readyAttackKind(brain) ~= nil
+	if distance >= keep or not Swarm.RetreatAllowed(ready, now, brain.lastRetreatAt, settings.RetreatCooldown) then
+		return nil
+	end
+	local entity = brain.entity
+	local speed = if entity.humanoid then entity.humanoid.WalkSpeed else 0
+	brain.lastRetreatAt = now
+	brain.retreatUntil = now + settings.RetreatDistance / math.max(speed, 1) + Tuning.Npc.ThinkInterval
+	return Swarm.ClampStep(entity.root.Position, destination, settings.RetreatDistance)
 end
 
 local function preferredRange(brain: Brain): number
@@ -835,20 +895,39 @@ local function think(brain: Brain, now: number)
 	if disrupt(brain, target, distance, now) then
 		return
 	end
-	local skillId, aim, aimedAt = chooseSkill(brain, target, distance, now)
+	local member = brain.member
+	local pressing = Swarm.TempoPhase(member.profile.tempo, brain.tempoOffset, now) == "Pressure"
+	local skillId, aim, aimedAt = chooseSkill(brain, target, distance, now, pressing)
 	if skillId and aim then
 		local skill = Skills.ById[skillId]
+		local windup = skill.castTime or skill.windup or 0
 		setState(brain, "Attack")
 		stop(brain)
 		face(brain, aim)
-		SquadService.Commit(brain.member, now + (skill.castTime or skill.windup or 0) + Tuning.Swarm.RecoveryHold)
+		SquadService.Commit(brain.member, now + windup + Tuning.Swarm.RecoveryHold)
 		SkillService.Cast(entity, skillId, aim, aimedAt)
 		attackCue(entity, skill)
+		if member.profile.plant > 0 then
+			brain.plantUntil = now + windup + member.profile.plant
+		end
 		return
 	end
 
-	local member = brain.member
-	local attackKind = readyAttackKind(brain)
+	-- Planted after a shot: the opening a melee player closes in on.
+	if now < brain.plantUntil then
+		stop(brain)
+		face(brain, target.root.Position)
+		return
+	end
+	if now < brain.retreatUntil then
+		return
+	end
+
+	if not pressing and SquadService.HasToken(member) then
+		-- A pause gives an unused token back, so the queue does not stall until TokenTimeout.
+		SquadService.DropToken(member)
+	end
+	local attackKind = if pressing then readyAttackKind(brain) else nil
 	local cleared = SquadService.HasToken(member)
 		or (attackKind ~= nil and SquadService.RequestToken(member, attackKind, now))
 	setState(brain, if cleared then "Aggro" else "Position")
@@ -869,8 +948,12 @@ local function think(brain: Brain, now: number)
 		spot = target.root.Position + bearing * (reach + Tuning.Swarm.WaitDistance)
 	end
 	if spot then
-		local destination = spot + separation(brain)
-		if (flat(destination) - flat(root.Position)).Magnitude > SLOT_ARRIVE and not forbidden(brain, destination) then
+		local destination = rangedStep(brain, target, distance, spot + separation(brain), now)
+		if
+			destination
+			and (flat(destination) - flat(root.Position)).Magnitude > SLOT_ARRIVE
+			and not forbidden(brain, destination)
+		then
 			moveTo(brain, destination, now)
 		else
 			stop(brain)
@@ -882,11 +965,12 @@ local function think(brain: Brain, now: number)
 	if keep and distance < keep then
 		local away = flat(root.Position - target.root.Position)
 		local direction = if away.Magnitude > 0.1 then away.Unit else Vector3.new(1, 0, 0)
-		local retreat = root.Position + direction * 10
-		if not forbidden(brain, retreat) then
+		local retreat = rangedStep(brain, target, distance, root.Position + direction * 10, now)
+		if retreat and not forbidden(brain, retreat) then
 			moveTo(brain, retreat, now)
 		else
 			stop(brain)
+			face(brain, target.root.Position)
 		end
 	elseif distance > reach then
 		moveTo(brain, target.root.Position, now)
@@ -982,12 +1066,16 @@ function AIService.Attach(entity: Entity, home: Vector3, leash: number, wander: 
 	end
 	local monster = Relations.IsMonster(entity.team)
 	local reachMax = 0
-	for _, skillId in def.skills do
+	local weights: { number? } = {}
+	for index, skillId in def.skills do
 		local skill = Skills.ById[skillId]
+		weights[index] = skill and skill.weight
 		if skill and skill.targets ~= "Ally" then
 			reachMax = math.max(reachMax, if skill.delivery == "Dash" then skill.range or 20 else skillReach(skill))
 		end
 	end
+	local member = SquadService.NewMember(entity, def)
+	local tempo = member.profile.tempo
 	brains[entity] = {
 		entity = entity,
 		def = def,
@@ -1018,9 +1106,14 @@ function AIService.Attach(entity: Entity, home: Vector3, leash: number, wander: 
 		poiseAt = -math.huge,
 		staggerUntil = 0,
 		staggerReadyAt = 0,
-		member = SquadService.NewMember(entity, def),
+		member = member,
 		reachMax = reachMax,
 		thoughtAt = os.clock(),
+		weights = weights,
+		tempoOffset = if tempo then random:NextNumber(0, tempo.pressure + tempo.pause) else 0,
+		plantUntil = 0,
+		retreatUntil = 0,
+		lastRetreatAt = -math.huge,
 	}
 	entity.model:SetAttribute("AiState", "Idle")
 end

@@ -24,7 +24,12 @@ local list: { Types.EnemyDef } = {
 		xp = 12,
 		scale = 0.75,
 		color = Color3.fromRGB(110, 150, 70),
-		combat = { slot = "Melee", roles = { Pressure = 2, Flanker = 1 }, morale = { base = 100, fleeBelow = 30 } },
+		combat = {
+			slot = "Melee",
+			roles = { Pressure = 2, Flanker = 1 },
+			morale = { base = 100, fleeBelow = 30 },
+			tempo = { pressure = 4, pause = 1.5 },
+		},
 	},
 	{
 		id = "goblin_slinger",
@@ -43,7 +48,12 @@ local list: { Types.EnemyDef } = {
 		xp = 13,
 		scale = 0.7,
 		color = Color3.fromRGB(130, 160, 80),
-		combat = { slot = "Ranged", roles = { Opportunist = 2, Reserve = 1 }, morale = { base = 90, fleeBelow = 35 } },
+		combat = {
+			slot = "Ranged",
+			roles = { Opportunist = 2, Reserve = 1 },
+			morale = { base = 90, fleeBelow = 35 },
+			plant = 0.8,
+		},
 	},
 	{
 		id = "goblin_trapper",
@@ -62,7 +72,12 @@ local list: { Types.EnemyDef } = {
 		xp = 15,
 		scale = 0.72,
 		color = Color3.fromRGB(95, 125, 60),
-		combat = { slot = "Ranged", roles = { Opportunist = 2, Reserve = 1 }, morale = { base = 90, fleeBelow = 35 } },
+		combat = {
+			slot = "Ranged",
+			roles = { Opportunist = 2, Reserve = 1 },
+			morale = { base = 90, fleeBelow = 35 },
+			plant = 0.9,
+		},
 	},
 	{
 		id = "goblin_brute",
@@ -143,7 +158,7 @@ local list: { Types.EnemyDef } = {
 		color = Color3.fromRGB(99, 95, 98),
 		template = "Skeleton",
 		team = "Undead",
-		combat = { slot = "Melee", roles = { Pressure = 1 }, morale = false },
+		combat = { slot = "Melee", roles = { Pressure = 1 }, morale = false, tempo = { pressure = 5, pause = 1 } },
 	},
 	{
 		-- Placeholder body: the Skeleton rig and clips until a zombie model exists.
@@ -164,7 +179,7 @@ local list: { Types.EnemyDef } = {
 		color = Color3.fromRGB(96, 112, 84),
 		template = "Skeleton",
 		team = "Undead",
-		combat = { slot = "Melee", roles = { Pressure = 1 }, morale = false },
+		combat = { slot = "Melee", roles = { Pressure = 1 }, morale = false, tempo = { pressure = 6, pause = 1 } },
 	},
 	{
 		id = "training_dummy",
@@ -208,6 +223,7 @@ local list: { Types.EnemyDef } = {
 			roles = { Pressure = 2, Opportunist = 1 },
 			poiseMax = 42,
 			parryPoise = 0.95,
+			tempo = { pressure = 5, pause = 1.5 },
 			morale = { base = 100, fleeBelow = 20 },
 		},
 	},
@@ -228,7 +244,12 @@ local list: { Types.EnemyDef } = {
 		xp = 40,
 		scale = 0.85,
 		color = Color3.fromRGB(80, 115, 65),
-		combat = { slot = "Ranged", roles = { Opportunist = 2, Reserve = 1 }, morale = { base = 90, fleeBelow = 30 } },
+		combat = {
+			slot = "Ranged",
+			roles = { Opportunist = 2, Reserve = 1 },
+			morale = { base = 90, fleeBelow = 30 },
+			plant = 0.6,
+		},
 	},
 	{
 		id = "goblin_hexer",
@@ -247,7 +268,7 @@ local list: { Types.EnemyDef } = {
 		xp = 45,
 		scale = 0.8,
 		color = Color3.fromRGB(90, 70, 120),
-		combat = { slot = "Ranged", roles = { Opportunist = 1 }, morale = { base = 90, fleeBelow = 30 } },
+		combat = { slot = "Ranged", roles = { Opportunist = 1 }, morale = { base = 90, fleeBelow = 30 }, plant = 1 },
 	},
 	{
 		id = "warband_shaman",

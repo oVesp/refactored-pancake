@@ -42,8 +42,8 @@ Most single-enemy and stagger sources are practitioner or community material. Th
 3. **Done.** **Parry ignores poise and level.** The same stun applies to every attacker. Intent: most same-level mobs break, elites and bosses do not.
 4. **Done** for basic swings. **Telegraphs carry the readability.** The per-skill `telegraph` flag is the only readability tool for several enemy skills (the light player attacks already use `telegraph = false` with animation and VFX instead).
 5. **Tank capacity equals DPS capacity.** The token budget is flat per player: 2 Melee, 1 Ranged, 1 Support.
-6. **The Slinger never plants.** After a throw (0.4 s windup, 2.2 s cooldown) the `keepDistance` branch retreats it 10 studs whenever the player is within 18 studs, so a chasing melee player never gets an opening.
-7. **Enemy ranged attacks have no recovery.** Enemy melee swings have windups; ranged enemies are never punishable.
+6. **Done.** **The Slinger never plants.** After a throw (0.4 s windup, 2.2 s cooldown) the `keepDistance` branch retreats it 10 studs whenever the player is within 18 studs, so a chasing melee player never gets an opening.
+7. **Done.** **Enemy ranged attacks have no recovery.** Enemy melee swings have windups; ranged enemies are never punishable.
 8. **Players have no poise.** A heavy hit does not interrupt a long cast unless it stuns, which makes long-cast spells either unsafe or untouchable depending on the enemy.
 
 ## Proposed design
@@ -84,12 +84,7 @@ Most single-enemy and stagger sources are practitioner or community material. Th
 
 ### 6. Single-enemy behavior
 
-- Each enemy has an attack pool with distance and recent-use filters and weighted random choice. `skills` order already filters; add `weight`.
-- Every attack has anticipation, active and recovery. The recovery is the opening.
-- **Tempo.** Enemies alternate pressure and reposition phases (`combat.tempo = { pressure, pause }` seconds), so even a lone enemy gives a rhythm: attack, step back or circle, attack. Pause lengths vary per enemy.
-- **Ranged enemies plant.** After a shot a Slinger stays put for a recovery (0.6 to 1.0 s), then repositions. It retreats only when a melee player is inside `keepDistance` and no shot is ready, and retreats are capped (one per 3 s, 6 studs) so a chasing player reaches it. A reach advantage that is also a weakness: punishable while planted.
-- **Hit reactions in tiers.** Flinch (visual only, no cancel), stagger (cancels the windup, short), break (long, riposte), knockdown (elites, rare). Only stagger and above interrupt.
-- **Poise per tier.** Rabble: one parry or two hits. Elites: several. Bosses: no flinch, a gauge with a long break window.
+**Done** (2026-10-31): weighted skill choice, tempo, ranged plant and capped retreats ([AI](ai-and-spawning.md), Brains, Behaviors, Tempo); flinch and break tiers ([combat](combat.md), Poise and parry). Still open: recent-use filters on the attack pool, a knockdown tier for elites, and boss gauges with a long break window instead of flinches.
 
 ### 7. Players and poise
 

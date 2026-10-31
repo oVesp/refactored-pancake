@@ -17,6 +17,7 @@ local DEFAULTS = {
 	morale = Tuning.Swarm.Morale.Default,
 	poiseShare = POOL.DefaultShare,
 	parryPoise = PARRY.Poise,
+	plant = Tuning.Swarm.Ranged.Plant,
 }
 
 -- Parries `count` times, `gap` seconds apart, by a defender `levelGap` levels above the enemy.

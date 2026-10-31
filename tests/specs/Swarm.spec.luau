@@ -17,6 +17,7 @@ local function profile(id: string): any
 		morale = Tuning.Swarm.Morale.Default,
 		poiseShare = Tuning.Swarm.Poise.DefaultShare,
 		parryPoise = Tuning.Parry.Poise,
+		plant = Tuning.Swarm.Ranged.Plant,
 	}, Skills, Statuses)
 end
 
@@ -308,6 +309,21 @@ return {
 		Expect.equal(raider.poiseMax, Tuning.Swarm.Poise.DefaultShare * Enemies.goblin_raider.base.MaxHp, "default")
 		Expect.truthy(profile("goblin_chieftain").poiseMax > raider.poiseMax, "boss is sturdier")
 		Expect.equal(profile("goblin_chieftain").parryPoise, 0, "boss never breaks by parry")
+	end,
+	["ranged enemies plant after attacks and melee ones keep tempo"] = function()
+		for id, def in Enemies do
+			local resolved = profile(id)
+			if def.keepDistance then
+				Expect.truthy(resolved.plant >= 0.6 and resolved.plant <= 1, `{id}: plants 0.6 to 1 s`)
+			else
+				Expect.equal(resolved.plant, 0, `{id}: melee does not plant`)
+			end
+			local tempo = resolved.tempo
+			if tempo then
+				Expect.truthy(tempo.pressure > tempo.pause and tempo.pause > 0, `{id}: pressure outlasts the pause`)
+			end
+		end
+		Expect.truthy(profile("goblin_raider").tempo, "rabble melee has a rhythm")
 	end,
 	["a holder gets the tank bonus on top of the melee budget"] = function()
 		local bonus = Tuning.Swarm.Budget.TankBonus
