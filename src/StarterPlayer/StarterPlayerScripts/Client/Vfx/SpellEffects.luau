@@ -226,7 +226,7 @@ local function slash(roll: number, lift: number): (origin: Vector3, aim: Vector3
 	end
 end
 
-SpellEffects.sword_slash = { swing = slash(-40, 1.2) } -- diagonal, top right to bottom left
+SpellEffects.sword_slash = { swing = slash(40, 1.2) } -- diagonal, top right to bottom left
 SpellEffects.sword_slash_2 = { swing = slash(0, 0.8) } -- horizontal, left to right
 SpellEffects.sword_slash_3 = { swing = slash(90, 1.4), hitstop = 0.085 } -- vertical chop
 SpellEffects.staff_strike = { swing = cleaveSwing }
