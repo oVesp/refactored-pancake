@@ -55,14 +55,24 @@ local SOCKETS: { [string]: { part: string, cframe: CFrame } } = {
 }
 local SOCKET_NAME = "SheathSocket"
 
--- The attachment a model hangs from: the hand's grip when drawn, else its body socket.
+-- Models worn on the body while drawn instead of gripped in a hand. The shield straps to the outer
+-- side of the forearm: its face (Handle Y) looks along the arm's -X, forward in the ShieldBlock and
+-- sword idle clips, and the disc stands vertical in them.
+local DRAWN_SOCKETS: { [string]: { part: string, cframe: CFrame } } = {
+	Shield = {
+		part = "LeftLowerArm",
+		cframe = CFrame.fromMatrix(Vector3.new(-0.55, -0.1, 0), Vector3.new(0, 0, -1), Vector3.new(-1, 0, 0)),
+	},
+}
+
+-- The attachment a model hangs from: the hand's grip or drawn socket when drawn, else its body socket.
 local function holder(character: Model, modelName: string, hand: string, drawn: boolean): Attachment?
-	if drawn then
+	if drawn and not DRAWN_SOCKETS[modelName] then
 		local handPart = character:FindFirstChild(hand .. "Hand")
 		local grip = handPart and handPart:FindFirstChild(hand .. "GripAttachment")
 		return if grip and grip:IsA("Attachment") then grip else nil
 	end
-	local socket = SOCKETS[modelName]
+	local socket = if drawn then DRAWN_SOCKETS[modelName] else SOCKETS[modelName]
 	local part = socket and character:FindFirstChild(socket.part)
 	if not socket or not part or not part:IsA("BasePart") then
 		return nil
