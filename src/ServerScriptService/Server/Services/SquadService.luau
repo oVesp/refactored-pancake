@@ -19,6 +19,8 @@ type TargetState = {
 	--[=[ Director's change to the attack budget and whether a window is open, per update. ]=]
 	bonus: number,
 	window: boolean,
+	--[=[ Extra Melee tokens while the target holds the pack (guarding or taunting a member). ]=]
+	holderBonus: number,
 	--[=[ os.clock() when any enemy may try to interrupt this player again. ]=]
 	nextDisruptAt: number,
 }
@@ -157,6 +159,7 @@ function SquadService.Leave(member: Member)
 		state.members[member] = nil
 		if next(state.members) == nil then
 			targets[target] = nil
+			target.overwhelm = 1
 		end
 	end
 end
@@ -175,6 +178,7 @@ function SquadService.Join(member: Member, target: Entity)
 			nextTactic = os.clock() + random:NextNumber(0, Tuning.Swarm.TacticInterval / 2),
 			bonus = 0,
 			window = false,
+			holderBonus = 0,
 			nextDisruptAt = 0,
 		}
 		targets[target] = state
@@ -209,7 +213,8 @@ function SquadService.RequestToken(member: Member, kind: Swarm.TokenKind, now: n
 	local swarm = Tuning.Swarm
 	Swarm.Sweep(ledger, now, swarm.TokenTimeout, swarm.WaitStale)
 	local cost = member.profile.tokenCost
-	local capacity = math.max(Swarm.Capacity(swarm.Budget[kind], kind, state.bonus), cost)
+	local bonus = state.bonus + (if kind == "Melee" then state.holderBonus else 0)
+	local capacity = math.max(Swarm.Capacity(swarm.Budget[kind], kind, bonus), cost)
 	-- Reserve waits behind everyone; Opportunists jump the queue while a window is open.
 	local priority = if member.role == "Reserve"
 		then 0
@@ -339,6 +344,24 @@ local function tactic(target: Entity, state: TargetState)
 	}, swarm.Director)
 	assignRoles(state)
 
+	-- A target guarding or taunting a member holds the pack: more melee may hit it at once. Every
+	-- attacker beyond the budget makes the target take a little more damage.
+	local taunting = false
+	local attackers = 0
+	for member in state.members do
+		if member.entity.tauntedBy == target then
+			taunting = true
+		end
+		local slot = member.profile.slot
+		if slot ~= "None" and slot ~= "Support" and member.entity.alive and not member.fleeing then
+			attackers += 1
+		end
+	end
+	state.holderBonus = Swarm.HolderBonus(target.guardSince ~= nil, taunting, swarm.Budget.TankBonus)
+	local budget = Swarm.Capacity(swarm.Budget.Melee, "Melee", state.bonus + state.holderBonus)
+		+ Swarm.Capacity(swarm.Budget.Ranged, "Ranged", state.bonus)
+	target.overwhelm = Swarm.Overwhelm(attackers, budget, swarm.Overwhelm.PerEnemy, swarm.Overwhelm.Max)
+
 	local center = target.root.Position
 	local seekers: { Swarm.Seeker } = {}
 	local radii: { [Swarm.Ring]: number } = {}
@@ -394,6 +417,7 @@ local function forget(entity: Entity)
 			other.slot = nil
 		end
 		targets[entity] = nil
+		entity.overwhelm = 1
 	end
 end
 

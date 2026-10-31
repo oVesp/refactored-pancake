@@ -41,7 +41,7 @@ Most single-enemy and stagger sources are practitioner or community material. Th
 2. **Done.** **Parry has no visible effect on the enemy.** `CombatService` applies a `stun` status for 0.6 s (`PARRY_STAGGER`). `AIService` does not read stun (it only knows its own `Stagger` state), and no hit-reaction cue plays, so the only feedback is the damage `parried` marker and the defender's clip. A parry should visibly knock the attacker back.
 3. **Done.** **Parry ignores poise and level.** The same stun applies to every attacker. Intent: most same-level mobs break, elites and bosses do not.
 4. **Done** for basic swings. **Telegraphs carry the readability.** The per-skill `telegraph` flag is the only readability tool for several enemy skills (the light player attacks already use `telegraph = false` with animation and VFX instead).
-5. **Tank capacity equals DPS capacity.** The token budget is flat per player: 2 Melee, 1 Ranged, 1 Support.
+5. **Done.** **Tank capacity equals DPS capacity.** The token budget is flat per player: 2 Melee, 1 Ranged, 1 Support.
 6. **Done.** **The Slinger never plants.** After a throw (0.4 s windup, 2.2 s cooldown) the `keepDistance` branch retreats it 10 studs whenever the player is within 18 studs, so a chasing melee player never gets an opening.
 7. **Done.** **Enemy ranged attacks have no recovery.** Enemy melee swings have windups; ranged enemies are never punishable.
 8. **Players have no poise.** A heavy hit does not interrupt a long cast unless it stuns, which makes long-cast spells either unsafe or untouchable depending on the enemy.
@@ -77,10 +77,7 @@ Most single-enemy and stagger sources are practitioner or community material. Th
 
 ### 5. Group combat
 
-- Budget scales with the party, as now. Add `Budget.TankBonus` (+1 to +2 Melee tokens) to a target flagged as a holder (guarding, wearing a shield, or with a taunt status), so the whole pack can attack the one built to take it. A DPS keeps the base 2.
-- Enemies without a token keep threatening (circling, pacing, shouting), so a pull is readable and does not look like a queue.
-- Packs are the unit of design: melee rabble, one or two ranged, at most one high-poise enemy. A lone DPS handles two or three; a tank handles the pack.
-- Scale damage taken for outnumbering lightly (a small `Overwhelm` factor per enemy beyond the token budget), so the pack cannot be ignored by taking hits.
+**Done** (2026-10-31): `Budget.TankBonus` and `Overwhelm` ([AI](ai-and-spawning.md), Attack tokens). Still open: shields as a holder flag, and enemies without a token pacing or shouting instead of standing in their slot.
 
 ### 6. Single-enemy behavior
 

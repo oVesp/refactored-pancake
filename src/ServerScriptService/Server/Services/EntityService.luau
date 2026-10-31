@@ -93,6 +93,7 @@ function EntityService.Register(info: NewEntity): Entity
 		commitUntil = 0,
 		invulnerableUntil = 0,
 		riposteUntil = 0,
+		overwhelm = 1,
 		statuses = {},
 		history = {},
 		threat = {},

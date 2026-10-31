@@ -89,6 +89,8 @@ export type Entity = {
 	invulnerableUntil: number,
 	--[=[ os.clock() until which the next melee hit taken is a riposte (Tuning.Parry.RiposteMultiplier). ]=]
 	riposteUntil: number,
+	--[=[ Damage-taken multiplier while more enemies fight this entity than its token budget allows (SquadService). ]=]
+	overwhelm: number,
 	statuses: { [string]: StatusInstance },
 	history: { Sample },
 	threat: { [Entity]: number },

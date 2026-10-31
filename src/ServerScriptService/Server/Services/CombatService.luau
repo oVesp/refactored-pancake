@@ -324,6 +324,9 @@ function CombatService.DealDamage(
 		show(target, 0, "immune", false)
 		return 0, "immune"
 	end
+	if target.overwhelm > 1 then
+		amount = math.floor(amount * target.overwhelm + 0.5)
+	end
 
 	-- A shield replaces the bare guard's values (docs/systems/weapons.md, Shields).
 	local guard = Tuning.Combat.Guard
