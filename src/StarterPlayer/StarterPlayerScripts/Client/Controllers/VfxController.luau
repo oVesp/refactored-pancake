@@ -20,17 +20,6 @@ local Logger = require(ReplicatedStorage.Shared.Logger)
 
 local log = Logger.new("Vfx")
 
-local TYPE_COLORS: { [string]: Color3 } = {
-	physical = Color3.fromRGB(230, 230, 230),
-	force = Color3.fromRGB(170, 140, 255),
-	fire = Color3.fromRGB(255, 120, 40),
-	cold = Color3.fromRGB(140, 210, 255),
-	lightning = Color3.fromRGB(255, 240, 120),
-	holy = Color3.fromRGB(255, 235, 170),
-	poison = Color3.fromRGB(120, 220, 90),
-	negative = Color3.fromRGB(150, 90, 200),
-}
-
 local DAMAGE_COLORS: { [string]: Color3 } = {
 	damage = Color3.fromRGB(255, 255, 255),
 	shielded = Color3.fromRGB(160, 200, 255),
@@ -43,9 +32,6 @@ local DAMAGE_COLORS: { [string]: Color3 } = {
 }
 
 local PARRY_COLOR = Color3.fromRGB(255, 210, 110)
--- Flash on the bow hand at full draw: the perfect release window opens.
-local DRAW_READY_COLOR = Color3.fromRGB(255, 225, 140)
-
 local TELEGRAPH_COLOR = Color3.fromRGB(255, 70, 50)
 
 -- Fade times (seconds) for the local player's skill clips.
@@ -56,8 +42,8 @@ local HIT_GRACE = 0.06 -- seconds past the baked `Hit` time before the swing sho
 
 --[=[
 	Visuals for casts, telegraphs, projectiles, impacts and floating damage numbers, plus the local
-	player's skill clips (`SkillDef.animation`, Action priority). Skills with a recipe in
-	`Vfx/SpellEffects` get textured particle effects; the rest keep neon placeholders. Everything
+	player's skill clips (`SkillDef.animation`, Action priority). Skills look as their recipe in
+	`Vfx/SpellEffects` says; the neon shapes here only mark where a telegraphed attack lands. Everything
 	here is cosmetic and client-only; the server already decided the outcome.
 ]=]
 local VfxController = {}
@@ -116,34 +102,6 @@ local function disc(center: Vector3, radius: number, color: Color3, duration: nu
 	Debris:AddItem(fill, duration + 0.1)
 end
 
-local function burst(position: Vector3, radius: number, color: Color3)
-	local ball = neon(Vector3.one, CFrame.new(position), color, 0.3)
-	ball.Shape = Enum.PartType.Ball
-	local tween = TweenService:Create(ball, TweenInfo.new(0.3), { Size = Vector3.one * radius * 2, Transparency = 1 })
-	tween:Play()
-	Debris:AddItem(ball, 0.35)
-end
-
-local function arc(origin: Vector3, aim: Vector3, range: number, color: Color3)
-	local look = Vector3.new(aim.X - origin.X, 0, aim.Z - origin.Z)
-	if look.Magnitude < 1e-3 then
-		return
-	end
-	local cframe = CFrame.lookAt(origin, origin + look) * CFrame.new(0, 0, -range / 2)
-	local slab = neon(Vector3.new(range * 0.9, 0.3, range), cframe, color, 0.55)
-	TweenService:Create(slab, TweenInfo.new(0.25), { Transparency = 1 }):Play()
-	Debris:AddItem(slab, 0.3)
-end
-
-local function skillColor(skillId: string): Color3
-	local skill = Skills.ById[skillId]
-	local damageType = skill and skill.damage and skill.damage.type
-	if damageType then
-		return TYPE_COLORS[damageType] or Color3.new(1, 1, 1)
-	end
-	return if skill and (skill.heal or skill.shield) then TYPE_COLORS.holy else Color3.fromRGB(180, 160, 255)
-end
-
 -- Plays the skill's sound for a phase of its use at a world position.
 local function playSkillSound(skill: any, phase: SkillSounds.Phase, position: Vector3): Sound?
 	local key = SkillSounds.For(skill, phase)
@@ -189,23 +147,15 @@ local function endFlight(id: number)
 		return
 	end
 	projectiles[id] = nil
-	if flight.recipe then
-		Particles.Release(flight.part, 0.8)
-	else
-		flight.part:Destroy()
-	end
+	Particles.Release(flight.part, 0.8)
 end
 
 local function launch(info: { [string]: any }, skill: any)
 	local recipe: SpellEffects.Recipe? = SpellEffects[info.skillId]
 	local start = CFrame.lookAt(info.origin, info.origin + info.direction)
-	local part: BasePart
+	local part = Particles.Anchor(start)
 	if recipe and recipe.projectile then
-		part = Particles.Anchor(start)
 		recipe.projectile(part)
-	else
-		part = neon(Vector3.new(0.8, 0.8, 2.4) * (skill.projectileScale or 1), start, skillColor(info.skillId), 0)
-		recipe = nil
 	end
 	local id = info.id
 	projectiles[id] = { part = part, recipe = recipe, skill = skill }
@@ -261,8 +211,6 @@ local function startCharge(info: { [string]: any }, skill: any)
 		end
 		charges[caster] = recipe.cast(root, info.duration, if info.hold then Tuning.Combat.Cast.MaxHold else 0)
 		heldCharges[caster] = if info.hold then true else nil
-	else
-		burst(info.origin + Vector3.new(0, 1, 0), 2, skillColor(skill.id))
 	end
 end
 
@@ -356,14 +304,14 @@ local function onImpact(id: number, position: Vector3, kind: string)
 		flight.recipe.impact(position)
 		playSkillSound(flight.skill, "impact", position)
 	elseif kind == "hit" then
-		burst(position, 2.5, Color3.fromRGB(255, 220, 160))
+		Effects.Play("HitImpact", CFrame.new(position))
 		if flight then
 			playSkillSound(flight.skill, "impact", position)
 		else
 			AudioController.PlayAt("Hit", position)
 		end
 	elseif kind == "interrupt" then
-		burst(position + Vector3.new(0, 2, 0), 3, Color3.fromRGB(255, 255, 255))
+		Effects.Play("BlockSpark", CFrame.new(position + Vector3.new(0, 2, 0)))
 	end
 end
 
@@ -594,7 +542,7 @@ function VfxController.Start()
 	CombatController.DrawReady:Connect(function()
 		local hand = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("LeftHand")
 		if hand and hand:IsA("BasePart") then
-			burst(hand.Position, 0.8, DRAW_READY_COLOR)
+			Effects.Play("DrawGlint", CFrame.new(hand.Position))
 		end
 		AudioController.Play("UiClick")
 	end)
@@ -625,8 +573,6 @@ function VfxController.PredictSwing(skillId: string, origin: Vector3, aim: Vecto
 		local recipe = SpellEffects[skillId]
 		if recipe and recipe.swing then
 			recipe.swing(origin, aim, skill.range or 6, skill.angle or 90)
-		else
-			arc(origin, aim, skill.range or 6, skillColor(skillId))
 		end
 		local key = SkillSounds.For(skill, "swing")
 		if key then

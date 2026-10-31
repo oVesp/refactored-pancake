@@ -58,9 +58,9 @@ end
 local DUST = C(rgb(170, 150, 125), rgb(120, 105, 90))
 
 --[=[
-	Visual recipes per skill id, for class spells and enemy attacks. Skills without a recipe
-	keep the controller's placeholder visuals. Hitboxes are not drawn here; shapes come from
-	textures, so the look is free to differ from the server's hit volume.
+	Visual recipes per skill id, for class spells and enemy attacks; a spec requires one for every
+	usable skill. Hitboxes are not drawn here; shapes come from textures, so the look is free to
+	differ from the server's hit volume.
 ]=]
 local SpellEffects: { [string]: Recipe } = {}
 
@@ -94,6 +94,9 @@ SpellEffects.firebolt = {
 }
 
 SpellEffects.frost_shard = {
+	cast = function(root, duration, hold)
+		return Effects.Charge("FrostCharge", root, duration, hold)
+	end,
 	projectile = function(body)
 		Effects.Attach("FrostShardBody", body)
 	end,
@@ -104,6 +107,9 @@ SpellEffects.frost_shard = {
 }
 
 SpellEffects.spark = {
+	cast = function(root, duration, hold)
+		return Effects.Charge("SparkCharge", root, duration, hold)
+	end,
 	projectile = function(body)
 		Effects.Attach("SparkBody", body)
 	end,
@@ -546,5 +552,113 @@ end
 SpellEffects.hex_bolt = hexMissile("Venom")
 SpellEffects.hex_curse = hexMissile("Hex")
 SpellEffects.shaman_heal = SpellEffects.mend
+
+-- Charge-up by template, shared by the recipes below.
+local function charge(template: string): (root: BasePart, duration: number, hold: number) -> Instance?
+	return function(root, duration, hold)
+		return Effects.Charge(template, root, duration, hold)
+	end
+end
+
+-- A flying bolt: `body` worn in flight, `burst` where it lands, `cast` (optional) at the hand first.
+local function bolt(body: string, burst: string, cast: string?): Recipe
+	return {
+		cast = if cast then charge(cast) else nil,
+		projectile = function(flying)
+			Effects.Attach(body, flying)
+		end,
+		impact = function(position)
+			Effects.Play(burst, CFrame.new(position))
+		end,
+	}
+end
+
+SpellEffects.staff_bolt = bolt("ArcaneBody", "ArcaneBurst", "ArcaneCharge")
+SpellEffects.magic_arrow = bolt("ArcaneBody", "ArcaneBurst", "ArcaneCharge")
+SpellEffects.wand_bolt = bolt("ArcaneBody", "ArcaneBurst")
+SpellEffects.wand_bolt_2 = SpellEffects.wand_bolt
+SpellEffects.wand_bolt_3 = SpellEffects.wand_bolt
+SpellEffects.wand_blast = bolt("ArcaneBlastBody", "ArcaneBurst", "ArcaneCharge")
+SpellEffects.destruction_water = bolt("WaterBody", "WaterBurst", "WaterCharge")
+SpellEffects.sleep = bolt("SleepBody", "SleepBurst", "HexCharge")
+SpellEffects.bow_shot = bolt("ArrowBody", "ArrowLand")
+SpellEffects.guard_bolt = bolt("ArrowBody", "ArrowLand")
+SpellEffects.sling_shot = bolt("SlingBody", "ArrowLand")
+SpellEffects.poison_dart = bolt("DartBody", "VenomBurst")
+
+-- A buff on the caster or the targeted ally, and the optional charge before it.
+local function bodyBuff(template: string, cast: string?): Recipe
+	return {
+		cast = if cast then charge(cast) else nil,
+		resolve = function(info)
+			local root = rootOf(info.target) or rootOf(info.caster)
+			if root then
+				Effects.Play(template, root.CFrame)
+			end
+		end,
+	}
+end
+
+SpellEffects.gather_strength = bodyBuff("MightBuff")
+SpellEffects.battle_trance = bodyBuff("MightBuff")
+SpellEffects.second_wind = bodyBuff("VigorBuff")
+SpellEffects.heightened_senses = bodyBuff("FocusBuff")
+SpellEffects.quick_march = bodyBuff("SwiftBuff", "ArcaneCharge")
+SpellEffects.light = bodyBuff("LightBuff", "HolyCharge")
+SpellEffects.glow = bodyBuff("LightBuff", "HolyCharge")
+SpellEffects.bless = bodyBuff("BlessBuff", "HolyCharge")
+SpellEffects.cleanse = bodyBuff("CleanseBuff", "LifeCharge")
+SpellEffects.anti_evil_protection = {
+	cast = charge("HolyCharge"),
+	resolve = SpellEffects.shelter.resolve,
+}
+
+-- A spell worked on the aimed object, such as a well or a brazier.
+local function atAim(template: string, cast: string): Recipe
+	return {
+		cast = charge(cast),
+		resolve = function(info)
+			Effects.Play(template, CFrame.new(info.aim))
+		end,
+	}
+end
+
+SpellEffects.kindle = atAim("KindleFlare", "FireCharge")
+SpellEffects.purify_water = atAim("WaterBurst", "WaterCharge")
+SpellEffects.create_water = atAim("WaterBurst", "WaterCharge")
+
+SpellEffects.create_undead = {
+	cast = charge("HexCharge"),
+	resolve = function(info)
+		onGround("UndeadRise", info.origin)
+	end,
+}
+
+-- Backward leap: dust at take-off and a streak along the path.
+SpellEffects.disengage = {
+	resolve = function(info)
+		local root = rootOf(info.caster)
+		if root then
+			local takeoff = Particles.Ground(info.origin) + Vector3.new(0, 0.5, 0)
+			Effects.Play("ChargeDust", CFrame.lookAt(takeoff, takeoff - root.CFrame.LookVector))
+			dashStreak(info.origin, root.Position, DUST, 2)
+		end
+	end,
+}
+
+-- The rally shout: the war cry's wave, with no screen tint since only monsters use it.
+SpellEffects.captain_rally = {
+	resolve = function(info)
+		Effects.Play("WarCryWave", CFrame.new(Particles.Ground(info.origin) + Vector3.new(0, 0.6, 0)))
+	end,
+}
+
+-- Enemy melee: a thrust for stabs, the sword crescent for blades, an upright rake for claws.
+SpellEffects.goblin_stab = { swing = punch("PunchJab") }
+SpellEffects.guard_strike = { swing = slash(-40, 1.2) }
+SpellEffects.soldier_strike = { swing = slash(40, 1.2) }
+SpellEffects.chief_cleave = { swing = cleaveSwing }
+SpellEffects.skeleton_scratch = { swing = slash(70, 1) }
+SpellEffects.zombie_claw = { swing = slash(-70, 1) }
 
 return table.freeze(SpellEffects)

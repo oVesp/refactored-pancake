@@ -304,7 +304,6 @@ local list: { Types.SkillDef } = {
 		range = 90,
 		speed = 120,
 		damage = { type = "force", base = 7.5, stat = "MagAtk", ratio = 0.8 },
-		projectileScale = 1.6,
 		animation = "BasicStrike3",
 		description = "Wand light attack: a heavier closing bolt. Costs no MP.",
 	},

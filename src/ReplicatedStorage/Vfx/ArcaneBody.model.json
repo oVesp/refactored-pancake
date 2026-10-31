@@ -1,0 +1,408 @@
+{
+	"className": "Part",
+	"properties": {
+		"Anchored": true,
+		"CanCollide": false,
+		"CanQuery": false,
+		"CanTouch": false,
+		"CastShadow": false,
+		"Transparency": 1,
+		"Size": [
+			1,
+			1,
+			1
+		]
+	},
+	"children": [
+		{
+			"name": "Core",
+			"className": "ParticleEmitter",
+			"properties": {
+				"Rate": 40,
+				"LightEmission": 0.5,
+				"LightInfluence": 0,
+				"Rotation": {
+					"NumberRange": [
+						0,
+						360
+					]
+				},
+				"Speed": {
+					"NumberRange": [
+						0,
+						0
+					]
+				},
+				"LockedToPart": true,
+				"Size": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 2.4,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 2.4,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Lifetime": {
+					"NumberRange": [
+						0.15,
+						0.15
+					]
+				},
+				"Transparency": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 0,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 1,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									0.9608,
+									0.902,
+									1.0
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.7255,
+									0.5098,
+									1.0
+								]
+							}
+						]
+					}
+				},
+				"RotSpeed": {
+					"NumberRange": [
+						-300,
+						300
+					]
+				},
+				"ZOffset": 1
+			},
+			"attributes": {
+				"TextureKey": "Wisp"
+			}
+		},
+		{
+			"name": "Haze",
+			"className": "ParticleEmitter",
+			"properties": {
+				"Rate": 20,
+				"LightEmission": 0,
+				"LightInfluence": 0,
+				"Rotation": {
+					"NumberRange": [
+						0,
+						360
+					]
+				},
+				"Speed": {
+					"NumberRange": [
+						0,
+						0
+					]
+				},
+				"Lifetime": {
+					"NumberRange": [
+						0.5,
+						0.8
+					]
+				},
+				"Size": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 1,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 2.5,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Transparency": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 0.5,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 1,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									0.3725,
+									0.2157,
+									0.8235
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.3725,
+									0.2157,
+									0.8235
+								]
+							}
+						]
+					}
+				},
+				"RotSpeed": {
+					"NumberRange": [
+						-40,
+						40
+					]
+				}
+			},
+			"attributes": {
+				"TextureKey": "Smoke"
+			}
+		},
+		{
+			"name": "Glints",
+			"className": "ParticleEmitter",
+			"properties": {
+				"Rate": 16,
+				"LightEmission": 1,
+				"LightInfluence": 0,
+				"Rotation": {
+					"NumberRange": [
+						0,
+						360
+					]
+				},
+				"Speed": {
+					"NumberRange": [
+						1,
+						3
+					]
+				},
+				"SpreadAngle": [
+					180,
+					180
+				],
+				"Lifetime": {
+					"NumberRange": [
+						0.25,
+						0.4
+					]
+				},
+				"Size": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 0.6,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 0,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									0.9608,
+									0.902,
+									1.0
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.7255,
+									0.5098,
+									1.0
+								]
+							}
+						]
+					}
+				}
+			},
+			"attributes": {
+				"TextureKey": "Glint"
+			}
+		},
+		{
+			"name": "TrailTop",
+			"className": "Attachment",
+			"properties": {
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							0.3,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				}
+			},
+			"children": []
+		},
+		{
+			"name": "TrailBottom",
+			"className": "Attachment",
+			"properties": {
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							-0.3,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				}
+			},
+			"children": []
+		},
+		{
+			"name": "Trail",
+			"className": "Trail",
+			"properties": {
+				"Lifetime": 0.3,
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									0.9608,
+									0.902,
+									1.0
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.7255,
+									0.5098,
+									1.0
+								]
+							}
+						]
+					}
+				},
+				"Transparency": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 0.1,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 1,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"LightEmission": 1,
+				"LightInfluence": 0,
+				"FaceCamera": true,
+				"MinLength": 0
+			},
+			"attributes": {
+				"TextureKey": "TrailStreak",
+				"From": "TrailTop",
+				"To": "TrailBottom"
+			}
+		},
+		{
+			"name": "Light",
+			"className": "PointLight",
+			"properties": {
+				"Color": {
+					"Color3": [
+						0.7255,
+						0.5098,
+						1.0
+					]
+				},
+				"Brightness": 1.5,
+				"Range": 10,
+				"Shadows": false
+			}
+		}
+	]
+}

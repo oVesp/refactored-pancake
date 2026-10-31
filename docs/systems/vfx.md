@@ -22,7 +22,7 @@ Target look: the owner's reference video (2026-10-25), anime-style hits with 4 t
 - **ForgeVFX** (`vendor/ForgeVFX/ForgeVFX.rbxm`, synced to `ReplicatedStorage.ForgeVFX`): the emit module from the owner's VFX Forge 2.4.0-rc1 plugin, extracted with `lune run tools/vendor/extract_forge <plugin .rbxm>`. Its license (VFX-DL 1.1, `vendor/ForgeVFX/LICENSE.txt`) allows it only inside the game runtime: never require it from a plugin, the command bar for anything but viewing finished effects, Lune tests or other tools. Re-extract when the plugin updates.
 - **Editing in Studio**: open a template under `ReplicatedStorage.Vfx`, tune it with VFX Forge (its plugin API is `shared.vfx`, reachable from Studio MCP `execute_luau`), then write the changes back into the `.model.json` file; Rojo does not sync Studio edits to disk.
 - **Textures**: originals come from `tools/vfxgen/vfxgen.py` (deterministic, project-owned, so free to upload) into `assets/original/vfx/`; see [../art/vfx-library.md](../art/vfx-library.md). Local contact sheets of the VFX Studio library, for planning only, are described there too.
-- **Skills without a template** keep the older code recipes built from `Vfx/Particles.luau` helpers.
+- **Every usable skill has a recipe** (a spec enforces it). Some still use the older code recipes built from `Vfx/Particles.luau` helpers. The only neon parts left are the red telegraph discs and slabs, which are gameplay readouts rather than effects.
 
 ## Sound
 
@@ -56,6 +56,14 @@ Guard and movement have their own keys: `Parry` (a bright ringing clink), `Block
 - Shelter: `ShelterLink` (`Effects.Link`); `ShelterBubble`; `ShelterBurst`.
 - Lay On Hands: `LayOnHandsColumn`, a light column; `LayOnHandsImpact`; `HolyFlash`, a screen tint played with `SpeedLines` for the caster.
 
+- Force bolts (`staff_bolt`, `wand_bolt` 1 to 3, `magic_arrow`): `ArcaneCharge`; `ArcaneBody`, the hex wisp shape in violet with glints; `ArcaneBurst`. `wand_blast` wears the larger `ArcaneBlastBody`.
+- Water (`destruction_water`, `purify_water`, `create_water`): `WaterCharge`; `WaterBody`; `WaterBurst`, the unwinding swirl with droplets thrown out under gravity.
+- `sleep`: `HexCharge`; `SleepBody`; `SleepBurst`, in soft lilac. `spark` charges with `SparkCharge`, `frost_shard` with `FrostCharge`.
+- Shots: `ArrowBody` (`bow_shot`, `guard_bolt`), a short dark shaft and a thin pale trail; `DartBody` (`poison_dart`), the same in green; `SlingBody` (`sling_shot`), a stone with a dust trail. Arrows and stones land with `ArrowLand`, darts with `VenomBurst`.
+- Buffs: one `buff()` shape, a soft flash and ring as motes lift away, in `MightBuff` (`gather_strength`, `battle_trance`), `VigorBuff` (`second_wind`), `FocusBuff` (`heightened_senses`), `SwiftBuff` (`quick_march`), `BlessBuff` (`bless`), `CleanseBuff` (`cleanse`) and `LightBuff` (`light`, `glow`). `anti_evil_protection` uses the Shelter ward.
+- `create_undead`: `UndeadRise`, a dark crack with wisps rising. `kindle`: `KindleFlare`. `disengage`: `ChargeDust` and a dust streak.
+- `DrawGlint`: the glint at the hand at full bow draw or spell charge.
+
 Monster attacks use lighter templates with no ink layer and no screen effects:
 
 - Wolf Charge: `ChargeHit`.
@@ -64,3 +72,5 @@ Monster attacks use lighter templates with no ink layer and no screen effects:
 - Poison Snare: `PoisonStain`, a sickly blot soaking into the ground; `PoisonPool`, bubbles (`ToxicBubble`) swelling and popping over the area under a drifting green haze, attached to a flat anchor (`Effects.Attach`).
 - Hex Bolt and Hex Curse: `VenomCharge` and `HexCharge`, the casts (`Effects.Charge`); `VenomBody` and `HexBody`, a writhing wisp core in a tinted haze with a thin trail (`Effects.Attach`); `VenomBurst` and `HexBurst`, a swirl unwinding outward as wisps scatter and a tinted haze lingers.
 - Shaman Heal: the Mend templates.
+- Captain Rally: `WarCryWave` with no tint.
+- Melee: `goblin_stab` thrusts with `PunchJab`; `guard_strike`, `soldier_strike`, `skeleton_scratch` and `zombie_claw` roll the `CleaveSwipe` crescent to their cut; `chief_cleave` sweeps it level.

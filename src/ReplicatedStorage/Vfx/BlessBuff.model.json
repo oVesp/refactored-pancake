@@ -1,0 +1,305 @@
+{
+	"className": "Part",
+	"properties": {
+		"Anchored": true,
+		"CanCollide": false,
+		"CanQuery": false,
+		"CanTouch": false,
+		"CastShadow": false,
+		"Transparency": 1,
+		"Size": [
+			3,
+			4,
+			3
+		]
+	},
+	"children": [
+		{
+			"name": "Flash",
+			"className": "ParticleEmitter",
+			"properties": {
+				"Enabled": false,
+				"Rate": 0,
+				"LightInfluence": 0,
+				"Rotation": {
+					"NumberRange": [
+						0,
+						360
+					]
+				},
+				"Speed": {
+					"NumberRange": [
+						0,
+						0
+					]
+				},
+				"Size": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 4,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 7,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Lifetime": {
+					"NumberRange": [
+						0.12,
+						0.12
+					]
+				},
+				"Transparency": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 0,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 1,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									1.0,
+									0.9882,
+									0.9216
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									1.0,
+									0.9882,
+									0.9216
+								]
+							}
+						]
+					}
+				},
+				"LightEmission": 1,
+				"Brightness": 2.5,
+				"ZOffset": 2
+			},
+			"attributes": {
+				"TextureKey": "ImpactStar",
+				"EmitCount": 1
+			}
+		},
+		{
+			"name": "Ring",
+			"className": "ParticleEmitter",
+			"properties": {
+				"Enabled": false,
+				"Rate": 0,
+				"LightInfluence": 0,
+				"Rotation": {
+					"NumberRange": [
+						0,
+						360
+					]
+				},
+				"Speed": {
+					"NumberRange": [
+						0,
+						0
+					]
+				},
+				"Size": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0,
+								"value": 0,
+								"envelope": 0
+							},
+							{
+								"time": 1,
+								"value": 9,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Lifetime": {
+					"NumberRange": [
+						0.3,
+						0.3
+					]
+				},
+				"Transparency": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 0.25,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 1,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									1.0,
+									1.0,
+									1.0
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									1.0,
+									0.8431,
+									0.4706
+								]
+							}
+						]
+					}
+				},
+				"LightEmission": 1,
+				"Brightness": 2,
+				"ZOffset": 1.8
+			},
+			"attributes": {
+				"TextureKey": "RingThin",
+				"EmitCount": 1
+			}
+		},
+		{
+			"name": "Motes",
+			"className": "ParticleEmitter",
+			"properties": {
+				"Enabled": false,
+				"Rate": 0,
+				"LightInfluence": 0,
+				"Rotation": {
+					"NumberRange": [
+						0,
+						360
+					]
+				},
+				"Speed": {
+					"NumberRange": [
+						3,
+						7
+					]
+				},
+				"SpreadAngle": [
+					50,
+					50
+				],
+				"Acceleration": [
+					0,
+					3,
+					0
+				],
+				"Drag": 1.5,
+				"Lifetime": {
+					"NumberRange": [
+						0.9,
+						1.4
+					]
+				},
+				"Size": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 0.9,
+								"envelope": 0
+							},
+							{
+								"time": 0.5,
+								"value": 0.7200000000000001,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 0,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									1.0,
+									0.9882,
+									0.9216
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									1.0,
+									0.8431,
+									0.4706
+								]
+							}
+						]
+					}
+				},
+				"LightEmission": 1,
+				"RotSpeed": {
+					"NumberRange": [
+						-180,
+						180
+					]
+				},
+				"EmissionDirection": "Top"
+			},
+			"attributes": {
+				"TextureKey": "Glint",
+				"EmitCount": 14
+			}
+		},
+		{
+			"name": "Light",
+			"className": "PointLight",
+			"properties": {
+				"Color": {
+					"Color3": [
+						1.0,
+						0.8431,
+						0.4706
+					]
+				},
+				"Brightness": 2.5,
+				"Range": 12,
+				"Shadows": false
+			},
+			"attributes": {
+				"FlashTime": 0.4
+			}
+		}
+	]
+}

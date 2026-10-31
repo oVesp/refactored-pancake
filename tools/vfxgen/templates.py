@@ -1926,7 +1926,7 @@ hex_charge = anchor(
 )
 
 
-def hex_body(colors, haze, extra):
+def hex_body(colors, haze, extra, scale=1):
     """A hex bolt in flight: a writhing wisp core in a tinted haze, with a thin trail."""
     hot, mid = colors
     return anchor(
@@ -1936,7 +1936,7 @@ def hex_body(colors, haze, extra):
                 "Wisp",
                 40,
                 LockedToPart=True,
-                Size=ns(2.4),
+                Size=ns(2.4 * scale),
                 Lifetime=nr(0.15),
                 Transparency=ns(0, 1),
                 Color=cs(hot, mid),
@@ -1949,15 +1949,15 @@ def hex_body(colors, haze, extra):
                 "Smoke",
                 20,
                 Lifetime=nr(0.5, 0.8),
-                Size=ns(1, 2.5),
+                Size=ns(1 * scale, 2.5 * scale),
                 Transparency=ns(0.5, 1),
                 Color=cs(haze),
                 LightEmission=0,
                 RotSpeed=nr(-40, 40),
             ),
             extra,
-            *trail((hot, mid), 0.3, 0.6),
-            glow(mid, 1.5, 10),
+            *trail((hot, mid), 0.3, 0.6 * scale),
+            glow(mid, 1.5, 10 * scale),
         ]
     )
 
@@ -2262,6 +2262,249 @@ block_spark = anchor(
     ]
 )
 
+# Bolts, spells and buffs that reuse the hex shapes in their own colours (docs/systems/vfx.md, "Templates").
+WATER_HOT = (225, 245, 255)
+WATER = (90, 170, 255)
+# Haze tints stay light: darker ones read as storm clouds on daylight ground.
+WATER_HAZE = (150, 205, 255)
+SLEEP_HOT = (232, 225, 255)
+SLEEP = (150, 150, 240)
+SLEEP_HAZE = (190, 185, 245)
+
+
+def hand_charge(gather, colors, extra):
+    """Particles gathering at the casting hand around a tinted glow."""
+    return anchor(
+        [inward("Gather", gather, 30, (1, 0.4), colors, LightEmission=0.4), extra, glow(colors[1], 1.2, 8)],
+        size=(3, 3, 3),
+        attrs=HAND,
+    )
+
+
+def glints_stream(colors):
+    return stream(
+        "Glints",
+        "Glint",
+        16,
+        Speed=nr(1, 3),
+        SpreadAngle=[180, 180],
+        Lifetime=nr(0.25, 0.4),
+        Size=ns(0.6, 0),
+        Color=cs(*colors),
+    )
+
+
+def glints_burst(colors, count=12):
+    return emitter(
+        "Glints",
+        "Glint",
+        {"EmitCount": count},
+        Size=ns(0.7, 0),
+        Lifetime=nr(0.4, 0.7),
+        Speed=nr(6, 12),
+        SpreadAngle=[180, 180],
+        Drag=4,
+        Color=cs(*colors),
+        LightEmission=1,
+    )
+
+
+def bubbles_stream(colors):
+    return stream(
+        "Bubbles",
+        "ToxicBubble",
+        14,
+        Speed=nr(1, 2),
+        SpreadAngle=[180, 180],
+        Lifetime=nr(0.4, 0.6),
+        Size=ns(0.5, 0.9),
+        Color=cs(*colors),
+        LightEmission=0.3,
+        Rotation=nr(0),
+        **FLIP,
+    )
+
+
+arcane_charge = hand_charge(
+    "Glint",
+    (ARC_HOT, ARC),
+    stream(
+        "Swirl",
+        "ArcaneSwirl",
+        6,
+        LockedToPart=True,
+        Lifetime=nr(0.3),
+        Size=ns(2),
+        Transparency=ns(0.3, 1),
+        Color=cs(ARC_HOT, ARC),
+        LightEmission=0.6,
+        RotSpeed=nr(-400, -300),
+        **FLIP,
+    ),
+)
+arcane_body = hex_body((ARC_HOT, ARC), ARC_D, glints_stream((ARC_HOT, ARC)))
+arcane_blast_body = hex_body((ARC_HOT, ARC), ARC_D, glints_stream((ARC_HOT, ARC)), scale=1.6)
+arcane_burst = hex_burst((ARC_HOT, ARC), ARC_D, glints_burst((ARC_HOT, ARC)))
+
+water_charge = hand_charge("Wisp", (WATER_HOT, WATER), bubbles_stream((WATER_HOT, WATER)))
+water_body = hex_body((WATER_HOT, WATER), WATER_HAZE, bubbles_stream((WATER_HOT, WATER)))
+water_burst = hex_burst(
+    (WATER_HOT, WATER),
+    WATER_HAZE,
+    emitter(
+        "Droplets",
+        "SparkStreak",
+        {"EmitCount": 16},
+        Orientation="VelocityParallel",
+        Speed=nr(10, 22),
+        SpreadAngle=[70, 70],
+        Acceleration=[0, -60, 0],
+        Lifetime=nr(0.35, 0.6),
+        Size=ns(1.2, 0.3),
+        Color=cs(WATER_HOT, WATER),
+        LightEmission=0.4,
+        Rotation=nr(0),
+    ),
+)
+
+sleep_body = hex_body((SLEEP_HOT, SLEEP), SLEEP_HAZE, glints_stream((SLEEP_HOT, SLEEP)))
+sleep_burst = hex_burst((SLEEP_HOT, SLEEP), SLEEP_HAZE, glints_burst((SLEEP_HOT, SLEEP)))
+
+spark_charge = hand_charge(
+    "Glint",
+    (STORM_HOT, BOLT),
+    stream(
+        "Fork",
+        "LightningFork",
+        14,
+        LockedToPart=True,
+        Size=ns(2),
+        Lifetime=nr(0.06, 0.1),
+        Color=cs(STORM_HOT, BOLT),
+        Brightness=2,
+        ZOffset=1,
+        **RANDOM,
+    ),
+)
+
+
+def shot_body(shaft, trail_colors, width, extra=()):
+    """An arrow or thrown shot: a short dark body along its flight with a thin pale trail."""
+    return anchor(
+        [
+            stream(
+                "Shaft",
+                "Streak",
+                60,
+                LockedToPart=True,
+                Orientation="VelocityParallel",
+                EmissionDirection="Front",
+                Speed=nr(0.1),
+                Rotation=nr(90),
+                Size=ns(2.4),
+                Lifetime=nr(0.05),
+                Color=cs(shaft),
+                LightEmission=0,
+                LightInfluence=1,
+            ),
+            *extra,
+            *trail(trail_colors, 0.18, width),
+        ]
+    )
+
+
+arrow_body = shot_body(ARROW, ((255, 250, 235), (200, 195, 180)), 0.25)
+dart_body = shot_body(TOXIC_D, (TOXIC_HOT, TOXIC), 0.2, (glow(TOXIC, 1, 6),))
+sling_body = anchor(
+    [
+        stream(
+            "Stone",
+            "Rubble",
+            40,
+            LockedToPart=True,
+            Size=ns(0.8),
+            Lifetime=nr(0.05),
+            Color=cs(DUST),
+            LightEmission=0,
+            LightInfluence=1,
+        ),
+        *trail((DUST, DUST_D), 0.15, 0.25),
+    ]
+)
+
+
+def buff(key, colors, size=0.9):
+    """A buff taking hold: a soft flash and ring around the body as motes lift away."""
+    return anchor(
+        [
+            flash_star((4, 7), brightness=2.5, tint=colors[0], lifetime=0.12),
+            air_ring("Ring", (0, 9), 0.3, tint=colors[1], transparency=0.25),
+            rising("Motes", key, 14, colors, size, (3, 7), spread=50, EmissionDirection="Top"),
+            light(colors[1], 2.5, 12, 0.4),
+        ],
+        size=(3, 4, 3),
+    )
+
+
+might_buff = buff("Glint", (RAGE_HOT, RAGE))
+vigor_buff = buff("LifeWisp", (LIFE_HOT, LIFE), size=1.1)
+focus_buff = buff("Glint", (WARD_HOT, WARD))
+swift_buff = buff("SparkStreak", (WHITE, AIR), size=1.2)
+bless_buff = buff("Glint", (HOLY_HOT, HOLY))
+cleanse_buff = buff("Glint", (WATER_HOT, WATER))
+light_buff = buff("SoftGlow", (HOLY_HOT, HOLY_GLOW), size=1.4)
+
+# Summoning the dead: the ground cracks while dark wisps and rubble rise from it.
+undead_rise = anchor(
+    [
+        surface(
+            "Crack",
+            [label("Shadow", "GroundCrack", HEX_D, 0.2, 1, 0.7)],
+            {"FlipbookGrid": 1, "Lifetime": 1.4, "Fade": 0.5, "Grow": 1.05},
+        ),
+        rising("Wisps", "Wisp", 16, (HEX_HOT, HEX), 2.2, (5, 10), spread=30, EmissionDirection="Top"),
+        dust(6, (3, 6), (4, 8), DUST_D, 0.4),
+        light(HEX, 3, 14, 0.5),
+    ],
+    size=(14, 0.05, 14),
+)
+
+# Kindling a flame on an object: a small flash and a spit of embers.
+kindle_flare = anchor(
+    [
+        flash_star((3, 5), brightness=3, tint=FIRE_HOT, lifetime=0.1),
+        emitter(
+            "Embers",
+            "Crackle",
+            {"EmitCount": 12},
+            Size=ns(0.8, 0),
+            Lifetime=nr(0.4, 0.8),
+            Speed=nr(4, 10),
+            SpreadAngle=[60, 60],
+            EmissionDirection="Top",
+            Acceleration=[0, 8, 0],
+            Color=cs(FIRE_HOT, FIRE),
+        ),
+        light(FIRE, 3, 12, 0.4),
+    ]
+)
+
+# Full bow draw or spell charge: a brief glint at the hand.
+draw_glint = anchor(
+    [
+        emitter(
+            "Glint",
+            "Glint",
+            Size=ns((0, 1), (0.3, 3.5), (1, 0)),
+            Lifetime=nr(0.2),
+            Rotation=nr(45),
+            Color=cs((255, 240, 190)),
+            LightEmission=1,
+            Brightness=4,
+        ),
+    ]
+)
+
 TEMPLATES = {
     "HitImpact": hit_impact,
     "HitShake": hit_shake,
@@ -2335,6 +2578,29 @@ TEMPLATES = {
     "PunchImpactHeavy": punch_impact_heavy,
     "ParryClash": parry_clash,
     "BlockSpark": block_spark,
+    "ArcaneCharge": arcane_charge,
+    "ArcaneBody": arcane_body,
+    "ArcaneBlastBody": arcane_blast_body,
+    "ArcaneBurst": arcane_burst,
+    "WaterCharge": water_charge,
+    "WaterBody": water_body,
+    "WaterBurst": water_burst,
+    "SleepBody": sleep_body,
+    "SleepBurst": sleep_burst,
+    "SparkCharge": spark_charge,
+    "ArrowBody": arrow_body,
+    "DartBody": dart_body,
+    "SlingBody": sling_body,
+    "MightBuff": might_buff,
+    "VigorBuff": vigor_buff,
+    "FocusBuff": focus_buff,
+    "SwiftBuff": swift_buff,
+    "BlessBuff": bless_buff,
+    "CleanseBuff": cleanse_buff,
+    "LightBuff": light_buff,
+    "UndeadRise": undead_rise,
+    "KindleFlare": kindle_flare,
+    "DrawGlint": draw_glint,
 }
 
 
