@@ -27,15 +27,21 @@ local function profile(equipment: { [string]: number }, ids: { string }): any
 end
 
 return {
-	["every weapon's basics are basic, off-GCD skills"] = function()
+	["every weapon's attacks are basic, off-GCD skills, or the spell it grants"] = function()
 		Expect.truthy(Weapons.ById[Weapons.Default], "default weapon")
 		for id, weapon in Weapons.ById do
 			local basics = Loadout.Basics(Skills, weapon, false, Weapons.ShieldBash)
 			for _, skillId in basics do
 				local skill = Skills[skillId]
 				Expect.truthy(skill, `{id}: {skillId} exists`)
-				Expect.equal(skill.source, "Basic", `{skillId} source`)
-				Expect.equal(skill.gcd, nil, `{skillId} off the GCD`)
+				if skill.weaponSpell then
+					Expect.equal(skillId, weapon.heavy, `{skillId}: only a heavy is a spell`)
+					Expect.equal(skill.source, "Spell", `{skillId} source`)
+					Expect.truthy(skill.gcd, `{skillId} on the GCD like any spell`)
+				else
+					Expect.equal(skill.source, "Basic", `{skillId} source`)
+					Expect.equal(skill.gcd, nil, `{skillId} off the GCD`)
+				end
 				Expect.truthy(skill.animation == nil or Animations[skill.animation], `{skillId} clip`)
 			end
 			Expect.equal(weapon.drawn == true, weapon.heavy == nil, `{id}: only the drawn weapon has no heavy`)
@@ -74,11 +80,22 @@ return {
 			clips[Skills[id].animation] = true
 		end
 		local blast = Skills[wand.heavy]
-		Expect.truthy(blast.castTime and blast.castTime > 0, "blast has a cast time")
 		Expect.truthy(blast.cooldown and blast.cooldown >= blast.castTime, "blast cooldown")
-		Expect.equal(blast.windup, nil, "blast casts, it does not wind up")
-		Expect.equal(blast.gcd, nil, "blast off the GCD")
-		Expect.truthy(blast.cost == nil or blast.cost.resource ~= "Mp", "blast costs no MP")
+	end,
+	["staff and wand heavies are spells paid in MP; their light attacks are not"] = function()
+		for _, id in { "staff", "wand" } do
+			local weapon = Weapons.ById[id]
+			local heavy = Skills[weapon.heavy]
+			Expect.truthy(heavy.weaponSpell, `{id}: heavy is its spell`)
+			Expect.truthy(heavy.castTime and heavy.castTime > 0, `{id}: heavy charges`)
+			Expect.equal(heavy.cost.resource, "Mp", `{id}: heavy costs MP`)
+			for _, skillId in Chain.Members(Skills, weapon.light) do
+				local light = Skills[skillId]
+				Expect.equal(light.castTime, nil, `{skillId} does not charge`)
+				Expect.equal(light.cost, nil, `{skillId} is free`)
+				Expect.truthy(light.windup and light.recovery, `{skillId} swings`)
+			end
+		end
 	end,
 	["weapon and shield items resolve"] = function()
 		for id, item in Items.ById do

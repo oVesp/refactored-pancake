@@ -6,7 +6,8 @@ local Types = require(script.Parent.Types)
 	Weapon types (docs/systems/weapons.md). An equipped weapon item names its type; with nothing
 	equipped the character fights with fists. Each type swaps the basic attacks bound to light and
 	heavy attack: sword and fists are melee chains, the bow is drawn and released, the staff mixes
-	a melee chain with a charged bolt, the wand only casts bolts. Placeholder models live in
+	a melee chain with a bolt spell, the wand chains bolts and casts a blast spell. A caster weapon's
+	heavy is a real spell it grants (`SkillDef.weaponSpell`). Placeholder models live in
 	ReplicatedStorage.Weapons.
 ]=]
 local list: { Types.WeaponDef } = {

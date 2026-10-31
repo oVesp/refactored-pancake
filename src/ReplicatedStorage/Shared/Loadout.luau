@@ -46,7 +46,7 @@ function Loadout.Of(profile: any, items: ItemMap, weapons: WeaponMap, defaultWea
 	}
 end
 
---[=[ Basic attacks the holder may use: the weapon's light chain and heavy, plus `bash` with a shield. ]=]
+--[=[ Attacks the holder may use: the weapon's light chain and heavy (a spell on staff and wand), plus `bash` with a shield. ]=]
 function Loadout.Basics(skills: SkillMap, weapon: Types.WeaponDef, hasShield: boolean, bash: string): { string }
 	local basics = Chain.Members(skills, weapon.light)
 	if weapon.heavy then

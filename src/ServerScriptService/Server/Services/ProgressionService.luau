@@ -53,14 +53,14 @@ end
 
 --[=[
 	True when the player may put this entry on the hotbar: a known active spell or class skill
-	(basic attacks have their own buttons), a dev skill for developers, or a known Discipline.
+	(basic attacks and a weapon's spell have their own buttons), a dev skill for developers, or a known Discipline.
 ]=]
 local function canSlot(profile: any, kind: string, id: string, isDev: boolean): boolean
 	if kind == "Discipline" then
 		return Disciplines.ById[id] ~= nil and table.find(profile.disciplines, id) ~= nil
 	end
 	local skill = Skills.ById[id]
-	if skill and skill.source == "Basic" then
+	if skill and (skill.source == "Basic" or skill.weaponSpell) then
 		return false
 	end
 	return table.find(SkillService.KnownActives(profile, isDev), id) ~= nil

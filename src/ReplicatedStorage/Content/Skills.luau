@@ -193,7 +193,7 @@ local list: { Types.SkillDef } = {
 		animation = "BasicStrike",
 		description = "Bow: hold heavy to aim and draw, attack to shoot. Full draw for full damage; release right at full draw for a perfect shot.",
 	},
-	-- Staff: magic-imbued melee chain, and a charged arcane bolt on heavy.
+	-- Staff: magic-imbued melee chain, and an arcane bolt spell on heavy.
 	{
 		id = "staff_strike",
 		name = "Staff Strike",
@@ -235,21 +235,24 @@ local list: { Types.SkillDef } = {
 		id = "staff_bolt",
 		name = "Staff Bolt",
 		kind = "Active",
-		source = "Basic",
+		source = "Spell",
+		number = 24,
+		tier = 1,
+		line = "arcane",
+		weaponSpell = true,
 		delivery = "Projectile",
 		targets = "Enemy",
-		cooldown = 1.0,
-		windup = 0.45,
-		recovery = 0.3,
+		gcd = true,
+		castTime = 1.2,
 		range = 70,
 		speed = 90,
-		cost = { resource = "Stamina", amount = 10 },
+		cost = { resource = "Mp", amount = 8 },
 		damage = { type = "force", base = 12, stat = "MagAtk", ratio = 1.1 },
 		animation = "BasicHeavyStrike",
-		description = "Staff heavy attack: a charged arcane bolt. Costs no MP.",
+		description = "Staff heavy attack: the staff's own spell, an arcane bolt fired where you aim.",
 	},
-	-- Wand: no melee; a three-bolt spell chain that slows the caster like a swing, and a cast blast
-	-- on heavy. Longer reach than any other basic.
+	-- Wand: no melee; a three-bolt chain that slows the caster like a swing, and a blast spell on
+	-- heavy. Longer reach than any other basic.
 	{
 		id = "wand_bolt",
 		name = "Wand Bolt",
@@ -308,17 +311,22 @@ local list: { Types.SkillDef } = {
 		id = "wand_blast",
 		name = "Wand Blast",
 		kind = "Active",
-		source = "Basic",
+		source = "Spell",
+		number = 25,
+		tier = 1,
+		line = "arcane",
+		weaponSpell = true,
 		delivery = "Projectile",
 		targets = "Enemy",
+		gcd = true,
 		cooldown = 6,
 		castTime = 1.2,
 		range = 90,
 		speed = 90,
-		cost = { resource = "Stamina", amount = 10 },
+		cost = { resource = "Mp", amount = 10 },
 		damage = { type = "force", base = 14, stat = "MagAtk", ratio = 1.3 },
 		animation = "BasicHeavyStrike",
-		description = "Wand heavy attack: a cast arcane blast; moving cancels it. Costs no MP.",
+		description = "Wand heavy attack: the wand's own spell, an arcane blast fired where you aim.",
 	},
 	-- Shield: light attack while guarding.
 	{
