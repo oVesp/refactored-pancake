@@ -114,7 +114,7 @@ local function assist(owner: Entity, victim: Entity, amount: number)
 		if not Relations.Hostile(entity.team, victim.team) then
 			EntityService.Provoke(entity, victim)
 		end
-		entity.threat[victim] = (entity.threat[victim] or 0) + amount
+		CombatService.AddThreat(entity, victim, amount)
 	end
 end
 

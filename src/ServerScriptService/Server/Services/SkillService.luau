@@ -16,6 +16,7 @@ local Logger = require(ReplicatedStorage.Shared.Logger)
 local NetServer = require(ReplicatedStorage.Shared.Net.Server)
 local Skills = require(ReplicatedStorage.Content.Skills)
 local Statuses = require(ReplicatedStorage.Content.Statuses)
+local Threat = require(ReplicatedStorage.Shared.Threat)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 local Weapons = require(ReplicatedStorage.Content.Weapons)
 local DevService = require(script.Parent.DevService)
@@ -147,11 +148,17 @@ local function hitEnemy(caster: Entity, target: Entity, skill: SkillDef, bonus: 
 			bonus += skill.rearBonus
 		end
 	end
+	local hit = table.clone(mods or {})
+	hit.threat = skill.threat
 	if skill.damage then
-		local dealt = CombatService.DealDamage(caster, target, skill.damage, skill.shownAs or skill.id, bonus, mods)
+		local dealt = CombatService.DealDamage(caster, target, skill.damage, skill.shownAs or skill.id, bonus, hit)
 		if dealt <= 0 and not CombatService.CanHarm(caster, target) then
 			return
 		end
+	end
+	local flatThreat = Threat.Flat(skill.threat, CombatService.ThreatMultiplier(caster))
+	if flatThreat > 0 and CombatService.CanHarm(caster, target) then
+		CombatService.AddThreat(target, caster, flatThreat)
 	end
 	CombatService.ApplyEffects(caster, target, skill.effects, caster.extras.StatusChance)
 	if skill.knockback then
@@ -214,7 +221,7 @@ local function supportAlly(caster: Entity, target: Entity, skill: SkillDef)
 			skill.shield.ratio,
 			healingBonus
 		)
-		CombatService.Shield(target, amount)
+		CombatService.Shield(target, amount, caster)
 	end
 	CombatService.ApplyEffects(caster, target, skill.effects, 0)
 end

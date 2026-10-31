@@ -95,6 +95,7 @@ function EntityService.Register(info: NewEntity): Entity
 		statuses = {},
 		history = {},
 		threat = {},
+		threatMultiplier = 1,
 		grudges = {},
 		tauntedBy = nil,
 		lastHitBy = nil,

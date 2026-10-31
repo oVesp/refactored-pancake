@@ -37,7 +37,7 @@ Most single-enemy and stagger sources are practitioner or community material. Th
 
 ## Gaps against the intent
 
-1. **Threat is damage only and has no rules around it.** No healing threat, no target-switch hysteresis, no decay, no tuning table, no hook for skills. A tank that deals less damage cannot hold aggro, and a healer is invisible to enemies.
+1. **Done.** **Threat is damage only and has no rules around it.** No healing threat, no target-switch hysteresis, no decay, no tuning table, no hook for skills. A tank that deals less damage cannot hold aggro, and a healer is invisible to enemies.
 2. **Parry has no visible effect on the enemy.** `CombatService` applies a `stun` status for 0.6 s (`PARRY_STAGGER`). `AIService` does not read stun (it only knows its own `Stagger` state), and no hit-reaction cue plays, so the only feedback is the damage `parried` marker and the defender's clip. A parry should visibly knock the attacker back.
 3. **Parry ignores poise and level.** The same stun applies to every attacker. Intent: most same-level mobs break, elites and bosses do not.
 4. **Telegraphs carry the readability.** The per-skill `telegraph` flag is the only readability tool for several enemy skills (the light player attacks already use `telegraph = false` with animation and VFX instead).
@@ -50,14 +50,7 @@ Most single-enemy and stagger sources are practitioner or community material. Th
 
 ### 1. Threat as a base mechanic
 
-Threat is data-driven and class-agnostic. Class skills later only supply modifiers.
-
-- **Sources.** Damage dealt: `damage × threatMultiplier`. Healing and shielding: `effective amount × HealThreat` (default 0.5), split across every enemy in combat with the healed ally. Taunt statuses and skills: the existing `taunt` status forces a target for its duration; a later class skill may also *set* threat to the current top plus a margin.
-- **Modifiers, all default 1.** A skill field `threat` (multiplier or flat), a status field `threatMultiplier` on the actor (stance, buff), and an optional entity-level `Threat` stat. A planned tank class sets these through data without code changes.
-- **Target choice.** The current top-threat target holds until another exceeds `SwitchRatio` of it: 1.1 for a melee enemy at range of the holder, 1.3 for a ranged one, so aggro does not flicker. A taunt overrides and also resets the ratio.
-- **Decay and reset.** Threat decays slowly out of an enemy's reach (`DecayPerSecond`) and resets on return home. Threat is per enemy; party members share nothing except the squad's `SetSquad` gain.
-- **Proximity bias.** Enemies prefer a target in reach over a higher-threat target out of reach, unless the target is casting a heal (Disruptor rule) or taunted. This keeps ranged and casters safe behind a tank without making them untouchable.
-- **Aggro starts with melee.** The first hit, or being closest in aggro radius, gives a flat opening threat (`PullThreat`), so melee that engages first holds the pack.
+**Done** (2026-10-31): [combat](combat.md), Threat. Still open: a class skill that *sets* threat to the current top plus a margin (the planned tank class).
 
 ### 2. Parry as the melee core
 

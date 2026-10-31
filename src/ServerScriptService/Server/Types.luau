@@ -90,6 +90,8 @@ export type Entity = {
 	statuses: { [string]: StatusInstance },
 	history: { Sample },
 	threat: { [Entity]: number },
+	--[=[ Multiplies all threat this entity generates (Shared/Threat); class data may change it. ]=]
+	threatMultiplier: number,
 	--[=[ Entities this one fights although their factions are not Hostile: who attacked it. ]=]
 	grudges: { [Entity]: true },
 	tauntedBy: Entity?,

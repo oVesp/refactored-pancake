@@ -534,6 +534,7 @@ local list: { Types.SkillDef } = {
 		cost = { resource = "Stamina", amount = 20 },
 		effects = { { status = "taunt", duration = 4 } },
 		selfEffects = { { status = "war_cry", duration = 8 } },
+		threat = { flat = 40 },
 		description = "Taunt nearby enemies and harden yourself.",
 	},
 

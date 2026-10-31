@@ -8,6 +8,7 @@ local NetServer = require(ReplicatedStorage.Shared.Net.Server)
 local Relations = require(ReplicatedStorage.Shared.Relations)
 local Signal = require(ReplicatedStorage.Shared.Signal)
 local Statuses = require(ReplicatedStorage.Content.Statuses)
+local Threat = require(ReplicatedStorage.Shared.Threat)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 local Types = require(script.Parent.Parent.Types)
 
@@ -107,6 +108,44 @@ function CombatService.Kill(target: Entity, killer: Entity?)
 	die(target, killer)
 end
 
+--[=[ Multiplier on every threat `entity` generates: its own `threatMultiplier` times its statuses'. ]=]
+function CombatService.ThreatMultiplier(entity: Entity): number
+	return Threat.SourceMultiplier(entity.threatMultiplier, entity.statuses, Statuses.ById)
+end
+
+--[=[
+	Adds `amount` threat for `source` on `target` (Shared/Threat.Add): the first entry an NPC gets
+	also carries Tuning.Threat.PullThreat. Use it for every threat change outside a hit.
+]=]
+function CombatService.AddThreat(target: Entity, source: Entity, amount: number)
+	if target == source or not target.alive then
+		return
+	end
+	Threat.Add(target.threat, source, amount, Tuning.Threat.PullThreat)
+end
+
+-- Healing or shielding `ally` for `amount` gives `source` threat with every enemy fighting the ally.
+local function healThreat(source: Entity?, ally: Entity, amount: number)
+	if not source or amount <= 0 then
+		return
+	end
+	local enemies: { Entity } = {}
+	for _, other in EntityService.All() do
+		if
+			other.alive
+			and other ~= source
+			and other.threat[ally] ~= nil
+			and EntityService.AreEnemies(other, source)
+		then
+			table.insert(enemies, other)
+		end
+	end
+	local share = Threat.HealShare(amount * CombatService.ThreatMultiplier(source), Tuning.Threat.HealThreat, #enemies)
+	for _, enemy in enemies do
+		CombatService.AddThreat(enemy, source, share)
+	end
+end
+
 local function landDamage(
 	target: Entity,
 	amount: number,
@@ -114,14 +153,18 @@ local function landDamage(
 	source: Entity?,
 	crit: boolean,
 	skillId: string?,
-	blocked: boolean?
+	blocked: boolean?,
+	skillThreat: Threat.SkillThreat?
 )
 	local now = os.clock()
 	target.lastCombatAt = now
 	if source then
 		source.lastCombatAt = now
 		target.lastHitBy = source
-		target.threat[source] = (target.threat[source] or 0) + amount
+		if target ~= source then
+			local threat = Threat.FromDamage(amount, skillThreat, CombatService.ThreatMultiplier(source))
+			Threat.Add(target.threat, source, threat, Tuning.Threat.PullThreat)
+		end
 	end
 
 	local remaining = amount
@@ -175,10 +218,12 @@ function CombatService.IsEvil(entity: Entity): boolean
 	return Formulas.TypeMultiplier("holy", entity.tags, Tuning.Combat.TypeMultiplier) > 1
 end
 
---[=[ Per-hit crit adjustments from the skill and the attacker's next-hit statuses. ]=]
+--[=[ Per-hit adjustments from the skill and the attacker's next-hit statuses. ]=]
 export type HitMods = {
 	critChance: number?,
 	forceCrit: boolean?,
+	--[=[ The skill's threat modifiers (`SkillDef.threat`). ]=]
+	threat: Threat.SkillThreat?,
 }
 
 -- Extra damage the target takes of this type from `source` (Exposed).
@@ -293,7 +338,7 @@ function CombatService.DealDamage(
 		source.rhythmStacks = stacks
 		source.rhythmAt = now
 	end
-	landDamage(target, amount, spec.type, source, crit, skillId, blocked)
+	landDamage(target, amount, spec.type, source, crit, skillId, blocked, mods and mods.threat)
 	if crit and #traits.critEffects > 0 then
 		CombatService.ApplyEffects(source, target, traits.critEffects)
 	end
@@ -323,17 +368,23 @@ function CombatService.Heal(source: Entity?, target: Entity, amount: number): nu
 	if source then
 		source.lastCombatAt = math.max(source.lastCombatAt, target.lastCombatAt)
 	end
+	healThreat(source, target, restored)
 	show(target, restored, "heal", false)
 	return restored
 end
 
---[=[ Grants an absorb shield that lasts SHIELD_SECONDS; a stronger shield replaces a weaker one. ]=]
-function CombatService.Shield(target: Entity, amount: number)
+--[=[
+	Grants an absorb shield that lasts SHIELD_SECONDS; a stronger shield replaces a weaker one.
+	The shield gained gives `source` healing threat.
+]=]
+function CombatService.Shield(target: Entity, amount: number, source: Entity?)
 	if not target.alive then
 		return
 	end
+	local before = target.shield
 	StatusService.Apply(target, "shield", SHIELD_SECONDS, nil, nil)
 	StatService.SetShield(target, math.max(target.shield, amount))
+	healThreat(source, target, target.shield - before)
 	show(target, amount, "shield", false)
 end
 

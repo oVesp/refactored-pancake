@@ -13,6 +13,7 @@ local Skills = require(ReplicatedStorage.Content.Skills)
 local SpatialHash = require(ReplicatedStorage.Shared.SpatialHash)
 local Swarm = require(ReplicatedStorage.Shared.Swarm)
 local Tasks = require(ReplicatedStorage.Shared.Tasks)
+local Threat = require(ReplicatedStorage.Shared.Threat)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 local Types = require(script.Parent.Parent.Types)
 
@@ -66,6 +67,10 @@ type Brain = {
 	--[=[ Indices of `combat.summons` entries already spawned. ]=]
 	summoned: { [number]: boolean },
 	member: Member,
+	--[=[ Longest attack reach; targets beyond it (plus Tuning.Threat.ReachSlack) lose threat. ]=]
+	reachMax: number,
+	--[=[ os.clock() of the last think, for threat decay. ]=]
+	thoughtAt: number,
 	--[=[ Poise damage taken in the current stagger window and when it was last added to. ]=]
 	poiseDamage: number,
 	poiseAt: number,
@@ -231,18 +236,50 @@ local function validTarget(brain: Brain, target: Entity?): boolean
 	return (flat(target.root.Position) - flat(brain.home)).Magnitude <= brain.leash + Tuning.Npc.TargetSlack
 end
 
+-- A target casting a heal or shield is chased even past closer ones.
+local function castingHeal(entity: Entity): boolean
+	local cast = entity.casting
+	local skill = cast and Skills.ById[cast.skillId]
+	return skill ~= nil and (skill.heal ~= nil or skill.shield ~= nil)
+end
+
+-- Threat on targets out of reach fades, so a kiting enemy slowly loses the brain's interest.
+local function decayThreat(brain: Brain, now: number)
+	local dt = now - brain.thoughtAt
+	brain.thoughtAt = now
+	if dt <= 0 or dt > 5 then
+		return
+	end
+	local entity = brain.entity
+	local reach = brain.reachMax + Tuning.Threat.ReachSlack
+	for other, value in entity.threat do
+		if (other.root.Position - entity.root.Position).Magnitude > reach then
+			entity.threat[other] = Threat.Decay(value, dt, Tuning.Threat.DecayPerSecond)
+		end
+	end
+end
+
 local function pickTarget(brain: Brain): Entity?
 	local entity = brain.entity
 	if validTarget(brain, entity.tauntedBy) then
 		return entity.tauntedBy
 	end
 
-	local best, bestThreat = nil, 0
+	local reach = brain.reachMax + Tuning.Threat.ReachSlack
+	local candidates: { Threat.Candidate } = {}
 	for other, threat in entity.threat do
-		if threat > bestThreat and validTarget(brain, other) then
-			best, bestThreat = other, threat
+		if threat > 0 and validTarget(brain, other) then
+			table.insert(candidates, {
+				key = other,
+				threat = threat,
+				inReach = (other.root.Position - entity.root.Position).Magnitude <= reach,
+				healing = castingHeal(other),
+			})
 		end
 	end
+	local ratios = Tuning.Threat.SwitchRatio
+	local ratio = if brain.member.profile.slot == "Melee" then ratios.Melee else ratios.Ranged
+	local best: Entity? = Threat.Choose(candidates, brain.target, ratio)
 	if best then
 		return best
 	end
@@ -269,6 +306,10 @@ local function pickTarget(brain: Brain): Entity?
 				nearest, nearestDistance = other, distance
 			end
 		end
+	end
+	if nearest then
+		-- Being the nearest when the fight starts is an engage: it opens with the pull threat.
+		CombatService.AddThreat(entity, nearest, 0)
 	end
 	return nearest
 end
@@ -480,7 +521,7 @@ local function alertSquad(brain: Brain, enemy: Entity)
 	for mate in squad do
 		if mate ~= brain and mate.entity.alive then
 			provoke(mate, enemy)
-			mate.entity.threat[enemy] = (mate.entity.threat[enemy] or 0) + 1
+			CombatService.AddThreat(mate.entity, enemy, 1)
 		end
 	end
 end
@@ -749,9 +790,13 @@ local function think(brain: Brain, now: number)
 		return
 	end
 
+	decayThreat(brain, now)
 	local previous = brain.target
 	local target = pickTarget(brain)
 	brain.target = target
+	if target and previous and target ~= previous and previous.alive then
+		log:Debug("%s switches aggro from %s to %s", entity.name, previous.name, target.name)
+	end
 	if target then
 		brain.lastSeen = target.root.Position
 		brain.lostAt = nil
@@ -906,6 +951,13 @@ function AIService.Attach(entity: Entity, home: Vector3, leash: number, wander: 
 		return
 	end
 	local monster = Relations.IsMonster(entity.team)
+	local reachMax = 0
+	for _, skillId in def.skills do
+		local skill = Skills.ById[skillId]
+		if skill and skill.targets ~= "Ally" then
+			reachMax = math.max(reachMax, if skill.delivery == "Dash" then skill.range or 20 else skillReach(skill))
+		end
+	end
 	brains[entity] = {
 		entity = entity,
 		def = def,
@@ -937,6 +989,8 @@ function AIService.Attach(entity: Entity, home: Vector3, leash: number, wander: 
 		staggerUntil = 0,
 		staggerReadyAt = 0,
 		member = SquadService.NewMember(entity, def),
+		reachMax = reachMax,
+		thoughtAt = os.clock(),
 	}
 	entity.model:SetAttribute("AiState", "Idle")
 end
@@ -1069,7 +1123,7 @@ function AIService.Start()
 				and Relations.Allied(other.team, target.team)
 				and EntityService.AreEnemies(other, source)
 			then
-				other.threat[source] = (other.threat[source] or 0) + 1
+				CombatService.AddThreat(other, source, 1)
 			end
 		end
 	end)
