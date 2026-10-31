@@ -246,7 +246,7 @@ tests/                        Lune runner + specs/*.spec.luau
 3. Server simulates the hit via spatial queries (`GetPartBoundsInRadius`, raycasts, overlap shapes) in the **skill's authoritative timeline**; animation markers are cosmetic cues, never proof of a hit.
 4. **Lag compensation**: keep a short ring buffer (~250 ms) of enemy/player positions; rewind within a validated window for hit checks. Cap the rewind; never trust a client timestamp beyond it.
 5. Damage → `DamageService` (type, resist, level-gap curve, crit, status). Result replicated; client reconciles prediction (rollback on reject).
-6. Skills are **data**: id, class requirement, cost, GCD flag, cooldown, cast time, delivery, hit shape, effects list, animation id, VFX id, sound id.
+6. Skills are **data**: id, class requirement, cost, GCD flag, cooldown, cast time, delivery, hit shape, effects list, animation id. Their look lives in the client's `Vfx/SpellEffects` by skill id and their sound in `Content/SkillSounds` (docs/systems/vfx.md).
 
 ### 5.6 Enemies and AI
 - Server-only AI: state machine (idle, patrol, aggro, position, attack, disrupt, flee, regroup, stagger, return), coordinated per target by `SquadService` (attack tokens; docs/systems/ai-and-spawning.md, Group combat).

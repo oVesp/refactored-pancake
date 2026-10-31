@@ -13,8 +13,27 @@ local Zones = require(ReplicatedStorage.Content.Zones)
 ]=]
 local AudioController = {}
 
+-- One-shots vary in pitch by this share so repeats do not sound identical.
+local PITCH_VARIANCE = 0.06
+-- A key played again within this many seconds is dropped, so a swarm's hits do not stack.
+local RETRIGGER_GAP = 0.05
+
 local sounds: { [string]: Sound } = {}
+local lastPlayed: { [string]: number } = {}
 local currentLoop: Sound? = nil
+
+local function ready(key: string): boolean
+	local now = os.clock()
+	if now - (lastPlayed[key] or 0) < RETRIGGER_GAP then
+		return false
+	end
+	lastPlayed[key] = now
+	return true
+end
+
+local function pitch(): number
+	return 1 + (math.random() * 2 - 1) * PITCH_VARIANCE
+end
 
 local function sound(key: string): Sound?
 	local existing = sounds[key]
@@ -38,22 +57,24 @@ end
 --[=[ Plays a 2D one-shot. ]=]
 function AudioController.Play(key: string)
 	local base = sound(key)
-	if base then
+	if base and ready(key) then
+		base.PlaybackSpeed = pitch()
 		SoundService:PlayLocalSound(base)
 	end
 end
 
---[=[ Plays a one-shot at a world position (distance-attenuated). ]=]
-function AudioController.PlayAt(key: string, position: Vector3)
+--[=[ Plays a one-shot at a world position (distance-attenuated). Returns the copy, to stop it early. ]=]
+function AudioController.PlayAt(key: string, position: Vector3): Sound?
 	local base = sound(key)
-	if not base then
-		return
+	if not base or not ready(key) then
+		return nil
 	end
 	local anchor = Instance.new("Attachment")
 	anchor.WorldPosition = position
 	anchor.Parent = workspace.Terrain
 	local copy = base:Clone()
 	copy.RollOffMaxDistance = 120
+	copy.PlaybackSpeed = pitch()
 	copy.Parent = anchor
 	copy:Play()
 	copy.Ended:Once(function()
@@ -64,6 +85,7 @@ function AudioController.PlayAt(key: string, position: Vector3)
 			anchor:Destroy()
 		end
 	end)
+	return copy
 end
 
 local function setLoop(key: string)

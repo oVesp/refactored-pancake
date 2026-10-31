@@ -24,6 +24,12 @@ Target look: the owner's reference video (2026-10-25), anime-style hits with 4 t
 - **Textures**: originals come from `tools/vfxgen/vfxgen.py` (deterministic, project-owned, so free to upload) into `assets/original/vfx/`; see [../art/vfx-library.md](../art/vfx-library.md). Local contact sheets of the VFX Studio library, for planning only, are described there too.
 - **Skills without a template** keep the older code recipes built from `Vfx/Particles.luau` helpers.
 
+## Sound
+
+`Content/SkillSounds.For(skill, phase)` names the `Assets.Audio` key for each phase of a skill's use: `cast` (any cast time; stopped if the charge ends early), `launch` and `impact` (projectiles, by damage type), `swing` and `hit` (melee, per skill for fists, blades and claws) and `resolve` (instant skills, at the caster or a Ground skill's aim point). A `SkillSounds` spec requires every usable skill to sound at each phase of its delivery. `VfxController` plays them; a spell's damage number adds no second hit sound, since its impact or resolve already sounded.
+
+Guard and movement have their own keys: `Parry` (a bright ringing clink), `Block` (a shield clang), `PoiseBreak` on a Break, `SpellFizzle` on an interrupted cast and `Dodge` on the local player's roll. `AudioController` varies one-shots by 6% in pitch and drops a key replayed within 0.05 s, so a swarm's hits do not stack. All new clips are Roblox-licensed Pro Sound Effects from the Creator Store (game-design.md 7.5).
+
 ## Templates
 
 - Fist chain (`strike`, `strike_2`, `strike_3`): `PunchJab`, a puff of displaced air and streaks off the knuckles on punches 1 and 2; `PunchFinisher`, a wider burst with an echo ring on the third; `PunchImpact`, the hit, a white starburst, a torn `ShockRing`, air streaks bursting out and a few punching through along the blow; `PunchImpactHeavy`, the third punch's hit, scaled up with an echo ring, strands, dust, a flash light and a longer hitstop. Fists have no blade, so no crescents.

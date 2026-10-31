@@ -8,6 +8,7 @@ local TweenService = game:GetService("TweenService")
 
 local NetClient = require(ReplicatedStorage.Shared.Net.Client)
 local AnimRoles = require(ReplicatedStorage.Content.AnimRoles)
+local SkillSounds = require(ReplicatedStorage.Content.SkillSounds)
 local Skills = require(ReplicatedStorage.Content.Skills)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
 
@@ -65,12 +66,14 @@ local UIController: any
 local AudioController: any
 local CombatController: any
 
-type Flight = { part: BasePart, recipe: SpellEffects.Recipe? }
+type Flight = { part: BasePart, recipe: SpellEffects.Recipe?, skill: any }
 
 local projectiles: { [number]: Flight } = {}
 -- The local character's skill clips by skill id, loaded when the character spawns.
 local skillTracks: { [string]: AnimationTrack } = {}
 local charges: { [Instance]: Instance? } = {}
+-- The charge sound of each caster, stopped if the charge ends early.
+local chargeSounds: { [Instance]: Sound? } = {}
 -- Casters whose charge waits for a release instead of running out.
 local heldCharges: { [Instance]: boolean? } = {}
 local effectsFolder: Folder
@@ -141,16 +144,10 @@ local function skillColor(skillId: string): Color3
 	return if skill and (skill.heal or skill.shield) then TYPE_COLORS.holy else Color3.fromRGB(180, 160, 255)
 end
 
-local function soundFor(skill: any): string
-	local damageType = skill.damage and skill.damage.type
-	if damageType == "fire" then
-		return "Fire"
-	elseif damageType == "lightning" or damageType == "cold" then
-		return "Zap"
-	elseif skill.heal or skill.shield or skill.delivery == "Ally" then
-		return "Heal"
-	end
-	return "Swing"
+-- Plays the skill's sound for a phase of its use at a world position.
+local function playSkillSound(skill: any, phase: SkillSounds.Phase, position: Vector3): Sound?
+	local key = SkillSounds.For(skill, phase)
+	return if key then AudioController.PlayAt(key, position) else nil
 end
 
 local function telegraph(info: { [string]: any })
@@ -175,6 +172,11 @@ local function telegraph(info: { [string]: any })
 	if info.caster and info.caster:GetAttribute("Team") == "Goblins" then
 		AudioController.PlayAt("GoblinBark", info.origin)
 	end
+end
+
+local function rootOf(model: Model?): BasePart?
+	local root = model and (model:FindFirstChild("HumanoidRootPart") or model.PrimaryPart)
+	return if root and root:IsA("BasePart") then root else nil
 end
 
 local function isLocalCaster(caster: Instance?): boolean
@@ -206,8 +208,8 @@ local function launch(info: { [string]: any }, skill: any)
 		recipe = nil
 	end
 	local id = info.id
-	projectiles[id] = { part = part, recipe = recipe }
-	AudioController.PlayAt(soundFor(skill), info.origin)
+	projectiles[id] = { part = part, recipe = recipe, skill = skill }
+	playSkillSound(skill, "launch", info.origin)
 	local travelled = 0
 	local position: Vector3 = info.origin
 	local direction: Vector3 = info.direction
@@ -248,6 +250,9 @@ end
 local function startCharge(info: { [string]: any }, skill: any)
 	local recipe = SpellEffects[info.skillId]
 	local caster = info.caster
+	if caster then
+		chargeSounds[caster] = playSkillSound(skill, "cast", info.origin)
+	end
 	local root = caster and (caster:FindFirstChild("HumanoidRootPart") or caster.PrimaryPart)
 	if recipe and recipe.cast and root and root:IsA("BasePart") then
 		local previous = charges[caster]
@@ -262,6 +267,11 @@ local function startCharge(info: { [string]: any }, skill: any)
 end
 
 local function cancelCharge(caster: Instance?)
+	local chargeSound = caster and chargeSounds[caster]
+	if chargeSound then
+		chargeSounds[caster :: Instance] = nil
+		chargeSound:Stop()
+	end
 	local charge = caster and charges[caster]
 	if charge then
 		charges[caster :: Instance] = nil
@@ -282,11 +292,24 @@ local function predictsSwing(skill: any): boolean
 	return skill.telegraph == false or not skill.windup
 end
 
+-- A swing's sound, or an instant skill's at the point it takes effect. The local player's committed
+-- swings already played theirs at the clip's Hit marker.
+local function resolveSound(info: { [string]: any }, skill: any)
+	local swings = skill.delivery == "Melee" or skill.delivery == "Cone"
+	if swings and isLocalCaster(info.caster) and predictsSwing(skill) then
+		return
+	end
+	local at = if skill.delivery == "Ground" then info.aim else info.origin
+	playSkillSound(skill, if swings then "swing" else "resolve", at)
+end
+
 local function onResolve(info: { [string]: any }, skill: any)
 	endHeldCharge(info.caster)
 	if info.caster then
 		charges[info.caster] = nil
+		chargeSounds[info.caster] = nil
 	end
+	resolveSound(info, skill)
 	local recipe = SpellEffects[info.skillId]
 	if not recipe then
 		return
@@ -313,6 +336,10 @@ local function onCast(info: { [string]: any })
 		startCharge(info, skill)
 	elseif info.kind == "Interrupted" then
 		cancelCharge(info.caster)
+		local casterRoot = rootOf(info.caster)
+		if casterRoot and skill.castTime then
+			AudioController.PlayAt("SpellFizzle", casterRoot.Position)
+		end
 		local track = skillTracks[info.skillId]
 		if track and isLocalCaster(info.caster) then
 			track:Stop(CLIP_FADE_OUT)
@@ -327,10 +354,14 @@ local function onImpact(id: number, position: Vector3, kind: string)
 	endFlight(id)
 	if kind == "hit" and flight and flight.recipe and flight.recipe.impact then
 		flight.recipe.impact(position)
-		AudioController.PlayAt("Hit", position)
+		playSkillSound(flight.skill, "impact", position)
 	elseif kind == "hit" then
 		burst(position, 2.5, Color3.fromRGB(255, 220, 160))
-		AudioController.PlayAt("Hit", position)
+		if flight then
+			playSkillSound(flight.skill, "impact", position)
+		else
+			AudioController.PlayAt("Hit", position)
+		end
 	elseif kind == "interrupt" then
 		burst(position + Vector3.new(0, 2, 0), 3, Color3.fromRGB(255, 255, 255))
 	end
@@ -340,11 +371,6 @@ local MELEE_DELIVERIES = { Melee = true, Cone = true, Dash = true }
 
 -- Turns a CFrame so its top face, which hit templates emit from, points along `look`.
 local TOP_ALONG_LOOK = CFrame.Angles(-math.pi / 2, 0, 0)
-
-local function rootOf(model: Model?): BasePart?
-	local root = model and (model:FindFirstChild("HumanoidRootPart") or model.PrimaryPart)
-	return if root and root:IsA("BasePart") then root else nil
-end
 
 -- Level unit vector from `root` toward `source`'s root, or nil when there is none.
 local function towardSource(root: BasePart, source: Model?): Vector3?
@@ -406,7 +432,7 @@ local function onParry(defender: Model?, attacker: Model?)
 	Effects.Play("ParryClash", facing(at, toward))
 	Effects.BodyFlash(defender, PARRY_COLOR, 0.2)
 	Particles.Flash(at, PARRY_COLOR, 18, 0.2)
-	AudioController.PlayAt("Hit", at)
+	AudioController.PlayAt("Parry", at)
 	if involvesLocal(defender, attacker) then
 		Effects.Hitstop({ defender, attacker }, 0.12)
 		Effects.Play("HitShake", CFrame.new(at))
@@ -424,6 +450,7 @@ local function onBreak(model: Model?, source: Model?, kind: string)
 	Effects.BodyFlash(model, PARRY_COLOR, if broke then 0.35 else 0.15)
 	if broke then
 		Particles.Flash(root.Position + Vector3.new(0, 1, 0), PARRY_COLOR, 24, 0.25)
+		AudioController.PlayAt("PoiseBreak", root.Position)
 	end
 	if involvesLocal(model, source) then
 		Effects.Hitstop({ model, source }, if broke then Tuning.Parry.BreakHitstop else Tuning.Parry.FlinchHitstop)
@@ -462,8 +489,15 @@ local function onDamage(model: Model, amount: number, kind: string, crit: boolea
 		:Create(text, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { TextTransparency = 1 })
 		:Play()
 	Debris:AddItem(gui, 1)
-	if kind == "damage" or kind == "shielded" or kind == "blocked" then
-		AudioController.PlayAt("Hit", root.Position)
+	if kind == "blocked" then
+		AudioController.PlayAt("Block", root.Position)
+	elseif kind == "damage" or kind == "shielded" then
+		-- Spells and thrown attacks already sounded at their impact or resolve.
+		if not skill then
+			AudioController.PlayAt("Hit", root.Position)
+		elseif MELEE_DELIVERIES[skill.delivery] then
+			playSkillSound(skill, "hit", root.Position)
+		end
 	end
 end
 
@@ -562,6 +596,10 @@ function VfxController.Start()
 		if hand and hand:IsA("BasePart") then
 			burst(hand.Position, 0.8, DRAW_READY_COLOR)
 		end
+		AudioController.Play("UiClick")
+	end)
+	CombatController.Dodged:Connect(function()
+		AudioController.Play("Dodge")
 	end)
 	CombatController.Rejected:Connect(function(skillId: string)
 		local track = skillTracks[skillId]
@@ -590,7 +628,10 @@ function VfxController.PredictSwing(skillId: string, origin: Vector3, aim: Vecto
 		else
 			arc(origin, aim, skill.range or 6, skillColor(skillId))
 		end
-		AudioController.Play(soundFor(skill))
+		local key = SkillSounds.For(skill, "swing")
+		if key then
+			AudioController.Play(key)
+		end
 	end
 end
 

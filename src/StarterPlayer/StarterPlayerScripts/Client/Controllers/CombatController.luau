@@ -60,6 +60,8 @@ CombatController.Used = Signal.new() :: Signal.Signal<string, Vector3>
 CombatController.SummonPrompted = Signal.new() :: Signal.Signal<string, { string }>
 --[=[ Fires at full bow draw (a release within `PerfectWindow` is a perfect shot) and at a spell's full charge. ]=]
 CombatController.DrawReady = Signal.new() :: Signal.Signal<>
+--[=[ Fires when the local player starts a dodge. ]=]
+CombatController.Dodged = Signal.new() :: Signal.Signal<>
 
 local ProfileController: any
 local TargetController: any
@@ -722,6 +724,7 @@ function CombatController.Dodge()
 	predictedReady["__dodge"] = os.clock() + dodge.Duration + dodge.Cooldown
 	NetClient.Fire("Dodge", direction, seq)
 	playDodge()
+	CombatController.Dodged:Fire()
 
 	local attachment = Instance.new("Attachment")
 	attachment.Name = "DodgeAttachment"
