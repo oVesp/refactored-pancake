@@ -56,7 +56,8 @@ return {
 		for key, asset in Assets.Textures do
 			local row = rows["texture:" .. key]
 			Expect.truthy(row, `texture {key} has no register row`)
-			Expect.truthy(row.path, `texture {key} has no source file path`)
+			-- VFX Studio textures are referenced by id, with no repo file (docs/art/vfx-library.md).
+			Expect.truthy(row.path or row.origin == "VFX Studio", `texture {key} has no source file path`)
 			Expect.truthy(string.match(asset.fallback, "^rbxasset://textures/"), `texture {key} fallback`)
 			if asset.id or row.assetId then
 				Expect.equal("rbxassetid://" .. tostring(row.assetId), asset.id, `texture {key} id`)

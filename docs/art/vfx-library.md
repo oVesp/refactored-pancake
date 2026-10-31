@@ -26,7 +26,8 @@ Free particle, flipbook, noise and trail textures for VFX work (§7.5).
 
 The VFX Studio texture library (https://github.com/Sytranom/VFXStudio) is a registry of about 9,300 Roblox asset ids, by category. Its author told the owner on Discord that it can be used without a license while the work is not publicly available; a public release needs a signed license for this place (agreement sections 3.4 and 10). Rules from the agreement:
 
-- **Reference only for now.** The tool below is for seeing textures while planning effects. Nothing from the library is in `Assets.Textures` or the register yet, and wiring it in is a separate owner decision: its assets are referenced by id instead of copied in, and the author does not warrant clear title to community-gathered assets (section 2.1), which the rules above do not cover.
+- **Exception to rules 1, 2 and 3 above, for this library only** (owner decision 2026-10-31). Its textures need not be CC0 and are not copied into the repo: the game references the author's original asset id unchanged. Rule 4 still applies with one change: each used texture gets an `Assets.Textures` entry and a register row with origin `VFX Studio`, license `VFX Studio agreement`, its `assetId` and no `path`. Rows stay `draft` until the place's license is signed, so they cannot ship before it.
+- **Title is not guaranteed.** The author does not warrant clear title to community-gathered assets (section 2.1) and does not track which those are. If the author reports a claim against an id, replace it within 72 hours (section 6.3).
 - **Never in git or published.** The dataset and assets may not be shared (section 4.3). All output stays in the git-ignored `.cache/vfxstudio/`.
 - **Never altered.** No editing, recoloring, resizing or re-uploading (section 2.3). A sheet is a preview, never a texture source. Tinting through a particle's `Color` at runtime leaves the asset unchanged.
 
