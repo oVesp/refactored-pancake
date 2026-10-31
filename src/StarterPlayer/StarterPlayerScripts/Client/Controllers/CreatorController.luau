@@ -7,8 +7,8 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
+local Animations = require(script.Parent.Parent.Animation.Animations)
 local Appearance = require(ReplicatedStorage.Content.Appearance)
-local Assets = require(ReplicatedStorage.Content.Assets)
 local Avatar = require(ReplicatedStorage.Shared.Avatar)
 local Classes = require(ReplicatedStorage.Content.Classes)
 local Heritages = require(ReplicatedStorage.Content.Heritages)
@@ -130,7 +130,7 @@ local function playIdle(model: Model)
 	local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator")
 	animator.Parent = humanoid
 	local animation = Instance.new("Animation")
-	animation.AnimationId = Assets.Stock.PreviewIdle
+	animation.AnimationId = (Animations.Get("PreviewIdle") :: Animation).AnimationId
 	local ok, track = pcall(function()
 		return (animator :: Animator):LoadAnimation(animation)
 	end)

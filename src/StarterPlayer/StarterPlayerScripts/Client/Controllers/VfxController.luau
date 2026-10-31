@@ -7,9 +7,10 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local NetClient = require(ReplicatedStorage.Shared.Net.Client)
+local AnimRoles = require(ReplicatedStorage.Content.AnimRoles)
 local Skills = require(ReplicatedStorage.Content.Skills)
 
-local Clips = require(script.Parent.Parent.Animation.Clips)
+local Animations = require(script.Parent.Parent.Animation.Animations)
 local Effects = require(script.Parent.Parent.Vfx.Effects)
 local Particles = require(script.Parent.Parent.Vfx.Particles)
 local SpellEffects = require(script.Parent.Parent.Vfx.SpellEffects)
@@ -430,7 +431,7 @@ local function loadSkillTracks(character: Model)
 	end
 	for id, skill in Skills.ById do
 		if skill.animation and skill.source ~= "Enemy" then
-			local track = Clips.Load(animator, skill.animation, Enum.AnimationPriority.Action, false)
+			local track = Animations.Load(animator, skill.animation, Enum.AnimationPriority.Action, false)
 			if track then
 				skillTracks[id] = track
 			end
@@ -455,7 +456,7 @@ local function onUsed(skillId: string, aim: Vector3)
 	end
 	track:Play(CLIP_FADE_IN)
 	if skill and predictsSwing(skill) then
-		local hit = track:GetMarkerReachedSignal("Hit"):Once(swing)
+		local hit = track:GetMarkerReachedSignal(AnimRoles.Markers.Hit):Once(swing)
 		track.Stopped:Once(function()
 			hit:Disconnect()
 		end)

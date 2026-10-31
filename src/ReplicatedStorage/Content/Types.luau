@@ -109,7 +109,7 @@ export type SkillDef = {
 	objectAttribute: string?,
 	objectNotice: string?,
 	modifiers: StatBlock?,
-	--[=[ Key in `Assets.Animations` for the caster's clip; markers `Windup`/`Hit` are cosmetic cues. ]=]
+	--[=[ Name of the `Animation` under ReplicatedStorage.Animations for the caster; its `Hit` marker (Content/AnimRoles Markers) is the cosmetic effect frame. ]=]
 	animation: string?,
 	--[=[
 		Basic chain only: the hit a light attack press uses next when it comes within

@@ -11,8 +11,9 @@ local ChatCast = require(ReplicatedStorage.Shared.ChatCast)
 local Formulas = require(ReplicatedStorage.Shared.Formulas)
 local Hotbar = require(ReplicatedStorage.Shared.Hotbar)
 local Loadout = require(ReplicatedStorage.Shared.Loadout)
-local GuardClips = require(script.Parent.Parent.Animation.GuardClips)
-local WeaponClips = require(script.Parent.Parent.Animation.WeaponClips)
+local Animations = require(script.Parent.Parent.Animation.Animations)
+local GuardAnimations = require(script.Parent.Parent.Animation.GuardAnimations)
+local WeaponAnimations = require(script.Parent.Parent.Animation.WeaponAnimations)
 local NetClient = require(ReplicatedStorage.Shared.Net.Client)
 local Signal = require(ReplicatedStorage.Shared.Signal)
 local Skills = require(ReplicatedStorage.Content.Skills)
@@ -566,6 +567,23 @@ function CombatController.SetRun(on: boolean)
 	NetClient.Fire("SetRun", on)
 end
 
+-- Plays the dodge roll on the local character; the loaded track is kept per animator.
+local dodgeTracks: { [Animator]: AnimationTrack } = setmetatable({}, { __mode = "k" }) :: any
+
+local function playDodge()
+	local _, _, humanoid = character()
+	local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
+	if not animator then
+		return
+	end
+	local track = dodgeTracks[animator] or Animations.Load(animator, "Dodge", Enum.AnimationPriority.Action3, false)
+	if not track then
+		return
+	end
+	dodgeTracks[animator] = track
+	track:Play(0.05)
+end
+
 --[=[ Dodges along the move direction (or backward): local impulse, server grants i-frames. ]=]
 function CombatController.Dodge()
 	local _, root, humanoid = character()
@@ -590,6 +608,7 @@ function CombatController.Dodge()
 	pending[seq] = "__dodge"
 	predictedReady["__dodge"] = os.clock() + dodge.Cooldown
 	NetClient.Fire("Dodge", direction, seq)
+	playDodge()
 
 	local attachment = Instance.new("Attachment")
 	attachment.Name = "DodgeAttachment"
@@ -665,8 +684,8 @@ function CombatController.Start()
 		drawStartedAt = nil
 		drawSkill = nil
 	end)
-	GuardClips.Start()
-	WeaponClips.Start()
+	GuardAnimations.Start()
+	WeaponAnimations.Start()
 	CameraController.Changed:Connect(function(on: boolean)
 		syncCombatMode(on, true)
 	end)

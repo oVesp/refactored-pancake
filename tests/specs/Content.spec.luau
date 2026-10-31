@@ -15,7 +15,7 @@ local Factions = Loader.load(Content .. "Factions").ById
 local Items = Loader.load(Content .. "Items")
 local Disciplines = Loader.load(Content .. "Disciplines").ById
 local Loot = Loader.load("src/ServerStorage/ContentServerOnly/Loot")
-local Animations = Loader.load(Content .. "Assets").Animations
+local Animations = require("../AnimationKeys")()
 local Basic = Loader.load(Content .. "Skills").Basic
 local Chain = Loader.load("src/ReplicatedStorage/Shared/Chain")
 local Strings = Loader.load(Content .. "Strings")
@@ -197,8 +197,8 @@ return {
 		Expect.truthy(last.cooldown > first.cooldown, "finisher recovers longer")
 	end,
 	["guard clips are in the manifest"] = function()
-		Expect.truthy(Animations.GuardHold, "GuardHold")
-		Expect.truthy(Animations.GuardParry, "GuardParry")
+		Expect.truthy(Animations["GuardHold"], "GuardHold")
+		Expect.truthy(Animations["GuardParry"], "GuardParry")
 	end,
 	["enemies reference known skills and have loot"] = function()
 		for id, enemy in Enemies do

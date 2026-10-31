@@ -18,7 +18,7 @@ Data: `Content/Factions.luau`. Logic: `Shared/Relations.luau` (pure, unit-tested
 Data: `Content/Npcs.luau` (same shape as `Content/Enemies`; `Shared/NpcDefs.Get` looks up both). Villager, Guard, Crossbow Guard, Merchant, Caravan Guard, Traveler, Kingdom Soldier, Kingdom Sergeant (placeholders on the Human rig).
 
 - `template = "Human"`: `SpawnService` builds an R15 body from a random `Appearance` look in one of the def's `outfits`, removes its stock Animate script and sets `AnimSet = "Human"`; the display name is a given name from `Content/Names` plus the role.
-- Clips: `HumanIdle/Walk/Run` are Roblox stock clips (`Assets.Stock`), `HumanAttack/Throw` alias `BasicStrike` (`Assets.AnimAliases`). `EnemyAnimationController` animates models tagged `Enemy` or `Npc`.
+- Clips: `HumanIdle/Walk/Run` are Roblox stock clips and `HumanAttack/Throw` alias `BasicStrike` (set `Human` in `content/animations/human.json`). `EnemyAnimationController` animates models tagged `Enemy` or `Npc`.
 - Civilians (villagers, merchants) have morale always below `fleeBelow`: they run home from any monster they see.
 - Merchants carry a `Trade` prompt that opens the vendor panel through the trainer flow; it opens the shop screen ([economy](economy.md)).
 

@@ -8,7 +8,7 @@ local AnimRoles = require(ReplicatedStorage.Content.AnimRoles)
 local Locomotion = require(ReplicatedStorage.Shared.Locomotion)
 local Maid = require(ReplicatedStorage.Shared.Maid)
 
-local Clips = require(script.Parent.Parent.Animation.Clips)
+local Animations = require(script.Parent.Parent.Animation.Animations)
 
 type Rig = {
 	model: Model,
@@ -42,7 +42,7 @@ local rigs: { [Model]: Rig } = {}
 	Plays NPC animations locally (game-design.md 5.6 visuals are client-side). Locomotion follows
 	the replicated root velocity through `Shared/Locomotion`, which smooths it and holds each clip
 	long enough that jitter never restarts one; one-shot clips follow the server's `AnimCue` attribute
-	("<clip>:<sequence>"). Roles come from `Content/AnimRoles`; clips resolve through `Animation/Clips`.
+	("<clip>:<sequence>"). Roles come from `Content/AnimRoles`; clips are the Animation instances under ReplicatedStorage.Animations (`Animation/Animations`).
 ]=]
 local EnemyAnimationController = {}
 
@@ -107,7 +107,7 @@ local function attach(model: Instance)
 	local rig: Rig =
 		{ model = model, root = root, tracks = {}, locomotion = nil, motion = Locomotion.new(), rate = 1, dead = false }
 	for clip, role in AnimRoles.Enemy do
-		local track = Clips.Load(animator, set .. clip, PRIORITIES[role.priority], role.looped)
+		local track = Animations.Load(animator, set .. clip, PRIORITIES[role.priority], role.looped)
 		if track then
 			rig.tracks[clip] = track
 		end

@@ -1,8 +1,6 @@
 {
 	"set": "Sword",
 	"kind": "skill",
-	"exporter": "studio",
-	"outDir": "src/ReplicatedStorage/Animations/Sword",
 	"defaults": {
 		"origin": "Owner-authored sword and shield animations on the stock R15 rig",
 		"license": "project"
@@ -16,9 +14,6 @@
 			"tier": "final",
 			"notes": "Diagonal cut, top right to bottom left. Authored by the owner and uploaded from Studio; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider), 1.0 s.",
 			"assetId": "84409040482136",
-			"uploadedSha": "07c86d7eab6ebc214db19301656c045fb0703e25d17caeca4339dab0c04a2ddc",
-			"uploadedTier": "final",
-			"uploaded": "2026-10-30",
 			"history": []
 		},
 		"BasicSwordSlash2": {
@@ -29,9 +24,6 @@
 			"tier": "final",
 			"notes": "Horizontal cut, left to right. Authored by the owner and uploaded from Studio; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider), 1.0 s.",
 			"assetId": "104365583971619",
-			"uploadedSha": "994c685765dd6cc4782962890a2d74f59e51ddce1b50a1fe15e009b75c7b36f4",
-			"uploadedTier": "final",
-			"uploaded": "2026-10-30",
 			"history": []
 		},
 		"BasicSwordSlash3": {
@@ -42,9 +34,6 @@
 			"tier": "final",
 			"notes": "Vertical chop, top to bottom; the chain finisher. Authored by the owner and uploaded from Studio; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider), 1.0 s.",
 			"assetId": "92205821610809",
-			"uploadedSha": "cf82659b53942d62dc9fd696d311b5d440813b4fb4da4cc07e9d4d40e15bfa92",
-			"uploadedTier": "final",
-			"uploaded": "2026-10-30",
 			"history": []
 		},
 		"BasicSwordIdle": {
@@ -52,9 +41,6 @@
 			"tier": "final",
 			"notes": "Sword idle, full body. Authored by the owner and uploaded from Studio; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider), 1.0 s.",
 			"assetId": "75413599382020",
-			"uploadedSha": "f882d4594623f7fd5b35c8a0a972368dc54353c3f85cee7bcb6ae9e356ca21b8",
-			"uploadedTier": "final",
-			"uploaded": "2026-10-30",
 			"history": []
 		},
 		"BasicSwordIdleNoLegs": {
@@ -62,9 +48,6 @@
 			"tier": "final",
 			"notes": "Sword idle without legs, layered over walking and running. Authored by the owner and uploaded from Studio; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider), 1.0 s.",
 			"assetId": "86017222558865",
-			"uploadedSha": "d6042dcceeaff390d16b05aab419b871f5d95486215413297397173b8156de4d",
-			"uploadedTier": "final",
-			"uploaded": "2026-10-30",
 			"history": []
 		},
 		"ShieldBlock": {
@@ -72,9 +55,6 @@
 			"tier": "final",
 			"notes": "Shield block, left arm only. Authored by the owner and uploaded from Studio; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider), 1.0 s.",
 			"assetId": "114807209446225",
-			"uploadedSha": "67f4098c94ea10d1182e34b0e26201e63063d80bfe6ecfcc942a206b68742a19",
-			"uploadedTier": "final",
-			"uploaded": "2026-10-30",
 			"history": []
 		}
 	}

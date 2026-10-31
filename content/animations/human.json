@@ -1,0 +1,51 @@
+{
+	"set": "Human",
+	"kind": "stock",
+	"defaults": {
+		"origin": "Roblox stock R15 animations",
+		"license": "Roblox"
+	},
+	"clips": {
+		"PreviewIdle": {
+			"looped": true,
+			"tier": "placeholder",
+			"assetId": "507766388",
+			"notes": "Default R15 idle on the character creator preview."
+		},
+		"HumanIdle": {
+			"role": "Idle",
+			"looped": true,
+			"tier": "placeholder",
+			"assetId": "507766388",
+			"notes": "Human NPC idle."
+		},
+		"HumanWalk": {
+			"role": "Walk",
+			"looped": true,
+			"tier": "placeholder",
+			"assetId": "507777826",
+			"notes": "Human NPC walk."
+		},
+		"HumanRun": {
+			"role": "Run",
+			"looped": true,
+			"tier": "placeholder",
+			"assetId": "507767714",
+			"notes": "Human NPC run."
+		},
+		"HumanAttack": {
+			"role": "Attack",
+			"looped": false,
+			"tier": "placeholder",
+			"alias": "BasicStrike",
+			"notes": "Human NPCs swing the player's light attack."
+		},
+		"HumanThrow": {
+			"role": "Throw",
+			"looped": false,
+			"tier": "placeholder",
+			"alias": "BasicStrike",
+			"notes": "Human NPCs throw with the player's light attack."
+		}
+	}
+}

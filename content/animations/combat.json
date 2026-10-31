@@ -1,114 +1,76 @@
 {
 	"set": "Combat",
 	"kind": "skill",
-	"exporter": "rbxanim",
-	"sourceDir": "assets/blender/combat_r15",
-	"outDir": "src/ReplicatedStorage/Animations/Combat",
 	"defaults": {
 		"origin": "Agent-authored placeholder on the stock Studio R15 rig in assets/blender/combat_r15/combat_r15.blend (owner exception 2026-10-25)",
 		"license": "project"
 	},
 	"clips": {
 		"BasicStrike": {
-			"source": "Strike.rbxanim",
 			"looped": false,
 			"markers": {
 				"Hit": 0.13333
 			},
 			"tier": "placeholder",
 			"notes": "Light attack (strike): 0.4 s, marker Hit at 0.133 s. Upper body only. Baked to .rbxanim by the Roblox Animations add-on (3.0.1 bake, re-verified identical with 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-25 to user 82401475 by tools/upload/animations.py.",
-			"exportedFrom": "3645c2d00d105395da2138e4d152ffd6076340f85ffd5546499a0e5321651f58",
 			"assetId": "75972502304014",
-			"uploadedSha": "62432aee0595cb70105af22c9183e8c555ba1943d0cba5bff8578f2e8f746f2b",
-			"uploadedTier": "placeholder",
-			"uploaded": "2026-10-25",
-			"history": [],
-			"sourceSha256": "3645c2d00d105395da2138e4d152ffd6076340f85ffd5546499a0e5321651f58",
-			"uploadedSource": "Strike.rbxanim"
+			"history": []
 		},
 		"BasicHeavyStrike": {
-			"source": "HeavyStrike.rbxanim",
 			"looped": false,
 			"markers": {
-				"Windup": 0.0,
 				"Hit": 0.5
 			},
 			"tier": "placeholder",
 			"notes": "Heavy attack (heavy_strike): 1.0 s, markers Windup at 0 s and Hit at 0.5 s. Upper body only. Baked to .rbxanim by the Roblox Animations add-on (3.0.1 bake, re-verified identical with 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-25 to user 82401475 by tools/upload/animations.py.",
-			"exportedFrom": "6d625e081d7b6b8cf0ecd3b001db5bf99b9543556699e94c0699e6f3b7836204",
 			"assetId": "73823663489909",
-			"uploadedSha": "f5721b0358a6c74462951665f23553ab569a6dfe8d2ef0d05ec5cfb296717b6d",
-			"uploadedTier": "placeholder",
-			"uploaded": "2026-10-25",
-			"history": [],
-			"sourceSha256": "6d625e081d7b6b8cf0ecd3b001db5bf99b9543556699e94c0699e6f3b7836204",
-			"uploadedSource": "HeavyStrike.rbxanim"
+			"history": []
 		},
 		"BasicStrike2": {
-			"source": "Strike2.rbxanim",
 			"looped": false,
 			"markers": {
 				"Hit": 0.13333
 			},
 			"tier": "placeholder",
 			"notes": "Light chain hit 2 (strike_2): 0.4 s left cross, marker Hit at 0.133 s. Upper body only. Posed by tools/blender/combat_poses.py, baked by tools/blender/combat_bake.py (Roblox Animations add-on 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-27 to user 82401475 by tools/upload/animations.py.",
-			"exportedFrom": "fd497310bc089038687cd423ff22c12476ed101a4337a8b1b4f8a44af6829f7e",
 			"assetId": "111687911389983",
-			"uploadedSha": "782e300c24ce1587c700c27f23539f44dae6aa8f0dc47b11cbf2c4dd301b8cba",
-			"uploadedTier": "placeholder",
-			"uploaded": "2026-10-27",
-			"history": [],
-			"sourceSha256": "fd497310bc089038687cd423ff22c12476ed101a4337a8b1b4f8a44af6829f7e",
-			"uploadedSource": "Strike2.rbxanim"
+			"history": []
 		},
 		"BasicStrike3": {
-			"source": "Strike3.rbxanim",
 			"looped": false,
 			"markers": {
 				"Hit": 0.23333
 			},
 			"tier": "placeholder",
 			"notes": "Light chain finisher (strike_3): 0.6 s rising right hook with torso turn, marker Hit at 0.233 s, recovery to rest by 0.6 s. Upper body only. Posed by tools/blender/combat_poses.py, baked by tools/blender/combat_bake.py (Roblox Animations add-on 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-27 to user 82401475 by tools/upload/animations.py.",
-			"exportedFrom": "d45a110383af52bfd1d0a2cadf6749884c71b5956f5ef139c086faff29c3c79f",
 			"assetId": "131814313813160",
-			"uploadedSha": "a91940f57327eec658557f2f8458ead9210e1777d74dd1826b85f7af85c28f0f",
-			"uploadedTier": "placeholder",
-			"uploaded": "2026-10-27",
-			"history": [],
-			"sourceSha256": "d45a110383af52bfd1d0a2cadf6749884c71b5956f5ef139c086faff29c3c79f",
-			"uploadedSource": "Strike3.rbxanim"
+			"history": []
 		},
 		"GuardHold": {
-			"source": "GuardHold.rbxanim",
 			"looped": true,
 			"markers": {},
 			"tier": "placeholder",
 			"notes": "Guard pose, forearms upright in front of the face; 1 s loop, played by GuardClips while Guarding. Upper body only. Posed by tools/blender/combat_poses.py, baked by tools/blender/combat_bake.py (Roblox Animations add-on 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-27 to user 82401475 by tools/upload/animations.py.",
-			"exportedFrom": "7d04867fbcb74a877118930e8b7f640d6fa1bd86ae29d6d5c18949c4d1198955",
 			"assetId": "109555153765403",
-			"uploadedSha": "e6d15cda1ca6c07f9d3c8cf616e575ae148342e54ff2a780654de1cf8237bb7d",
-			"uploadedTier": "placeholder",
-			"uploaded": "2026-10-27",
-			"history": [],
-			"sourceSha256": "7d04867fbcb74a877118930e8b7f640d6fa1bd86ae29d6d5c18949c4d1198955",
-			"uploadedSource": "GuardHold.rbxanim"
+			"history": []
 		},
 		"GuardParry": {
-			"source": "GuardParry.rbxanim",
 			"looped": false,
 			"markers": {
-				"Parry": 0.03333
+				"Hit": 0.03333
 			},
 			"tier": "placeholder",
 			"notes": "Parry deflection: 0.333 s, left forearm sweeps outward and back to guard, marker Parry at 0.033 s; played by GuardClips on ShowParry. Upper body only. Posed by tools/blender/combat_poses.py, baked by tools/blender/combat_bake.py (Roblox Animations add-on 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-27 to user 82401475 by tools/upload/animations.py.",
-			"exportedFrom": "f8a9c207cbb5575fac8fc12ad4c18ae76fc331ff2f66ff144a02c6613e2e6a74",
 			"assetId": "77764665687591",
-			"uploadedSha": "143faf933d69ae3ca0cd8659b079ace52ba520e0841dc07e660bfb4c6aaaa9b5",
-			"uploadedTier": "placeholder",
-			"uploaded": "2026-10-27",
-			"history": [],
-			"sourceSha256": "f8a9c207cbb5575fac8fc12ad4c18ae76fc331ff2f66ff144a02c6613e2e6a74",
-			"uploadedSource": "GuardParry.rbxanim"
+			"history": []
+		},
+		"Dodge": {
+			"looped": false,
+			"markers": {},
+			"tier": "final",
+			"assetId": "130043066388929",
+			"notes": "Dodge roll, played when the player dodges. Authored by the owner and uploaded from Studio.",
+			"history": []
 		}
 	}
 }

@@ -63,21 +63,20 @@ return {
 			end
 		end
 	end,
-	["every manifest animation has a clip file row and a matching id once uploaded"] = function()
+	["every manifest animation has an Animation file row and a matching id"] = function()
 		local rows = rowsById()
-		for key, asset in Assets.Animations do
+		local count = 0
+		for _, name in fs.readDir("src/ReplicatedStorage/Animations") do
+			local key = string.match(name, "^(.+)%.model%.json$")
+			Expect.truthy(key, `{name} is not an Animation model`)
 			local row = rows["animation:" .. key]
 			Expect.truthy(row, `animation {key} has no register row`)
-			Expect.truthy(
-				row.path
-					and string.match(row.path, "^src/ReplicatedStorage/Animations/%w+/(%w+)%.rbxmx$")
-						== asset.keyframes,
-				`animation {key} path`
-			)
-			if asset.id or row.assetId then
-				Expect.equal("rbxassetid://" .. tostring(row.assetId), asset.id, `animation {key} id`)
-			end
+			Expect.equal(`src/ReplicatedStorage/Animations/{name}`, row.path, `animation {key} path`)
+			local model = serde.decode("json", fs.readFile("src/ReplicatedStorage/Animations/" .. name))
+			Expect.equal("rbxassetid://" .. tostring(row.assetId), model.properties.AnimationId, `animation {key} id`)
+			count += 1
 		end
+		Expect.truthy(count > 0, "no animations")
 	end,
 	["every manifest mesh is registered with the same id"] = function()
 		local rows = rowsById()
