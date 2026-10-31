@@ -22,6 +22,10 @@ export type Cast = {
 	token: number,
 	--[=[ Resource paid when a cast completes; a cancelled cast costs nothing. ]=]
 	cost: { resource: "Mp" | "Stamina", amount: number }?,
+	--[=[ A cast-time spell (not a melee windup): hits push it back or interrupt it (Shared/Poise.CastHit). ]=]
+	isCast: boolean,
+	--[=[ Seconds of pushback taken so far. ]=]
+	pushed: number,
 }
 
 export type StatusInstance = {
@@ -91,6 +95,8 @@ export type Entity = {
 	riposteUntil: number,
 	--[=[ Damage-taken multiplier while more enemies fight this entity than its token budget allows (SquadService). ]=]
 	overwhelm: number,
+	--[=[ Players: no new stun (Stun-kind status) before this os.clock(); set when a stun ends. ]=]
+	stunGuardUntil: number,
 	statuses: { [string]: StatusInstance },
 	history: { Sample },
 	threat: { [Entity]: number },

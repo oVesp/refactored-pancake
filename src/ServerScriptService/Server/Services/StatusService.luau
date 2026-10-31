@@ -55,7 +55,9 @@ end
 
 --[=[
 	Applies a status. Immune targets ignore it; harmful durations shrink with Resistance.
-	Reapplying refreshes duration and keeps the larger magnitude. Returns true if applied.
+	Reapplying refreshes duration and keeps the larger magnitude. A player who is stunned, or whose
+	stun ended less than Tuning.Combat.Poise.StunGuard seconds ago, refuses new Stun-kind statuses.
+	Returns true if applied.
 ]=]
 function StatusService.Apply(
 	entity: Entity,
@@ -73,6 +75,14 @@ function StatusService.Apply(
 	end
 
 	local now = os.clock()
+	-- A stunned player cannot be stunned again, nor right after, so a pack cannot chain-stun them.
+	if
+		def.kind == "Stun"
+		and entity.kind == "Player"
+		and (StatusService.IsDisabled(entity) or now < entity.stunGuardUntil)
+	then
+		return false
+	end
 	local seconds =
 		Formulas.StatusDuration(duration, entity.stats.Resistance or 0, def.harmful, Tuning.Combat.ResistanceConstant)
 	local existing = entity.statuses[statusId]
@@ -114,6 +124,9 @@ function StatusService.Remove(entity: Entity, statusId: string)
 	end
 	entity.statuses[statusId] = nil
 	local def = Statuses.ById[statusId]
+	if def and def.kind == "Stun" and entity.kind == "Player" and not StatusService.IsDisabled(entity) then
+		entity.stunGuardUntil = os.clock() + Tuning.Combat.Poise.StunGuard
+	end
 	if def and def.kind == "Taunt" then
 		entity.tauntedBy = nil
 	elseif def and def.kind == "Light" then

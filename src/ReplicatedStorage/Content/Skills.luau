@@ -88,6 +88,7 @@ local list: { Types.SkillDef } = {
 		damage = { type = "physical", base = 12, stat = "PhysAtk", ratio = 1.1 },
 		animation = "BasicHeavyStrike",
 		heavy = true,
+		poiseDamage = 1.5,
 		description = "Slow heavy attack.",
 	},
 
@@ -171,6 +172,7 @@ local list: { Types.SkillDef } = {
 		damage = { type = "physical", base = 15, stat = "PhysAtk", ratio = 1.3 },
 		animation = "BasicHeavyStrike",
 		heavy = true,
+		poiseDamage = 1.5,
 		description = "Sword heavy attack: slow overhead cut.",
 	},
 	-- Bow: hold to draw, release to shoot. Arrows fall, never home, and hit harder from behind.

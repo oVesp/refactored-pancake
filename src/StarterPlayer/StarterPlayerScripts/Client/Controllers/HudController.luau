@@ -459,6 +459,8 @@ function HudController.Start()
 			castEndsAt = castStartedAt + info.duration
 			local skill = Skills.ById[info.skillId]
 			setText("Bind_CastText", if skill then skill.name else "")
+		elseif info.kind == "Pushback" then
+			castEndsAt = os.clock() + info.remaining
 		elseif info.kind == "Interrupted" then
 			castEndsAt = 0
 		end

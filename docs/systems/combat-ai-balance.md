@@ -44,7 +44,7 @@ Most single-enemy and stagger sources are practitioner or community material. Th
 5. **Done.** **Tank capacity equals DPS capacity.** The token budget is flat per player: 2 Melee, 1 Ranged, 1 Support.
 6. **Done.** **The Slinger never plants.** After a throw (0.4 s windup, 2.2 s cooldown) the `keepDistance` branch retreats it 10 studs whenever the player is within 18 studs, so a chasing melee player never gets an opening.
 7. **Done.** **Enemy ranged attacks have no recovery.** Enemy melee swings have windups; ranged enemies are never punishable.
-8. **Players have no poise.** A heavy hit does not interrupt a long cast unless it stuns, which makes long-cast spells either unsafe or untouchable depending on the enemy.
+8. **Done.** **Players have no poise.** A heavy hit does not interrupt a long cast unless it stuns, which makes long-cast spells either unsafe or untouchable depending on the enemy.
 
 ## Proposed design
 
@@ -85,9 +85,7 @@ Most single-enemy and stagger sources are practitioner or community material. Th
 
 ### 7. Players and poise
 
-- Casters get an interrupt threshold: a hit under `CastPoise` damage only pushes the cast back slightly (pushback), a heavy hit interrupts. Melee and tank stances grant hyper-armor while guarding.
-- Players have a short invulnerability after being staggered, so a pack cannot chain-stun a player to death.
-- Light, heavy and parry carry `poiseDamage`, so melee has a way to open enemies. Hit stop scales with poise damage dealt, so a break reads differently from a normal hit.
+**Done** (2026-10-31): cast pushback and heavy-hit interrupts, a stun guard instead of invulnerability (decision log, *Player poise*), `poiseDamage` on heavy attacks and hitstop scaled by it ([combat](combat.md), Cast, Statuses, Visuals). Still open: hyper-armor for melee and tank stances while guarding, and a `poiseDamage` value for the parry itself.
 
 ### 8. Tuning and tests
 

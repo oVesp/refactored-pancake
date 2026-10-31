@@ -590,13 +590,14 @@ local function commit(caster: Entity, endsAt: number)
 	end)
 end
 
--- Cancels the cast when the caster drifts more than MoveTolerance before the slidecast window.
-local function watchMovement(caster: Entity, token: number, slideAt: number)
+-- Cancels the cast when the caster drifts more than MoveTolerance before the slidecast window,
+-- which follows the cast's end when pushback moves it.
+local function watchMovement(caster: Entity, token: number)
 	local start = flat(caster.root.Position)
 	local connection: RBXScriptConnection
 	connection = RunService.Heartbeat:Connect(function()
 		local cast = caster.casting
-		if not cast or cast.token ~= token or os.clock() >= slideAt then
+		if not cast or cast.token ~= token or os.clock() >= cast.endsAt - Tuning.Combat.Gcd.SlidecastWindow then
 			connection:Disconnect()
 			return
 		end
@@ -659,6 +660,8 @@ function SkillService.Cast(
 		interruptible = true,
 		token = token,
 		cost = cost,
+		isCast = isCast,
+		pushed = 0,
 	}
 	if skill.telegraph ~= false then
 		broadcast({
@@ -674,12 +677,18 @@ function SkillService.Cast(
 		caster.model:SetAttribute("Casting", skillId)
 	end
 	if isCast and (caster.player or skill.interruptible) then
-		watchMovement(caster, token, now + duration - timing.SlidecastWindow)
+		watchMovement(caster, token)
 	end
 
-	task.delay(duration, function()
+	local function finish()
 		local cast = caster.casting
 		if not cast or cast.token ~= token then
+			return
+		end
+		-- Pushback moved the end: wait out the rest.
+		local remaining = cast.endsAt - os.clock()
+		if remaining > 1e-3 then
+			task.delay(remaining, finish)
 			return
 		end
 		if not caster.alive or StatusService.IsDisabled(caster) then
@@ -696,7 +705,34 @@ function SkillService.Cast(
 		caster.casting = nil
 		caster.model:SetAttribute("Casting", nil)
 		resolve(caster, skill, aim, target)
-	end)
+	end
+	task.delay(duration, finish)
+end
+
+--[=[
+	A hit on a casting player (`poise` damage, Shared/Poise.CastHit): at or above
+	Tuning.Combat.Poise.CastPoise x max HP it interrupts the cast; lighter hits push it back,
+	up to PushbackMax per cast. Melee windups are not affected.
+]=]
+local function castHit(entity: Entity, poise: number)
+	local cast = entity.casting
+	if not entity.player or not cast or not cast.isCast then
+		return
+	end
+	local action, seconds = Poise.CastHit(poise, entity.stats.MaxHp or 1, cast.pushed, Tuning.Combat.Poise)
+	if action == "Interrupt" then
+		SkillService.Interrupt(entity)
+	elseif action == "Pushback" then
+		cast.pushed += seconds
+		cast.endsAt += seconds
+		entity.lockedUntil = math.max(entity.lockedUntil, cast.endsAt)
+		broadcast({
+			kind = "Pushback",
+			caster = entity.model,
+			skillId = cast.skillId,
+			remaining = cast.endsAt - os.clock(),
+		})
+	end
 end
 
 --[=[
@@ -1041,6 +1077,9 @@ function SkillService.Start()
 		if skill and entity.alive then
 			applySelfEffects(entity, skill)
 		end
+	end)
+	CombatService.PoiseDamaged:Connect(function(target: Entity, poise: number)
+		castHit(target, poise)
 	end)
 	StatusService.Interrupted:Connect(function(entity: Entity)
 		stopDraw(entity)

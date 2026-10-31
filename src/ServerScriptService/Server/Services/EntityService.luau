@@ -94,6 +94,7 @@ function EntityService.Register(info: NewEntity): Entity
 		invulnerableUntil = 0,
 		riposteUntil = 0,
 		overwhelm = 1,
+		stunGuardUntil = 0,
 		statuses = {},
 		history = {},
 		threat = {},

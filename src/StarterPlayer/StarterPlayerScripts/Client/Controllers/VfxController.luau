@@ -351,15 +351,24 @@ local function involvesLocal(a: Model?, b: Model?): boolean
 end
 
 -- Melee hit on a body: the recipe's impact (default `HitImpact`) along the blow, white flash and
--- light; hitstop and shake when the local player gives or takes it.
-local function meleeImpact(model: Model, root: BasePart, source: Model?, crit: boolean, recipe: SpellEffects.Recipe?)
+-- light; hitstop and shake when the local player gives or takes it. The hitstop grows with the
+-- skill's poise factor (Tuning.Swarm.Poise.HitstopMaxScale), so heavy blows read heavier.
+local function meleeImpact(
+	model: Model,
+	root: BasePart,
+	source: Model?,
+	crit: boolean,
+	recipe: SpellEffects.Recipe?,
+	poiseFactor: number
+)
 	local toward = towardSource(root, source)
 	local at = root.Position + Vector3.new(0, 0.5, 0) + (if toward then toward * 0.8 else Vector3.zero)
 	Effects.Play(recipe and recipe.hit or "HitImpact", facing(at, toward and -toward))
 	Effects.BodyFlash(model, Color3.new(1, 1, 1), if crit then 0.22 else 0.14)
 	Particles.Flash(at, Color3.fromRGB(220, 230, 255), 14, 0.15)
 	if involvesLocal(model, source) then
-		local hitstop = recipe and recipe.hitstop or 0.055
+		local scale = math.clamp(poiseFactor, 1, Tuning.Swarm.Poise.HitstopMaxScale)
+		local hitstop = (recipe and recipe.hitstop or 0.055) * scale
 		Effects.Hitstop({ model, source }, if crit then hitstop + 0.035 else hitstop)
 		Effects.Play("HitShake", CFrame.new(at))
 	end
@@ -418,7 +427,8 @@ local function onDamage(model: Model, amount: number, kind: string, crit: boolea
 	end
 	local skill = skillId and Skills.ById[skillId]
 	if (kind == "damage" or kind == "shielded") and skill and MELEE_DELIVERIES[skill.delivery] then
-		meleeImpact(model, root, source, crit, SpellEffects[skill.id])
+		local poiseFactor = skill.poiseDamage or Tuning.Swarm.Poise.DamageFactor
+		meleeImpact(model, root, source, crit, SpellEffects[skill.id], poiseFactor)
 	elseif kind == "blocked" then
 		blockImpact(root, source)
 	end

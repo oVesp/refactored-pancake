@@ -69,7 +69,8 @@ export type ProfileDefaults = {
 	plant: number,
 }
 
---[=[ True when a skill can interrupt a player's cast and is telegraphed: an enemy-targeted skill
+--[=[ True when a skill is sure to interrupt a player's cast (a stun; plain hits only push most
+	casts back) and is telegraphed: an enemy-targeted skill
 	with a windup and an effect whose status is of kind Stun. ]=]
 function Swarm.Interrupts(skill: any, statuses: { [string]: any }): boolean
 	if skill.targets ~= "Enemy" or not skill.windup or skill.windup <= 0 then
