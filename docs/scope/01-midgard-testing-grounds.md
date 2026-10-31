@@ -205,6 +205,7 @@ Rules live in `game-design.md` §7.5. Per-pack use here:
 | Pack | Use |
 |---|---|
 | Medieval Village MegaKit (Quaternius, CC0; `assets/third_party`) | Village houses and barns (`tools/blender/house_generator.py`), fences, crates, wagon, stone borders; its materials also clad the generated well, braziers, scarecrows, palisade, gate towers, tents and dais (`tools/blender/village_kit.py`) |
+| Fantasy Props MegaKit (Quaternius, CC0; `assets/third_party`) | Held sword and shield, training dummies, creation stage stands, Harbor dressing (`tools/blender/fantasy_kit.py`) |
 | Generated low-poly library (`tools/blender/world_props.py`) | Wheat, sprouts, hay bales, orchard fruit trees |
 | prototype-textures | Dev Yard |
 | game-icons, game-icons-expansion | Placeholder skill, passive, status and HUD icons |

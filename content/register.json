@@ -759,12 +759,12 @@
 		{
 			"id": "weapon:Sword",
 			"type": "model",
-			"path": "src/ReplicatedStorage/Weapons/Sword.model.json",
-			"origin": "original",
-			"license": "project",
+			"path": "src/ReplicatedStorage/Weapons/Sword.rbxmx",
+			"origin": "Quaternius Fantasy Props MegaKit (CC0; assets/third_party, not in the repo), tools/blender/fantasy_kit.py",
+			"license": "CC0 1.0 (Quaternius)",
 			"owner": "dev",
 			"status": "draft",
-			"notes": "Placeholder held model built from Roblox parts; replace with a final mesh."
+			"notes": "Fantasy Props MegaKit Sword_Steel on an invisible Handle, written by tools/world/build.luau."
 		},
 		{
 			"id": "weapon:Bow",
@@ -799,12 +799,12 @@
 		{
 			"id": "weapon:Shield",
 			"type": "model",
-			"path": "src/ReplicatedStorage/Weapons/Shield.model.json",
-			"origin": "original",
-			"license": "project",
+			"path": "src/ReplicatedStorage/Weapons/Shield.rbxmx",
+			"origin": "Quaternius Fantasy Props MegaKit (CC0; assets/third_party, not in the repo), tools/blender/fantasy_kit.py",
+			"license": "CC0 1.0 (Quaternius)",
 			"owner": "dev",
 			"status": "draft",
-			"notes": "Placeholder held model built from Roblox parts; replace with a final mesh."
+			"notes": "Fantasy Props MegaKit Shield_Wooden on an invisible Handle, written by tools/world/build.luau."
 		},
 		{
 			"id": "content:Population",
@@ -1019,6 +1019,105 @@
 			"status": "draft",
 			"notes": "Uploaded by the owner via the Studio 3D importer 2026-10-26; no texture, the part colour shows.",
 			"assetId": "82895584857979"
+		},
+		{
+			"id": "mesh:FantasySwordSteel",
+			"type": "mesh",
+			"name": "Sword_Steel / MI_Trim_Props",
+			"origin": "Quaternius Fantasy Props MegaKit (CC0; assets/third_party, not in the repo), tools/blender/fantasy_kit.py",
+			"license": "CC0 1.0 (Quaternius)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Held Sword. Part of the library asset in content/world/fantasy.json; textures in Assets.Meshes.",
+			"assetId": "117656601300435"
+		},
+		{
+			"id": "mesh:FantasyShieldStrap",
+			"type": "mesh",
+			"name": "Shield_Wooden / MI_Trim_Props",
+			"origin": "Quaternius Fantasy Props MegaKit (CC0; assets/third_party, not in the repo), tools/blender/fantasy_kit.py",
+			"license": "CC0 1.0 (Quaternius)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Held Shield. Part of the library asset in content/world/fantasy.json; textures in Assets.Meshes.",
+			"assetId": "70455758631757"
+		},
+		{
+			"id": "mesh:FantasyShieldMetal",
+			"type": "mesh",
+			"name": "Shield_Wooden / MI_Trim_Metal",
+			"origin": "Quaternius Fantasy Props MegaKit (CC0; assets/third_party, not in the repo), tools/blender/fantasy_kit.py",
+			"license": "CC0 1.0 (Quaternius)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Held Shield. Part of the library asset in content/world/fantasy.json; textures in Assets.Meshes.",
+			"assetId": "137245069426149"
+		},
+		{
+			"id": "mesh:FantasyShieldWood",
+			"type": "mesh",
+			"name": "Shield_Wooden / MI_Trim_Furniture",
+			"origin": "Quaternius Fantasy Props MegaKit (CC0; assets/third_party, not in the repo), tools/blender/fantasy_kit.py",
+			"license": "CC0 1.0 (Quaternius)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Held Shield. Part of the library asset in content/world/fantasy.json; textures in Assets.Meshes.",
+			"assetId": "135906149047618"
+		},
+		{
+			"id": "mesh:FantasyDummyMetal",
+			"type": "mesh",
+			"name": "Dummy / MI_Trim_Metal",
+			"origin": "Quaternius Fantasy Props MegaKit (CC0; assets/third_party, not in the repo), tools/blender/fantasy_kit.py",
+			"license": "CC0 1.0 (Quaternius)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Training dummies in the Map. Part of the library asset in content/world/fantasy.json; textures in Assets.Meshes.",
+			"assetId": "115009795142633"
+		},
+		{
+			"id": "mesh:FantasyDummyCloth",
+			"type": "mesh",
+			"name": "Dummy / MI_Trim_Cloth",
+			"origin": "Quaternius Fantasy Props MegaKit (CC0; assets/third_party, not in the repo), tools/blender/fantasy_kit.py",
+			"license": "CC0 1.0 (Quaternius)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Training dummies in the Map. Part of the library asset in content/world/fantasy.json; textures in Assets.Meshes.",
+			"assetId": "139180699289020"
+		},
+		{
+			"id": "mesh:FantasyDummyWood",
+			"type": "mesh",
+			"name": "Dummy / MI_Trim_Furniture",
+			"origin": "Quaternius Fantasy Props MegaKit (CC0; assets/third_party, not in the repo), tools/blender/fantasy_kit.py",
+			"license": "CC0 1.0 (Quaternius)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Training dummies in the Map. Part of the library asset in content/world/fantasy.json; textures in Assets.Meshes.",
+			"assetId": "114897773470312"
+		},
+		{
+			"id": "mesh:FantasyCandleStandMetal",
+			"type": "mesh",
+			"name": "CandleStick_Stand / MI_Trim_Metal",
+			"origin": "Quaternius Fantasy Props MegaKit (CC0; assets/third_party, not in the repo), tools/blender/fantasy_kit.py",
+			"license": "CC0 1.0 (Quaternius)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Creation stage stands in the Map. Part of the library asset in content/world/fantasy.json; textures in Assets.Meshes.",
+			"assetId": "80895858474903"
+		},
+		{
+			"id": "mesh:FantasyCandleStandWax",
+			"type": "mesh",
+			"name": "CandleStick_Stand / MI_Trim_Props",
+			"origin": "Quaternius Fantasy Props MegaKit (CC0; assets/third_party, not in the repo), tools/blender/fantasy_kit.py",
+			"license": "CC0 1.0 (Quaternius)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Creation stage stands in the Map. Part of the library asset in content/world/fantasy.json; textures in Assets.Meshes.",
+			"assetId": "81407264813936"
 		},
 		{
 			"id": "ui:DamageNumber",
@@ -3965,6 +4064,16 @@
 			"notes": "Studio edit-mode builder: one continent region at a time (terrain, sea, roads, props, site markers), View cameras."
 		},
 		{
+			"id": "worldgen:FantasyKit",
+			"type": "tool",
+			"path": "src/ServerStorage/WorldGen/FantasyKit.luau",
+			"origin": "original",
+			"license": "project",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Studio edit-mode importer of the Fantasy Props MegaKit library into ServerStorage.FantasyKit."
+		},
+		{
 			"id": "model:WorldProps",
 			"type": "model",
 			"path": "content/world/props.json",
@@ -3985,6 +4094,16 @@
 			"status": "draft",
 			"notes": "Village kit: 10 houses and 2 barns from tools/blender/house_generator.py, kit fences, crates, wagon and stone borders, and wells, braziers, scarecrows, palisades, gate tower, tents and dais. Uploaded through Open Cloud by tools/worldgen/props.py and imported into ServerStorage.VillageKit by Sections.ImportVillage.",
 			"assetId": "101579549897253"
+		},
+		{
+			"id": "model:FantasyKit",
+			"type": "model",
+			"path": "content/world/fantasy.json",
+			"origin": "Quaternius Fantasy Props MegaKit (CC0; assets/third_party, not in the repo), tools/blender/fantasy_kit.py",
+			"license": "CC0 1.0 (Quaternius)",
+			"owner": "dev",
+			"status": "draft",
+			"notes": "Manifest of the kit pieces the game places: library asset id, bounds, tints."
 		},
 		{
 			"id": "animation:BasicSwordSlash1",

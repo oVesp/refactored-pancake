@@ -3,7 +3,11 @@
 local RunService = game:GetService("RunService")
 local ServerStorage = game:GetService("ServerStorage")
 
+local Continent = require(script.Parent.Continent)
+local villageManifest = require(script.Parent.VillageManifest) :: any
+
 local VILLAGE_KIT = "VillageKit" -- ServerStorage folder of village-kit templates (tools/blender/village_kit.py)
+local FANTASY_KIT = "FantasyKit" -- ServerStorage folder of fantasy-kit templates (WorldGen/FantasyKit.luau)
 local ROOT_NAME = "Harbor"
 local GROUND_TOP = 200
 
@@ -69,10 +73,57 @@ local function kit(parent: Instance, asset: string, x: number, z: number, yaw: n
 		return nil
 	end
 	local model = template:Clone()
+	model:SetAttribute("KitAsset", asset)
 	model:PivotTo(CFrame.new(x, groundAt(x, z), z) * CFrame.Angles(0, yaw, 0))
 	local box, size = model:GetBoundingBox()
 	local bottom = box.Position.Y - size.Y / 2
 	model:PivotTo(model:GetPivot() + Vector3.new(0, groundAt(x, z) - bottom, 0))
+	model.Parent = parent
+	return model
+end
+
+local function fantasyTemplate(asset: string): Model?
+	local library = ServerStorage:FindFirstChild(FANTASY_KIT)
+	local template = library and library:FindFirstChild(asset)
+	if not template or not template:IsA("Model") then
+		warn(`Harbor: fantasy kit has no {asset}`)
+		return nil
+	end
+	return template:Clone()
+end
+
+-- A fantasy-kit prop standing on the ground at (x, z).
+local function prop(parent: Instance, asset: string, x: number, z: number, yaw: number): Model?
+	local model = fantasyTemplate(asset)
+	if not model then
+		return nil
+	end
+	model:PivotTo(CFrame.new(x, 0, z) * CFrame.Angles(0, yaw, 0))
+	local box, size = model:GetBoundingBox()
+	local bottom = box.Position.Y - size.Y / 2
+	model:PivotTo(model:GetPivot() + Vector3.new(0, groundAt(x, z) - bottom, 0))
+	model.Parent = parent
+	return model
+end
+
+-- A fantasy-kit fitting on a building's front wall: `x` along the wall from its centre, `y` above the
+-- ground. Fittings stick out along the building's front (-Z) at 0 `turn`.
+local function fitting(parent: Instance, asset: string, building: Model?, x: number, y: number, turn: number): Model?
+	local model = fantasyTemplate(asset)
+	if not model or not building then
+		return nil
+	end
+	local depth = villageManifest.assets[building:GetAttribute("KitAsset") :: string].footprint[2]
+	local box, size = building:GetBoundingBox()
+	local bottom = box.Position.Y - size.Y / 2
+	local wall = -depth / 2 * Continent.kitScale
+	local pivot = building:GetPivot()
+	model:PivotTo(
+		CFrame.new(pivot.Position.X, bottom, pivot.Position.Z)
+			* pivot.Rotation
+			* CFrame.new(x, y, wall)
+			* CFrame.Angles(0, turn, 0)
+	)
 	model.Parent = parent
 	return model
 end
@@ -109,6 +160,61 @@ local function buildings(root: Folder)
 	end
 	-- Plaza fittings.
 	kit(group, "Well", 14, 62, 0)
+	-- Inn and hall frontage: the pub sign and lanterns at the inn door, banners and lanterns at the hall's.
+	local fittings = folder(group, "Fittings")
+	local function lantern(building: Model?, x: number)
+		local model = fitting(fittings, "Lantern_Wall", building, x, 7, 0)
+		local glass = model and model:FindFirstChildWhichIsA("BasePart")
+		if glass then
+			-- The kit tints this iron darker with its shader.
+			local surface = glass:FindFirstChildOfClass("SurfaceAppearance")
+			if surface then
+				surface.Color = Color3.fromRGB(95, 90, 88)
+			end
+			local light = Instance.new("PointLight")
+			light.Color = Color3.fromRGB(255, 190, 120)
+			light.Range = 18
+			light.Brightness = 0.8
+			light.Parent = glass
+		end
+	end
+	-- Inn door at wall x -3.2, hall door at wall x 9.6 (content/world/village.json).
+	fitting(fittings, "Sign_Pub", inn, -11.5, 13.5, -math.pi / 2)
+	lantern(inn, 2)
+	lantern(inn, -8.4)
+	fitting(fittings, "Banner_Vertical_1", hall, 1, 3, 0)
+	fitting(fittings, "Banner_Vertical_1", hall, 18.2, 3, 0)
+	lantern(hall, 4)
+	lantern(hall, 15.2)
+end
+
+-- Market and street furniture around the plaza and the road to the dock.
+local function dressing(root: Folder)
+	local group = folder(root, "Dressing")
+	local spots: { { asset: string, x: number, z: number, turn: number } } = {
+		-- Market stalls along the road, open to it.
+		{ asset = "Stall_Empty", x = -38, z = 34, turn = -90 },
+		{ asset = "Stall_Empty", x = -38, z = 46, turn = -90 },
+		{ asset = "Stall_Cart_Empty", x = 36, z = 48, turn = 90 },
+		-- Benches facing the Pylon.
+		{ asset = "Bench", x = -20, z = 78, turn = 90 },
+		{ asset = "Bench", x = 20, z = 84, turn = -90 },
+		-- A table in the shade of the houses.
+		{ asset = "Table_Large", x = 36, z = 72, turn = 90 },
+		{ asset = "Stool", x = 31, z = 69, turn = 23 },
+		{ asset = "Stool", x = 31, z = 75, turn = 75 },
+		{ asset = "Stool", x = 41, z = 72, turn = 126 },
+		-- Barrels at the inn's side, by the warehouse, a bucket at the well.
+		{ asset = "Barrel", x = 50, z = -10, turn = 29 },
+		{ asset = "Barrel", x = 47, z = -7, turn = 115 },
+		{ asset = "Barrel", x = 51, z = -5, turn = 195 },
+		{ asset = "Barrel", x = 32, z = 136, turn = 57 },
+		{ asset = "Barrel", x = 35, z = 140, turn = 229 },
+		{ asset = "Bucket_Wooden_1", x = 20, z = 58, turn = 46 },
+	}
+	for _, spot in spots do
+		prop(group, spot.asset, spot.x, spot.z, math.rad(spot.turn))
+	end
 end
 
 local function questBoard(root: Folder)
@@ -122,16 +228,22 @@ local function questBoard(root: Folder)
 	local board =
 		part(model, "Board", Vector3.new(0.6, 5.5, 7.4), CFrame.new(x, y + 6, z), WOOD, Enum.Material.WoodPlanks)
 	part(model, "Roof", Vector3.new(2.6, 0.5, 8.6), CFrame.new(x, y + 9.3, z), WOOD_DARK, Enum.Material.Wood)
-	-- Pinned notices: pale slabs on the east face.
+	-- Pinned notices: kit parchment on the east face, stood up from lying flat.
 	for index, dz in { -2.4, 0, 2.4 } do
-		part(
-			model,
-			`Notice{index}`,
-			Vector3.new(0.1, 1.8, 1.6),
-			CFrame.new(x + 0.35, y + 6.2 + (index % 2) * 0.6, z + dz),
-			Color3.fromRGB(226, 214, 180),
-			Enum.Material.Fabric
-		)
+		local notice = fantasyTemplate("Parchment")
+		if notice then
+			notice.Name = `Notice{index}`
+			notice:ScaleTo(notice:GetScale() * 2.2)
+			for _, surface in notice:GetDescendants() do
+				if surface:IsA("SurfaceAppearance") then
+					surface.Color = Color3.fromRGB(222, 208, 170)
+				end
+			end
+			notice:PivotTo(
+				CFrame.new(x + 0.32, y + 6.2 + (index % 2) * 0.6, z + dz) * CFrame.Angles(0, 0, -math.pi / 2)
+			)
+			notice.Parent = model
+		end
 	end
 	board:AddTag("QuestBoard")
 	model.PrimaryPart = board
@@ -268,6 +380,11 @@ local function dock(root: Folder)
 		kit(group, "Crate", spot[1], spot[2], index * 0.7)
 	end
 	kit(group, "Wagon", -16, 334, math.rad(90))
+	for index, spot in { { 18, 310 }, { 15, 307 }, { 19, 306 } } do
+		prop(group, "Barrel", spot[1], spot[2], index * 1.3)
+	end
+	prop(group, "Rope_1", 5, 326, 0)
+	prop(group, "Rope_1", -7, 309, 2)
 end
 
 -- Lifts kit models placed on the deck: they were set on the ground, the deck is higher.
@@ -302,6 +419,7 @@ function Harbor.Build(): number
 	local root = Instance.new("Folder")
 	root.Name = ROOT_NAME
 	buildings(root)
+	dressing(root)
 	questBoard(root)
 	pylon(root)
 	dock(root)

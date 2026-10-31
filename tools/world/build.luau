@@ -1,6 +1,6 @@
 --!strict
 
--- Generates the M0.5 greybox world and NPC templates as Rojo model files.
+-- Generates the M0.5 greybox world, NPC templates and held weapon models as Rojo model files.
 -- Run from the repo root: `lune run tools/world/build`. Output is deterministic; commit it.
 -- Gameplay objects only: zones, spawn, NPCs, dev yard and the creation stage. Village,
 -- farmland, orchard and camp dressing comes from the world generator (docs/systems/world-generation.md).
@@ -12,6 +12,8 @@ local Vector3 = roblox.Vector3
 local CFrame = roblox.CFrame
 local Color3 = roblox.Color3
 local Enum = roblox.Enum
+
+local Assets = require("../../src/ReplicatedStorage/Content/Assets")
 
 -- Ground level of the gameplay areas; the world generator holds the pads at this height.
 local G = 0.2
@@ -58,6 +60,81 @@ end
 
 local function folder(parent: any, name: string): any
 	return make("Folder", { Name = name }, parent)
+end
+
+-- Fantasy Props MegaKit pieces (tools/blender/fantasy_kit.py): per Assets.Meshes key, its size and
+-- centre in studs around the kit origin at the kit scale, as measured on `ServerStorage.FantasyKit`.
+-- Lune cannot read them from the import, like the Goblin's ids.
+local KIT_SCALE = 3.2
+local KIT_PIECES: { [string]: { { key: string, size: any, centre: any } } } = {
+	Sword = {
+		{ key = "FantasySwordSteel", size = Vector3.new(0.853, 3.6229, 0.2093), centre = Vector3.new(0, 1.1456, 0) },
+	},
+	Shield = {
+		{ key = "FantasyShieldStrap", size = Vector3.new(0.1175, 1.0013, 0.1438), centre = Vector3.new(0, 0, -0.073) },
+		{ key = "FantasyShieldMetal", size = Vector3.new(1.9666, 1.9869, 0.511), centre = Vector3.new(0, 0, -0.3179) },
+		{
+			key = "FantasyShieldWood",
+			size = Vector3.new(1.8037, 1.8082, 0.3575),
+			centre = Vector3.new(0.0026, 0.0024, -0.2703),
+		},
+	},
+	Dummy = {
+		{
+			key = "FantasyDummyMetal",
+			size = Vector3.new(1.4339, 0.5988, 1.4339),
+			centre = Vector3.new(0.0007, 0.4967, -0.0009),
+		},
+		{
+			key = "FantasyDummyCloth",
+			size = Vector3.new(2.5872, 3.3658, 1.1413),
+			centre = Vector3.new(0, 4.2686, -0.0028),
+		},
+		{
+			key = "FantasyDummyWood",
+			size = Vector3.new(1.8707, 5.1834, 1.8707),
+			centre = Vector3.new(0, 2.5826, -0.0016),
+		},
+	},
+	Stand = {
+		{
+			key = "FantasyCandleStandMetal",
+			size = Vector3.new(2.3433, 3.8559, 2.3401),
+			centre = Vector3.new(0.0016, 1.9031, 0),
+		},
+		{
+			key = "FantasyCandleStandWax",
+			size = Vector3.new(2.1977, 1.1098, 2.1876),
+			centre = Vector3.new(-0.0018, 3.6203, 0.003),
+		},
+	},
+}
+
+-- Places a kit piece with its origin at `origin`, `scale` times its kit-scale size. Cosmetic:
+-- colliders and hit targets stay plain parts.
+local function kitPiece(parent: any, piece: string, origin: any, scale: number)
+	for _, entry in KIT_PIECES[piece] do
+		local asset = Assets.Meshes[entry.key]
+		assert(asset, `Assets.Meshes.{entry.key} missing`)
+		local mesh = make("MeshPart", {
+			Name = entry.key,
+			MeshId = asset.id,
+			InitialSize = entry.size / KIT_SCALE,
+			Size = entry.size * scale,
+			CFrame = origin * CFrame.new(entry.centre * scale),
+			Anchored = true,
+			CanCollide = false,
+			CanQuery = false,
+			CanTouch = false,
+		}, parent)
+		make("SurfaceAppearance", {
+			Name = "SurfaceAppearance",
+			ColorMap = asset.texture,
+			NormalMap = asset.normal,
+			MetalnessMap = asset.metalness,
+			RoughnessMap = asset.roughness,
+		}, mesh)
+	end
 end
 
 local function model(parent: any, name: string): any
@@ -186,13 +263,33 @@ local DUMMIES = {
 	{ "Dummy Vulnerable Holy", -140, -60, { Level = 1, Vulnerable = "holy" } },
 	{ "Dummy Immune Fire", -125, -60, { Level = 1, Immune = "fire" } },
 }
+-- The kit dummy, 5.96 studs at the kit scale, stands 8 studs. It is the look; the invisible parts
+-- stay the collider, hit target and nameplate anchor.
+local DUMMY_SCALE = 8 / 5.96
+local DUMMY_HITBOX = { Transparency = 1, CastShadow = false }
 for _, entry in DUMMIES do
 	local name, x, z, attributes = entry[1], entry[2], entry[3], entry[4]
 	local m = model(dev, name)
-	part(m, "Post", Vector3.new(0.8, 3, 0.8), at(x, G + 1.5, z), COLORS.darkWood, Enum.Material.Wood)
-	local body =
-		part(m, "Body", Vector3.new(2.2, 3.4, 1.4), at(x, G + 4.7, z), rgb(190, 160, 110), Enum.Material.Fabric)
-	part(m, "Head", Vector3.new(1.6, 1.6, 1.6), at(x, G + 7.2, z), rgb(190, 160, 110), Enum.Material.Fabric)
+	part(m, "Post", Vector3.new(0.8, 3, 0.8), at(x, G + 1.5, z), COLORS.darkWood, Enum.Material.Wood, DUMMY_HITBOX)
+	local body = part(
+		m,
+		"Body",
+		Vector3.new(2.2, 3.4, 1.4),
+		at(x, G + 4.7, z),
+		rgb(190, 160, 110),
+		Enum.Material.Fabric,
+		DUMMY_HITBOX
+	)
+	part(
+		m,
+		"Head",
+		Vector3.new(1.6, 1.6, 1.6),
+		at(x, G + 7.2, z),
+		rgb(190, 160, 110),
+		Enum.Material.Fabric,
+		DUMMY_HITBOX
+	)
+	kitPiece(m, "Dummy", at(x, G, z), DUMMY_SCALE)
 	m.PrimaryPart = body
 	m:AddTag("TrainingDummy")
 	for key, value in attributes do
@@ -213,8 +310,25 @@ for i = 0, 8 do
 end
 do
 	local m = model(dev, "Dummy Moving")
-	local body =
-		part(m, "Body", Vector3.new(2.2, 5, 1.4), at(-220, G + 2.5, 20), rgb(200, 120, 90), Enum.Material.Fabric)
+	local body = part(
+		m,
+		"Body",
+		Vector3.new(2.2, 5, 1.4),
+		at(-220, G + 2.5, 20),
+		rgb(200, 120, 90),
+		Enum.Material.Fabric,
+		DUMMY_HITBOX
+	)
+	part(
+		m,
+		"Head",
+		Vector3.new(1.6, 1.6, 1.6),
+		at(-220, G + 7.2, 20),
+		rgb(200, 120, 90),
+		Enum.Material.Fabric,
+		DUMMY_HITBOX
+	)
+	kitPiece(m, "Dummy", at(-220, G, 20), DUMMY_SCALE)
 	m.PrimaryPart = body
 	m:AddTag("TrainingDummy")
 	m:SetAttribute("Level", 1)
@@ -284,16 +398,19 @@ part(
 	marker
 )
 for i, x in { -9, 9 } do
-	local stand = part(
+	-- A kit candle stand, 6 studs tall; the invisible part at its candle ring carries the flame.
+	local flame = part(
 		stage,
 		`Torch{i}`,
-		Vector3.new(1, 6, 1),
-		at(x, STAGE_Y + 3, STAGE_Z - 6),
+		Vector3.one,
+		at(x, STAGE_Y + 5.6, STAGE_Z - 6),
 		COLORS.darkWood,
-		Enum.Material.Wood
+		Enum.Material.SmoothPlastic,
+		{ Transparency = 1, CanCollide = false, CanQuery = false, CanTouch = false, CastShadow = false }
 	)
-	make("Fire", { Name = "Flame", Size = 3, Heat = 4 }, stand)
-	make("PointLight", { Name = "Glow", Range = 18, Brightness = 0.9, Color = rgb(255, 170, 100) }, stand)
+	make("Fire", { Name = "Flame", Size = 3, Heat = 4 }, flame)
+	make("PointLight", { Name = "Glow", Range = 18, Brightness = 0.9, Color = rgb(255, 170, 100) }, flame)
+	kitPiece(stage, "Stand", at(x, STAGE_Y, STAGE_Z - 6), 6 / 4.2)
 end
 local fill =
 	part(stage, "Fill", Vector3.one, at(0, STAGE_Y + 8, STAGE_Z + 9), Color3.new(1, 1, 1), Enum.Material.Air, marker)
@@ -312,7 +429,6 @@ fs.writeFile("src/Workspace/Map.rbxmx", roblox.serializeModel({ map }, true))
 -- Humanoid. The import's RootPart carries the bone tree at the feet and the skinned parts hang off it
 -- by Motor6D; it becomes "Rig" under a new HumanoidRootPart. Lune cannot read the import's mesh and
 -- SurfaceAppearance ids, so they come from Assets.Meshes.GoblinScout<Part>.
-local Assets = require("../../src/ReplicatedStorage/Content/Assets")
 local scout = roblox.deserializeModel(fs.readFile("tools/world/goblin_scout_import.rbxm"))[1]
 local scoutRig = scout:FindFirstChild("RootPart")
 local scoutOrigin = scoutRig.CFrame.Position
@@ -482,3 +598,24 @@ skeleton.PrimaryPart = skeletonRoot
 
 fs.writeFile("src/ServerStorage/Templates/Skeleton.rbxmx", roblox.serializeModel({ skeleton }, true))
 print("World and templates written.")
+
+-- Held models: an invisible Handle at the grip (LoadoutService welds it to the hand) and the kit mesh
+-- around it, sized and turned like the part models they replaced so the clips and sheath sockets fit.
+local function heldModel(name: string, handleSize: any, scale: number, offset: any)
+	local held = make("Model", { Name = name })
+	local handle = part(held, "Handle", handleSize, CFrame.new(), Color3.new(1, 1, 1), Enum.Material.SmoothPlastic, {
+		Transparency = 1,
+		CanCollide = false,
+		CastShadow = false,
+	})
+	make("Attachment", { Name = "Grip" }, handle)
+	kitPiece(held, name, offset, scale)
+	held.PrimaryPart = handle
+	fs.writeFile(`src/ReplicatedStorage/Weapons/{name}.rbxmx`, roblox.serializeModel({ held }, true))
+end
+
+-- 4.5 studs from pommel to tip; the kit's edge lies along X, the part model's blade along Z. The
+-- offset centres the kit's grip on the Handle.
+heldModel("Sword", Vector3.new(0.25, 1, 0.25), 1.25, CFrame.new(0, 0.14, 0) * CFrame.Angles(0, math.pi / 2, 0))
+-- 3.2 studs across; the kit's face looks along -Z, a held shield's along +Y (LoadoutService sockets).
+heldModel("Shield", Vector3.new(0.2, 0.2, 0.2), 1.6, CFrame.new(0, 0.1, 0) * CFrame.Angles(math.pi / 2, 0, 0))

@@ -100,6 +100,9 @@
 				},
 				"VillageManifest": {
 					"$path": "content/world/village.json"
+				},
+				"FantasyManifest": {
+					"$path": "content/world/fantasy.json"
 				}
 			}
 		}

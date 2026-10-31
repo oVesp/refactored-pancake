@@ -153,11 +153,75 @@ local Textures: { [string]: TextureAsset } = {
 }
 
 --[=[
-	Skinned meshes uploaded through the Studio 3D importer. Read by tools/world/build.luau when it
-	writes NPC templates; scripts never reference these at runtime. GoblinScout* are the parts of the
-	Goblin template (tools/world/goblin_scout_import.rbxm), keyed by import part name.
+	Meshes read by tools/world/build.luau when it writes NPC templates, the Map and held weapons;
+	scripts never reference these at runtime. GoblinScout* are the parts of the Goblin template
+	(tools/world/goblin_scout_import.rbxm), keyed by import part name. Fantasy* are Fantasy Props
+	MegaKit pieces, one per material (tools/blender/fantasy_kit.py), ids from `ServerStorage.FantasyKit`.
 ]=]
 local Meshes: { [string]: MeshAsset } = {
+	FantasySwordSteel = {
+		id = "rbxassetid://117656601300435",
+		texture = "rbxassetid://130942139644018",
+		normal = "rbxassetid://76809191648989",
+		metalness = "rbxassetid://95609058420757",
+		roughness = "rbxassetid://70752306329676",
+	},
+	FantasyShieldStrap = {
+		id = "rbxassetid://70455758631757",
+		texture = "rbxassetid://130942139644018",
+		normal = "rbxassetid://76809191648989",
+		metalness = "rbxassetid://95609058420757",
+		roughness = "rbxassetid://70752306329676",
+	},
+	FantasyShieldMetal = {
+		id = "rbxassetid://137245069426149",
+		texture = "rbxassetid://100297492607570",
+		normal = "rbxassetid://71663481572939",
+		metalness = "rbxassetid://127075542757490",
+		roughness = "rbxassetid://137806055183566",
+	},
+	FantasyShieldWood = {
+		id = "rbxassetid://135906149047618",
+		texture = "rbxassetid://103307790842822",
+		normal = "rbxassetid://135626202939081",
+		metalness = "rbxassetid://114955576131898",
+		roughness = "rbxassetid://86396976566519",
+	},
+	FantasyDummyMetal = {
+		id = "rbxassetid://115009795142633",
+		texture = "rbxassetid://100297492607570",
+		normal = "rbxassetid://71663481572939",
+		metalness = "rbxassetid://127075542757490",
+		roughness = "rbxassetid://137806055183566",
+	},
+	FantasyDummyCloth = {
+		id = "rbxassetid://139180699289020",
+		texture = "rbxassetid://140592733186554",
+		normal = "rbxassetid://88794075347318",
+		metalness = "rbxassetid://91953174956757",
+		roughness = "rbxassetid://116533119105975",
+	},
+	FantasyDummyWood = {
+		id = "rbxassetid://114897773470312",
+		texture = "rbxassetid://103307790842822",
+		normal = "rbxassetid://135626202939081",
+		metalness = "rbxassetid://114955576131898",
+		roughness = "rbxassetid://86396976566519",
+	},
+	FantasyCandleStandMetal = {
+		id = "rbxassetid://80895858474903",
+		texture = "rbxassetid://100297492607570",
+		normal = "rbxassetid://71663481572939",
+		metalness = "rbxassetid://127075542757490",
+		roughness = "rbxassetid://137806055183566",
+	},
+	FantasyCandleStandWax = {
+		id = "rbxassetid://81407264813936",
+		texture = "rbxassetid://130942139644018",
+		normal = "rbxassetid://76809191648989",
+		metalness = "rbxassetid://95609058420757",
+		roughness = "rbxassetid://70752306329676",
+	},
 	GoblinScoutBelt = {
 		id = "rbxassetid://83394005475880",
 		texture = "rbxassetid://72066017057670",

@@ -93,17 +93,32 @@ Roblox compatibility fixes, all in the script:
 
 `python tools/worldgen/props.py upload --creator-user 82401475 --library village` uploads it and writes the asset id, materials and asset metadata to `content/world/village.json`, which Rojo maps to `WorldGen.VillageManifest`. The Studio importer went with the zone graph; the region builder brings it back.
 
+## Fantasy kit (Fantasy Props MegaKit)
+
+`tools/blender/fantasy_kit.py` (headless Blender 5.2) builds the kit pieces the game places into `build/fantasy_kit.glb` with `build/fantasy_kit.json`, from the kit's plain glTF export (Quaternius, CC0, `assets/third_party`, not committed). Add a piece by naming it in `ASSETS`; the kit has 211.
+
+Roblox compatibility fixes, all in the script:
+- The kit's root textures are already OpenGL normals, unlike the village kit.
+- Textures scaled to 1024 px; the second UV set (the kit's wear shader) dropped.
+- Roblox drops vertex colours. `_Vertex` materials merge into their base material. Pieces that depend on the tint stay out: bronze tools, fruit and vegetable crates, full stalls. Banner cloth is white and takes its colour from `SurfaceAppearance.Color` (`ROBLOX_MATERIALS`).
+
+`python tools/worldgen/props.py upload --creator-user 82401475 --library fantasy` uploads it and writes `content/world/fantasy.json`, which Rojo maps to `WorldGen.FantasyManifest`. `require(game.ServerStorage.WorldGen.FantasyKit).Import()` then fills `ServerStorage.FantasyKit` at `kitScale` in Edit mode. After a new upload, the mesh ids and sizes that `tools/world/build.luau` reads must be retaken from there (`Assets.Meshes.Fantasy*`, `KIT_PIECES`).
+
+- **Held**: `Sword_Steel` and `Shield_Wooden` replace the part-built models, on the same invisible `Handle` and `Grip`.
+- **Map** (written by `tools/world/build.luau`): `Dummy` on the training dummies, whose invisible parts stay the collider, hit target and nameplate anchor; `CandleStick_Stand` on the creation stage.
+- **Harbor**: see below. The approved Verdant Greens and its camps keep the village kit.
+
 ## Harbor mock (owner, 2026-10-30)
 
-`WorldGen/Harbor.luau` is a Studio builder, run in Edit mode with `require(game.ServerStorage.WorldGen.Harbor).Build()`. It rebuilds `Workspace.Harbor` from `ServerStorage.VillageKit` models and plain parts, and removes the region builder's placeholder pillar for the Harbor site. It does not touch the approved Verdant Greens build (terrain, props, `Region.fingerprint`); the ground there is the existing village pads and bay.
+`WorldGen/Harbor.luau` is a Studio builder, run in Edit mode with `require(game.ServerStorage.WorldGen.Harbor).Build()`. It rebuilds `Workspace.Harbor` from `ServerStorage.VillageKit` and `ServerStorage.FantasyKit` models and plain parts, and removes the region builder's placeholder pillar for the Harbor site. It does not touch the approved Verdant Greens build (terrain, props, `Region.fingerprint`); the ground there is the existing village pads and bay.
 
 - **Inn** (kit House06) east of the plaza, door facing west; the innkeeper (the Map's vendor, `TrainerType = "Vendor"`) stands at its door and `InnSpawn` (`RespawnPoint`) is beside it.
 - **Guild hall** (kit Barn01) west of the plaza, door facing east; the **quest board** (`QuestBoard` tag) stands in front of it.
 - **Pylon** (`Pylon` tag, with an `Arrival` part) south of the plaza on a stone dais with a glowing core.
 - **Dock**: a 12-stud pier from z 150 to 330 on piles with rails, a 44-stud head with crates and a wagon, and `DockSpawn` (`ArrivalSpawn`) on the head.
-- **Dressing**: houses around the plaza and road, a well, a warehouse.
+- **Dressing**: houses around the plaza and road, a well, a warehouse. From the fantasy kit: market stalls and a cart, benches, a table and stools, barrels, a bucket and rope; a pub sign and lanterns (lit) on the inn, banners and lanterns on the guild hall, parchment notices on the quest board.
 
-The gameplay behind each tag is in [economy](economy.md). Positions are code constants; art can be replaced as long as the tags and the `Arrival` part stay. Not done: Fantasy Props MegaKit dressing (barrels, banners, benches), Poly Haven props, signage, lamps and boats.
+The gameplay behind each tag is in [economy](economy.md). Positions are code constants; art can be replaced as long as the tags and the `Arrival` part stay. Not done: Poly Haven props and boats. The quest board frame, the Pylon and the dock are plain parts; the kit has nothing to replace them.
 
 ## Props: procedural low-poly at low cost
 
