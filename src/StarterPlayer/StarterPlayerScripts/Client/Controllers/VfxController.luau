@@ -14,6 +14,9 @@ local Animations = require(script.Parent.Parent.Animation.Animations)
 local Effects = require(script.Parent.Parent.Vfx.Effects)
 local Particles = require(script.Parent.Parent.Vfx.Particles)
 local SpellEffects = require(script.Parent.Parent.Vfx.SpellEffects)
+local Logger = require(ReplicatedStorage.Shared.Logger)
+
+local log = Logger.new("Vfx")
 
 local TYPE_COLORS: { [string]: Color3 } = {
 	physical = Color3.fromRGB(230, 230, 230),
@@ -46,6 +49,7 @@ local TELEGRAPH_COLOR = Color3.fromRGB(255, 70, 50)
 -- Fade times (seconds) for the local player's skill clips.
 local CLIP_FADE_IN = 0.05
 local CLIP_FADE_OUT = 0.15
+local DEFAULT_HIT_TIME = 0.2 -- swing time for a clip with neither a marker nor a baked `Hit`
 local HIT_GRACE = 0.06 -- seconds past the baked `Hit` time before the swing shows without the marker
 
 --[=[
@@ -457,8 +461,8 @@ local function onUsed(skillId: string, aim: Vector3)
 	end
 	track:Play(CLIP_FADE_IN)
 	if skill and predictsSwing(skill) then
-		-- The clip's own `Hit` marker wins; the time baked into the Animation covers a published
-		-- asset that lacks the marker.
+		-- The clip's own `Hit` marker wins; a clip without it still swings at the time baked into the
+		-- Animation, or at DEFAULT_HIT_TIME when none is baked.
 		local fired = false
 		local function once()
 			if not fired then
@@ -468,13 +472,24 @@ local function onUsed(skillId: string, aim: Vector3)
 		end
 		local hit = track:GetMarkerReachedSignal(AnimRoles.Markers.Hit):Once(once)
 		local animation = Animations.Get(skill.animation or "")
-		local at = animation and animation:GetAttribute("Hit")
-		local fallback = if type(at) == "number" then task.delay(at + HIT_GRACE, once) else nil
+		local baked = animation and animation:GetAttribute("Hit")
+		local at = if type(baked) == "number" then baked else DEFAULT_HIT_TIME
+		local fallback = task.delay(at + HIT_GRACE, function()
+			if not fired then
+				log:Throttled(
+					"no-hit-" .. skillId,
+					30,
+					"warn",
+					"Animation %s has no Hit marker; swing shown at %.2fs",
+					skill.animation or skillId,
+					at
+				)
+				once()
+			end
+		end)
 		track.Stopped:Once(function()
 			hit:Disconnect()
-			if fallback then
-				task.cancel(fallback)
-			end
+			task.cancel(fallback)
 		end)
 	end
 end
