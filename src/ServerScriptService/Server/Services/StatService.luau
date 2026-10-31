@@ -74,6 +74,9 @@ local function statusModifiers(entity: Entity): ({ Formulas.StatBlock }, number)
 	if entity.drawSince then
 		moveMultiplier *= Tuning.Combat.Bow.DrawMoveMultiplier
 	end
+	if entity.casting and entity.casting.locked then
+		moveMultiplier *= Tuning.Combat.Cast.MoveMultiplier
+	end
 	return blocks, moveMultiplier
 end
 

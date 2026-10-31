@@ -190,18 +190,19 @@ end
 
 --[=[
 	Holds template `name` at its `Offset` attribute from `root` (the casting hand) for `duration`
-	seconds, its emitters speeding up to their full rate as the cast ends, then releases it.
-	Returns the copy; destroying it cancels the charge.
+	seconds, its emitters speeding up to their full rate as the cast ends, and for `hold` seconds more
+	at that rate while a full charge waits for its release, then releases it. Returns the copy;
+	destroying it cancels the charge.
 ]=]
-function Effects.Charge(name: string, root: BasePart, duration: number): Instance?
+function Effects.Charge(name: string, root: BasePart, duration: number, hold: number): Instance?
 	local source = template(name)
 	if not source then
 		return nil
 	end
 	local effect = source:Clone()
 	local offset = effect:GetAttribute("Offset")
-	local hold = CFrame.new(if typeof(offset) == "Vector3" then offset else Vector3.zero)
-	effect.CFrame = root.CFrame * hold
+	local place = CFrame.new(if typeof(offset) == "Vector3" then offset else Vector3.zero)
+	effect.CFrame = root.CFrame * place
 	effect.Parent = folder
 	local rates: { [ParticleEmitter]: number } = {}
 	for _, item in effect:GetDescendants() do
@@ -214,15 +215,15 @@ function Effects.Charge(name: string, root: BasePart, duration: number): Instanc
 	local connection: RBXScriptConnection
 	connection = RunService.RenderStepped:Connect(function()
 		local elapsed = os.clock() - started
-		if not effect.Parent or not root.Parent or elapsed >= duration then
+		if not effect.Parent or not root.Parent or elapsed >= duration + hold then
 			connection:Disconnect()
 			if effect.Parent then
 				Particles.Release(effect, CHARGE_LINGER)
 			end
 			return
 		end
-		effect.CFrame = root.CFrame * hold
-		local ramp = CHARGE_START_RATE + (1 - CHARGE_START_RATE) * elapsed / duration
+		effect.CFrame = root.CFrame * place
+		local ramp = CHARGE_START_RATE + (1 - CHARGE_START_RATE) * math.min(elapsed / duration, 1)
 		for emitter, rate in rates do
 			emitter.Rate = rate * ramp
 		end

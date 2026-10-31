@@ -78,10 +78,24 @@ return table.freeze({
 			AnimationLock = 0.6,
 			--[=[ A press this close to an action becoming ready is queued and fires when it is. ]=]
 			QueueWindow = 0.5,
-			--[=[ Moving during the last seconds of a cast no longer cancels it. ]=]
-			SlidecastWindow = 0.5,
-			--[=[ Flat studs a caster may drift before the slidecast window without cancelling. ]=]
-			MoveTolerance = 1.5,
+		}),
+		--[=[
+			Spell casts (docs/systems/combat.md, Cast; Shared/Casting): hold to charge for the skill's
+			`castTime`, release once full to fire. The caster creeps at `MoveMultiplier`, so a tapped key
+			stays inside `MoveTolerance` flat studs of where the caster stood `MoveGrace` seconds in, and
+			about a second of sustained walking crosses it and cancels. A release up to `ReleaseGrace`
+			before full (network jitter) fires at full; earlier fizzles. A full charge held `MaxHold`
+			seconds cancels. Non-utility spells cast for at least `SpellMin`, utility spells at most
+			`UtilityMax`.
+		]=]
+		Cast = table.freeze({
+			MoveMultiplier = 0.2,
+			MoveGrace = 0.25,
+			MoveTolerance = 2.5,
+			ReleaseGrace = 0.12,
+			MaxHold = 10,
+			SpellMin = 1,
+			UtilityMax = 0.5,
 		}),
 		--[=[ Light attack chain: max seconds between hits for the next press to continue it. ]=]
 		Chain = table.freeze({ Window = 0.8 }),

@@ -19,7 +19,7 @@ local Zones = require(ReplicatedStorage.Content.Zones)
 
 local Attributes = Constants.Attributes
 -- Cast fill tint once the slidecast window opens (moving no longer cancels).
-local SLIDECAST_COLOR = Theme.Green
+local CAST_FULL_COLOR = Theme.Green
 local TARGET_ATTRIBUTES = { Attributes.Hp, Attributes.MaxHp, "Level", "DisplayName", "Elite", "Casting" }
 local TOAST_SECONDS = 4
 local MAX_TOASTS = 5
@@ -308,7 +308,7 @@ local function renderHotbar(slots: { [number]: any })
 				DragController.Begin(input, { kind = slot.kind, id = slot.id }, name, index)
 			else
 				CombatController.ActivateSlot(index)
-				-- Tracked on the input so letting go off the slot still shoots a draw.
+				-- Tracked on the input so letting go off the slot still shoots a draw or fires a spell.
 				local released: RBXScriptConnection
 				released = input:GetPropertyChangedSignal("UserInputState"):Connect(function()
 					if input.UserInputState == Enum.UserInputState.End then
@@ -316,7 +316,7 @@ local function renderHotbar(slots: { [number]: any })
 						CombatController.ReleaseSlot(index)
 					elseif input.UserInputState == Enum.UserInputState.Cancel then
 						released:Disconnect()
-						CombatController.CancelDraw()
+						CombatController.CancelHold()
 					end
 				end)
 			end
@@ -348,14 +348,13 @@ local function updateCooldowns()
 
 	local castBar = bound.Bind_CastBar
 	local now = os.clock()
-	if now < castEndsAt then
+	if now < castEndsAt or CombatController.Casting() then
 		local castFill = bound.Bind_CastFill
 		castFillColor = castFillColor or castFill.BackgroundColor3
 		castBar.Visible = true
-		castFill.Size = UDim2.fromScale((now - castStartedAt) / math.max(castEndsAt - castStartedAt, 1e-3), 1)
-		castFill.BackgroundColor3 = if castEndsAt - now <= Tuning.Combat.Gcd.SlidecastWindow
-			then SLIDECAST_COLOR
-			else castFillColor :: Color3
+		local share = (now - castStartedAt) / math.max(castEndsAt - castStartedAt, 1e-3)
+		castFill.Size = UDim2.fromScale(math.clamp(share, 0, 1), 1)
+		castFill.BackgroundColor3 = if now >= castEndsAt then CAST_FULL_COLOR else castFillColor :: Color3
 	else
 		castBar.Visible = false
 	end

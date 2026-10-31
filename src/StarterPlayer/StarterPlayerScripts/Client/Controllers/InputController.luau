@@ -81,7 +81,7 @@ end
 local function onAttack(_: string, state: Enum.UserInputState): Enum.ContextActionResult
 	if UIController.IsWorldOpen() then
 		-- Clicks belong to the floating menu while one holds the camera.
-		CombatController.CancelDraw()
+		CombatController.CancelHold()
 		return Enum.ContextActionResult.Pass
 	end
 	if state == Enum.UserInputState.Begin then
@@ -94,16 +94,16 @@ local function onAttack(_: string, state: Enum.UserInputState): Enum.ContextActi
 			CombatController.Attack(false)
 		end
 	elseif state == Enum.UserInputState.Cancel then
-		CombatController.CancelDraw()
+		CombatController.CancelHold()
 	end
 	return sink()
 end
 
--- Heavy attack (bow: hold to aim and draw). Mouse 2 rotates the exploration camera, so it only
+-- Heavy attack (bow: hold to aim and draw; staff and wand: hold to charge the spell). Mouse 2 rotates the exploration camera, so it only
 -- belongs to combat mode; the pad trigger and touch button work in both.
 local function onHeavy(_: string, state: Enum.UserInputState, input: InputObject): Enum.ContextActionResult
 	if UIController.IsWorldOpen() then
-		CombatController.CancelDraw()
+		CombatController.CancelHold()
 		return Enum.ContextActionResult.Pass
 	end
 	local drawn = CombatController.Weapon().drawn
@@ -121,6 +121,10 @@ local function onHeavy(_: string, state: Enum.UserInputState, input: InputObject
 		end
 	elseif drawn then
 		CombatController.CancelDraw()
+	elseif state == Enum.UserInputState.End then
+		CombatController.ReleaseHeavy()
+	elseif state == Enum.UserInputState.Cancel then
+		CombatController.CancelCast()
 	end
 	return sink()
 end
@@ -139,7 +143,7 @@ local function onSlot(index: number)
 		elseif state == Enum.UserInputState.End then
 			CombatController.ReleaseSlot(index)
 		elseif state == Enum.UserInputState.Cancel then
-			CombatController.CancelDraw()
+			CombatController.CancelHold()
 		end
 		return sink()
 	end

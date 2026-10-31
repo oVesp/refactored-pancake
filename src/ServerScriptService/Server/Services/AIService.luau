@@ -5,6 +5,7 @@ local PathfindingService = game:GetService("PathfindingService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Casting = require(ReplicatedStorage.Shared.Casting)
 local Formation = require(ReplicatedStorage.Shared.Formation)
 local Logger = require(ReplicatedStorage.Shared.Logger)
 local NetServer = require(ReplicatedStorage.Shared.Net.Server)
@@ -507,7 +508,7 @@ local function disrupt(brain: Brain, target: Entity, distance: number, now: numb
 			continue
 		end
 		local reach = if skill.delivery == "Dash" then skill.range or 20 else skillReach(skill)
-		local remaining = cast.endsAt - now
+		local remaining = Casting.Remaining(now, cast.endsAt, cast.holdUntil)
 		if
 			not Swarm.CanInterruptInTime(
 				remaining,

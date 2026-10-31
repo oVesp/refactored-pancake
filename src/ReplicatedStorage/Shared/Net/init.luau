@@ -73,6 +73,20 @@ local Remotes: { [string]: RemoteSpec } = {
 				and argOk
 		end,
 	},
+	--[=[
+		`(seq, aim?, target?)`: lets go of the held spell the press `seq` started. The server decides
+		from its own clock whether it was full; no `aim` cancels it.
+	]=]
+	ReleaseCast = {
+		direction = "ClientToServer",
+		rateLimit = { capacity = 10, perSecond = 8 },
+		validate = function(...)
+			local seq, aim, target = ...
+			local count = select("#", ...)
+			local targetOk = target == nil or (typeof(target) == "Instance" and target:IsA("Model"))
+			return count >= 1 and count <= 3 and isCount(seq) and (aim == nil or isFiniteVector(aim)) and targetOk
+		end,
+	},
 	--[=[ `(on)`: combat mode on draws the held weapon, off sheathes it (`Drawn` attribute). ]=]
 	SetCombatMode = {
 		direction = "ClientToServer",

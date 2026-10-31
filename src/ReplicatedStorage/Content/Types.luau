@@ -81,8 +81,12 @@ export type SkillDef = {
 	gcd: boolean?,
 	--[=[ Seconds between uses of this skill; a GCD skill may add its own on top of the GCD. ]=]
 	cooldown: number?,
-	--[=[ Seconds of casting; moving before the slidecast window cancels it. ]=]
+	--[=[ Seconds a player holds to charge it (released to fire) or an NPC or auto-fired cast takes. ]=]
 	castTime: number?,
+	--[=[ Spell of convenience, not combat: casts in at most Tuning.Combat.Cast.UtilityMax seconds. ]=]
+	utility: boolean?,
+	--[=[ Spell a weapon grants as its heavy attack: known only while held, drawn to cast, never learned. ]=]
+	weaponSpell: boolean?,
 	interruptible: boolean?,
 	--[=[ Seconds from the press to the hit; the swing commits the player (Tuning.Combat.Commit). ]=]
 	windup: number?,

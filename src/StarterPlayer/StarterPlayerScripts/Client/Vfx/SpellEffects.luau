@@ -18,7 +18,7 @@ export type ResolveInfo = {
 
 export type Recipe = {
 	--[=[ Charge-up on the caster while a cast time runs. Returns the instance to cancel it. ]=]
-	cast: ((root: BasePart, duration: number) -> Instance?)?,
+	cast: ((root: BasePart, duration: number, hold: number) -> Instance?)?,
 	--[=[ Dresses the invisible projectile anchor the controller moves along the flight path. ]=]
 	projectile: ((body: BasePart) -> ())?,
 	--[=[ Projectile hit at a world position. ]=]
@@ -81,8 +81,8 @@ local function onGround(name: string, position: Vector3)
 end
 
 SpellEffects.firebolt = {
-	cast = function(root, duration)
-		return Effects.Charge("FireCharge", root, duration)
+	cast = function(root, duration, hold)
+		return Effects.Charge("FireCharge", root, duration, hold)
 	end,
 	projectile = function(body)
 		Effects.Attach("FireboltBody", body)
@@ -115,8 +115,8 @@ SpellEffects.spark = {
 -- Holy bolt: a knot of light rays in flight; on the hit a shaft of light drops onto the target and
 -- bursts over an ink star, with a gold ring on the ground below.
 SpellEffects.smite = {
-	cast = function(root, duration)
-		return Effects.Charge("HolyCharge", root, duration)
+	cast = function(root, duration, hold)
+		return Effects.Charge("HolyCharge", root, duration, hold)
 	end,
 	projectile = function(body)
 		Effects.Attach("SmiteBody", body)
@@ -164,8 +164,8 @@ SpellEffects.rebuke = {
 
 -- Heal: a green rune seal turns under the ally while leaves of light lift off it.
 SpellEffects.mend = {
-	cast = function(root, duration)
-		return Effects.Charge("LifeCharge", root, duration)
+	cast = function(root, duration, hold)
+		return Effects.Charge("LifeCharge", root, duration, hold)
 	end,
 	resolve = function(info)
 		local root = rootOf(info.target) or rootOf(info.caster)
@@ -235,8 +235,8 @@ end
 
 -- Ground eruption: rime spreads over the area and ice splinters stab up at staggered points.
 SpellEffects.ice_patch = {
-	cast = function(root, duration)
-		return Effects.Charge("FrostCharge", root, duration)
+	cast = function(root, duration, hold)
+		return Effects.Charge("FrostCharge", root, duration, hold)
 	end,
 	resolve = function(info)
 		local center = groundTarget(info)
@@ -531,8 +531,8 @@ SpellEffects.poison_snare = {
 -- Hex missile: a wisp gathers at the hand, flies in a tinted haze and bursts into an unwinding swirl.
 local function hexMissile(kind: string): Recipe
 	return {
-		cast = function(root, duration)
-			return Effects.Charge(kind .. "Charge", root, duration)
+		cast = function(root, duration, hold)
+			return Effects.Charge(kind .. "Charge", root, duration, hold)
 		end,
 		projectile = function(body)
 			Effects.Attach(kind .. "Body", body)

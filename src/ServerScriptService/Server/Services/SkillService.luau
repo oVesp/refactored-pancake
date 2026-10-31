@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Archery = require(ReplicatedStorage.Shared.Archery)
+local Casting = require(ReplicatedStorage.Shared.Casting)
 local Chain = require(ReplicatedStorage.Shared.Chain)
 local Classes = require(ReplicatedStorage.Content.Classes)
 local DevSkills = require(ReplicatedStorage.Shared.DevSkills)
@@ -56,8 +57,9 @@ worldParams.FilterType = Enum.RaycastFilterType.Exclude
 --[=[
 	Resolves every skill use, for players (validated `UseSkill`) and NPCs (`Cast`), through one
 	authoritative timeline (game-design.md 5.5): checks, GCD/cooldown/animation lock, windup or
-	cast (cancelled by moving before the slidecast window), cost, then the delivery's hit test.
-	Clients only predict visuals and timers.
+	cast, cost, then the delivery's hit test. A player's spell is held to charge and released to fire
+	(Shared/Casting); the server's clock decides whether it was full. Clients only predict visuals
+	and timers.
 ]=]
 local SkillService = {}
 
@@ -590,38 +592,66 @@ local function commit(caster: Entity, endsAt: number)
 	end)
 end
 
--- Cancels the cast when the caster drifts more than MoveTolerance before the slidecast window,
--- which follows the cast's end when pushback moves it.
+-- Cancels the cast on sustained movement (Casting.Step); a tapped key stays inside the tolerance.
 local function watchMovement(caster: Entity, token: number)
-	local start = flat(caster.root.Position)
+	local startedAt = os.clock()
+	local anchor: Casting.Anchor? = nil
 	local connection: RBXScriptConnection
 	connection = RunService.Heartbeat:Connect(function()
 		local cast = caster.casting
-		if not cast or cast.token ~= token or os.clock() >= cast.endsAt - Tuning.Combat.Gcd.SlidecastWindow then
+		if not cast or cast.token ~= token then
 			connection:Disconnect()
 			return
 		end
-		if (flat(caster.root.Position) - start).Magnitude > Tuning.Combat.Gcd.MoveTolerance then
+		local position = caster.root.Position
+		local drifted
+		anchor, drifted = Casting.Step(anchor, os.clock() - startedAt, position.X, position.Z, Tuning.Combat.Cast)
+		if drifted then
 			connection:Disconnect()
 			SkillService.Interrupt(caster)
 		end
 	end)
 end
 
+-- Ends a cast by resolving it: pays its cost, then runs the skill at the cast's latest aim and target.
+local function fireCast(caster: Entity, skill: SkillDef, cast: Types.Cast)
+	if not caster.alive or StatusService.IsDisabled(caster) then
+		SkillService.Interrupt(caster)
+		return
+	end
+	if cast.cost and not StatService.Spend(caster, cast.cost.resource, cast.cost.amount) then
+		SkillService.Interrupt(caster)
+		if caster.player then
+			NetServer.Fire("Notify", caster.player, "CastNoResource", {})
+		end
+		return
+	end
+	caster.casting = nil
+	caster.model:SetAttribute("Casting", nil)
+	if cast.locked then
+		caster.lockedUntil = os.clock() + Tuning.Combat.Gcd.AnimationLock
+		StatService.Recompute(caster)
+	end
+	resolve(caster, skill, cast.aim, cast.target)
+end
+
 --[=[
 	Starts a skill for any entity after its checks have passed. Sets the skill's own cooldown, the
 	GCD (`gcd` skills) and the animation lock (non-basic player actions), broadcasts the cast or
 	telegraph, waits out the windup/cast and resolves it. A cast is cancelled by stun, knockback,
-	dodging or moving before the slidecast window (players and interruptible NPC casts); `cost`,
-	when given, is paid only if the cast completes. `target` is the chosen enemy (Target, Dash) or
-	ally (Ally); it is re-validated when the skill resolves. NPCs call this directly.
+	dodging or sustained movement (players and interruptible NPC casts); `cost`, when given, is paid
+	only if the cast completes. `target` is the chosen enemy (Target, Dash) or ally (Ally); it is
+	re-validated when the skill resolves. `holdSeq` makes a cast wait at full charge for the
+	`ReleaseCast` naming that press; without it the cast fires when full, as NPC, chat and summon
+	picker casts do, having no button to let go. NPCs call this directly.
 ]=]
 function SkillService.Cast(
 	caster: Entity,
 	skillId: string,
 	aim: Vector3,
 	target: Entity?,
-	cost: { resource: "Mp" | "Stamina", amount: number }?
+	cost: { resource: "Mp" | "Stamina", amount: number }?,
+	holdSeq: number?
 )
 	local skill = skillOf(caster, skillId)
 	if not skill or not caster.alive then
@@ -652,6 +682,8 @@ function SkillService.Cast(
 
 	caster.castToken += 1
 	local token = caster.castToken
+	local locked = isCast and caster.player ~= nil
+	local hold = isCast and holdSeq ~= nil
 	caster.casting = {
 		skillId = skillId,
 		endsAt = now + duration,
@@ -662,7 +694,14 @@ function SkillService.Cast(
 		cost = cost,
 		isCast = isCast,
 		pushed = 0,
+		locked = locked,
+		hold = hold,
+		seq = holdSeq,
+		released = false,
 	}
+	if locked then
+		StatService.Recompute(caster)
+	end
 	if skill.telegraph ~= false then
 		broadcast({
 			id = castId(),
@@ -673,6 +712,7 @@ function SkillService.Cast(
 			aim = aim,
 			target = if target then target.model else nil,
 			duration = duration,
+			hold = hold,
 		})
 		caster.model:SetAttribute("Casting", skillId)
 	end
@@ -691,20 +731,19 @@ function SkillService.Cast(
 			task.delay(remaining, finish)
 			return
 		end
-		if not caster.alive or StatusService.IsDisabled(caster) then
-			SkillService.Interrupt(caster)
+		if cast.hold and not cast.released then
+			-- Full: wait for the release, up to MaxHold (a release that never comes cancels).
+			local maxHold = Tuning.Combat.Cast.MaxHold
+			cast.holdUntil = os.clock() + maxHold
+			task.delay(maxHold, function()
+				local current = caster.casting
+				if current and current.token == token then
+					SkillService.Interrupt(caster)
+				end
+			end)
 			return
 		end
-		if cast.cost and not StatService.Spend(caster, cast.cost.resource, cast.cost.amount) then
-			SkillService.Interrupt(caster)
-			if caster.player then
-				NetServer.Fire("Notify", caster.player, "CastNoResource", {})
-			end
-			return
-		end
-		caster.casting = nil
-		caster.model:SetAttribute("Casting", nil)
-		resolve(caster, skill, aim, target)
+		fireCast(caster, skill, cast)
 	end
 	task.delay(duration, finish)
 end
@@ -712,7 +751,8 @@ end
 --[=[
 	A hit on a casting player (`poise` damage, Shared/Poise.CastHit): at or above
 	Tuning.Combat.Poise.CastPoise x max HP it interrupts the cast; lighter hits push it back,
-	up to PushbackMax per cast. Melee windups are not affected.
+	up to PushbackMax per cast. A full charge has nothing left to push back. Melee windups are not
+	affected.
 ]=]
 local function castHit(entity: Entity, poise: number)
 	local cast = entity.casting
@@ -722,7 +762,7 @@ local function castHit(entity: Entity, poise: number)
 	local action, seconds = Poise.CastHit(poise, entity.stats.MaxHp or 1, cast.pushed, Tuning.Combat.Poise)
 	if action == "Interrupt" then
 		SkillService.Interrupt(entity)
-	elseif action == "Pushback" then
+	elseif action == "Pushback" and os.clock() < cast.endsAt then
 		cast.pushed += seconds
 		cast.endsAt += seconds
 		entity.lockedUntil = math.max(entity.lockedUntil, cast.endsAt)
@@ -749,6 +789,9 @@ function SkillService.Interrupt(caster: Entity): boolean
 	caster.casting = nil
 	caster.lockedUntil = now
 	endCommit(caster)
+	if cast.locked then
+		StatService.Recompute(caster)
+	end
 	if skill and skill.gcd then
 		caster.gcdReadyAt = now
 	end
@@ -795,13 +838,36 @@ local function isSheathed(entity: Entity): boolean
 	return holdsGear and entity.model:GetAttribute("Drawn") ~= true
 end
 
+-- The target a skill will use, from the client's suggestion: it must still be alive, on the right
+-- side and in range. Returns the target (nil where none is needed) and a rejection reason.
+local function settleTarget(caster: Entity, skill: SkillDef, targetModel: Model?): (Entity?, string?)
+	local target = if targetModel then EntityService.Get(targetModel) else nil
+	if needsEnemyTarget(skill) then
+		if not target or not target.alive or not CombatService.MayAttack(caster, target) then
+			return nil, "NoTarget"
+		end
+		if not inRange(caster, target, skill.range or 0) then
+			return nil, "Range"
+		end
+		return target, nil
+	elseif skill.delivery == "Ally" then
+		return if validAlly(caster, target, skill) then target else nil, nil
+	elseif skill.delivery == "Dev" then
+		-- Dev skills inspect any living entity, at any range.
+		return if target and target.alive then target else nil, nil
+	end
+	return nil, nil
+end
+
+-- `autoFire`: no button will be let go (chat casting, the summon picker), so a spell fires when full.
 local function handleUseSkill(
 	player: Player,
 	skillId: string,
 	aim: Vector3,
 	seq: number,
 	targetModel: Model?,
-	arg: string?
+	arg: string?,
+	autoFire: boolean?
 )
 	local caster = EntityService.ForPlayer(player)
 	local profile = DataService.Get(player)
@@ -822,7 +888,7 @@ local function handleUseSkill(
 		reject(player, seq, "Disabled")
 		return
 	end
-	if skill.source == "Basic" and isSheathed(caster) then
+	if (skill.source == "Basic" or skill.weaponSpell) and isSheathed(caster) then
 		reject(player, seq, "Sheathed")
 		return
 	end
@@ -864,28 +930,16 @@ local function handleUseSkill(
 		end
 		drawBonus = scale - 1
 	end
-	-- The client's target is a suggestion: it must still be alive, on the right side and in range.
-	local target = if targetModel then EntityService.Get(targetModel) else nil
-	if needsEnemyTarget(skill) then
-		if not target or not target.alive or not CombatService.MayAttack(caster, target) then
-			reject(player, seq, "NoTarget")
+	-- A held spell picks its target at the release; anything else needs it now.
+	local hold = skill.castTime ~= nil and not autoFire and arg == nil
+	local target: Entity? = nil
+	if not hold then
+		local reason
+		target, reason = settleTarget(caster, skill, targetModel)
+		if reason then
+			reject(player, seq, reason)
 			return
 		end
-		if not inRange(caster, target, skill.range or 0) then
-			reject(player, seq, "Range")
-			return
-		end
-	elseif skill.delivery == "Ally" then
-		if not validAlly(caster, target, skill) then
-			target = nil
-		end
-	elseif skill.delivery == "Dev" then
-		-- Dev skills inspect any living entity, at any range.
-		if target and not target.alive then
-			target = nil
-		end
-	else
-		target = nil
 	end
 	if skill.summon and not SummonService.Choose(player, profile, skill.summon, arg) then
 		reject(player, seq, "Summon")
@@ -928,7 +982,42 @@ local function handleUseSkill(
 	if skill.delivery == "Dev" and arg then
 		devArgs[caster] = arg
 	end
-	SkillService.Cast(caster, skillId, aim, target, cost)
+	SkillService.Cast(caster, skillId, aim, target, cost, if hold then seq else nil)
+end
+
+-- Lets go of a held spell (Shared/Casting.Release): full fires it at this aim and target, a release
+-- just short of full fires when it fills, anything earlier fizzles. Nothing has been paid yet.
+local function handleReleaseCast(player: Player, seq: number, aim: Vector3?, targetModel: Model?)
+	local caster = EntityService.ForPlayer(player)
+	local cast = caster and caster.casting
+	if not caster or not cast or not cast.hold or cast.released or cast.seq ~= seq then
+		return
+	end
+	local action = Casting.Release(os.clock(), cast.endsAt, Tuning.Combat.Cast.ReleaseGrace)
+	local skill = skillOf(caster, cast.skillId)
+	local weapon = Weapons.ById[caster.weapon] or Weapons.ById[Weapons.Default]
+	if
+		not aim
+		or action == "Fizzle"
+		or not skill
+		or (skill.weaponSpell and weapon.heavy ~= cast.skillId)
+		or (aim - caster.root.Position).Magnitude > MAX_AIM_DISTANCE
+	then
+		SkillService.Interrupt(caster)
+		return
+	end
+	local target, reason = settleTarget(caster, skill, targetModel)
+	if reason then
+		reject(player, seq, reason)
+		SkillService.Interrupt(caster)
+		return
+	end
+	cast.aim = aim
+	cast.target = target
+	cast.released = true
+	if action == "Fire" then
+		fireCast(caster, skill, cast)
+	end
 end
 
 local function withLatency(player: Player, fn: () -> ())
@@ -941,12 +1030,12 @@ local function withLatency(player: Player, fn: () -> ())
 end
 
 --[=[
-	Runs a player's skill use through the same checks as `UseSkill` (chat casting uses it).
+	Runs a chat-cast skill use through the same checks as `UseSkill`; a spell fires when full.
 	`arg` is a dev skill's chat argument, or the summon a Summon delivery raises.
 ]=]
 function SkillService.Use(player: Player, skillId: string, aim: Vector3, seq: number, target: Model?, arg: string?)
 	withLatency(player, function()
-		handleUseSkill(player, skillId, aim, seq, target, arg)
+		handleUseSkill(player, skillId, aim, seq, target, arg, true)
 	end)
 end
 
@@ -991,7 +1080,8 @@ local function handleDraw(player: Player, on: boolean)
 	end
 end
 
--- Combat mode draws or sheathes the held weapon; sheathing drops the guard and any bow draw.
+-- Combat mode draws or sheathes the held weapon; sheathing drops the guard, any bow draw and a
+-- weapon's spell in progress.
 local function handleCombatMode(player: Player, on: boolean)
 	local entity = EntityService.ForPlayer(player)
 	if not entity or not entity.alive or (entity.model:GetAttribute("Drawn") == true) == on then
@@ -1001,6 +1091,11 @@ local function handleCombatMode(player: Player, on: boolean)
 	if not on then
 		stopDraw(entity)
 		handleGuard(player, false)
+		local cast = entity.casting
+		local skill = cast and Skills.ById[cast.skillId]
+		if skill and skill.weaponSpell then
+			SkillService.Interrupt(entity)
+		end
 	end
 	entity.lockedUntil = math.max(entity.lockedUntil, os.clock() + Tuning.Combat.DrawLock)
 end
@@ -1011,6 +1106,10 @@ local function handleDodge(player: Player, direction: Vector3, seq: number)
 	local entity = EntityService.ForPlayer(player)
 	local dodge = Tuning.Combat.Dodge
 	local now = os.clock()
+	-- The press alone drops a spell in progress, even if the roll itself is refused.
+	if entity and entity.casting and entity.casting.locked then
+		SkillService.Interrupt(entity)
+	end
 	if not entity or not entity.alive or StatusService.IsImmobile(entity) then
 		reject(player, seq, "Dodge")
 		return
@@ -1048,6 +1147,11 @@ function SkillService.Init(deps: { [string]: any })
 			end)
 		end
 	)
+	NetServer.Connect("ReleaseCast", function(player: Player, seq: number, aim: Vector3?, target: Model?)
+		withLatency(player, function()
+			handleReleaseCast(player, seq, aim, target)
+		end)
+	end)
 	NetServer.Connect("SetGuard", function(player: Player, on: boolean)
 		withLatency(player, function()
 			handleGuard(player, on)

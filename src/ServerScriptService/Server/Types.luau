@@ -26,6 +26,15 @@ export type Cast = {
 	isCast: boolean,
 	--[=[ Seconds of pushback taken so far. ]=]
 	pushed: number,
+	--[=[ A player's spell: creeps at Tuning.Combat.Cast.MoveMultiplier until it ends. ]=]
+	locked: boolean,
+	--[=[ Waits at full charge for `ReleaseCast`; otherwise it fires when full. ]=]
+	hold: boolean,
+	--[=[ The press's sequence number, which a release must name. ]=]
+	seq: number?,
+	released: boolean,
+	--[=[ Set at full charge: the hold cancels at this time. ]=]
+	holdUntil: number?,
 }
 
 export type StatusInstance = {

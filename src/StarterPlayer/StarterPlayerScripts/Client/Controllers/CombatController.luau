@@ -6,6 +6,7 @@ local RunService = game:GetService("RunService")
 local TextChatService = game:GetService("TextChatService")
 
 local Archery = require(ReplicatedStorage.Shared.Archery)
+local Casting = require(ReplicatedStorage.Shared.Casting)
 local Chain = require(ReplicatedStorage.Shared.Chain)
 local ChatCast = require(ReplicatedStorage.Shared.ChatCast)
 local Formulas = require(ReplicatedStorage.Shared.Formulas)
@@ -41,7 +42,8 @@ export type Slot = {
 --[=[
 	Client side of combat: aim, predicted cooldowns, GCD and animation lock, a one-action input
 	queue, `UseSkill` with sequence numbers and rollback on `RejectSkill` or an interrupted cast,
-	the equipped weapon's basic attacks (light chain, heavy, bow draw, shield bash), guard and dodge. Each delivery reads the target from TargetController its own
+	spells held to charge and released to fire, the equipped weapon's basic attacks (light chain,
+	heavy, bow draw, shield bash), guard and dodge. Each delivery reads the target from TargetController its own
 	way (docs/systems/combat.md, Targeting). The server decides every outcome (game-design.md 5.5).
 ]=]
 local CombatController = {}
@@ -54,7 +56,7 @@ CombatController.Rejected = Signal.new() :: Signal.Signal<string, string>
 CombatController.Used = Signal.new() :: Signal.Signal<string, Vector3>
 --[=[ Fires `(skillId, options)` when a summon skill with more than one option is pressed (SummonController). ]=]
 CombatController.SummonPrompted = Signal.new() :: Signal.Signal<string, { string }>
---[=[ Fires when the bow reaches full draw: releasing within `PerfectWindow` is a perfect shot. ]=]
+--[=[ Fires at full bow draw (a release within `PerfectWindow` is a perfect shot) and at a spell's full charge. ]=]
 CombatController.DrawReady = Signal.new() :: Signal.Signal<>
 
 local ProfileController: any
@@ -82,6 +84,10 @@ local drawStartedAt: number? = nil
 -- Skill the current draw will shoot: the bow's light attack or a `weaponAttack` skill.
 local drawSkill: string? = nil
 local drawConnection: RBXScriptConnection? = nil
+-- Spell being charged. `hold` waits for the button; otherwise it fires when full (chat, summon picker).
+-- After a release that fizzles it stays set, blocking new presses, until the server's `Interrupted`.
+local activeCast: { skillId: string, seq: number, fullAt: number, hold: boolean, full: boolean, released: boolean }? =
+	nil
 
 local function character(): (Model?, BasePart?, Humanoid?)
 	local model = player.Character
@@ -291,11 +297,14 @@ local function send(skillId: string, chatText: string?, arg: string?): boolean
 	if model:GetAttribute("Stunned") == true or model:GetAttribute("Casting") ~= nil then
 		return false
 	end
-	local aim, target = aimFor(skill, root)
-	if not aim then
+	local autoFire = chatText ~= nil or arg ~= nil
+	local aimed, target = aimFor(skill, root)
+	if not aimed and (not skill.castTime or autoFire) then
 		CombatController.Rejected:Fire(skillId, "NoTarget")
 		return true
 	end
+	-- A held spell picks its target at the release.
+	local aim: Vector3 = aimed or CombatController.GetAim()
 	local now = os.clock()
 	seq += 1
 	pending[seq] = skillId
@@ -318,24 +327,88 @@ local function send(skillId: string, chatText: string?, arg: string?): boolean
 		if skill.lunge then
 			lunge(skill, root, aim)
 		end
-	elseif skill.source ~= "Basic" or skill.castTime then
-		-- Non-basic actions lock for the animation; a basic with a cast time locks for the cast.
-		local cast = if skill.castTime then hasted(skill.castTime) else 0
-		lockedUntil = now + math.max(cast, Tuning.Combat.Gcd.AnimationLock)
+	elseif skill.castTime then
+		-- A spell locks until it fires or is cancelled (`castFired`, `rollback`).
+		activeCast = {
+			skillId = skillId,
+			seq = seq,
+			fullAt = now + hasted(skill.castTime),
+			hold = not autoFire,
+			full = false,
+			released = false,
+		}
+		lockedUntil = math.huge
+	elseif skill.source ~= "Basic" then
+		-- Non-basic actions lock for the animation.
+		lockedUntil = now + Tuning.Combat.Gcd.AnimationLock
 	end
 	if chatText then
 		NetClient.Fire("CastSpellByName", chatText, aim, seq, target)
 	else
 		NetClient.Fire("UseSkill", skillId, aim, seq, target, arg)
 	end
-	CombatController.Used:Fire(skillId, aim)
+	-- A spell's clip and effects wait for it to fire.
+	if not skill.castTime then
+		CombatController.Used:Fire(skillId, aim)
+	end
 	return true
+end
+
+-- The spell left the caster: only the animation lock remains.
+local function castFired(skillId: string, aim: Vector3)
+	activeCast = nil
+	lockedUntil = os.clock() + Tuning.Combat.Gcd.AnimationLock
+	CombatController.Used:Fire(skillId, aim)
+end
+
+--[=[
+	Lets go of the held spell. Full (or just short of it) it fires at the current aim and target;
+	earlier it fizzles, and the lock stays until the server's `Interrupted` confirms it. The server
+	decides from its own clock.
+]=]
+function CombatController.ReleaseCast()
+	local cast = activeCast
+	if not cast or not cast.hold or cast.released then
+		return
+	end
+	cast.released = true
+	local skill = skillOf(cast.skillId)
+	local _, root = character()
+	local aim: Vector3?, target: Model? = nil, nil
+	local grace = Tuning.Combat.Cast.ReleaseGrace
+	if skill and root and Casting.Release(os.clock(), cast.fullAt, grace) ~= "Fizzle" then
+		aim, target = aimFor(skill, root)
+		if not aim then
+			CombatController.Rejected:Fire(cast.skillId, "NoTarget")
+		end
+	end
+	if aim then
+		NetClient.Fire("ReleaseCast", cast.seq, aim, target)
+		castFired(cast.skillId, aim)
+	else
+		NetClient.Fire("ReleaseCast", cast.seq)
+	end
+end
+
+--[=[ Cancels the held spell whatever its charge, as when a menu takes the button. ]=]
+function CombatController.CancelCast()
+	local cast = activeCast
+	if cast and cast.hold and not cast.released then
+		cast.released = true
+		NetClient.Fire("ReleaseCast", cast.seq)
+	end
+end
+
+--[=[ True while a spell is charging or held at full charge. ]=]
+function CombatController.Casting(): boolean
+	return activeCast ~= nil
 end
 
 --[=[
 	Sends a skill use if the local prediction allows it. A hotbar skill pressed within
 	`QueueWindow` of becoming ready is queued (one at a time, the latest press wins) and sent the
-	moment it is, which buffers presses made during a swing's recovery. The light attack entry continues the chain: it
+	moment it is, which buffers presses made during a swing's recovery. A spell charges while the
+	button is held and fires on release (`ReleaseSlot`, `ReleaseHeavy`). The light attack entry continues the chain: it
 	uses the last hit's `chainNext` within Tuning.Combat.Chain.Window, else starts over. A skill the
 	held weapon draws starts the draw; releasing the slot shoots it (`ReleaseSlot`). A summon skill
 	with more than one option asks SummonController first, which comes back with `arg`.
@@ -401,6 +474,7 @@ local function rollback(skillId: string)
 	end
 	lockedUntil = 0
 	swingId = nil
+	activeCast = nil
 end
 
 --[=[ Toggles a Discipline. ]=]
@@ -421,11 +495,31 @@ function CombatController.ActivateSlot(index: number)
 	end
 end
 
---[=[ Hotbar slot `index` let go: shoots the draw that slot started. ]=]
+-- A button let go on `skillId`: a press still queued has no hold left, a spell it charged is released.
+local function letGo(skillId: string)
+	if queued == skillId and not queuedArg then
+		queued = nil
+	end
+	if activeCast and activeCast.skillId == skillId then
+		CombatController.ReleaseCast()
+	end
+end
+
+--[=[ Hotbar slot `index` let go: shoots the draw or releases the spell that slot started. ]=]
 function CombatController.ReleaseSlot(index: number)
 	local slot = hotbar[index]
 	if slot and slot.id == drawSkill then
 		CombatController.ReleaseDraw()
+	elseif slot then
+		letGo(slot.id)
+	end
+end
+
+--[=[ Heavy attack let go: releases the weapon's spell. ]=]
+function CombatController.ReleaseHeavy()
+	local heavy = CombatController.Weapon().heavy
+	if heavy then
+		letGo(heavy)
 	end
 end
 
@@ -518,9 +612,15 @@ function CombatController.CancelDraw()
 	end
 end
 
+--[=[ Lowers a bow draw and cancels a held spell, as when a menu or the system takes the button. ]=]
+function CombatController.CancelHold()
+	CombatController.CancelDraw()
+	CombatController.CancelCast()
+end
+
 --[=[ Starts or stops guarding; weapons that cannot guard need a shield. ]=]
 function CombatController.SetGuard(on: boolean)
-	if on and not Loadout.CanGuard(CombatController.Weapon(), hasShield()) then
+	if on and (activeCast or not Loadout.CanGuard(CombatController.Weapon(), hasShield())) then
 		return
 	end
 	if on then
@@ -595,6 +695,10 @@ function CombatController.Dodge()
 	end
 	queued = nil
 	CombatController.CancelDraw()
+	-- Dodge drops a spell at once: the server does the same on the press.
+	if activeCast then
+		rollback(activeCast.skillId)
+	end
 	-- Dodge cancels a swing in progress and its recovery.
 	if swingId and os.clock() < swingEndsAt then
 		CombatController.Rejected:Fire(swingId, "Dodge")
@@ -689,11 +793,27 @@ function CombatController.Start()
 		end
 	end)
 	NetClient.Connect("ShowCast", function(info: { [string]: any })
-		if info.kind == "Interrupted" and info.caster == player.Character then
+		if info.caster ~= player.Character then
+			return
+		end
+		if info.kind == "Interrupted" then
 			rollback(info.skillId)
+		elseif info.kind == "Pushback" and activeCast then
+			activeCast.fullAt = os.clock() + info.remaining
 		end
 	end)
 	RunService.Heartbeat:Connect(function()
+		local cast = activeCast
+		if cast and not cast.full and os.clock() >= cast.fullAt then
+			cast.full = true
+			if cast.hold then
+				if not cast.released then
+					CombatController.DrawReady:Fire()
+				end
+			else
+				castFired(cast.skillId, CombatController.GetAim())
+			end
+		end
 		local skillId = queued
 		if not skillId then
 			return
@@ -714,6 +834,8 @@ function CombatController.Start()
 		end
 		drawStartedAt = nil
 		drawSkill = nil
+		activeCast = nil
+		lockedUntil = 0
 	end)
 	GuardAnimations.Start()
 	WeaponAnimations.Start()

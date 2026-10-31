@@ -71,6 +71,8 @@ local projectiles: { [number]: Flight } = {}
 -- The local character's skill clips by skill id, loaded when the character spawns.
 local skillTracks: { [string]: AnimationTrack } = {}
 local charges: { [Instance]: Instance? } = {}
+-- Casters whose charge waits for a release instead of running out.
+local heldCharges: { [Instance]: boolean? } = {}
 local effectsFolder: Folder
 
 local function neon(size: Vector3, cframe: CFrame, color: Color3, transparency: number?): Part
@@ -252,7 +254,8 @@ local function startCharge(info: { [string]: any }, skill: any)
 		if previous then
 			previous:Destroy()
 		end
-		charges[caster] = recipe.cast(root, info.duration)
+		charges[caster] = recipe.cast(root, info.duration, if info.hold then Tuning.Combat.Cast.MaxHold else 0)
+		heldCharges[caster] = if info.hold then true else nil
 	else
 		burst(info.origin + Vector3.new(0, 1, 0), 2, skillColor(skill.id))
 	end
@@ -262,7 +265,15 @@ local function cancelCharge(caster: Instance?)
 	local charge = caster and charges[caster]
 	if charge then
 		charges[caster :: Instance] = nil
+		heldCharges[caster :: Instance] = nil
 		charge:Destroy()
+	end
+end
+
+-- A held charge ends when its spell fires; any other has already run out on its own.
+local function endHeldCharge(caster: Instance?)
+	if caster and heldCharges[caster] then
+		cancelCharge(caster)
 	end
 end
 
@@ -272,6 +283,7 @@ local function predictsSwing(skill: any): boolean
 end
 
 local function onResolve(info: { [string]: any }, skill: any)
+	endHeldCharge(info.caster)
 	if info.caster then
 		charges[info.caster] = nil
 	end
@@ -293,6 +305,7 @@ local function onCast(info: { [string]: any })
 		return
 	end
 	if info.kind == "Projectile" then
+		endHeldCharge(info.caster)
 		launch(info, skill)
 	elseif info.kind == "Telegraph" then
 		telegraph(info)
