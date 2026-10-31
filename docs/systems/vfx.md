@@ -21,7 +21,7 @@ Target look: the owner's reference video (2026-10-25), anime-style hits with 4 t
 - **Ground marks**: marks under mid-air hits (`Scorch`, `FrostSplash`) only play when the ground is within reach of the hit.
 - **ForgeVFX** (`vendor/ForgeVFX/ForgeVFX.rbxm`, synced to `ReplicatedStorage.ForgeVFX`): the emit module from the owner's VFX Forge 2.4.0-rc1 plugin, extracted with `lune run tools/vendor/extract_forge <plugin .rbxm>`. Its license (VFX-DL 1.1, `vendor/ForgeVFX/LICENSE.txt`) allows it only inside the game runtime: never require it from a plugin, the command bar for anything but viewing finished effects, Lune tests or other tools. Re-extract when the plugin updates.
 - **Editing in Studio**: open a template under `ReplicatedStorage.Vfx`, tune it with VFX Forge (its plugin API is `shared.vfx`, reachable from Studio MCP `execute_luau`), then write the changes back into the `.model.json` file; Rojo does not sync Studio edits to disk.
-- **Textures**: originals come from `tools/vfxgen/vfxgen.py` (deterministic, project-owned, so free to upload) into `assets/original/vfx/`; see [../art/vfx-library.md](../art/vfx-library.md).
+- **Textures**: originals come from `tools/vfxgen/vfxgen.py` (deterministic, project-owned, so free to upload) into `assets/original/vfx/`; see [../art/vfx-library.md](../art/vfx-library.md). Local contact sheets of the VFX Studio library, for planning only, are described there too.
 - **Skills without a template** keep the older code recipes built from `Vfx/Particles.luau` helpers.
 
 ## Templates
