@@ -116,7 +116,13 @@ return table.freeze({
 			`Invulnerable` seconds, and travels `Distance` studs on a slowing curve whose peak stays near
 			walking speed (1.5 x Distance / Duration). `Cooldown` is the wait after the roll ends.
 		]=]
-		Dodge = table.freeze({ Duration = 0.8, Invulnerable = 0.4, Cooldown = 0.15, StaminaCost = 20, Distance = 9 }),
+		Dodge = table.freeze({
+			Duration = 0.8,
+			Invulnerable = 0.4,
+			Cooldown = 0.15,
+			StaminaCost = 20,
+			Distance = 11.25,
+		}),
 		--[=[ Max seconds a player's hit check may rewind target positions (lag compensation). ]=]
 		MaxRewind = 0.25,
 		--[=[ Extra studs allowed on range checks for latency. ]=]

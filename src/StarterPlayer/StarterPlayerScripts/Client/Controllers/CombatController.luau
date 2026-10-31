@@ -630,7 +630,20 @@ function CombatController.Dodge()
 	local peak = 1.5 * dodge.Distance / dodge.Duration
 	local startedAt = os.clock()
 	local step: RBXScriptConnection
+	-- The roll turns the character along its direction, after the camera script has run so shift lock
+	-- and auto-rotate cannot turn it back toward the camera.
+	local facing = CFrame.lookAt(Vector3.zero, direction)
+	local rotateName = "DodgeFace"
+	local autoRotate = humanoid.AutoRotate
+	humanoid.AutoRotate = false
+	local function turn()
+		root.CFrame = CFrame.new(root.Position) * facing
+	end
+	turn()
+	RunService:BindToRenderStep(rotateName, Enum.RenderPriority.Camera.Value + 1, turn)
 	local function finish()
+		RunService:UnbindFromRenderStep(rotateName)
+		humanoid.AutoRotate = autoRotate
 		step:Disconnect()
 		velocity:Destroy()
 		attachment:Destroy()
