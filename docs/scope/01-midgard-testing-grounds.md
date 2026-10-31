@@ -113,7 +113,7 @@ Canon names and canon power scale (§3.2 *Canon power scale*): at least one spel
 | Light | 0 | Lifestyle | Self | Utility cost rule |
 | Magic Arrow | 1 | Force | Target (homing), never misses | Basic targeted spell |
 | Destruction Water | 1 | Elemental (water) | Projectile, knockback | Free-aim skillshot, knockback |
-| Sleep | 1 | Control | Target (homing), cast | Disable that breaks on damage |
+| Sleep | 1 | Control | Target (homing) | Disable that breaks on damage |
 | Quick March | 1 | Enhancement | Self | Move-speed buff |
 | Arcane Shield | 1 | Protection | Self | Damage absorb |
 
@@ -124,7 +124,7 @@ Canon names and canon power scale (§3.2 *Canon power scale*): at least one spel
 | Anti-Evil Protection | 1 | Protection | Ally | Damage reduction against evil (holy-vulnerable) attackers |
 | Smite | 1 | Holy | Target (homing) | Holy damage |
 
-Kept in `Content/Skills` off the lists: Kindle, Glow, Purify Water (Tier 0); Spark, Firebolt, Frost Shard, Cleanse, Renew, Shelter, Bless (Tier 2); Flame Fan, Ice Patch (Tier 3). Moved to Tier 2+ (M1 or later): chaining lightning, area heal-and-smite, resurrection. Summons follow the summon system.
+Every spell is held to charge and released to fire ([combat](../systems/combat.md), Cast). Kept in `Content/Skills` off the lists: Kindle, Glow, Purify Water (Tier 0); Spark, Firebolt, Frost Shard, Cleanse, Renew, Shelter, Bless (Tier 2); Flame Fan, Ice Patch (Tier 3). Moved to Tier 2+ (M1 or later): chaining lightning, area heal-and-smite, resurrection. Summons follow the summon system.
 
 ### 4.3 Disciplines (D3)
 

@@ -593,6 +593,7 @@ local function commit(caster: Entity, endsAt: number)
 end
 
 -- Cancels the cast on sustained movement (Casting.Step); a tapped key stays inside the tolerance.
+-- The caster's ping counts as grace: the creep reaches the owner's client a round trip after the press.
 local function watchMovement(caster: Entity, token: number)
 	local startedAt = os.clock()
 	local anchor: Casting.Anchor? = nil
@@ -605,7 +606,8 @@ local function watchMovement(caster: Entity, token: number)
 		end
 		local position = caster.root.Position
 		local drifted
-		anchor, drifted = Casting.Step(anchor, os.clock() - startedAt, position.X, position.Z, Tuning.Combat.Cast)
+		local elapsed = os.clock() - startedAt - rewindFor(caster)
+		anchor, drifted = Casting.Step(anchor, elapsed, position.X, position.Z, Tuning.Combat.Cast)
 		if drifted then
 			connection:Disconnect()
 			SkillService.Interrupt(caster)

@@ -29,6 +29,8 @@ local Weapons = require(ReplicatedStorage.Content.Weapons)
 local AIM_RANGE = 280
 -- Seconds a queued action may wait past its predicted ready time for the server's cast to end.
 local QUEUE_GRACE = 0.5
+-- Seconds a fizzled release waits for the server's `Interrupted` before giving up the lock anyway.
+local FIZZLE_CONFIRM = 1
 -- Studs a melee lunge stops short of the aim point.
 local LUNGE_STOP_SHORT = 3
 
@@ -86,7 +88,7 @@ local drawSkill: string? = nil
 local drawConnection: RBXScriptConnection? = nil
 -- Spell being charged. `hold` waits for the button; otherwise it fires when full (chat, summon picker).
 -- After a release that fizzles it stays set, blocking new presses, until the server's `Interrupted`.
-local activeCast: { skillId: string, seq: number, fullAt: number, hold: boolean, full: boolean, released: boolean }? =
+local activeCast: { skillId: string, seq: number, fullAt: number, hold: boolean, full: boolean, releasedAt: number? }? =
 	nil
 
 local function character(): (Model?, BasePart?, Humanoid?)
@@ -335,7 +337,6 @@ local function send(skillId: string, chatText: string?, arg: string?): boolean
 			fullAt = now + hasted(skill.castTime),
 			hold = not autoFire,
 			full = false,
-			released = false,
 		}
 		lockedUntil = math.huge
 	elseif skill.source ~= "Basic" then
@@ -368,10 +369,10 @@ end
 ]=]
 function CombatController.ReleaseCast()
 	local cast = activeCast
-	if not cast or not cast.hold or cast.released then
+	if not cast or not cast.hold or cast.releasedAt then
 		return
 	end
-	cast.released = true
+	cast.releasedAt = os.clock()
 	local skill = skillOf(cast.skillId)
 	local _, root = character()
 	local aim: Vector3?, target: Model? = nil, nil
@@ -393,8 +394,8 @@ end
 --[=[ Cancels the held spell whatever its charge, as when a menu takes the button. ]=]
 function CombatController.CancelCast()
 	local cast = activeCast
-	if cast and cast.hold and not cast.released then
-		cast.released = true
+	if cast and cast.hold and not cast.releasedAt then
+		cast.releasedAt = os.clock()
 		NetClient.Fire("ReleaseCast", cast.seq)
 	end
 end
@@ -472,6 +473,10 @@ local function rollback(skillId: string)
 	if table.find(lightChain(), skillId) then
 		chainLast = nil
 	end
+	-- A late answer about an older press must not unlock a spell being charged.
+	if activeCast and activeCast.skillId ~= skillId then
+		return
+	end
 	lockedUntil = 0
 	swingId = nil
 	activeCast = nil
@@ -495,9 +500,10 @@ function CombatController.ActivateSlot(index: number)
 	end
 end
 
--- A button let go on `skillId`: a press still queued has no hold left, a spell it charged is released.
+-- A button let go on `skillId`: a queued spell has no hold left, a spell it charged is released.
 local function letGo(skillId: string)
-	if queued == skillId and not queuedArg then
+	local skill = skillOf(skillId)
+	if queued == skillId and not queuedArg and skill and skill.castTime then
 		queued = nil
 	end
 	if activeCast and activeCast.skillId == skillId then
@@ -804,15 +810,25 @@ function CombatController.Start()
 	end)
 	RunService.Heartbeat:Connect(function()
 		local cast = activeCast
-		if cast and not cast.full and os.clock() >= cast.fullAt then
+		local now = os.clock()
+		if cast and not cast.full and now >= cast.fullAt then
 			cast.full = true
-			if cast.hold then
-				if not cast.released then
-					CombatController.DrawReady:Fire()
-				end
-			else
+			if not cast.hold then
 				castFired(cast.skillId, CombatController.GetAim())
+			elseif not cast.releasedAt then
+				CombatController.DrawReady:Fire()
 			end
+		end
+		-- The server cancels on its own; these only keep a lost message from locking the client for good.
+		if
+			cast
+			and cast == activeCast
+			and (
+				(cast.releasedAt and now - cast.releasedAt > FIZZLE_CONFIRM)
+				or now > cast.fullAt + Tuning.Combat.Cast.MaxHold + FIZZLE_CONFIRM
+			)
+		then
+			rollback(cast.skillId)
 		end
 		local skillId = queued
 		if not skillId then

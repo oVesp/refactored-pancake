@@ -10,8 +10,10 @@ local CAST = Tuning.Combat.Cast
 local BASE_SPEED = Tuning.Base.MoveSpeed
 
 -- Walks a cast at `speed` studs per second while `walking(elapsed)`; returns the seconds until it
--- cancels, or nil if it never does within `seconds`.
-local function cancelledAfter(speed: number, seconds: number, walking: (number) -> boolean): number?
+-- cancels, or nil if it never does within `seconds`. For `ping` seconds the caster has not yet got the
+-- creep and walks at `BASE_SPEED`, and the server counts that time as grace.
+local function cancelledAfter(speed: number, seconds: number, walking: (number) -> boolean, ping: number?): number?
+	local latency = ping or 0
 	local dt = 1 / 60
 	local anchor = nil
 	local x = 0
@@ -19,10 +21,10 @@ local function cancelledAfter(speed: number, seconds: number, walking: (number) 
 	while elapsed < seconds do
 		elapsed += dt
 		if walking(elapsed) then
-			x += speed * dt
+			x += (if elapsed < latency then BASE_SPEED else speed) * dt
 		end
 		local cancelled
-		anchor, cancelled = Casting.Step(anchor, elapsed, x, 0, CAST)
+		anchor, cancelled = Casting.Step(anchor, elapsed - latency, x, 0, CAST)
 		if cancelled then
 			return elapsed
 		end
@@ -54,6 +56,17 @@ return {
 			return elapsed < CAST.MoveGrace
 		end)
 		Expect.equal(slide, nil, "running into the press")
+	end,
+	["high ping does not use up the tolerance"] = function()
+		local speed = BASE_SPEED * CAST.MoveMultiplier
+		local stops = cancelledAfter(speed, 5, function(elapsed)
+			return elapsed < 0.7
+		end, Tuning.Combat.MaxRewind)
+		Expect.equal(stops, nil, "walking into the press, then stopping")
+		local keepsWalking = cancelledAfter(speed, 5, function()
+			return true
+		end, Tuning.Combat.MaxRewind)
+		Expect.truthy(keepsWalking, "sustained walking still cancels")
 	end,
 	["sustained walking cancels within about a second, running sooner"] = function()
 		local function always()
