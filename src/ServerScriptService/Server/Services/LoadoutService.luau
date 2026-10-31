@@ -25,6 +25,10 @@ local LoadoutService = {}
 -- Name of the folder in the character that holds the held models.
 local HELD_FOLDER = "Held"
 
+-- Models held when an item's own model does not exist or cannot be held.
+local BASE_WEAPON = "Sword"
+local BASE_SHIELD = "Shield"
+
 -- Where each model hangs while sheathed: body part and offset (the Handle's axes follow the
 -- socket's: Y is the blade or shaft and a shield's face normal; a bow's limbs run along Z).
 local SOCKETS: { [string]: { part: string, cframe: CFrame } } = {
@@ -70,22 +74,34 @@ local function holder(character: Model, modelName: string, hand: string, drawn: 
 	return attachment
 end
 
-local function attach(character: Model, modelName: string, hand: string, drawn: boolean): Model?
+-- A model is holdable with a Handle part carrying a Grip attachment.
+local function holdable(modelName: string): Model?
 	local source = ReplicatedStorage:FindFirstChild("Weapons")
 	local template = source and source:FindFirstChild(modelName)
+	local handle = template and template:FindFirstChild("Handle")
+	local grip = handle and handle:FindFirstChild("Grip")
+	if template and template:IsA("Model") and handle and handle:IsA("BasePart") and grip and grip:IsA("Attachment") then
+		return template
+	end
+	return nil
+end
+
+local function attach(character: Model, wanted: string, base: string, hand: string, drawn: boolean): Model?
+	local modelName = wanted
+	local template = holdable(wanted)
+	if not template then
+		log:Warn("Weapon model %s missing or lacks Handle and Grip; holding %s", wanted, base)
+		modelName = base
+		template = holdable(base)
+	end
 	local handGrip = holder(character, modelName, hand, drawn)
-	if not (template and template:IsA("Model")) or not handGrip then
+	if not template or not handGrip then
 		log:Warn("Cannot hold %s (%s)", modelName, if drawn then hand .. " hand" else "sheathed")
 		return nil
 	end
 	local model = template:Clone()
-	local handle = model:FindFirstChild("Handle")
-	local grip = handle and handle:FindFirstChild("Grip")
-	if not (handle and handle:IsA("BasePart")) or not (grip and grip:IsA("Attachment")) then
-		log:Warn("Weapon model %s needs a Handle part with a Grip attachment", modelName)
-		model:Destroy()
-		return nil
-	end
+	local handle = model:FindFirstChild("Handle") :: BasePart
+	local grip = handle:FindFirstChild("Grip") :: Attachment
 	-- Template parts are positioned around the Handle; weld each one to it where it stands.
 	for _, part in model:GetDescendants() do
 		if part:IsA("BasePart") then
@@ -134,14 +150,14 @@ local function refresh(character: Model)
 
 	local weapon = Weapons.ById[character:GetAttribute("Weapon") :: any]
 	if weapon and weapon.model then
-		local model = attach(character, weapon.model, weapon.hand or "Right", drawn)
+		local model = attach(character, weapon.model, BASE_WEAPON, weapon.hand or "Right", drawn)
 		if model then
 			model.Parent = folder
 		end
 	end
 	local shieldItem = Items.ById[character:GetAttribute("Shield") :: any]
 	if shieldItem and shieldItem.shield then
-		local model = attach(character, shieldItem.shield.model, "Left", drawn)
+		local model = attach(character, shieldItem.shield.model, BASE_SHIELD, "Left", drawn)
 		if model then
 			model.Parent = folder
 		end

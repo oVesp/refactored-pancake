@@ -41,7 +41,7 @@ local function writePools(entity: Entity)
 	model:SetAttribute(Attributes.MaxMp, entity.stats.MaxMp)
 	model:SetAttribute("Stamina", math.floor(entity.stamina))
 	model:SetAttribute("MaxStamina", entity.maxStamina)
-	model:SetAttribute("Shield", entity.shield)
+	model:SetAttribute("Absorb", entity.shield)
 	local humanoid = entity.humanoid
 	if humanoid and humanoid.Health > 0 then
 		humanoid.MaxHealth = math.max(entity.stats.MaxHp, 1)
