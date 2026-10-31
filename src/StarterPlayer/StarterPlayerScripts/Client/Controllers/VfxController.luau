@@ -538,7 +538,7 @@ end
 --[=[ Local swing feedback for the player's own melee, shown before the server confirms. ]=]
 function VfxController.PredictSwing(skillId: string, origin: Vector3, aim: Vector3)
 	local skill = Skills.ById[skillId]
-	if skill and (skill.delivery == "Melee" or skill.delivery == "Cone") and not skill.windup then
+	if skill and (skill.delivery == "Melee" or skill.delivery == "Cone") and predictsSwing(skill) then
 		local recipe = SpellEffects[skillId]
 		if recipe and recipe.swing then
 			recipe.swing(origin, aim, skill.range or 6, skill.angle or 90)
