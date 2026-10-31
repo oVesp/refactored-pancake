@@ -274,4 +274,24 @@ return {
 			Expect.truthy(Statuses[discipline.status], `{id} status`)
 		end
 	end,
+	["enemy attacks state their parry class and keep area telegraphs"] = function()
+		local parries = { Normal = true, Heavy = true, None = true }
+		for id, skill in Skills do
+			if skill.source ~= "Enemy" or not skill.damage then
+				continue
+			end
+			Expect.truthy(skill.parry and parries[skill.parry], `{id}: parry class`)
+			local area = skill.delivery == "SelfArea" or skill.delivery == "Ground"
+			if area then
+				Expect.truthy(skill.telegraph ~= false, `{id}: area attacks keep their ground telegraph`)
+			end
+			if skill.telegraph == false then
+				Expect.truthy(
+					skill.delivery == "Melee" or skill.delivery == "Projectile",
+					`{id}: only basic swings and throws, which play an Attack or Throw cue, drop the telegraph`
+				)
+				Expect.truthy(not skill.castTime, `{id}: casts keep their cast bar`)
+			end
+		end
+	end,
 }

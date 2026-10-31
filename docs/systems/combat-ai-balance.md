@@ -40,7 +40,7 @@ Most single-enemy and stagger sources are practitioner or community material. Th
 1. **Done.** **Threat is damage only and has no rules around it.** No healing threat, no target-switch hysteresis, no decay, no tuning table, no hook for skills. A tank that deals less damage cannot hold aggro, and a healer is invisible to enemies.
 2. **Done.** **Parry has no visible effect on the enemy.** `CombatService` applies a `stun` status for 0.6 s (`PARRY_STAGGER`). `AIService` does not read stun (it only knows its own `Stagger` state), and no hit-reaction cue plays, so the only feedback is the damage `parried` marker and the defender's clip. A parry should visibly knock the attacker back.
 3. **Done.** **Parry ignores poise and level.** The same stun applies to every attacker. Intent: most same-level mobs break, elites and bosses do not.
-4. **Telegraphs carry the readability.** The per-skill `telegraph` flag is the only readability tool for several enemy skills (the light player attacks already use `telegraph = false` with animation and VFX instead).
+4. **Done** for basic swings. **Telegraphs carry the readability.** The per-skill `telegraph` flag is the only readability tool for several enemy skills (the light player attacks already use `telegraph = false` with animation and VFX instead).
 5. **Tank capacity equals DPS capacity.** The token budget is flat per player: 2 Melee, 1 Ranged, 1 Support.
 6. **The Slinger never plants.** After a throw (0.4 s windup, 2.2 s cooldown) the `keepDistance` branch retreats it 10 studs whenever the player is within 18 studs, so a chasing melee player never gets an opening.
 7. **Enemy ranged attacks have no recovery.** Enemy melee swings have windups; ranged enemies are never punishable.
@@ -61,11 +61,10 @@ Most single-enemy and stagger sources are practitioner or community material. Th
 
 ### 3. Telegraphs are a fallback
 
-- Readability comes from authored animation (anticipation pose before the active frames), weapon or body VFX during windup, and sound. A skill with `telegraph = false` shows no ground marker.
-- Per-skill rule: a skill loses its telegraph when its clip has a readable anticipation and a windup VFX. Until then it keeps the telegraph.
-- Area attacks (the Brute slam, Chieftain stomp) keep a ground marker for now because their reach cannot be read from a body pose. Revisit when those clips and VFX ship.
-- Consistency: one colour for parriable windup VFX (white-gold), one for unparriable (red). The player learns the vocabulary once.
-- `Swarm.Interrupts` and the Disruptor still use the telegraphed stun skills; only the display changes.
+**Done for basic swings and throws** (2026-10-31): [AI](ai-and-spawning.md), Animation; every enemy damage skill states its `parry` class (`Content.spec`). Still open:
+- Windup VFX per attack and one colour vocabulary (white-gold parriable, red unparriable).
+- Ground markers on area attacks (Slam, Stomp, Snare, Volley) and Wolf Charge until their clips and windup VFX ship.
+- The goblin bark rode the telegraph, so telegraph-free swings are silent; a bark on the Attack cue would restore it.
 
 ### 4. Roles
 

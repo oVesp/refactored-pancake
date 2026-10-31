@@ -1053,6 +1053,8 @@ local list: { Types.SkillDef } = {
 		range = 6,
 		angle = 90,
 		damage = { type = "physical", base = 4, stat = "PhysAtk", ratio = 0.5 },
+		telegraph = false,
+		parry = "Normal",
 		description = "Goblin melee.",
 	},
 	{
@@ -1067,6 +1069,8 @@ local list: { Types.SkillDef } = {
 		range = 45,
 		speed = 70,
 		damage = { type = "physical", base = 4, stat = "PhysAtk", ratio = 0.5 },
+		telegraph = false,
+		parry = "None",
 		description = "Thrown stone.",
 	},
 	{
@@ -1082,6 +1086,8 @@ local list: { Types.SkillDef } = {
 		speed = 80,
 		damage = { type = "poison", base = 2, stat = "PhysAtk", ratio = 0.3 },
 		effects = { { status = "poison", duration = 6, magnitude = 2, chance = 0.8 } },
+		telegraph = false,
+		parry = "None",
 		description = "Poisoned dart.",
 	},
 	{
@@ -1100,6 +1106,7 @@ local list: { Types.SkillDef } = {
 			{ status = "poison", duration = 6, magnitude = 2 },
 			{ status = "root", duration = 1, magnitude = 0 },
 		},
+		parry = "None",
 		description = "Snare thrown under the target.",
 	},
 	{
@@ -1114,6 +1121,7 @@ local list: { Types.SkillDef } = {
 		radius = 11,
 		damage = { type = "physical", base = 14, stat = "PhysAtk", ratio = 1.2 },
 		effects = { { status = "stun", duration = 0.8 } },
+		parry = "None",
 		description = "Telegraphed ground slam.",
 	},
 	{
@@ -1128,6 +1136,8 @@ local list: { Types.SkillDef } = {
 		range = 10,
 		angle = 150,
 		damage = { type = "physical", base = 10, stat = "PhysAtk", ratio = 0.9 },
+		telegraph = false,
+		parry = "Heavy",
 		description = "Wide chieftain swing.",
 	},
 	{
@@ -1142,6 +1152,7 @@ local list: { Types.SkillDef } = {
 		radius = 14,
 		damage = { type = "physical", base = 16, stat = "PhysAtk", ratio = 1.0 },
 		effects = { { status = "slow", duration = 3, magnitude = 0.5 } },
+		parry = "None",
 		description = "Telegraphed stomp.",
 	},
 
@@ -1158,6 +1169,8 @@ local list: { Types.SkillDef } = {
 		range = 6,
 		angle = 90,
 		damage = { type = "physical", base = 4, stat = "PhysAtk", ratio = 0.5 },
+		telegraph = false,
+		parry = "Normal",
 		description = "Skeleton claw swipe.",
 	},
 
@@ -1174,6 +1187,8 @@ local list: { Types.SkillDef } = {
 		range = 6,
 		angle = 90,
 		damage = { type = "physical", base = 5, stat = "PhysAtk", ratio = 0.5 },
+		telegraph = false,
+		parry = "Normal",
 		description = "Slow rotting swipe.",
 	},
 
@@ -1190,6 +1205,8 @@ local list: { Types.SkillDef } = {
 		range = 7,
 		angle = 90,
 		damage = { type = "physical", base = 8, stat = "PhysAtk", ratio = 0.7 },
+		telegraph = false,
+		parry = "Normal",
 		description = "Trained sword cut.",
 	},
 	{
@@ -1204,6 +1221,8 @@ local list: { Types.SkillDef } = {
 		range = 55,
 		speed = 110,
 		damage = { type = "physical", base = 7, stat = "PhysAtk", ratio = 0.6 },
+		telegraph = false,
+		parry = "None",
 		description = "Crossbow bolt.",
 	},
 
@@ -1220,6 +1239,8 @@ local list: { Types.SkillDef } = {
 		range = 7,
 		angle = 90,
 		damage = { type = "physical", base = 9, stat = "PhysAtk", ratio = 0.7 },
+		telegraph = false,
+		parry = "Normal",
 		description = "Disciplined strike.",
 	},
 	{
@@ -1234,6 +1255,7 @@ local list: { Types.SkillDef } = {
 		range = 50,
 		radius = 8,
 		damage = { type = "physical", base = 12, stat = "PhysAtk", ratio = 0.8 },
+		parry = "None",
 		description = "Arrows rain on a marked area.",
 	},
 	{
@@ -1250,6 +1272,7 @@ local list: { Types.SkillDef } = {
 		speed = 60,
 		damage = { type = "poison", base = 10, stat = "MagAtk", ratio = 1.0 },
 		effects = { { status = "poison", duration = 6, magnitude = 3 } },
+		parry = "None",
 		description = "Interruptible poison bolt.",
 	},
 	{
@@ -1266,6 +1289,7 @@ local list: { Types.SkillDef } = {
 		speed = 60,
 		damage = { type = "negative", base = 4, stat = "MagAtk", ratio = 0.4 },
 		effects = { { status = "hexed", duration = 8 } },
+		parry = "None",
 		description = "Interruptible curse that weakens attacks.",
 	},
 	{
@@ -1294,6 +1318,7 @@ local list: { Types.SkillDef } = {
 		range = 30,
 		damage = { type = "physical", base = 10, stat = "PhysAtk", ratio = 0.8 },
 		effects = { { status = "stun", duration = 0.6 } },
+		parry = "Heavy",
 		description = "Running knockdown.",
 	},
 	{
