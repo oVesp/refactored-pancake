@@ -168,6 +168,18 @@ export type SkillDef = {
 	chatArg: boolean?,
 	--[=[ Summon delivery: family id in `Content/Summons`. ]=]
 	summon: string?,
+	--[=[ Threat this skill generates: `multiplier` on its damage threat, `flat` per enemy hit (Shared/Threat). ]=]
+	threat: { multiplier: number?, flat: number? }?,
+	--[=[ Poise damage per point of damage dealt. Default Tuning.Swarm.Poise.DamageFactor. ]=]
+	poiseDamage: number?,
+	--[=[
+		How a guard's parry window treats this hit (Shared/Poise): Normal parries, Heavy parries only
+		early in the window or against a lower-level attacker, None is only blocked. Default: Normal
+		for Melee, Cone and Dash, else None.
+	]=]
+	parry: ("Normal" | "Heavy" | "None")?,
+	--[=[ Enemy skills: relative chance among the attacks ready at once (Swarm.WeightedOrder); default 1. ]=]
+	weight: number?,
 	description: string,
 }
 
@@ -206,6 +218,8 @@ export type StatusDef = {
 	fillsRhythm: boolean?,
 	--[=[ When it runs out (not when cleared), the bearer gets that skill's self effects for free. ]=]
 	expireSkill: string?,
+	--[=[ Multiplies all threat the bearer generates (a stance, a buff). Default 1. ]=]
+	threatMultiplier: number?,
 }
 
 --[=[ Who a summon skill may raise (docs/systems/ai-and-spawning.md, Summons). ]=]
@@ -251,6 +265,17 @@ export type CombatDef = {
 	leader: boolean?,
 	--[=[ Share of max HP taken quickly that staggers the enemy. Default Tuning.Swarm.Stagger.DefaultPoise. ]=]
 	poise: number?,
+	--[=[
+		Poise pool at the enemy's base stats; it grows with max HP by level (Shared/Poise.Pool).
+		Default Tuning.Swarm.Poise.DefaultShare x base MaxHp.
+	]=]
+	poiseMax: number?,
+	--[=[ Share of the pool one same-level parry takes. Default Tuning.Parry.Poise; 0 never breaks by parry. ]=]
+	parryPoise: number?,
+	--[=[ Seconds the enemy stands planted after each attack. Default Tuning.Swarm.Ranged.Plant with `keepDistance`, else 0. ]=]
+	plant: number?,
+	--[=[ Alternating seconds of pressure (attacks allowed) and pause (repositioning). Absent: always pressure. ]=]
+	tempo: { pressure: number, pause: number }?,
 	--[=[ Adds spawned once the enemy's HP falls below `belowHp` (fraction), with optional self effects. ]=]
 	summons: { Summon }?,
 }

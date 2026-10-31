@@ -316,4 +316,65 @@ return {
 		Expect.equal(total, 10, "only the new hit counts")
 		Expect.truthy(profile("goblin_chieftain").poise > profile("goblin_raider").poise, "boss is sturdier")
 	end,
+	["a holder gets the tank bonus on top of the melee budget"] = function()
+		local bonus = Tuning.Swarm.Budget.TankBonus
+		Expect.equal(Swarm.HolderBonus(false, false, bonus), 0, "a DPS keeps the base budget")
+		Expect.equal(Swarm.HolderBonus(true, false, bonus), bonus, "guarding")
+		Expect.equal(Swarm.HolderBonus(false, true, bonus), bonus, "taunting")
+	end,
+	["overwhelm grows past the budget and is capped"] = function()
+		local settings = Tuning.Swarm.Overwhelm
+		Expect.equal(Swarm.Overwhelm(3, 3, settings.PerEnemy, settings.Max), 1, "within budget")
+		Expect.near(Swarm.Overwhelm(5, 3, settings.PerEnemy, settings.Max), 1 + 2 * settings.PerEnemy, "two extra")
+		Expect.near(Swarm.Overwhelm(40, 3, settings.PerEnemy, settings.Max), 1 + settings.Max, "capped")
+	end,
+	["tempo alternates pressure and pause"] = function()
+		local tempo = { pressure = 3, pause = 1 }
+		Expect.equal(Swarm.TempoPhase(nil, 0, 100), "Pressure", "no tempo is always pressure")
+		Expect.equal(Swarm.TempoPhase(tempo, 0, 1), "Pressure", "inside pressure")
+		Expect.equal(Swarm.TempoPhase(tempo, 0, 3.5), "Pause", "inside pause")
+		Expect.equal(Swarm.TempoPhase(tempo, 0, 4.5), "Pressure", "next cycle")
+		Expect.equal(Swarm.TempoPhase(tempo, 1, 2.5), "Pause", "offset shifts the cycle")
+	end,
+	["weighted order keeps data order without weights"] = function()
+		local calls = 0
+		local order = Swarm.WeightedOrder({}, 3, function()
+			calls += 1
+			return 0.99
+		end)
+		Expect.equal(table.concat(order, ","), "1,2,3", "data order")
+		Expect.equal(calls, 0, "no roll without weights")
+		order = Swarm.WeightedOrder({ 3, nil :: any }, 2, function()
+			return 0.8
+		end)
+		Expect.equal(order[1], 2, "a high roll lands on the light weight")
+		order = Swarm.WeightedOrder({ 3, nil :: any }, 2, function()
+			return 0.5
+		end)
+		Expect.equal(order[1], 1, "a middle roll lands on the heavy weight")
+		Expect.equal(#order, 2, "every skill is still tried")
+	end,
+	["ranged retreats are capped"] = function()
+		local settings = Tuning.Swarm.Ranged
+		Expect.equal(
+			Swarm.RetreatAllowed(true, 10, 0, settings.RetreatCooldown),
+			false,
+			"a ready attack shoots instead"
+		)
+		Expect.truthy(Swarm.RetreatAllowed(false, 10, 0, settings.RetreatCooldown), "nothing ready, cap clear")
+		Expect.equal(
+			Swarm.RetreatAllowed(false, 10, 10 - settings.RetreatCooldown / 2, settings.RetreatCooldown),
+			false,
+			"one retreat per cooldown"
+		)
+		local from = Vector3.new(0, 0, 0)
+		local clamped = Swarm.ClampStep(from, Vector3.new(30, 2, 0), settings.RetreatDistance)
+		Expect.near(clamped.X, settings.RetreatDistance, "step capped")
+		Expect.equal(clamped.Y, 2, "height kept")
+		Expect.equal(
+			Swarm.ClampStep(from, Vector3.new(1, 0, 1), settings.RetreatDistance),
+			Vector3.new(1, 0, 1),
+			"short"
+		)
+	end,
 }

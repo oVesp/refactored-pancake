@@ -135,6 +135,50 @@ return table.freeze({
 			when none is chosen or equipped (docs/systems/classes.md, Fighter).
 		]=]
 		ProficiencyWeapons = table.freeze({ "sword", "bow" }),
+		--[=[
+			Player poise (docs/systems/combat.md, Poise and parry; Shared/Poise). A hit of less than
+			`CastPoise` x max HP poise damage pushes a cast back by `Pushback` seconds, at most
+			`PushbackMax` per cast; a heavier hit interrupts it. After a stun ends the player cannot be
+			stunned again for `StunGuard` seconds.
+		]=]
+		Poise = table.freeze({ CastPoise = 0.15, Pushback = 0.25, PushbackMax = 0.75, StunGuard = 1.5 }),
+	}),
+
+	--[=[
+		Threat (docs/systems/combat.md, Threat; Shared/Threat). Every NPC keeps threat per enemy and
+		fights the top one, within the rules below.
+	]=]
+	Threat = table.freeze({
+		--[=[ Threat per point of healing or shielding, split across the enemies fighting the healed ally. ]=]
+		HealThreat = 0.5,
+		--[=[ Opening threat for whoever engages an NPC first: the first hit, or the nearest in aggro radius. ]=]
+		PullThreat = 10,
+		--[=[ A challenger must exceed the current target's threat by this ratio, by the NPC's slot. ]=]
+		SwitchRatio = table.freeze({ Melee = 1.1, Ranged = 1.3 }),
+		--[=[ Share of threat lost per second on targets beyond the NPC's reach plus ReachSlack studs. ]=]
+		DecayPerSecond = 0.05,
+		ReachSlack = 6,
+	}),
+
+	--[=[
+		Parry (docs/systems/combat.md, Poise and parry; Shared/Poise). A parry takes `combat.parryPoise`
+		(default Poise) of the attacker's pool, scaled by clamp(1 + LevelStep x (defender level -
+		attacker level), MinScale, MaxScale). Heavy attacks parry only in the first HeavyWindowShare
+		of the parry window, unless the defender is the higher level. A break staggers the attacker
+		for BreakSeconds and its next melee hit taken deals RiposteMultiplier damage; a parry that
+		does not break makes it flinch for FlinchSeconds. Hitstops are the client's reaction.
+	]=]
+	Parry = table.freeze({
+		Poise = 1,
+		LevelStep = 0.1,
+		MinScale = 0.25,
+		MaxScale = 2,
+		HeavyWindowShare = 0.5,
+		BreakSeconds = 1.5,
+		RiposteMultiplier = 1.5,
+		FlinchSeconds = 0.2,
+		BreakHitstop = 0.2,
+		FlinchHitstop = 0.1,
 	}),
 
 	--[=[ Soft target, lock and aim assist (docs/systems/combat.md, Targeting). Studs and degrees. ]=]
@@ -278,8 +322,19 @@ return table.freeze({
 		number of players in a fight.
 	]=]
 	Swarm = table.freeze({
-		--[=[ Token budget per player target, by kind. Ally skills use Support, never the attack budget. ]=]
-		Budget = table.freeze({ Melee = 2, Ranged = 1, Support = 1 }),
+		--[=[
+			Token budget per player target, by kind. Ally skills use Support, never the attack budget.
+			A holder (guarding, or taunting a squad member) gets TankBonus extra Melee tokens.
+		]=]
+		Budget = table.freeze({ Melee = 2, Ranged = 1, Support = 1, TankBonus = 1 }),
+		--[=[ Damage taken grows by PerEnemy for each attacker beyond the target's token budget, up to Max. ]=]
+		Overwhelm = table.freeze({ PerEnemy = 0.03, Max = 0.15 }),
+		--[=[
+			Ranged enemies (`keepDistance`): after each attack they stand planted for `combat.plant`
+			seconds (default Plant). Against a melee target they move away only with no attack ready,
+			once per RetreatCooldown seconds and at most RetreatDistance studs.
+		]=]
+		Ranged = table.freeze({ Plant = 0.8, RetreatCooldown = 3, RetreatDistance = 6 }),
 		--[=[ Default `combat.tokenCost`; large enemies set 2. ]=]
 		TokenCost = 1,
 		--[=[ Seconds a token stays taken after the attack's windup or cast ends. ]=]
@@ -334,5 +389,21 @@ return table.freeze({
 			it cannot be staggered again for Cooldown seconds.
 		]=]
 		Stagger = table.freeze({ DefaultPoise = 0.2, Window = 3, Seconds = 0.6, Cooldown = 3 }),
+		--[=[
+			Enemy poise pool (Shared/Poise). `combat.poiseMax` is the pool at the enemy's base stats
+			(default DefaultShare x base max HP) and grows with max HP by level. Hits take poise damage of
+			damage x the skill's `poiseDamage` (default DamageFactor); damage over time takes none. The
+			pool refills after RefillDelay seconds without poise damage. A break cancels the windup, gives
+			back the token and pauses decisions for Seconds; no new break for Cooldown seconds. The
+			client's hitstop scales with the hit's poise factor, up to HitstopMaxScale.
+		]=]
+		Poise = table.freeze({
+			DefaultShare = 0.2,
+			DamageFactor = 1,
+			RefillDelay = 3,
+			Seconds = 0.6,
+			Cooldown = 3,
+			HitstopMaxScale = 2,
+		}),
 	}),
 })

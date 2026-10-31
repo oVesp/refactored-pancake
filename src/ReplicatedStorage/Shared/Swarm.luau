@@ -561,4 +561,92 @@ function Swarm.Held(ledger: Ledger, holder: any): Token?
 	return ledger.tokens[holder]
 end
 
+--[=[
+	Extra Melee tokens for a target that holds the pack: `tankBonus` while it guards or taunts a
+	squad member, else 0.
+]=]
+function Swarm.HolderBonus(guarding: boolean, taunting: boolean, tankBonus: number): number
+	return if guarding or taunting then tankBonus else 0
+end
+
+--[=[
+	Damage-taken multiplier for a target fought by `attackers` enemies while its budget allows
+	`budget` at once: 1 + `perEnemy` for each attacker beyond the budget, the bonus capped at `max`.
+]=]
+function Swarm.Overwhelm(attackers: number, budget: number, perEnemy: number, max: number): number
+	return 1 + math.min(max, perEnemy * math.max(0, attackers - budget))
+end
+
+--[=[
+	Tempo phase at `now`: "Pressure" (attacks allowed) or "Pause" (repositioning), alternating
+	`pressure` and `pause` seconds, shifted by `offset` so a pack does not pause together. Always
+	"Pressure" without a tempo.
+]=]
+function Swarm.TempoPhase(
+	tempo: { pressure: number, pause: number }?,
+	offset: number,
+	now: number
+): "Pressure" | "Pause"
+	if not tempo or tempo.pause <= 0 then
+		return "Pressure"
+	end
+	local cycle = tempo.pressure + tempo.pause
+	return if (now + offset) % cycle < tempo.pressure then "Pressure" else "Pause"
+end
+
+--[=[
+	Order to try an enemy's skills in: data order when none of `weights` is set, else a weighted
+	random order where a missing weight counts as 1. `roll` returns a number in [0, 1).
+	Returns indices into the skill list.
+]=]
+function Swarm.WeightedOrder(weights: { number? }, count: number, roll: () -> number): { number }
+	local order = {}
+	local weighted = false
+	for index = 1, count do
+		table.insert(order, index)
+		if weights[index] ~= nil then
+			weighted = true
+		end
+	end
+	if not weighted then
+		return order
+	end
+	local result = {}
+	while #order > 0 do
+		local total = 0
+		for _, index in order do
+			total += math.max(0, weights[index] or 1)
+		end
+		local pick = #order
+		local point = roll() * total
+		for position, index in order do
+			point -= math.max(0, weights[index] or 1)
+			if point < 0 then
+				pick = position
+				break
+			end
+		end
+		table.insert(result, table.remove(order, pick) :: number)
+	end
+	return result
+end
+
+--[=[
+	True when a ranged enemy may step away from a melee target now: no attack is ready and its
+	last retreat was at least `cooldown` seconds ago.
+]=]
+function Swarm.RetreatAllowed(attackReady: boolean, now: number, lastRetreatAt: number, cooldown: number): boolean
+	return not attackReady and now - lastRetreatAt >= cooldown
+end
+
+--[=[ `to`, pulled back toward `from` so the flat step is at most `maxStep` studs. ]=]
+function Swarm.ClampStep(from: Vector3, to: Vector3, maxStep: number): Vector3
+	local offset = Vector3.new(to.X - from.X, 0, to.Z - from.Z)
+	if offset.Magnitude <= maxStep then
+		return to
+	end
+	local step = offset.Unit * maxStep
+	return Vector3.new(from.X + step.X, to.Y, from.Z + step.Z)
+end
+
 return Swarm
