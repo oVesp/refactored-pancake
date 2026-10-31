@@ -6,6 +6,7 @@ local Loader = require("../Loader")
 
 local Content = "src/ReplicatedStorage/Content/"
 local Classes = Loader.load(Content .. "Classes").ById
+local Tuning = Loader.load(Content .. "Tuning")
 local Skills = Loader.load(Content .. "Skills").ById
 local Statuses = Loader.load(Content .. "Statuses").ById
 local Enemies = Loader.load(Content .. "Enemies").ById
@@ -52,6 +53,36 @@ return {
 				Expect.truthy(spell and spell.source == "Spell", `{id}: spell {spellId}`)
 				Expect.equal(spell.line, class.line, `{spellId} line`)
 				Expect.truthy(spell.tier <= 1, `{spellId} must be Tier 0-1 in M0.5`)
+			end
+		end
+	end,
+	["every spell charges, utility spells faster, and nothing else a player uses does"] = function()
+		local cast = Tuning.Combat.Cast
+		for id, skill in Skills do
+			if skill.source == "Spell" then
+				local castTime = skill.castTime
+				Expect.truthy(castTime, `{id}: spells charge`)
+				Expect.equal(skill.windup, nil, `{id}: spells charge, they do not wind up`)
+				Expect.equal(skill.recovery, nil, `{id}: spells do not swing`)
+				if skill.utility then
+					Expect.truthy(castTime <= cast.UtilityMax, `{id}: utility spells cast faster`)
+					Expect.equal(skill.damage, nil, `{id}: utility spells deal no damage`)
+				else
+					Expect.truthy(castTime >= cast.SpellMin, `{id}: below the spell cast minimum`)
+				end
+			elseif skill.source ~= "Enemy" then
+				Expect.equal(skill.castTime, nil, `{id}: only spells charge`)
+				Expect.equal(skill.utility, nil, `{id}: only spells are utility`)
+			end
+		end
+	end,
+	["weapon spells are spells no class teaches"] = function()
+		for id, skill in Skills do
+			if skill.weaponSpell then
+				Expect.equal(skill.source, "Spell", `{id}: source`)
+				for classId, class in Classes do
+					Expect.equal(table.find(class.spellList, id), nil, `{classId} teaches {id}`)
+				end
 			end
 		end
 	end,
