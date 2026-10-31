@@ -31,7 +31,7 @@ Most single-enemy and stagger sources are practitioner or community material. Th
 
 - Attack tokens, two slot rings, roles, a director that opens windows while the player is locked or casting, and morale (`Tuning.Swarm`).
 - Hard commitment on player melee: windup, recovery, lunge, one buffered press, chain window.
-- Poise as damage in a window, with a cooldown after stagger. This is the damage-gated meter the sources describe.
+- Poise as a damage-gated meter with a cooldown after stagger, as the sources describe (now a pool, §2).
 - Hitstop and shake on the local player's melee hits.
 - Threat exists: `CombatService.landDamage` adds damage to `target.threat[source]`, and brains pick targets by taunt, threat, then proximity.
 
@@ -89,7 +89,7 @@ Most single-enemy and stagger sources are practitioner or community material. Th
 
 ### 8. Tuning and tests
 
-**Done** (2026-10-31): the simulation ([AI](ai-and-spawning.md), Balance simulation), tuning tables and debug logs for parry breaks and aggro switches. Results against the targets: a DPS survives 5 to 7 same-level raiders (target 1 to 3: too easy), a tank 5 (target 5 to 8, but below the DPS, because without a tank kit it only trades damage for blocking). Every raider hit breaks its 0.2-share pool, so DPS hits stagger constantly. Tuning the numbers to the targets is an owner decision. Still open: a counter for time spent at the full token budget, and a Slinger opening measurement once the sim models space.
+**Done** (2026-10-31): the simulation ([AI](ai-and-spawning.md), Balance simulation), tuning tables and debug logs for parry breaks and aggro switches. Results against the targets: a DPS survives 5 to 7 same-level raiders (target 1 to 3: too easy), a tank 5 (target 5 to 8, but below the DPS, because without a tank kit it only trades damage for blocking). A rusty-sword slash (about 23) exceeds a level-3 raider's pool (about 14), so nearly every DPS hit breaks it; against 5 raiders 61% to 79% of parries still break, the rest landing in the 3 s stagger cooldown those hit breaks start. Tuning the numbers to the targets is an owner decision. Still open: a counter for time spent at the full token budget, and a Slinger opening measurement once the sim models space.
 
 ## Decisions (2026-10-31)
 
@@ -99,13 +99,6 @@ Most single-enemy and stagger sources are practitioner or community material. Th
 4. Basic enemy melee and projectile skills whose windup already plays an Attack or Throw clip lose the ground marker first; area attacks keep it.
 5. The riposte bonus applies to the first melee hit only.
 
-## Blast radius if accepted
+## Blast radius
 
-- `CombatService`: threat gains a modifier path and healing threat; `PARRY_STAGGER` goes, replaced by poise damage and a break/flinch reaction; parry tests need updating.
-- `AIService`: target selection uses switch ratio, proximity and decay; new `Parried` and flinch states with `AnimCue`; ranged plant and tempo logic; `keepDistance` branch rewritten.
-- `Tuning.Swarm.Stagger`: reshaped or kept as the stun-lock guard only. New `Tuning.Threat` and `Tuning.Parry`.
-- `Content/Enemies`: `poise` becomes `poiseMax` and `parry` class; `tempo` and `weight` fields (Types.luau).
-- `Content/Skills`: `poiseDamage`, `threat`, `parry`; `telegraph` removed from skills as their clips and VFX are ready; War Cry keeps the taunt and gains a threat field.
-- `SquadService`, `Tuning.Swarm.Budget`: holder bonus.
-- Client: `Parried` and flinch clips and VFX in `EnemyAnimationController` and `VfxController`; new clips and effects for the animation and VFX pipelines.
-- Docs: combat.md (Damage, parry, Cast) and ai-and-spawning.md (Stagger, Group combat, Brains) updated when items are accepted.
+Shipped (2026-10-31) in `CombatService`, `AIService`, `SquadService`, `SkillService`, `StatusService`, `Content/Enemies`, `Content/Npcs`, `Content/Skills`, `Tuning`, `Types`, the client `VfxController`, `HudController` and `EnemyAnimationController`, and docs combat.md and ai-and-spawning.md. `Tuning.Swarm.Stagger` and `PARRY_STAGGER` are gone. What is left is listed under each section above.

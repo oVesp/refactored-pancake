@@ -97,7 +97,16 @@ local function hit(skill: any, attacker: any, defender: any, roll: () -> number,
 	return amount
 end
 
-export type Result = { won: boolean, seconds: number, hpLeft: number, parries: number, breaks: number }
+export type Result = {
+	won: boolean,
+	seconds: number,
+	hpLeft: number,
+	parries: number,
+	--[=[ Parries that broke the raider's pool; the rest flinched (full pool or stagger cooldown). ]=]
+	parryBreaks: number,
+	--[=[ Breaks by hits. ]=]
+	hitBreaks: number,
+}
 
 --[=[ Fights `count` raiders at the persona's level with `seed`. ]=]
 function Balance.Fight(persona: Persona, count: number, seed: number, enemyId: string?): Result
@@ -151,7 +160,7 @@ function Balance.Fight(persona: Persona, count: number, seed: number, enemyId: s
 	local swingHitAt = 0
 	local guarding = false
 	local guardUntil = 0
-	local parries, breaks = 0, 0
+	local parries, parryBreaks, hitBreaks = 0, 0, 0
 
 	local function drain(enemy: any, amount: number, now: number): boolean
 		if now < enemy.staggerReadyAt or amount <= 0 then
@@ -168,7 +177,17 @@ function Balance.Fight(persona: Persona, count: number, seed: number, enemyId: s
 		enemy.staggerReadyAt = now + swarm.Poise.Cooldown
 		enemy.windupEnds = nil
 		Swarm.Drop(ledger, enemy.key)
-		breaks += 1
+	end
+
+	local function result(won: boolean, seconds: number): Result
+		return {
+			won = won,
+			seconds = seconds,
+			hpLeft = math.max(0, player.hp),
+			parries = parries,
+			parryBreaks = parryBreaks,
+			hitBreaks = hitBreaks,
+		}
 	end
 
 	local now = 0
@@ -181,7 +200,7 @@ function Balance.Fight(persona: Persona, count: number, seed: number, enemyId: s
 			end
 		end
 		if #alive == 0 then
-			return { won = true, seconds = now, hpLeft = player.hp, parries = parries, breaks = breaks }
+			return result(true, now)
 		end
 		player.stamina = math.min(Tuning.Base.MaxStamina, player.stamina + Tuning.Base.StaminaRegen * DT)
 
@@ -212,6 +231,7 @@ function Balance.Fight(persona: Persona, count: number, seed: number, enemyId: s
 			local poise = Poise.Damage(amount, skill.poiseDamage, swarm.Poise.DamageFactor)
 			if target.hp > 0 and drain(target, poise, now) then
 				stagger(target, swarm.Poise.Seconds, now)
+				hitBreaks += 1
 			end
 			if target.hp <= 0 then
 				Swarm.Drop(ledger, target.key)
@@ -223,10 +243,17 @@ function Balance.Fight(persona: Persona, count: number, seed: number, enemyId: s
 			chainIndex = if chainIndex >= #chain or persona.guardSeconds then 1 else chainIndex + 1
 		end
 
-		-- Enemies: tokens, tempo, windups, poise.
+		-- Enemies: the director, tokens, tempo, windups, poise (as SquadService.tactic).
+		local bonus = Swarm.Director({
+			casting = false,
+			locked = false,
+			gcdRemaining = 0,
+			hpRatio = player.hp / math.max(stats.MaxHp, 1),
+		}, swarm.Director)
 		local holder = Swarm.HolderBonus(guarding, false, swarm.Budget.TankBonus)
-		local meleeCap = Swarm.Capacity(swarm.Budget.Melee, "Melee", holder)
-		local overwhelm = Swarm.Overwhelm(#alive, meleeCap, swarm.Overwhelm.PerEnemy, swarm.Overwhelm.Max)
+		local meleeCap = Swarm.Capacity(swarm.Budget.Melee, "Melee", bonus + holder)
+		local budget = meleeCap + Swarm.Capacity(swarm.Budget.Ranged, "Ranged", bonus)
+		local overwhelm = Swarm.Overwhelm(#alive, budget, swarm.Overwhelm.PerEnemy, swarm.Overwhelm.Max)
 		Swarm.Sweep(ledger, now, swarm.TokenTimeout, swarm.WaitStale)
 		for _, enemy in alive do
 			if now < enemy.staggerUntil then
@@ -251,6 +278,7 @@ function Balance.Fight(persona: Persona, count: number, seed: number, enemyId: s
 						if drain(enemy, damage, now) then
 							stagger(enemy, Tuning.Parry.BreakSeconds, now)
 							enemy.riposteUntil = now + Tuning.Parry.BreakSeconds
+							parryBreaks += 1
 						else
 							enemy.staggerUntil = now + Tuning.Parry.FlinchSeconds
 						end
@@ -262,7 +290,7 @@ function Balance.Fight(persona: Persona, count: number, seed: number, enemyId: s
 						end
 						player.hp -= amount
 						if player.hp <= 0 then
-							return { won = false, seconds = now, hpLeft = 0, parries = parries, breaks = breaks }
+							return result(false, now)
 						end
 					end
 				end
@@ -279,7 +307,7 @@ function Balance.Fight(persona: Persona, count: number, seed: number, enemyId: s
 			end
 		end
 	end
-	return { won = true, seconds = TIME_LIMIT, hpLeft = player.hp, parries = parries, breaks = breaks }
+	return result(true, TIME_LIMIT)
 end
 
 --[=[ Share of `seeds` fights the persona survives against `count` raiders. ]=]
