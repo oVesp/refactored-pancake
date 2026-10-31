@@ -970,12 +970,12 @@ local function handleDodge(player: Player, direction: Vector3, seq: number)
 		reject(player, seq, "Dodge")
 		return
 	end
-	dodgeReadyAt[player] = now + dodge.Cooldown
+	dodgeReadyAt[player] = now + dodge.Duration + dodge.Cooldown
 	entity.invulnerableUntil = now + dodge.Invulnerable
 	-- Dodge cancels a swing in its windup (Interrupt) or recovery, and a bow draw.
 	stopDraw(entity)
 	SkillService.Interrupt(entity)
-	entity.lockedUntil = now
+	entity.lockedUntil = now + dodge.Duration
 	endCommit(entity)
 end
 

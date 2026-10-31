@@ -26,7 +26,6 @@ local Weapons = require(ReplicatedStorage.Content.Weapons)
 
 -- Studs the screen-centre aim ray reaches; stays inside the server's aim sanity check.
 local AIM_RANGE = 280
-local DODGE_SECONDS = 0.2
 -- Seconds a queued action may wait past its predicted ready time for the server's cast to end.
 local QUEUE_GRACE = 0.5
 -- Studs a melee lunge stops short of the aim point.
@@ -582,6 +581,10 @@ local function playDodge()
 	end
 	dodgeTracks[animator] = track
 	track:Play(0.05)
+	-- The roll lasts Tuning.Combat.Dodge.Duration whatever the clip's own length.
+	if track.Length > 0 then
+		track:AdjustSpeed(track.Length / Tuning.Combat.Dodge.Duration)
+	end
 end
 
 --[=[ Dodges along the move direction (or backward): local impulse, server grants i-frames. ]=]
@@ -597,8 +600,8 @@ function CombatController.Dodge()
 		CombatController.Rejected:Fire(swingId, "Dodge")
 	end
 	swingId = nil
-	lockedUntil = 0
 	local dodge = Tuning.Combat.Dodge
+	lockedUntil = os.clock() + dodge.Duration
 	local direction = humanoid.MoveDirection
 	if direction.Magnitude < 0.1 then
 		direction = -root.CFrame.LookVector
@@ -606,7 +609,7 @@ function CombatController.Dodge()
 	direction = Vector3.new(direction.X, 0, direction.Z).Unit
 	seq += 1
 	pending[seq] = "__dodge"
-	predictedReady["__dodge"] = os.clock() + dodge.Cooldown
+	predictedReady["__dodge"] = os.clock() + dodge.Duration + dodge.Cooldown
 	NetClient.Fire("Dodge", direction, seq)
 	playDodge()
 
@@ -618,13 +621,28 @@ function CombatController.Dodge()
 	velocity.VelocityConstraintMode = Enum.VelocityConstraintMode.Plane
 	velocity.PrimaryTangentAxis = Vector3.xAxis
 	velocity.SecondaryTangentAxis = Vector3.zAxis
-	velocity.PlaneVelocity = Vector2.new(direction.X, direction.Z) * (dodge.Distance / DODGE_SECONDS)
+	velocity.PlaneVelocity = Vector2.zero
 	velocity.MaxForce = 1e6
 	attachment.Parent = root
 	velocity.Parent = root
-	task.delay(DODGE_SECONDS, function()
+	-- Speed 1.5 x Distance / Duration x (1 - u^2) integrates to Distance over the roll: quick off the
+	-- mark, slowing as the character comes out of it.
+	local peak = 1.5 * dodge.Distance / dodge.Duration
+	local startedAt = os.clock()
+	local step: RBXScriptConnection
+	local function finish()
+		step:Disconnect()
 		velocity:Destroy()
 		attachment:Destroy()
+	end
+	step = RunService.Heartbeat:Connect(function()
+		local u = (os.clock() - startedAt) / dodge.Duration
+		if u >= 1 or not velocity.Parent then
+			finish()
+			return
+		end
+		local speed = peak * (1 - u * u)
+		velocity.PlaneVelocity = Vector2.new(direction.X, direction.Z) * speed
 	end)
 end
 

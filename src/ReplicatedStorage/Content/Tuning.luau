@@ -110,7 +110,13 @@ return table.freeze({
 			DrawMoveMultiplier = 0.45,
 			RearArc = 120,
 		}),
-		Dodge = table.freeze({ Invulnerable = 0.3, Cooldown = 1, StaminaCost = 20, Distance = 14 }),
+		--[=[
+			Dodge roll (docs/systems/combat.md, Dodge): a committed roll of `Duration` seconds, as in the
+			Souls games. The player cannot act or steer until it ends, is invulnerable for the first
+			`Invulnerable` seconds, and travels `Distance` studs on a slowing curve whose peak stays near
+			walking speed (1.5 x Distance / Duration). `Cooldown` is the wait after the roll ends.
+		]=]
+		Dodge = table.freeze({ Duration = 0.8, Invulnerable = 0.4, Cooldown = 0.15, StaminaCost = 20, Distance = 9 }),
 		--[=[ Max seconds a player's hit check may rewind target positions (lag compensation). ]=]
 		MaxRewind = 0.25,
 		--[=[ Extra studs allowed on range checks for latency. ]=]
