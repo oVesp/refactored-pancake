@@ -600,7 +600,7 @@ fs.writeFile("src/ServerStorage/Templates/Skeleton.rbxmx", roblox.serializeModel
 print("World and templates written.")
 
 -- Held models: an invisible Handle at the grip (LoadoutService welds it to the hand) and the kit mesh
--- around it, sized and turned like the part models they replaced so the clips and sheath sockets fit.
+-- around it, sized and turned to fit the clips and the sheath sockets in LoadoutService.
 local function heldModel(name: string, handleSize: any, scale: number, offset: any)
 	local held = make("Model", { Name = name })
 	local handle = part(held, "Handle", handleSize, CFrame.new(), Color3.new(1, 1, 1), Enum.Material.SmoothPlastic, {
@@ -614,7 +614,7 @@ local function heldModel(name: string, handleSize: any, scale: number, offset: a
 	fs.writeFile(`src/ReplicatedStorage/Weapons/{name}.rbxmx`, roblox.serializeModel({ held }, true))
 end
 
--- 4.5 studs from pommel to tip; the kit's edge lies along X, the part model's blade along Z. The
+-- 4.5 studs from pommel to tip. The kit's edge lies along X; turned to Z, it leads the swing. The
 -- offset centres the kit's grip on the Handle.
 heldModel("Sword", Vector3.new(0.25, 1, 0.25), 1.25, CFrame.new(0, 0.14, 0) * CFrame.Angles(0, math.pi / 2, 0))
 -- 3.2 studs across; the kit's face looks along -Z, a held shield's along +Y (LoadoutService sockets).
