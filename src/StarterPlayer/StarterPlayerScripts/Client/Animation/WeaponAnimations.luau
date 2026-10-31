@@ -65,8 +65,8 @@ local function load(character: Model)
 		return
 	end
 	for weapon, names in IDLES do
-		local stand = Animations.Load(animator, names.stand, Enum.AnimationPriority.Idle, true)
-		local move = Animations.Load(animator, names.move, Enum.AnimationPriority.Idle, true)
+		local stand = Animations.Load(animator, names.stand, Enum.AnimationPriority.Movement, true)
+		local move = Animations.Load(animator, names.move, Enum.AnimationPriority.Movement, true)
 		if stand and move then
 			pairs_[weapon] = { stand = stand, move = move }
 		end

@@ -71,6 +71,13 @@
 			"assetId": "130043066388929",
 			"notes": "Dodge roll, played when the player dodges. Authored by the owner and uploaded from Studio.",
 			"history": []
+		},
+		"PlayerRun": {
+			"looped": true,
+			"tier": "placeholder",
+			"assetId": "129808019913977",
+			"notes": "Player run, played by RunAnimations while the double-tap run is on. Uploaded by the owner from Studio.",
+			"history": []
 		}
 	}
 }

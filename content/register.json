@@ -4167,6 +4167,20 @@
 			"notes": "Human NPCs throw with the player's light attack.",
 			"assetId": "75972502304014",
 			"status": "draft"
+		},
+		{
+			"id": "animation:PlayerRun",
+			"type": "animation",
+			"name": "PlayerRun",
+			"path": "src/ReplicatedStorage/Animations/PlayerRun.model.json",
+			"set": "Combat",
+			"tier": "placeholder",
+			"origin": "Agent-authored placeholder on the stock Studio R15 rig in assets/blender/combat_r15/combat_r15.blend (owner exception 2026-10-25)",
+			"license": "project",
+			"owner": "dev",
+			"notes": "Player run, played by RunAnimations while the double-tap run is on. Uploaded by the owner from Studio.",
+			"assetId": "129808019913977",
+			"status": "draft"
 		}
 	]
 }

@@ -14,6 +14,7 @@ local Hotbar = require(ReplicatedStorage.Shared.Hotbar)
 local Loadout = require(ReplicatedStorage.Shared.Loadout)
 local Animations = require(script.Parent.Parent.Animation.Animations)
 local GuardAnimations = require(script.Parent.Parent.Animation.GuardAnimations)
+local RunAnimations = require(script.Parent.Parent.Animation.RunAnimations)
 local WeaponAnimations = require(script.Parent.Parent.Animation.WeaponAnimations)
 local NetClient = require(ReplicatedStorage.Shared.Net.Client)
 local Signal = require(ReplicatedStorage.Shared.Signal)
@@ -672,6 +673,7 @@ end
 --[=[ Starts or stops running (the server sets the walk speed). ]=]
 function CombatController.SetRun(on: boolean)
 	NetClient.Fire("SetRun", on)
+	RunAnimations.SetRunning(on)
 end
 
 -- Plays the dodge roll on the local character; the loaded track is kept per animator.
@@ -858,6 +860,7 @@ function CombatController.Start()
 	end)
 	GuardAnimations.Start()
 	WeaponAnimations.Start()
+	RunAnimations.Start()
 	CameraController.Changed:Connect(function(on: boolean)
 		syncCombatMode(on, true)
 	end)
