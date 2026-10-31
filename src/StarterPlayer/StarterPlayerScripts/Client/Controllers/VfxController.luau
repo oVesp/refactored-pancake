@@ -46,6 +46,7 @@ local TELEGRAPH_COLOR = Color3.fromRGB(255, 70, 50)
 -- Fade times (seconds) for the local player's skill clips.
 local CLIP_FADE_IN = 0.05
 local CLIP_FADE_OUT = 0.15
+local HIT_GRACE = 0.06 -- seconds past the baked `Hit` time before the swing shows without the marker
 
 --[=[
 	Visuals for casts, telegraphs, projectiles, impacts and floating damage numbers, plus the local
@@ -456,9 +457,24 @@ local function onUsed(skillId: string, aim: Vector3)
 	end
 	track:Play(CLIP_FADE_IN)
 	if skill and predictsSwing(skill) then
-		local hit = track:GetMarkerReachedSignal(AnimRoles.Markers.Hit):Once(swing)
+		-- The clip's own `Hit` marker wins; the time baked into the Animation covers a published
+		-- asset that lacks the marker.
+		local fired = false
+		local function once()
+			if not fired then
+				fired = true
+				swing()
+			end
+		end
+		local hit = track:GetMarkerReachedSignal(AnimRoles.Markers.Hit):Once(once)
+		local animation = Animations.Get(skill.animation or "")
+		local at = animation and animation:GetAttribute("Hit")
+		local fallback = if type(at) == "number" then task.delay(at + HIT_GRACE, once) else nil
 		track.Stopped:Once(function()
 			hit:Disconnect()
+			if fallback then
+				task.cancel(fallback)
+			end
 		end)
 	end
 end

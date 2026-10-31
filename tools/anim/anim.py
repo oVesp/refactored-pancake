@@ -85,6 +85,9 @@ def sync():
             "properties": {"AnimationId": f"rbxassetid://{asset}"},
             "attributes": {"Looped": bool(clip.get("looped", False))},
         }
+        hit = clip.get("markers", {}).get("Hit")
+        if hit is not None:
+            model["attributes"]["Hit"] = hit
         with open(os.path.join(OUT, name), "w", encoding="utf8", newline="\n") as f:
             f.write(json.dumps(model, indent="\t") + "\n")
         defaults = manifest.get("defaults", {})

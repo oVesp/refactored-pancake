@@ -4,6 +4,7 @@
 		"AnimationId": "rbxassetid://92205821610809"
 	},
 	"attributes": {
-		"Looped": false
+		"Looped": false,
+		"Hit": 0.47
 	}
 }
