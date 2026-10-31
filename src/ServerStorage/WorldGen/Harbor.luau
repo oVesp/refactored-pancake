@@ -160,7 +160,7 @@ local function buildings(root: Folder)
 	end
 	-- Plaza fittings.
 	kit(group, "Well", 14, 62, 0)
-	-- Inn and hall frontage: the pub sign and lanterns at the inn door, banners and lanterns at the hall's.
+	-- Inn and hall frontage: a banner and lanterns at the inn door, banners and lanterns at the hall's.
 	local fittings = folder(group, "Fittings")
 	local function lantern(building: Model?, x: number)
 		local model = fitting(fittings, "Lantern_Wall", building, x, 7, 0)
@@ -179,7 +179,7 @@ local function buildings(root: Folder)
 		end
 	end
 	-- Inn door at wall x -3.2, hall door at wall x 9.6 (content/world/village.json).
-	fitting(fittings, "Sign_Pub", inn, -11.5, 13.5, -math.pi / 2)
+	fitting(fittings, "Banner_1", inn, -11.5, 13.5, -math.pi / 2)
 	lantern(inn, 2)
 	lantern(inn, -8.4)
 	fitting(fittings, "Banner_Vertical_1", hall, 1, 3, 0)
