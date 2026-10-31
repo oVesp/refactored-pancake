@@ -384,12 +384,6 @@ return table.freeze({
 			FleeDistance = 30,
 		}),
 		--[=[
-			Stagger: damage of `combat.poise` x max HP (default DefaultPoise) within Window seconds
-			cancels the enemy's windup, gives back its token and pauses its decisions for Seconds;
-			it cannot be staggered again for Cooldown seconds.
-		]=]
-		Stagger = table.freeze({ DefaultPoise = 0.2, Window = 3, Seconds = 0.6, Cooldown = 3 }),
-		--[=[
 			Enemy poise pool (Shared/Poise). `combat.poiseMax` is the pool at the enemy's base stats
 			(default DefaultShare x base max HP) and grows with max HP by level. Hits take poise damage of
 			damage x the skill's `poiseDamage` (default DamageFactor); damage over time takes none. The

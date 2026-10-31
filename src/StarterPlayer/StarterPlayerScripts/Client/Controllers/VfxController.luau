@@ -9,6 +9,7 @@ local TweenService = game:GetService("TweenService")
 local NetClient = require(ReplicatedStorage.Shared.Net.Client)
 local AnimRoles = require(ReplicatedStorage.Content.AnimRoles)
 local Skills = require(ReplicatedStorage.Content.Skills)
+local Tuning = require(ReplicatedStorage.Content.Tuning)
 
 local Animations = require(script.Parent.Parent.Animation.Animations)
 local Effects = require(script.Parent.Parent.Vfx.Effects)
@@ -390,6 +391,26 @@ local function onParry(defender: Model?, attacker: Model?)
 	end
 end
 
+-- An NPC's poise broke (long gold flash, burst, long hitstop) or a parry made it flinch (short
+-- flash and hitstop). The hitstop and shake only play when the local player is either side.
+local function onBreak(model: Model?, source: Model?, kind: string)
+	local root = rootOf(model)
+	if not root or not model then
+		return
+	end
+	local broke = kind == "Break"
+	Effects.BodyFlash(model, PARRY_COLOR, if broke then 0.35 else 0.15)
+	if broke then
+		Particles.Flash(root.Position + Vector3.new(0, 1, 0), PARRY_COLOR, 24, 0.25)
+	end
+	if involvesLocal(model, source) then
+		Effects.Hitstop({ model, source }, if broke then Tuning.Parry.BreakHitstop else Tuning.Parry.FlinchHitstop)
+		if broke then
+			Effects.Play("HitShake", CFrame.new(root.Position))
+		end
+	end
+end
+
 local function onDamage(model: Model, amount: number, kind: string, crit: boolean, skillId: string?, source: Model?)
 	local root = model and model:FindFirstChild("HumanoidRootPart") or (model and model.PrimaryPart)
 	if not root or not root:IsA("BasePart") then
@@ -511,6 +532,7 @@ function VfxController.Start()
 	NetClient.Connect("ShowImpact", onImpact)
 	NetClient.Connect("ShowDamage", onDamage)
 	NetClient.Connect("ShowParry", onParry)
+	NetClient.Connect("ShowBreak", onBreak)
 	CombatController.Used:Connect(onUsed)
 	CombatController.DrawReady:Connect(function()
 		local hand = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("LeftHand")

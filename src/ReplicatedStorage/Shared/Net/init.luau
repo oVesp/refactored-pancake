@@ -223,8 +223,10 @@ local Remotes: { [string]: RemoteSpec } = {
 	ShowCast = { direction = "ServerToClient" },
 	ShowImpact = { direction = "ServerToClient" },
 	ShowDamage = { direction = "ServerToClient" },
-	--[=[ `(defender, attacker)`: a guard parried a hit (cosmetic; the stun is a status). ]=]
+	--[=[ `(defender, attacker)`: a guard parried a hit (cosmetic; the attacker's reaction is ShowBreak). ]=]
 	ShowParry = { direction = "ServerToClient" },
+	--[=[ `(model, source, "Break" | "Flinch")`: an NPC's poise broke or a parry made it flinch (cosmetic). ]=]
+	ShowBreak = { direction = "ServerToClient" },
 	Notify = { direction = "ServerToClient" },
 	SendDeathState = { direction = "ServerToClient" },
 	SendDevLog = { direction = "ServerToClient" },

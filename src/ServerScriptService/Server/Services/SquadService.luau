@@ -44,17 +44,18 @@ wallParams.FilterType = Enum.RaycastFilterType.Exclude
 ]=]
 local SquadService = {}
 
+--[=[ What an enemy's `combat` data falls back on (Swarm.Profile). ]=]
+SquadService.ProfileDefaults = table.freeze({
+	tokenCost = Tuning.Swarm.TokenCost,
+	morale = Tuning.Swarm.Morale.Default,
+	poiseShare = Tuning.Swarm.Poise.DefaultShare,
+	parryPoise = Tuning.Parry.Poise,
+}) :: Swarm.ProfileDefaults
+
 --[=[ Creates the squad record for an enemy; AIService keeps it on the brain. ]=]
 function SquadService.NewMember(entity: Entity, def: any): Member
 	memberSeq += 1
-	local profile = Swarm.Profile(
-		def,
-		Tuning.Swarm.TokenCost,
-		Tuning.Swarm.Morale.Default,
-		Tuning.Swarm.Stagger.DefaultPoise,
-		Skills.ById,
-		Statuses.ById
-	)
+	local profile = Swarm.Profile(def, SquadService.ProfileDefaults, Skills.ById, Statuses.ById)
 	local member: Member = {
 		entity = entity,
 		profile = profile,

@@ -22,6 +22,8 @@ local Enemy: { [string]: Role } = {
 	Attack = { priority = "Action", looped = false, required = true },
 	Throw = { priority = "Action", looped = false, required = false },
 	Hit = { priority = "Action", looped = false, required = false },
+	--[=[ Parry break reaction; a set without it plays Hit (EnemyAnimationController). ]=]
+	Parried = { priority = "Action2", looped = false, required = false },
 	Death = { priority = "Action4", looped = false, required = true },
 }
 

@@ -87,6 +87,8 @@ export type Entity = {
 	--[=[ os.clock() until which a melee swing keeps the player committed (slowed, no actions). ]=]
 	commitUntil: number,
 	invulnerableUntil: number,
+	--[=[ os.clock() until which the next melee hit taken is a riposte (Tuning.Parry.RiposteMultiplier). ]=]
+	riposteUntil: number,
 	statuses: { [string]: StatusInstance },
 	history: { Sample },
 	threat: { [Entity]: number },

@@ -15,6 +15,7 @@ local Loadout = require(ReplicatedStorage.Shared.Loadout)
 local Logger = require(ReplicatedStorage.Shared.Logger)
 local NetServer = require(ReplicatedStorage.Shared.Net.Server)
 local Skills = require(ReplicatedStorage.Content.Skills)
+local Poise = require(ReplicatedStorage.Shared.Poise)
 local Statuses = require(ReplicatedStorage.Content.Statuses)
 local Threat = require(ReplicatedStorage.Shared.Threat)
 local Tuning = require(ReplicatedStorage.Content.Tuning)
@@ -150,9 +151,18 @@ local function hitEnemy(caster: Entity, target: Entity, skill: SkillDef, bonus: 
 	end
 	local hit = table.clone(mods or {})
 	hit.threat = skill.threat
+	hit.poiseDamage = skill.poiseDamage
+	hit.parry = Poise.ParryClass(skill)
+	hit.melee = skill.delivery == "Melee" or skill.delivery == "Cone" or skill.delivery == "Dash"
 	if skill.damage then
-		local dealt = CombatService.DealDamage(caster, target, skill.damage, skill.shownAs or skill.id, bonus, hit)
-		if dealt <= 0 and not CombatService.CanHarm(caster, target) then
+		local dealt, outcome =
+			CombatService.DealDamage(caster, target, skill.damage, skill.shownAs or skill.id, bonus, hit)
+		-- A dodged or parried hit carries none of its effects (stun, poison, knockback).
+		if
+			(dealt <= 0 and not CombatService.CanHarm(caster, target))
+			or outcome == "dodged"
+			or outcome == "parried"
+		then
 			return
 		end
 	end

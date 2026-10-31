@@ -5,6 +5,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Formulas = require(ReplicatedStorage.Shared.Formulas)
 local NetServer = require(ReplicatedStorage.Shared.Net.Server)
+local Poise = require(ReplicatedStorage.Shared.Poise)
 local Relations = require(ReplicatedStorage.Shared.Relations)
 local Signal = require(ReplicatedStorage.Shared.Signal)
 local Statuses = require(ReplicatedStorage.Content.Statuses)
@@ -16,7 +17,6 @@ type Entity = Types.Entity
 type Effect = { status: string, duration: number?, magnitude: number?, chance: number? }
 
 local SHOW_RADIUS = 90
-local PARRY_STAGGER = 0.6
 local SHIELD_SECONDS = 15
 local KNOCKBACK_SECONDS = 0.25
 
@@ -37,6 +37,10 @@ local CombatService = {}
 CombatService.Damaged = Signal.new() :: Signal.Signal<Entity, number, string, Entity?, boolean, string?>
 --[=[ Fires `(victim, killer)` once when an entity dies. ]=]
 CombatService.Died = Signal.new() :: Signal.Signal<Entity, Entity?>
+--[=[ Fires `(target, poise, source)` after a hit lands: its poise damage (Shared/Poise.Damage). Ticks deal none. ]=]
+CombatService.PoiseDamaged = Signal.new() :: Signal.Signal<Entity, number, Entity?>
+--[=[ Fires `(attacker, defender)` when a guard parries a hit; AIService turns it into a break or a flinch. ]=]
+CombatService.Parried = Signal.new() :: Signal.Signal<Entity, Entity>
 
 local function show(target: Entity, amount: number, kind: string, crit: boolean, skillId: string?, source: Entity?)
 	local position = target.root.Position
@@ -224,7 +228,16 @@ export type HitMods = {
 	forceCrit: boolean?,
 	--[=[ The skill's threat modifiers (`SkillDef.threat`). ]=]
 	threat: Threat.SkillThreat?,
+	--[=[ The skill's `poiseDamage` factor. ]=]
+	poiseDamage: number?,
+	--[=[ How a guard's parry window treats the hit (Shared/Poise.ParryClass). Default Normal. ]=]
+	parry: Poise.ParryClass?,
+	--[=[ A melee hit (Melee, Cone, Dash): spends a riposte window. ]=]
+	melee: boolean?,
 }
+
+--[=[ What happened to a hit besides its damage; effects do not land on "dodged" or "parried". ]=]
+export type Outcome = "hit" | "blocked" | "parried" | "dodged" | "immune" | "none"
 
 -- Extra damage the target takes of this type from `source` (Exposed).
 local function exposureFrom(source: Entity, target: Entity, damageType: string): number
@@ -241,8 +254,10 @@ end
 --[=[
 	Resolves and lands one hit. `bonus` is an additive outgoing multiplier (e.g. Overcharge);
 	Weapon Proficiency, Battle Rhythm, Finishing Instinct and Exposed add to it (Formulas.HitBonus).
-	Guarding defenders facing the attacker take reduced damage, or none inside the parry window
-	(the attacker is staggered). A crit applies the attacker's crit effects. Returns the damage dealt.
+	Guarding defenders facing the attacker take reduced damage, or none when the parry window
+	parries the hit's class (Shared/Poise.Parries; `Parried` fires). The first melee hit on a target
+	in its riposte window deals Tuning.Parry.RiposteMultiplier. A crit applies the attacker's crit
+	effects. Returns the damage dealt and the outcome.
 ]=]
 function CombatService.DealDamage(
 	source: Entity,
@@ -251,14 +266,19 @@ function CombatService.DealDamage(
 	skillId: string?,
 	bonus: number?,
 	mods: HitMods?
-): number
+): (number, Outcome)
 	if not CombatService.CanHarm(source, target) then
-		return 0
+		return 0, "none"
 	end
 	local now = os.clock()
 	if now < target.invulnerableUntil then
 		show(target, 0, "dodged", false)
-		return 0
+		return 0, "dodged"
+	end
+	local riposte = 0
+	if mods and mods.melee and now < target.riposteUntil then
+		riposte = Tuning.Parry.RiposteMultiplier - 1
+		target.riposteUntil = 0
 	end
 
 	local traits = source.traits
@@ -288,7 +308,7 @@ function CombatService.DealDamage(
 		critChance = critChance,
 		roll = random:NextNumber(),
 		bonus = Formulas.HitBonus({
-			base = (source.extras.DamageDone or 0) + (bonus or 0),
+			base = (source.extras.DamageDone or 0) + (bonus or 0) + riposte,
 			proficiency = if proficiency then proficiency.damage else 0,
 			rhythmStacks = stacks,
 			perStack = if rhythm then rhythm.perStack else 0,
@@ -302,7 +322,7 @@ function CombatService.DealDamage(
 
 	if amount == 0 then
 		show(target, 0, "immune", false)
-		return 0
+		return 0, "immune"
 	end
 
 	-- A shield replaces the bare guard's values (docs/systems/weapons.md, Shields).
@@ -314,11 +334,12 @@ function CombatService.DealDamage(
 	local damageMultiplier = if shield then shield.damageMultiplier else guard.DamageMultiplier
 	local blocked = false
 	if target.guardSince and inFront(target, source, arc) then
-		if now - target.guardSince <= parryWindow then
+		local class: Poise.ParryClass = if mods and mods.parry then mods.parry else "Normal"
+		if Poise.Parries(class, now - target.guardSince, parryWindow, target.level, source.level, Tuning.Parry) then
 			show(target, 0, "parried", false)
 			NetServer.FireAll("ShowParry", target.model, source.model)
-			StatusService.Apply(source, "stun", PARRY_STAGGER, nil, target)
-			return 0
+			CombatService.Parried:Fire(source, target)
+			return 0, "parried"
 		end
 		if StatService.Spend(target, "Stamina", staminaPerHit) then
 			amount = math.floor(amount * damageMultiplier + 0.5)
@@ -342,7 +363,11 @@ function CombatService.DealDamage(
 	if crit and #traits.critEffects > 0 then
 		CombatService.ApplyEffects(source, target, traits.critEffects)
 	end
-	return amount
+	local poise = Poise.Damage(amount, mods and mods.poiseDamage, Tuning.Swarm.Poise.DamageFactor)
+	if poise > 0 and target.alive then
+		CombatService.PoiseDamaged:Fire(target, poise, source)
+	end
+	return amount, if blocked then "blocked" else "hit"
 end
 
 --[=[ Lands a damage-over-time tick: type multiplier applies, defense does not. ]=]

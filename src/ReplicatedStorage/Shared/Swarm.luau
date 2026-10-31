@@ -47,8 +47,20 @@ export type Profile = {
 	--[=[ Nil for enemies that never flee. ]=]
 	morale: { base: number, fleeBelow: number }?,
 	leader: boolean,
-	--[=[ Share of max HP that staggers the enemy when taken within Tuning.Swarm.Stagger.Window. ]=]
-	poise: number,
+	--[=[ Poise pool at the base max HP (`baseMaxHp`); it grows with max HP (Shared/Poise.Pool). ]=]
+	poiseMax: number,
+	baseMaxHp: number,
+	--[=[ Share of the pool one same-level parry takes; 0 never breaks by parry. ]=]
+	parryPoise: number,
+}
+
+--[=[ Values an enemy's `combat` falls back on (from Tuning). ]=]
+export type ProfileDefaults = {
+	tokenCost: number,
+	morale: { base: number, fleeBelow: number },
+	--[=[ Default poise pool as a share of base max HP. ]=]
+	poiseShare: number,
+	parryPoise: number,
 }
 
 --[=[ True when a skill can interrupt a player's cast and is telegraphed: an enemy-targeted skill
@@ -68,13 +80,12 @@ end
 
 --[=[
 	Combat profile of an enemy with defaults filled in. `def` is a Content EnemyDef; `skills` and
-	`statuses` are the Content ById tables; defaults come from Tuning.Swarm. `combat.morale = false` means the enemy never flees.
+	`statuses` are the Content ById tables; `defaults` come from Tuning. `combat.morale = false`
+	means the enemy never flees.
 ]=]
 function Swarm.Profile(
 	def: any,
-	defaultCost: number,
-	defaultMorale: { base: number, fleeBelow: number },
-	defaultPoise: number,
+	defaults: ProfileDefaults,
 	skills: { [string]: any },
 	statuses: { [string]: any }
 ): Profile
@@ -86,14 +97,17 @@ function Swarm.Profile(
 			table.insert(interrupts, skillId)
 		end
 	end
+	local baseMaxHp = def.base and def.base.MaxHp or 1
 	return {
 		slot = combat.slot or "Melee",
-		tokenCost = combat.tokenCost or defaultCost,
+		tokenCost = combat.tokenCost or defaults.tokenCost,
 		roles = combat.roles or { Pressure = 1 },
 		interrupts = interrupts,
-		morale = if combat.morale == false then nil else combat.morale or defaultMorale,
+		morale = if combat.morale == false then nil else combat.morale or defaults.morale,
 		leader = combat.leader == true,
-		poise = combat.poise or defaultPoise,
+		poiseMax = combat.poiseMax or defaults.poiseShare * baseMaxHp,
+		baseMaxHp = baseMaxHp,
+		parryPoise = combat.parryPoise or defaults.parryPoise,
 	}
 end
 
@@ -109,29 +123,6 @@ export type MoraleSettings = {
 	--[=[ A fleeing enemy returns only above fleeBelow + Hysteresis. ]=]
 	Hysteresis: number,
 }
-
---[=[
-	Adds a hit to the poise damage taken within `window` seconds (older damage is dropped first).
-	Returns the new total and true when it reaches `poise` x `maxHp`, which also resets it.
-]=]
-function Swarm.PoiseHit(
-	total: number,
-	lastAt: number,
-	amount: number,
-	maxHp: number,
-	poise: number,
-	window: number,
-	now: number
-): (number, boolean)
-	if now - lastAt > window then
-		total = 0
-	end
-	total += amount
-	if total >= poise * maxHp then
-		return 0, true
-	end
-	return total, false
-end
 
 --[=[
 	Seconds of morale regeneration between `from` and `now` when the last loss was at `lostAt`:

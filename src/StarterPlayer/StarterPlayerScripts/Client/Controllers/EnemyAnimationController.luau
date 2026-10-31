@@ -73,7 +73,7 @@ local function onCue(rig: Rig)
 		return
 	end
 	local clip = string.match(cue, "^(%a+):")
-	local track = clip and rig.tracks[clip]
+	local track = clip and (rig.tracks[clip] or (if clip == "Parried" then rig.tracks.Hit else nil))
 	if not track then
 		return
 	end

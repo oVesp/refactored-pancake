@@ -92,6 +92,7 @@ function EntityService.Register(info: NewEntity): Entity
 		chainAt = 0,
 		commitUntil = 0,
 		invulnerableUntil = 0,
+		riposteUntil = 0,
 		statuses = {},
 		history = {},
 		threat = {},

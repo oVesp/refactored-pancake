@@ -83,7 +83,8 @@ local list: { Types.EnemyDef } = {
 		combat = {
 			slot = "Melee",
 			roles = { Disruptor = 2, Pressure = 1 },
-			poise = 0.35,
+			poiseMax = 42,
+			parryPoise = 0.95,
 			morale = { base = 100, fleeBelow = 20 },
 		},
 	},
@@ -109,7 +110,8 @@ local list: { Types.EnemyDef } = {
 			slot = "Melee",
 			tokenCost = 2,
 			roles = { Pressure = 1 },
-			poise = 0.6,
+			poiseMax = 252,
+			parryPoise = 0,
 			morale = false,
 			leader = true,
 			summons = {
@@ -204,7 +206,8 @@ local list: { Types.EnemyDef } = {
 		combat = {
 			slot = "Melee",
 			roles = { Pressure = 2, Opportunist = 1 },
-			poise = 0.3,
+			poiseMax = 42,
+			parryPoise = 0.95,
 			morale = { base = 100, fleeBelow = 20 },
 		},
 	},
@@ -284,7 +287,8 @@ local list: { Types.EnemyDef } = {
 		combat = {
 			slot = "Melee",
 			roles = { Disruptor = 2, Flanker = 1 },
-			poise = 0.3,
+			poiseMax = 39,
+			parryPoise = 0.95,
 			morale = { base = 100, fleeBelow = 25 },
 		},
 	},
@@ -305,7 +309,15 @@ local list: { Types.EnemyDef } = {
 		scale = 1.3,
 		color = Color3.fromRGB(110, 60, 50),
 		elite = true,
-		combat = { slot = "Melee", tokenCost = 2, roles = { Pressure = 1 }, poise = 0.5, morale = false, leader = true },
+		combat = {
+			slot = "Melee",
+			tokenCost = 2,
+			roles = { Pressure = 1 },
+			poiseMax = 300,
+			parryPoise = 0,
+			morale = false,
+			leader = true,
+		},
 	},
 }
 

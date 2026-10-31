@@ -7,7 +7,9 @@ local RunService = game:GetService("RunService")
 
 local Formation = require(ReplicatedStorage.Shared.Formation)
 local Logger = require(ReplicatedStorage.Shared.Logger)
+local NetServer = require(ReplicatedStorage.Shared.Net.Server)
 local NpcDefs = require(ReplicatedStorage.Shared.NpcDefs)
+local Poise = require(ReplicatedStorage.Shared.Poise)
 local Relations = require(ReplicatedStorage.Shared.Relations)
 local Skills = require(ReplicatedStorage.Content.Skills)
 local SpatialHash = require(ReplicatedStorage.Shared.SpatialHash)
@@ -71,8 +73,8 @@ type Brain = {
 	reachMax: number,
 	--[=[ os.clock() of the last think, for threat decay. ]=]
 	thoughtAt: number,
-	--[=[ Poise damage taken in the current stagger window and when it was last added to. ]=]
-	poiseDamage: number,
+	--[=[ Poise left in the pool and when it last took poise damage (it refills after Tuning.Swarm.Poise.RefillDelay). ]=]
+	poise: number,
 	poiseAt: number,
 	--[=[ Decisions pause until this os.clock(); no new stagger before staggerReadyAt. ]=]
 	staggerUntil: number,
@@ -911,34 +913,62 @@ local function publishDebug(brain: Brain)
 	model:SetAttribute("AiMorale", if member.profile.morale then math.floor(member.morale) else nil)
 end
 
--- Poise: enough damage in a short window cancels the windup, gives back the token and pauses.
-local function poiseHit(brain: Brain, amount: number)
-	local entity = brain.entity
-	local now = os.clock()
-	if entity.hp <= 0 or now < brain.staggerReadyAt then
-		return
-	end
-	local settings = Tuning.Swarm.Stagger
-	local staggered
-	brain.poiseDamage, staggered = Swarm.PoiseHit(
-		brain.poiseDamage,
-		brain.poiseAt,
-		amount,
-		entity.stats.MaxHp,
-		brain.member.profile.poise,
-		settings.Window,
-		now
-	)
-	brain.poiseAt = now
-	if not staggered then
-		return
-	end
-	brain.staggerUntil = now + settings.Seconds
-	brain.staggerReadyAt = now + settings.Cooldown
-	SkillService.Interrupt(entity)
+-- A break cancels the windup, gives back the token and pauses decisions for `seconds`; no new
+-- break for Tuning.Swarm.Poise.Cooldown seconds.
+local function stagger(brain: Brain, seconds: number, now: number)
+	brain.staggerUntil = math.max(brain.staggerUntil, now + seconds)
+	brain.staggerReadyAt = now + Tuning.Swarm.Poise.Cooldown
+	SkillService.Interrupt(brain.entity)
 	SquadService.DropToken(brain.member)
 	stop(brain)
 	setState(brain, "Stagger")
+end
+
+-- Takes `amount` from the brain's poise pool; returns true when the pool broke. Nothing is taken
+-- during the stagger cooldown, so a broken enemy cannot be locked down.
+local function drainPoise(brain: Brain, amount: number, now: number): boolean
+	local entity = brain.entity
+	if entity.hp <= 0 or now < brain.staggerReadyAt or amount <= 0 then
+		return false
+	end
+	local profile = brain.member.profile
+	local pool = Poise.Pool(profile.poiseMax, profile.baseMaxHp, entity.stats.MaxHp)
+	local broken
+	brain.poise, broken = Poise.Hit(brain.poise, brain.poiseAt, amount, pool, Tuning.Swarm.Poise.RefillDelay, now)
+	brain.poiseAt = now
+	return broken
+end
+
+-- Hits drain the pool; a break staggers the enemy and every client sees it.
+local function poiseHit(brain: Brain, amount: number, source: Entity?)
+	local now = os.clock()
+	if drainPoise(brain, amount, now) then
+		stagger(brain, Tuning.Swarm.Poise.Seconds, now)
+		NetServer.FireAll("ShowBreak", brain.entity.model, source and source.model, "Break")
+	end
+end
+
+-- A parry takes a level-scaled share of the attacker's pool. A break staggers it for longer and
+-- opens a riposte window; otherwise it flinches. Both play a reaction clip and client effects.
+local function parried(brain: Brain, defender: Entity)
+	local entity = brain.entity
+	local now = os.clock()
+	local settings = Tuning.Parry
+	local profile = brain.member.profile
+	local pool = Poise.Pool(profile.poiseMax, profile.baseMaxHp, entity.stats.MaxHp)
+	local damage = Poise.ParryDamage(pool, profile.parryPoise, defender.level, entity.level, settings)
+	if drainPoise(brain, damage, now) then
+		stagger(brain, settings.BreakSeconds, now)
+		entity.riposteUntil = now + settings.BreakSeconds
+		cue(entity, "Parried")
+		NetServer.FireAll("ShowBreak", entity.model, defender.model, "Break")
+		log:Debug("%s parry-broken by %s", entity.name, defender.name)
+	else
+		brain.staggerUntil = math.max(brain.staggerUntil, now + settings.FlinchSeconds)
+		stop(brain)
+		cue(entity, "Hit")
+		NetServer.FireAll("ShowBreak", entity.model, defender.model, "Flinch")
+	end
 end
 
 --[=[
@@ -984,8 +1014,8 @@ function AIService.Attach(entity: Entity, home: Vector3, leash: number, wander: 
 		pathTarget = nil,
 		nextPathAt = 0,
 		summoned = {},
-		poiseDamage = 0,
-		poiseAt = 0,
+		poise = 0,
+		poiseAt = -math.huge,
 		staggerUntil = 0,
 		staggerReadyAt = 0,
 		member = SquadService.NewMember(entity, def),
@@ -1093,10 +1123,20 @@ function AIService.Start()
 	EntityService.Added:Connect(refreshFilter)
 
 	CombatService.Damaged:Connect(function(target: Entity, amount: number)
-		local brain = brains[target]
-		if brain and target.alive and amount > 0 then
+		if brains[target] and target.alive and amount > 0 then
 			cue(target, "Hit")
-			poiseHit(brain, amount)
+		end
+	end)
+	CombatService.PoiseDamaged:Connect(function(target: Entity, amount: number, source: Entity?)
+		local brain = brains[target]
+		if brain and target.alive then
+			poiseHit(brain, amount, source)
+		end
+	end)
+	CombatService.Parried:Connect(function(attacker: Entity, defender: Entity)
+		local brain = brains[attacker]
+		if brain and attacker.alive then
+			parried(brain, defender)
 		end
 	end)
 	CombatService.Died:Connect(function(target: Entity)

@@ -12,14 +12,12 @@ local Skills = Loader.load("src/ReplicatedStorage/Content/Skills").ById
 local Statuses = Loader.load("src/ReplicatedStorage/Content/Statuses").ById
 
 local function profile(id: string): any
-	return Swarm.Profile(
-		Enemies[id],
-		Tuning.Swarm.TokenCost,
-		Tuning.Swarm.Morale.Default,
-		Tuning.Swarm.Stagger.DefaultPoise,
-		Skills,
-		Statuses
-	)
+	return Swarm.Profile(Enemies[id], {
+		tokenCost = Tuning.Swarm.TokenCost,
+		morale = Tuning.Swarm.Morale.Default,
+		poiseShare = Tuning.Swarm.Poise.DefaultShare,
+		parryPoise = Tuning.Parry.Poise,
+	}, Skills, Statuses)
 end
 
 local TIMEOUT = 4
@@ -305,16 +303,11 @@ return {
 		Expect.equal(Swarm.RegenSeconds(0, delay + 2, 0, settings), 2, "regen after the delay")
 		Expect.equal(Swarm.RegenSeconds(delay + 5, delay + 7, 0, settings), 2, "only the new interval")
 	end,
-	["poise breaks on enough damage inside the window"] = function()
-		local total, staggered = Swarm.PoiseHit(0, 0, 10, 100, 0.2, 3, 1)
-		Expect.equal(staggered, false, "one light hit")
-		total, staggered = Swarm.PoiseHit(total, 1, 10, 100, 0.2, 3, 2)
-		Expect.truthy(staggered, "two hits inside the window")
-		Expect.equal(total, 0, "reset after a stagger")
-		total, staggered = Swarm.PoiseHit(15, 0, 10, 100, 0.2, 3, 5)
-		Expect.equal(staggered, false, "old damage dropped")
-		Expect.equal(total, 10, "only the new hit counts")
-		Expect.truthy(profile("goblin_chieftain").poise > profile("goblin_raider").poise, "boss is sturdier")
+	["profiles carry the poise pool"] = function()
+		local raider = profile("goblin_raider")
+		Expect.equal(raider.poiseMax, Tuning.Swarm.Poise.DefaultShare * Enemies.goblin_raider.base.MaxHp, "default")
+		Expect.truthy(profile("goblin_chieftain").poiseMax > raider.poiseMax, "boss is sturdier")
+		Expect.equal(profile("goblin_chieftain").parryPoise, 0, "boss never breaks by parry")
 	end,
 	["a holder gets the tank bonus on top of the melee budget"] = function()
 		local bonus = Tuning.Swarm.Budget.TankBonus

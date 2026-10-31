@@ -38,8 +38,8 @@ Most single-enemy and stagger sources are practitioner or community material. Th
 ## Gaps against the intent
 
 1. **Done.** **Threat is damage only and has no rules around it.** No healing threat, no target-switch hysteresis, no decay, no tuning table, no hook for skills. A tank that deals less damage cannot hold aggro, and a healer is invisible to enemies.
-2. **Parry has no visible effect on the enemy.** `CombatService` applies a `stun` status for 0.6 s (`PARRY_STAGGER`). `AIService` does not read stun (it only knows its own `Stagger` state), and no hit-reaction cue plays, so the only feedback is the damage `parried` marker and the defender's clip. A parry should visibly knock the attacker back.
-3. **Parry ignores poise and level.** The same stun applies to every attacker. Intent: most same-level mobs break, elites and bosses do not.
+2. **Done.** **Parry has no visible effect on the enemy.** `CombatService` applies a `stun` status for 0.6 s (`PARRY_STAGGER`). `AIService` does not read stun (it only knows its own `Stagger` state), and no hit-reaction cue plays, so the only feedback is the damage `parried` marker and the defender's clip. A parry should visibly knock the attacker back.
+3. **Done.** **Parry ignores poise and level.** The same stun applies to every attacker. Intent: most same-level mobs break, elites and bosses do not.
 4. **Telegraphs carry the readability.** The per-skill `telegraph` flag is the only readability tool for several enemy skills (the light player attacks already use `telegraph = false` with animation and VFX instead).
 5. **Tank capacity equals DPS capacity.** The token budget is flat per player: 2 Melee, 1 Ranged, 1 Support.
 6. **The Slinger never plants.** After a throw (0.4 s windup, 2.2 s cooldown) the `keepDistance` branch retreats it 10 studs whenever the player is within 18 studs, so a chasing melee player never gets an opening.
@@ -54,16 +54,10 @@ Most single-enemy and stagger sources are practitioner or community material. Th
 
 ### 2. Parry as the melee core
 
-- **Parry breaks poise.** A successful parry deals `ParryPoise` (a fraction of the attacker's `poiseMax`) scaled by the level gap: `ParryPoise × clamp(1 + 0.1 × (defenderLevel − attackerLevel), 0.25, 2)`.
-- **Same-level default.** Standard Rabble have `parry = "Normal"` and a low `poiseMax`; a same-level parry always breaks them. Brutes, soldiers and riders break only on a parry of a lower-level attacker or after two parries; the Captain and Chieftain do not break (they flinch and take a riposte window instead).
-- **Visible result.** A break plays a distinct reaction clip (`Parried`) on the attacker, a spark and a hitstop on both sides, and the enemy stays staggered for `ParryBreakSeconds`. A parry without a break plays a short flinch (about 0.2 s) so the player still sees the effect.
-- **Riposte window.** While an enemy is in a parry break, the next melee hit deals bonus damage (`RiposteMultiplier`, 1.5 to 2). That rewards the parry as the main melee DPS tool and gives tanks a reason to parry.
-- **Parry classes of attack.** Each enemy skill has `parry = "Normal" | "Heavy" | "None"`:
-  - Normal: parriable, the default for basic strikes.
-  - Heavy: parriable only in the first part of the window or at a level advantage; reads through animation and a distinct VFX color.
-  - None: grabs, area slams, projectiles. Must be dodged or blocked.
-- **Fallback.** If a parry cannot break (high poise), it behaves as a block with a stamina refund and a short flinch.
-- **Stun-lock guard stays.** The 3 s stagger cooldown applies to parry breaks as well.
+**Done** (2026-10-31): [combat](combat.md), Poise and parry; [AI](ai-and-spawning.md), Stagger. Still open:
+- Art: a `Parried` reaction clip per enemy set (goblin, skeleton; the role is optional and falls back to `Hit`, which the Skeleton and Human sets also lack) and a dedicated break VFX template; today the break is a gold body flash, a particle burst and hitstop.
+- Heavy attacks' distinct windup VFX colour (white-gold parriable, red unparriable).
+- Stamina refund on a parry that does not break, and a riposte window on a leader's flinch.
 
 ### 3. Telegraphs are a fallback
 
