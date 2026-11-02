@@ -1,0 +1,118 @@
+--!strict
+
+local Expect = require("../Expect")
+local Loader = require("../Loader")
+local Profile = require("../../src/ServerScriptService/Server/Data/Profile")
+local Hotbar = Loader.load("src/ReplicatedStorage/Shared/Hotbar")
+
+return {
+	["new profile is serializable and current"] = function()
+		local profile = Profile.new()
+		Expect.equal(profile.schemaVersion, Profile.SchemaVersion)
+		Expect.truthy(Profile.IsSerializable(profile))
+	end,
+	["rejects NaN, infinity and functions"] = function()
+		Expect.equal(Profile.IsSerializable({ xp = 0 / 0 }), false, "NaN")
+		Expect.equal(Profile.IsSerializable({ xp = math.huge }), false, "inf")
+		Expect.equal(Profile.IsSerializable({ fn = print }), false, "function")
+	end,
+	["rejects metatables, cycles and shared references"] = function()
+		Expect.equal(Profile.IsSerializable(setmetatable({}, {})), false, "metatable")
+		local cycle = {}
+		cycle.self = cycle
+		Expect.equal(Profile.IsSerializable(cycle), false, "cycle")
+		local shared = {}
+		Expect.equal(Profile.IsSerializable({ a = shared, b = shared }), false, "shared")
+	end,
+	["migrate refuses newer schema"] = function()
+		local profile = Profile.new()
+		profile.schemaVersion = Profile.SchemaVersion + 1
+		Expect.errors(function()
+			Profile.Migrate(profile)
+		end)
+	end,
+	["new profile has an empty hotbar of the shared size"] = function()
+		local profile = Profile.new()
+		Expect.equal(Profile.HotbarSize, Hotbar.Size)
+		Expect.equal(#profile.hotbar, Hotbar.Size)
+		for _, slot in profile.hotbar do
+			Expect.equal(slot, "")
+		end
+	end,
+	["migrates schema 1 by adding an empty hotbar"] = function()
+		local profile = Profile.new() :: any
+		profile.schemaVersion = 1
+		profile.hotbar = nil
+		local migrated = Profile.Migrate(profile)
+		Expect.equal(migrated.schemaVersion, Profile.SchemaVersion)
+		Expect.equal(#migrated.hotbar, Hotbar.Size)
+		Expect.truthy(Profile.IsSerializable(migrated))
+	end,
+	["new profile starts uncreated"] = function()
+		local profile = Profile.new()
+		Expect.equal(profile.created, false)
+		Expect.equal(profile.name, "")
+		Expect.equal(profile.heritage, "human")
+	end,
+	["migrates schema 2 to an uncreated character"] = function()
+		local profile = Profile.new() :: any
+		profile.schemaVersion = 2
+		profile.created = nil
+		profile.name = nil
+		profile.appearance = nil
+		profile.heritage = "Human"
+		local migrated = Profile.Migrate(profile)
+		Expect.equal(migrated.schemaVersion, Profile.SchemaVersion)
+		Expect.equal(migrated.created, false)
+		Expect.equal(migrated.heritage, "human")
+		Expect.truthy(Profile.IsSerializable(migrated))
+	end,
+	["migrates schema 3 warriors to fighters with no proficiency chosen"] = function()
+		local profile = Profile.new() :: any
+		profile.schemaVersion = 3
+		profile.proficiency = nil
+		profile.classes = { { id = "warrior", level = 4 }, { id = "mage", level = 1 } }
+		local migrated = Profile.Migrate(profile)
+		Expect.equal(migrated.schemaVersion, Profile.SchemaVersion)
+		Expect.equal(migrated.classes[1].id, "fighter")
+		Expect.equal(migrated.classes[1].level, 4)
+		Expect.equal(migrated.classes[2].id, "mage")
+		Expect.equal(migrated.proficiency, "")
+	end,
+	["migrates schema 4 to no discoveries"] = function()
+		local profile = Profile.new() :: any
+		profile.schemaVersion = 4
+		profile.discoveries = nil
+		local migrated = Profile.Migrate(profile)
+		Expect.equal(migrated.schemaVersion, Profile.SchemaVersion)
+		Expect.equal(next(migrated.discoveries), nil)
+		Expect.truthy(Profile.IsSerializable(migrated))
+	end,
+	["migrates schema 5 to the starting gold and no quest"] = function()
+		local profile = Profile.new() :: any
+		profile.schemaVersion = 5
+		profile.gold = nil
+		local migrated = Profile.Migrate(profile)
+		Expect.equal(migrated.schemaVersion, Profile.SchemaVersion)
+		Expect.equal(migrated.gold, Profile.StartingGold)
+		Expect.equal(migrated.quest, nil)
+		Expect.truthy(Profile.IsSerializable(migrated))
+	end,
+	["a quest serializes in the profile"] = function()
+		local profile = Profile.new()
+		profile.quest = { id = "thin_the_raiders", kills = 2 }
+		Expect.truthy(Profile.IsSerializable(profile))
+	end,
+	["CanFit counts stack room and free slots"] = function()
+		local profile = Profile.new({ { id = "bread", count = 19 } })
+		Expect.truthy(Profile.CanFit(profile, 20, "bread", 1, 1), "last slot of a stack")
+		Expect.equal(Profile.CanFit(profile, 20, "bread", 2, 1), false, "no free slot")
+		Expect.truthy(Profile.CanFit(profile, 20, "bread", 21, 2), "stack room plus a free slot")
+	end,
+	["a new profile has discovered nothing, and discoveries serialize"] = function()
+		local profile = Profile.new()
+		Expect.equal(next(profile.discoveries), nil)
+		profile.discoveries.skeleton = true
+		Expect.truthy(Profile.IsSerializable(profile))
+	end,
+}

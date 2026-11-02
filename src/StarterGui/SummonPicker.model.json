@@ -1,0 +1,149 @@
+{
+	"className": "ScreenGui",
+	"properties": {
+		"ResetOnSpawn": false,
+		"ZIndexBehavior": "Sibling",
+		"IgnoreGuiInset": false,
+		"Enabled": false,
+		"DisplayOrder": 5
+	},
+	"children": [
+		{
+			"name": "Panel",
+			"className": "Frame",
+			"properties": {
+				"AnchorPoint": [0.5, 1],
+				"Position": {
+					"UDim2": [
+						[0.5, 0],
+						[1, -150]
+					]
+				},
+				"Size": {
+					"UDim2": [
+						[0, 0],
+						[0, 74]
+					]
+				},
+				"AutomaticSize": "X",
+				"BackgroundColor3": [1, 1, 1],
+				"BorderSizePixel": 0
+			},
+			"children": [
+				{
+					"name": "UICorner",
+					"className": "UICorner",
+					"properties": {
+						"CornerRadius": {
+							"UDim": [0, 3]
+						}
+					}
+				},
+				{
+					"name": "UIStroke",
+					"className": "UIStroke",
+					"properties": {
+						"Color": [0.824, 0.718, 0.514],
+						"Thickness": 1,
+						"ApplyStrokeMode": "Border"
+					}
+				},
+				{
+					"name": "UIGradient",
+					"className": "UIGradient",
+					"properties": {
+						"Color": {
+							"ColorSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"color": [0.145, 0.176, 0.227]
+									},
+									{
+										"time": 1.0,
+										"color": [0.082, 0.098, 0.133]
+									}
+								]
+							}
+						},
+						"Rotation": 90
+					}
+				},
+				{
+					"name": "UIPadding",
+					"className": "UIPadding",
+					"properties": {
+						"PaddingTop": {
+							"UDim": [0, 6]
+						},
+						"PaddingRight": {
+							"UDim": [0, 10]
+						},
+						"PaddingBottom": {
+							"UDim": [0, 6]
+						},
+						"PaddingLeft": {
+							"UDim": [0, 10]
+						}
+					}
+				},
+				{
+					"name": "Header",
+					"className": "TextLabel",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[1, 0],
+								[0, 18]
+							]
+						},
+						"BackgroundTransparency": 1,
+						"Text": "RAISE",
+						"TextColor3": [0.824, 0.718, 0.514],
+						"FontFace": {
+							"Font": {
+								"family": "rbxasset://fonts/families/AccanthisADFStd.json",
+								"weight": "Bold",
+								"style": "Normal"
+							}
+						},
+						"TextSize": 13
+					}
+				},
+				{
+					"name": "Bind_Options",
+					"className": "Frame",
+					"properties": {
+						"Position": {
+							"UDim2": [
+								[0, 0],
+								[0, 22]
+							]
+						},
+						"Size": {
+							"UDim2": [
+								[0, 0],
+								[0, 34]
+							]
+						},
+						"AutomaticSize": "X",
+						"BackgroundTransparency": 1
+					},
+					"children": [
+						{
+							"name": "UIListLayout",
+							"className": "UIListLayout",
+							"properties": {
+								"FillDirection": "Horizontal",
+								"Padding": {
+									"UDim": [0, 6]
+								},
+								"SortOrder": "LayoutOrder"
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

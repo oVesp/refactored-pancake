@@ -1,0 +1,34 @@
+{
+	"className": "TextLabel",
+	"properties": {
+		"Size": {
+			"UDim2": [
+				[
+					1,
+					0
+				],
+				[
+					0,
+					16
+				]
+			]
+		},
+		"BackgroundTransparency": 1,
+		"Text": "",
+		"TextColor3": [
+			0.651,
+			0.82,
+			0.69
+		],
+		"FontFace": {
+			"Font": {
+				"family": "rbxasset://fonts/families/RobotoMono.json",
+				"weight": "Regular",
+				"style": "Normal"
+			}
+		},
+		"TextSize": 12,
+		"TextXAlignment": "Left",
+		"TextTruncate": "AtEnd"
+	}
+}

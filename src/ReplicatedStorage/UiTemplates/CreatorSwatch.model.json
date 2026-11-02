@@ -1,0 +1,53 @@
+{
+	"className": "TextButton",
+	"properties": {
+		"Size": {
+			"UDim2": [
+				[
+					0,
+					36
+				],
+				[
+					0,
+					36
+				]
+			]
+		},
+		"BackgroundColor3": [
+			1,
+			1,
+			1
+		],
+		"BorderSizePixel": 0,
+		"Text": "",
+		"AutoButtonColor": true
+	},
+	"children": [
+		{
+			"name": "UICorner",
+			"className": "UICorner",
+			"properties": {
+				"CornerRadius": {
+					"UDim": [
+						0.5,
+						0
+					]
+				}
+			}
+		},
+		{
+			"name": "Bind_Stroke",
+			"className": "UIStroke",
+			"properties": {
+				"Color": [
+					0.549,
+					0.471,
+					0.325
+				],
+				"Thickness": 2,
+				"Transparency": 0.2,
+				"ApplyStrokeMode": "Border"
+			}
+		}
+	]
+}

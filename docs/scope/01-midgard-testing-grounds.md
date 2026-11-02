@@ -1,12 +1,14 @@
 # Scope 01 — Midgard Testing Grounds
 
-Status: **approved scope, revision 2.** Milestone **M0.5** in [game-design.md](../game-design.md) §7.4 and §10. Where this file and `game-design.md` disagree, `game-design.md` wins.
+Status: **approved scope, revision 2; built 2026-10-24 (see §10).** Milestone **M0.5** in [game-design.md](../game-design.md) §7.4 and §10. Where this file and `game-design.md` disagree, `game-design.md` wins.
+
+**2026-10-29:** Midgard is now a generated continent ([world generation](../systems/world-generation.md)). The generated village, fields and camp terrain and their population were removed; the Map's gameplay objects remain as a placeholder. The slice now sits at the Harbor, the stud origin (owner, 2026-10-29); its dressing is rebuilt as part of the Verdant Greens region. The Harbor mock (inn, guild hall with quest board, Pylon, dock; 2026-10-30) is described in [world generation](../systems/world-generation.md#harbor-mock-owner-2026-10-30).
 
 | Field | Value |
 |---|---|
 | Realm | Midgard |
 | Level band | 1–5 |
-| Classes | Warrior, Mage, Healer |
+| Classes | Fighter, Mage, Healer |
 | Area | Farming Village and its fields |
 | Threat | Goblin Rabble (Lv 1–6). Goblin Warband (Lv 7+) is data-only here, spawned in the Dev Yard |
 | Place type | Single dev place: placeholder art, testing grounds |
@@ -15,8 +17,8 @@ Status: **approved scope, revision 2.** Milestone **M0.5** in [game-design.md](.
 
 | # | Decision |
 |---|---|
-| D1 | New milestone **M0.5 Testing Grounds** between M0 and M1. M1 targets unchanged except its Circle range (§3 below). |
-| D2 | **1 spell pick per caster class level** here (`SPELL_PICKS_PER_LEVEL = 1`, data constant). **Circle 2 unlocks at casting-line level 6**, so levels 1–5 use Circles 0–1 only. |
+| D1 | New milestone **M0.5 Testing Grounds** between M0 and M1. M1 targets unchanged except its Tier range (§3 below). |
+| D2 | **1 spell pick per caster class level** (`SPELL_PICKS_PER_LEVEL = 1`, data constant; the target, not a placeholder). **Tier 2 unlocks at casting-line level 8**, so levels 1–5 use Tiers 0–1 only. |
 | D3 | Minimal Disciplines: Focus pool + 2 Disciplines from a trainer NPC. |
 | D4 | §4's 8-class starter list and its templates stay as the future plan. This place has 3 classes, so it tests 5 / 3+2 / 2+2+1 / 3+1+1; dabbler (2+1+1+1) waits for a 4th class. |
 | D5 | Midgard is used. Public-domain myth and folklore names are allowed (§2 of the design doc, amended). |
@@ -39,7 +41,7 @@ One place, run as zones behind `ZoneService` (§3.7). Danger reads honestly from
 |---|---|---|---|
 | **Village Core** | Safe | Spawn/respawn, 3 class trainers, Discipline trainer, vendor stub, well, barns, houses | Class pick, dev respec, safe-zone rules |
 | **Dev Yard** | Safe | Training dummies (one per damage type + one with resist tags), spawn pads, lag test lane | Combat tuning, hit validation, Warband tests |
-| **Wheat Fields** | Lv 1–3 | Raiders, Slingers, scarecrow cover, fences | First pulls, ranged vs melee |
+| **Wheat Fields** | Lv 1–3 | Raiders, Slingers, Skeletons, scarecrow cover, fences | First pulls, ranged vs melee |
 | **Orchard Edge** | Lv 3–4 | Mixed Raider/Slinger/Trapper packs | Poison and cleanse, healing pressure |
 | **Goblin Camp** | Lv 4–6 | Palisade, tents, Brutes, optional Chieftain | Telegraphs, elite fight, leash rules |
 
@@ -47,20 +49,22 @@ Fiction (light): goblin raiders steal grain and livestock from the village. No n
 
 ---
 
-## 3. Circles at levels 1–5
+## 3. Tiers at levels 1–5
 
-Rule (§3.2): the Circle ceiling follows levels in the **deepest compatible casting line**, not total level. Unlock table lives in `Content/Magic` and is tunable:
+Rule (§3.2): the Tier ceiling follows levels in the caster's **own magic system** (Arcane, Divine, Spiritual, Alternative), not total level; systems never sum. Unlock table lives in `Tuning.Magic` and is tunable:
 
-| Circle | Casting-line level |
+| Tier | Casting-line level |
 |---|---|
 | 0, 1 | 1 |
-| 2 | 6 |
-| 3 | 12 |
-| n (≥2) | 6 × (n − 1) |
+| 2 | 8 |
+| 3 | 15 |
+| 4 | 22 |
+| 5 | 29 |
+| n (≥2) | 7 × (n − 1) + 1 |
 
-So Circle 3 lands at 12, Circle 6 at 30 and Circle 10 at 54. That matches the research benchmarks: ordinary folk top out around 2, elites around 3.
+`MaxTier = 5` covers the 1–30 scope.
 
-Here: Mage and Healer see **Circles 0–1 only**. Circle 0 is utility and costs like Circle 1 (§3.2).
+Here: Mage and Healer see **Tiers 0–1 only**. Tier 0 is utility and costs like Tier 1 (§3.2).
 
 ---
 
@@ -70,71 +74,57 @@ All three are **base classes** (cap 15). Level cap here is 5. Stats per §3.1, n
 
 | Class | Role | Resource | Stat lean | Damage types |
 |---|---|---|---|---|
-| **Warrior** | Front line, melee | Stamina for class skills, Focus for Disciplines | HP, Physical Attack, Physical Defense | Physical |
-| **Mage** | Ranged damage, control | MP | MP, Magic Attack, Agility | Fire, cold, lightning |
+| **Fighter** | General physical damage, every weapon but the wand | Stamina for class skills, Focus for Disciplines | HP, Physical Attack, Agility | Physical |
+| **Mage** | Ranged damage, control | MP | MP, Magic Attack, Agility | Force, water (elemental damage starts at Tier 2) |
 | **Healer** | Support, holy damage | MP | MP, Magic Defense, Resistance | Holy |
 
 ### 4.1 Class level grants
 
 Every class level grants **one class skill**, either **Active** (hotbar) or **Passive** (always on, applied by `StatService`/`SkillService` from data). Caster levels also grant **1 spell pick** from the class list (D2). Base stat growth per level comes from the class's stat lean, separate from these grants. Names are placeholders, plain descriptive (§2).
 
-**Warrior**
-
-| Lv | Grant | Kind | Effect | Tests |
-|---|---|---|---|---|
-| 1 | Cleave | Active | Melee arc | Multi-target hit shapes |
-| 2 | Hardy | Passive | +Max HP %, +Physical Defense | Passive stat pipeline |
-| 3 | Charge | Active | Dash to target, short stun | Movement validation, stun |
-| 4 | Weapon Training | Passive | +Physical Attack, faster heavy attack | Passive modifying an action |
-| 5 | War Cry | Active | Area taunt + self buff | Aggro override |
+**Fighter**: 15 levels, the full table lives in [classes](../systems/classes.md#fighter). M0.5 reaches Fighter 5 (Weapon Proficiency I, Precise Attack, Combat Conditioning, Gather Strength, Second Wind). The old Warrior kit's Cleave, Charge and War Cry stay in `Content/Skills` as Warrior high-class candidates, granted by no class.
 
 **Mage** (+1 spell pick per level)
 
 | Lv | Grant | Kind | Effect | Tests |
 |---|---|---|---|---|
-| 1 | Arcane Line | Passive | Opens the arcane casting line (Circle 0–1) | Casting-line ceiling rule |
+| 1 | Arcane Line | Passive | Opens the arcane casting line (Tier 0–1) | Casting-line ceiling rule |
 | 2 | Mana Flow | Passive | +MP regen | Resource regen modifier |
 | 3 | Blink | Active | Short teleport | Server movement validation |
-| 4 | Elemental Focus | Passive | +burn/slow chance | Proc-on-hit passives |
+| 4 | Elemental Focus | Passive | +burn/slow chance (no Tier 0–1 spell applies them since the canon trim; rework pending) | Proc-on-hit passives |
 | 5 | Overcharge | Active | Next spell +damage, +cost | Buff consumed by next cast |
 
 **Healer** (+1 spell pick per level)
 
 | Lv | Grant | Kind | Effect | Tests |
 |---|---|---|---|---|
-| 1 | Divine Line | Passive | Opens the divine casting line (Circle 0–1) | Second casting line, incompatibility cap |
+| 1 | Divine Line | Passive | Opens the divine casting line (Tier 0–1) | Second casting line, incompatibility cap |
 | 2 | Gentle Hands | Passive | +Healing done | Outgoing-heal modifier |
 | 3 | Rebuke | Active | Holy knockback around self | Knockback, self area |
 | 4 | Devotion | Passive | +Magic Defense, +Resistance | Mitigation passive |
 | 5 | Lay On Hands | Active | Large single heal, long cooldown | Long cooldowns |
 
-### 4.2 Spell lists (Circles 0–1)
+### 4.2 Spell lists (Tiers 0–1)
 
-8 spells per caster class; 5 picks by level 5, so the list always offers choice.
+Canon names and canon power scale (§3.2 *Canon power scale*): at least one spell per tradition plus the essentials (Light, Light Healing, Create Water). Mage has 6 spells for 5 picks; Healer has 4, so a level-5 Healer knows the whole list.
 
-| Mage | Circle | Delivery | Tests |
-|---|---|---|---|
-| Light | 0 | Self | Utility cost rule |
-| Kindle | 0 | Target object | Interactable world props |
-| Spark | 1 | Projectile | Basic projectile |
-| Firebolt | 1 | Projectile | Burn status |
-| Frost Shard | 1 | Projectile | Slow status |
-| Flame Fan | 1 | Cone | Cone hit shape |
-| Ice Patch | 1 | Ground target | Ground AoE, root |
-| Arcane Shield | 1 | Self | Damage absorb |
+| Mage | Tier | Tradition | Delivery | Tests |
+|---|---|---|---|---|
+| Light | 0 | Lifestyle | Self | Utility cost rule |
+| Magic Arrow | 1 | Force | Target (homing), never misses | Basic targeted spell |
+| Destruction Water | 1 | Elemental (water) | Projectile, knockback | Free-aim skillshot, knockback |
+| Sleep | 1 | Control | Target (homing) | Disable that breaks on damage |
+| Quick March | 1 | Enhancement | Self | Move-speed buff |
+| Arcane Shield | 1 | Protection | Self | Damage absorb |
 
-| Healer | Circle | Delivery | Tests |
-|---|---|---|---|
-| Glow | 0 | Ally | Utility cost rule |
-| Purify Water | 0 | Target object | Interactable world props |
-| Mend | 1 | Ally | Direct heal, ally targeting |
-| Smite | 1 | Projectile | Holy damage |
-| Cleanse | 1 | Ally | Remove poison/bleed |
-| Renew | 1 | Ally | Heal over time |
-| Shelter | 1 | Ally | Shield, friendly-target rules |
-| Bless | 1 | Ally | Minor stat buff |
+| Healer | Tier | Tradition | Delivery | Tests |
+|---|---|---|---|---|
+| Light Healing | 1 | Healing | Ally | Direct heal, ally targeting |
+| Create Water | 1 | Lifestyle | Target object | Interactable world props |
+| Anti-Evil Protection | 1 | Protection | Ally | Damage reduction against evil (holy-vulnerable) attackers |
+| Smite | 1 | Holy | Target (homing) | Holy damage |
 
-Moved to Circle 2+ (M1 or later): chaining lightning, area heal-and-smite, resurrection.
+Every spell is held to charge and released to fire ([combat](../systems/combat.md), Cast). Kept in `Content/Skills` off the lists: Kindle, Glow, Purify Water (Tier 0); Spark, Firebolt, Frost Shard, Cleanse, Renew, Shelter, Bless (Tier 2); Flame Fan, Ice Patch (Tier 3). Moved to Tier 2+ (M1 or later): chaining lightning, area heal-and-smite, resurrection. Summons follow the summon system.
 
 ### 4.3 Disciplines (D3)
 
@@ -154,10 +144,18 @@ Loose raiding bands, no casters.
 |---|---|---|---|---|---|
 | Goblin Raider | 1–3 | Melee grunt, packs of 2–3 | Physical | — | Aggro, chase, leash |
 | Goblin Slinger | 2–4 | Ranged, kites | Physical | — | Projectile dodge, kiting AI |
-| Goblin Trapper | 3–4 | Lays poison snares, throws darts | Poison | — | Ground hazards, cleanse |
+| Goblin Trapper | 3–4 | Throws poison snares and darts, keeps distance | Poison | — | Ground hazards, cleanse |
 | Goblin Brute | 4–5 | Heavy, slow wind-up slam | Physical | Resist: physical | Telegraph + dodge, mitigation |
 | Goblin Chieftain (optional elite) | 6 | 2 phases, calls a Raider pair at 50% HP | Physical | Immune: fear | Scripted timeline (§5.6), level-gap curve vs Lv 5 |
 | Training Dummy | any | Static, configurable | — | Configurable | Damage numbers, resist math |
+
+### 5.1a Skeleton (Lv 1–3, placed in this scope)
+
+Unarmed undead on the `Undead` team, so goblin packs do not call it for help. Skinned mesh from the Studio 3D importer, rebuilt on the goblin's Humanoid layout by `tools/world/build.luau`; clips (Idle, Walk, Scratch, Defeat) uploaded from Studio. On `exp/open-world` they come from the `field_barrow` nest at night (docs/systems/open-world.md).
+
+| Enemy | Lv | Role | Damage | Tags | Tests |
+|---|---|---|---|---|---|
+| Skeleton | 1–3 | Melee, slow claw swipe (Scratch) | Physical | Resist: poison; Vulnerable: holy | Aggro, chase, holy bonus |
 
 ### 5.2 Goblin Warband (Lv 7+, data-only in this scope)
 
@@ -172,7 +170,7 @@ An organized war company with specialist roles. Mechanical reference: the resear
 | Wolf Rider | 8–10 | Fast flanker, charge | Physical | — | Fast pathing, knockdown |
 | Warband Captain | 10–12 | Leader, buffs nearby Warband | Physical | Immune: fear | Leader aura, boss timeline |
 
-Spawning: `Spawner` tags per zone, leash radius, respawn timers, active cap per zone (start at 20, tune after profiling).
+Spawning (`exp/open-world`): nests and garrisons in `ContentServerOnly/Population`, squads roam a territory and the leash follows the group, garrisons replace their dead on timers, `Tuning.Population.MaxBodies` caps bodies (docs/systems/open-world.md).
 
 ---
 
@@ -192,10 +190,11 @@ Server-gated: allowed only when `RunService:IsStudio()` or the UserId is on a de
 | Tool | Form |
 |---|---|
 | `/level n`, `/class add/remove X`, `/xp n` | `TextChatCommand` |
-| `/spawn enemy lv`, `/clear`, `/god` | `TextChatCommand` |
+| `/spawn enemy [lv] [count]`, `/clear`, `/god`, `/heal`, `/kill`, `/damage n`, `/give item [n]` | `TextChatCommand` |
 | `/latency ms` (simulated) | `TextChatCommand`, Studio only |
 | Damage log, aggro/state overlay | Studio-authored debug `ScreenGui` + controller (no code-built UI, §6.1) |
-| Training dummies | Dev Yard, configurable via attributes |
+| Training dummies | Dev Yard, configurable via attributes (`Level`, `Resist`, `Vulnerable`, `Immune`, lane movement) |
+| Studio test hook | `ServerStorage.RunDevCommand` BindableFunction (Studio only) runs the same commands for automation |
 
 ---
 
@@ -205,10 +204,10 @@ Rules live in `game-design.md` §7.5. Per-pack use here:
 
 | Pack | Use |
 |---|---|
-| retro-fantasy-kit | Village blockout: walls, roofs, fences, barrels, crates, towers, docks, trees; goblin palisade from fortified walls |
-| retro-textures-fantasy | Village and camp surfaces |
-| prototype-textures | Greybox for Dev Yard and unfinished areas |
-| foliage-sprites | Billboard crops, grass, bushes |
+| Medieval Village MegaKit (Quaternius, CC0; `assets/third_party`) | Village houses and barns (`tools/blender/house_generator.py`), fences, crates, wagon, stone borders; its materials also clad the generated well, braziers, scarecrows, palisade, gate towers, tents and dais (`tools/blender/village_kit.py`) |
+| Fantasy Props MegaKit (Quaternius, CC0; `assets/third_party`) | Held sword and shield, training dummies, creation stage stands, Harbor dressing (`tools/blender/fantasy_kit.py`) |
+| Generated low-poly library (`tools/blender/world_props.py`) | Wheat, sprouts, hay bales, orchard fruit trees |
+| prototype-textures | Dev Yard |
 | game-icons, game-icons-expansion | Placeholder skill, passive, status and HUD icons |
 | ui-pack (+ Kenney Future font), fantasy-ui-borders | HUD and menu frames |
 | input-prompts | Keyboard/gamepad/touch prompts |
@@ -226,9 +225,36 @@ Toolbox audio needed: footsteps (grass, wood), melee swing/hit, spell cast/impac
 
 1. Join → pick class at trainer → kill goblins → reach level 5 in each class, on desktop and phone emulator.
 2. Every class skill, passive and spell in §4 resolves through the server path. Passives show in stats. Rejected casts roll back client prediction.
-3. Circle 2 spells are refused at casting-line level 5 (unit test + playtest).
-4. Each Rabble AI state (idle, patrol, aggro, attack, return) observed. Leash and respawn work. Hexer interrupt works in the Dev Yard.
+3. Tier 2 spells are refused at casting-line level 7 and allowed at 8 (unit test + playtest).
+4. Each Rabble AI state (idle, patrol, aggro, attack, return) observed. Leash and respawn work (on `exp/open-world`: the leash follows the group and garrisons and nests replace their dead). Hexer interrupt works in the Dev Yard.
 5. Multiclass to 5 total levels using each D4 template.
 6. Dev commands refused for non-allowlisted users in a published test.
 7. Every asset in the place has a register row. No hard-coded asset ids.
 8. Format, lint, typecheck, tests and `rojo build` pass.
+
+---
+
+## 10. Build status (2026-10-24)
+
+Verified by Studio playtest (single client, Studio) and Lune unit tests.
+
+| Exit criterion | Result |
+|---|---|
+| 1. Class pick at trainer, kill goblins, reach level 5 | Pass on desktop: trainer prompts train classes; kills grant XP; each class taken to level 5 in play (via `/level 5` plus the same `TrainClass` path the trainer uses). **Phone emulator not tested.** |
+| 2. Skills, passives, spells resolve server-side; rejects roll back | Pass: every Fighter, Mage and Healer active and all 16 spells fired in play with the expected damage, heal, shield, status, teleport or prop change; all 9 passives observed through `Stat_*`/`Extra_*` attributes; cooldown, unknown-skill and malformed calls rejected; the client clears its predicted cooldown on reject. |
+| 3. Tier 2 refused at line level 7 | Pass in unit tests (`Formulas.spec`, allowed at 8); no Tier 2 content exists to try in play. |
+| 4. Rabble AI states, leash, respawn; Hexer interrupt | Pass: idle, patrol, aggro, attack, return observed; leash resets HP; Charge interrupts the Hexer's cast; Chieftain phase 2 summons two Raiders. |
+| 5. Multiclass with each template | Pass in unit tests for all four templates; 2+2+1 and 3+1+1 also exercised in play. |
+| 6. Dev commands refused for non-allowlisted users | **Not verified**: needs a published test; Studio always allows dev commands. |
+| 7. Every asset registered, no hard-coded ids | Pass: `Register.spec` validates `content/register.json`, the manifest and all content, UI and world files. All 10 audio ids preload in Studio (`IsLoaded`, non-zero length). |
+| 8. Format, lint, typecheck, tests, build | Pass (`tools/gate.sh`). |
+
+Also verified: guard (parry window, then 40% damage and stamina cost), dodge i-frames, Disciplines with Focus capacity, XP debt on death repaid by later XP, Weakened after respawn, loot to inventory, equip/unequip changing stats, potions, fire immunity, physical resistance, Rebuke knockback.
+
+Deviations and open items:
+- The Map keeps only gameplay objects; the village, fields, orchard and camp are dressed by the world generator's settlement layout (2026-10-29, [world generation](../systems/world-generation.md)). The Dev Yard stays greybox.
+- Audio ids are Creator Store picks (mostly Roblox-licensed Pro Sound Effects and APM); status `draft` in the register until a reviewer signs off.
+- Player-facing text lives in `Content/Strings`; LocalizationTable is deferred to M1.
+- Player attacks have no animations: they show placeholder neon arcs, telegraph discs and projectiles. Goblins use a placeholder skinned mesh with idle, walk, run, attack, throw, hit and death clips that play only in Studio until uploaded.
+- Lag compensation rewinds target positions up to 250 ms from recorded history; `/latency` adds simulated delay in Studio.
+- Mobile: touch buttons come from ContextActionService (Attack, Dodge, Guard, slots 1-4); layout not tuned on devices.

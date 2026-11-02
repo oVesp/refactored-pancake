@@ -1,0 +1,417 @@
+--!strict
+
+local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Classes = require(ReplicatedStorage.Content.Classes)
+local Enemies = require(ReplicatedStorage.Content.Enemies)
+local Disciplines = require(ReplicatedStorage.Content.Disciplines)
+local Formulas = require(ReplicatedStorage.Shared.Formulas)
+local Hotbar = require(ReplicatedStorage.Shared.Hotbar)
+local Items = require(ReplicatedStorage.Content.Items)
+local Logger = require(ReplicatedStorage.Shared.Logger)
+local NetServer = require(ReplicatedStorage.Shared.Net.Server)
+local Skills = require(ReplicatedStorage.Content.Skills)
+local SummonFamilies = require(ReplicatedStorage.Content.Summons)
+local Summons = require(ReplicatedStorage.Shared.Summons)
+local Tuning = require(ReplicatedStorage.Content.Tuning)
+local DevService = require(script.Parent.DevService)
+local Types = require(script.Parent.Parent.Types)
+
+type Entity = Types.Entity
+
+local log = Logger.new("ProgressionService")
+
+local CombatService: any
+local DataService: any
+local DisciplineService: any
+local EntityService: any
+local SkillService: any
+local StatService: any
+local StatusService: any
+
+-- Studs a player may drift past the prompt's range while the trainer panel is open.
+local TRAINER_REACH_SLACK = 6
+
+local pendingSnapshot: { [Player]: boolean } = {}
+local weakenOnSpawn: { [Player]: boolean } = {}
+
+--[=[
+	XP, character level, class training at trainers, spell picks, death debt and the profile
+	snapshot sent to clients (scope 01, section 6).
+]=]
+local ProgressionService = {}
+
+local function notify(player: Player, key: string, ...: any)
+	NetServer.Fire("Notify", player, key, { ... })
+end
+
+local function levelInfo(profile: any): (number, number, number?)
+	return Formulas.CharacterLevel(profile.xp, Tuning.Progression.XpToNext, Tuning.Progression.LevelCap)
+end
+
+--[=[
+	True when the player may put this entry on the hotbar: a known active spell or class skill
+	(basic attacks and a weapon's spell have their own buttons), a dev skill for developers, or a known Discipline.
+]=]
+local function canSlot(profile: any, kind: string, id: string, isDev: boolean): boolean
+	if kind == "Discipline" then
+		return Disciplines.ById[id] ~= nil and table.find(profile.disciplines, id) ~= nil
+	end
+	local skill = Skills.ById[id]
+	if skill and (skill.source == "Basic" or skill.weaponSpell) then
+		return false
+	end
+	return table.find(SkillService.KnownActives(profile, isDev), id) ~= nil
+end
+
+local function prunedHotbar(profile: any, isDev: boolean): { string }
+	return Hotbar.Prune(table.clone(profile.hotbar), function(kind, id)
+		return canSlot(profile, kind, id, isDev)
+	end)
+end
+
+--[=[ Builds the client snapshot: profile plus derived progression data. ]=]
+function ProgressionService.Snapshot(player: Player): { [string]: any }?
+	local profile = DataService.Get(player)
+	if not profile then
+		return nil
+	end
+	local level, into, need = levelInfo(profile)
+	return {
+		created = profile.created,
+		name = profile.name,
+		level = level,
+		xp = profile.xp,
+		xpInto = into,
+		xpNeed = need,
+		xpDebt = profile.xpDebt,
+		unspent = level - Formulas.TotalClassLevels(profile.classes),
+		classes = profile.classes,
+		spells = profile.spells,
+		disciplines = profile.disciplines,
+		picks = Formulas.SpellPicks(profile.classes, profile.spells, Classes.ById, Tuning.Magic.SpellPicksPerLevel),
+		ceilings = Formulas.TierCeilings(profile.classes, Classes.ById, Tuning.Magic),
+		actives = SkillService.KnownActives(profile, DevService.IsDev(player)),
+		granted = Formulas.GrantedSkills(profile.classes, Classes.ById),
+		hotbar = prunedHotbar(profile, DevService.IsDev(player)),
+		inventory = profile.inventory,
+		equipment = profile.equipment,
+		discoveries = profile.discoveries,
+		gold = profile.gold,
+		quest = profile.quest,
+	}
+end
+
+local function pushSnapshot(player: Player)
+	if pendingSnapshot[player] then
+		return
+	end
+	pendingSnapshot[player] = true
+	task.defer(function()
+		pendingSnapshot[player] = nil
+		if player.Parent then
+			local snapshot = ProgressionService.Snapshot(player)
+			if snapshot then
+				NetServer.Fire("SendProfileSnapshot", player, snapshot)
+			end
+		end
+	end)
+end
+
+local function totalPicks(profile: any): number
+	local total = 0
+	for _, count in Formulas.SpellPicks(profile.classes, profile.spells, Classes.ById, Tuning.Magic.SpellPicksPerLevel) do
+		total += count
+	end
+	return total
+end
+
+--[=[ Adds XP (repaying debt first) and announces level-ups. ]=]
+function ProgressionService.GrantXp(player: Player, amount: number)
+	local profile = DataService.Get(player)
+	if not profile or amount <= 0 then
+		return
+	end
+	local before = levelInfo(profile)
+	DataService.Update(player, function(p: any)
+		p.xp, p.xpDebt = Formulas.GainXp(p.xp, p.xpDebt, amount)
+	end, "xp")
+	NetServer.Fire("ShowGain", player, "Xp", "XP", amount)
+	local after = levelInfo(profile)
+	if after > before then
+		notify(player, "LevelUp", after)
+	end
+end
+
+--[=[ Dev: sets XP to exactly the start of `level`, clearing debt. ]=]
+function ProgressionService.SetLevel(player: Player, level: number)
+	local target = math.clamp(math.floor(level), 1, Tuning.Progression.LevelCap)
+	local xp = 0
+	for i = 1, target - 1 do
+		xp += Tuning.Progression.XpToNext[i]
+	end
+	DataService.Update(player, function(p: any)
+		p.xp = xp
+		p.xpDebt = 0
+		local over = Formulas.TotalClassLevels(p.classes) - target
+		while over > 0 and #p.classes > 0 do
+			local last = p.classes[#p.classes]
+			last.level -= 1
+			if last.level <= 0 then
+				table.remove(p.classes)
+			end
+			over -= 1
+		end
+	end, "xp")
+end
+
+--[=[ Sets the Weapon Proficiency weapon type (Tuning.Combat.ProficiencyWeapons). Returns ok and a reason code. ]=]
+function ProgressionService.SetProficiency(player: Player, family: string): (boolean, string?)
+	if not table.find(Tuning.Combat.ProficiencyWeapons, family) then
+		return false, "UnknownFamily"
+	end
+	if not DataService.Get(player) then
+		return false, "NoProfile"
+	end
+	DataService.Update(player, function(p: any)
+		p.proficiency = family
+	end, "proficiency")
+	return true, nil
+end
+
+--[=[ Puts one unspent level into a class. Returns ok and a reason code. ]=]
+function ProgressionService.TrainClass(player: Player, classId: string): (boolean, string?)
+	local profile = DataService.Get(player)
+	if not profile then
+		return false, "NoProfile"
+	end
+	local ok, reason = Formulas.CanTrain(profile.classes, classId, Classes.ById, (levelInfo(profile)))
+	if not ok then
+		return false, reason
+	end
+	local newLevel = 0
+	local grantedBefore = Formulas.GrantedSkills(profile.classes, Classes.ById)
+	DataService.Update(player, function(p: any)
+		local found = false
+		for _, entry in p.classes do
+			if entry.id == classId then
+				entry.level += 1
+				newLevel = entry.level
+				found = true
+				break
+			end
+		end
+		if not found then
+			table.insert(p.classes, { id = classId, level = 1 })
+			newLevel = 1
+		end
+		for _, skillId in Formulas.GrantedSkills(p.classes, Classes.ById) do
+			local skill = Skills.ById[skillId]
+			if not table.find(grantedBefore, skillId) and skill.kind == "Active" then
+				Hotbar.AutoPlace(p.hotbar, Hotbar.Encode("Skill", skillId))
+			end
+			-- The first Weapon Proficiency locks in the equipped weapon type (or the default).
+			if skill.proficiency and p.proficiency == "" then
+				p.proficiency = Formulas.ProficiencyFamily(
+					nil,
+					Formulas.EquippedWeapon(p.equipment, p.inventory, Items.ById),
+					Tuning.Combat.ProficiencyWeapons[1]
+				)
+			end
+		end
+	end, "classes")
+	notify(player, "Trained", Classes.ById[classId].name, newLevel)
+	local picks = totalPicks(profile)
+	if picks > 0 then
+		notify(player, "SpellPickReady", picks)
+	end
+	return true, nil
+end
+
+--[=[ Dev: removes every level of a class (and spells only that class taught). ]=]
+function ProgressionService.RemoveClass(player: Player, classId: string)
+	DataService.Update(player, function(p: any)
+		for index, entry in p.classes do
+			if entry.id == classId then
+				table.remove(p.classes, index)
+				break
+			end
+		end
+		local def = Classes.ById[classId]
+		if def then
+			for i = #p.spells, 1, -1 do
+				if table.find(def.spellList, p.spells[i]) then
+					table.remove(p.spells, i)
+				end
+			end
+		end
+		p.hotbar = prunedHotbar(p, DevService.IsDev(player))
+	end, "classes")
+end
+
+--[=[ Learns a spell with one of the player's picks, notifying the reason when refused. ]=]
+function ProgressionService.LearnSpell(player: Player, spellId: string)
+	local profile = DataService.Get(player)
+	if not profile then
+		return
+	end
+	local ok, reason =
+		Formulas.CanLearnSpell(profile.classes, profile.spells, spellId, Classes.ById, Skills.ById, Tuning.Magic)
+	if not ok then
+		notify(player, reason or "UnknownSpell")
+		return
+	end
+	DataService.Update(player, function(p: any)
+		table.insert(p.spells, spellId)
+		Hotbar.AutoPlace(p.hotbar, Hotbar.Encode("Skill", spellId))
+	end, "spells")
+	notify(player, "LearnedSpell", Skills.ById[spellId].name)
+end
+
+--[=[ Puts a known entry into hotbar slot `index` (swapping if it is already on the bar), or clears the slot. ]=]
+local function setHotbarSlot(player: Player, index: number, kind: string, id: string)
+	local profile = DataService.Get(player)
+	if not profile or (kind ~= "" and not canSlot(profile, kind, id, DevService.IsDev(player))) then
+		return
+	end
+	local entry = if kind == "" then "" else Hotbar.Encode(kind :: Hotbar.Kind, id)
+	DataService.Update(player, function(p: any)
+		Hotbar.Place(p.hotbar, index, entry)
+	end, "hotbar")
+end
+
+-- Runs a trainer's service once the player confirms it on the trainer panel.
+local function requestTrain(player: Player, body: Instance)
+	if not body:IsA("BasePart") or not CollectionService:HasTag(body, "Trainer") then
+		return
+	end
+	local prompt = body:FindFirstChildOfClass("ProximityPrompt")
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if not prompt or not root or not root:IsA("BasePart") then
+		return
+	end
+	if (root.Position - body.Position).Magnitude > prompt.MaxActivationDistance + TRAINER_REACH_SLACK then
+		return
+	end
+	local kind = body:GetAttribute("TrainerType")
+	if kind == "Class" then
+		local classId = body:GetAttribute("ClassId")
+		if type(classId) == "string" then
+			local ok, reason = ProgressionService.TrainClass(player, classId)
+			if not ok then
+				notify(player, reason or "UnknownClass")
+			end
+		end
+	elseif kind == "Discipline" then
+		DisciplineService.LearnAll(player)
+	end
+end
+
+local function bindTrainer(instance: Instance)
+	local prompt = instance:FindFirstChildOfClass("ProximityPrompt")
+	if prompt then
+		prompt.Triggered:Connect(function(player)
+			-- Vendors open the shop screen; every other trainer opens the trainer panel.
+			NetServer.Fire(
+				if instance:GetAttribute("TrainerType") == "Vendor" then "OpenShop" else "OpenTrainer",
+				player,
+				instance
+			)
+		end)
+	end
+end
+
+-- Records a kill of a new enemy type; a summon option it opens is announced.
+local function discover(player: Player, id: string, name: string)
+	local profile = DataService.Get(player)
+	if not profile or profile.discoveries[id] then
+		return
+	end
+	DataService.Update(player, function(p: any)
+		p.discoveries[id] = true
+	end, "discoveries")
+	if Summons.Unlocks(SummonFamilies.ById, id) then
+		notify(player, "SummonUnlocked", name)
+	end
+end
+
+local function onDied(victim: Entity, killer: Entity?)
+	if victim.kind == "Npc" and killer and killer.kind == "Player" and killer.player then
+		local def = Enemies.ById[victim.defId]
+		if def then
+			local amount = Formulas.KillXp(
+				def.xp,
+				victim.level,
+				killer.level,
+				Tuning.Progression.KillXpLevelGapStep,
+				Tuning.Progression.KillXpMin,
+				Tuning.Progression.KillXpMax
+			)
+			ProgressionService.GrantXp(killer.player, amount)
+			discover(killer.player, victim.defId, def.name)
+		end
+	elseif victim.kind == "Player" and victim.player then
+		local player = victim.player
+		local profile = DataService.Get(player)
+		if profile then
+			local level = levelInfo(profile)
+			local curve = Tuning.Progression.XpToNext
+			local basis = curve[math.min(level, #curve)]
+			local debt = math.floor(basis * Tuning.Death.DebtFraction + 0.5)
+			DataService.Update(player, function(p: any)
+				p.xpDebt += debt
+			end, "xp")
+			weakenOnSpawn[player] = true
+			notify(player, "Died", profile.xpDebt)
+			NetServer.Fire("SendDeathState", player, { respawnIn = Tuning.Death.RespawnSeconds, debt = profile.xpDebt })
+			log:Debug("Player %d died; debt now %d", player.UserId, profile.xpDebt)
+		end
+	end
+end
+
+function ProgressionService.Init(deps: { [string]: any })
+	CombatService = deps.CombatService
+	DataService = deps.DataService
+	DisciplineService = deps.DisciplineService
+	EntityService = deps.EntityService
+	SkillService = deps.SkillService
+	StatService = deps.StatService
+	StatusService = deps.StatusService
+
+	NetServer.Connect("RequestProfile", pushSnapshot)
+	NetServer.Connect("LearnSpell", ProgressionService.LearnSpell)
+	NetServer.Connect("RequestTrain", requestTrain)
+	NetServer.Connect("SetHotbarSlot", setHotbarSlot)
+end
+
+function ProgressionService.Start()
+	DataService.Changed:Connect(pushSnapshot)
+	CombatService.Died:Connect(onDied)
+
+	EntityService.Added:Connect(function(entity: Entity)
+		local player = entity.player
+		if player and weakenOnSpawn[player] then
+			weakenOnSpawn[player] = nil
+			StatusService.Apply(entity, "weakened", Tuning.Death.WeakenedDuration, nil, nil)
+			StatService.Refill(entity)
+		end
+		if player then
+			pushSnapshot(player)
+		end
+	end)
+
+	for _, instance in CollectionService:GetTagged("Trainer") do
+		bindTrainer(instance)
+	end
+	CollectionService:GetInstanceAddedSignal("Trainer"):Connect(bindTrainer)
+
+	Players.PlayerRemoving:Connect(function(player)
+		pendingSnapshot[player] = nil
+		weakenOnSpawn[player] = nil
+	end)
+end
+
+return ProgressionService

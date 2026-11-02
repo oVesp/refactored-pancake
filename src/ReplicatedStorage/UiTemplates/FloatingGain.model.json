@@ -1,0 +1,146 @@
+{
+	"className": "BillboardGui",
+	"properties": {
+		"Size": {
+			"UDim2": [
+				[
+					0,
+					260
+				],
+				[
+					0,
+					30
+				]
+			]
+		},
+		"StudsOffset": [
+			0,
+			1.8,
+			0
+		],
+		"AlwaysOnTop": true,
+		"MaxDistance": 120,
+		"LightInfluence": 0,
+		"ResetOnSpawn": false
+	},
+	"children": [
+		{
+			"name": "Row",
+			"className": "Frame",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							0
+						],
+						[
+							1,
+							0
+						]
+					]
+				},
+				"BackgroundTransparency": 1
+			},
+			"children": [
+				{
+					"name": "UIListLayout",
+					"className": "UIListLayout",
+					"properties": {
+						"FillDirection": "Horizontal",
+						"HorizontalAlignment": "Center",
+						"VerticalAlignment": "Center",
+						"Padding": {
+							"UDim": [
+								0,
+								6
+							]
+						},
+						"SortOrder": "LayoutOrder"
+					}
+				},
+				{
+					"name": "Bind_Gem",
+					"className": "Frame",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									0,
+									9
+								],
+								[
+									0,
+									9
+								]
+							]
+						},
+						"Rotation": 45,
+						"BackgroundColor3": [
+							0.824,
+							0.718,
+							0.514
+						],
+						"BorderSizePixel": 0,
+						"LayoutOrder": 1
+					},
+					"children": [
+						{
+							"name": "UIStroke",
+							"className": "UIStroke",
+							"properties": {
+								"Color": [
+									0.051,
+									0.063,
+									0.086
+								],
+								"Thickness": 1.5
+							}
+						}
+					]
+				},
+				{
+					"name": "Bind_Text",
+					"className": "TextLabel",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									0,
+									0
+								],
+								[
+									1,
+									0
+								]
+							]
+						},
+						"AutomaticSize": "X",
+						"BackgroundTransparency": 1,
+						"Text": "",
+						"TextColor3": [
+							0.941,
+							0.867,
+							0.69
+						],
+						"FontFace": {
+							"Font": {
+								"family": "rbxasset://fonts/families/AccanthisADFStd.json",
+								"weight": "Bold",
+								"style": "Normal"
+							}
+						},
+						"TextSize": 22,
+						"TextStrokeTransparency": 0.2,
+						"TextStrokeColor3": [
+							0.051,
+							0.063,
+							0.086
+						],
+						"LayoutOrder": 2
+					}
+				}
+			]
+		}
+	]
+}

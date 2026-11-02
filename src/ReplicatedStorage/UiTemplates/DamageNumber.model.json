@@ -1,0 +1,70 @@
+{
+	"className": "BillboardGui",
+	"properties": {
+		"Size": {
+			"UDim2": [
+				[
+					0,
+					120
+				],
+				[
+					0,
+					34
+				]
+			]
+		},
+		"StudsOffset": [
+			0,
+			2.5,
+			0
+		],
+		"AlwaysOnTop": true,
+		"MaxDistance": 120,
+		"LightInfluence": 0
+	},
+	"children": [
+		{
+			"name": "Bind_Text",
+			"className": "TextLabel",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							0
+						],
+						[
+							1,
+							0
+						]
+					]
+				},
+				"BackgroundTransparency": 1,
+				"Text": "",
+				"TextColor3": [
+					1,
+					1,
+					1
+				],
+				"FontFace": {
+					"Font": {
+						"family": "rbxasset://fonts/families/AccanthisADFStd.json",
+						"weight": "Bold",
+						"style": "Normal"
+					}
+				},
+				"TextSize": 16,
+				"TextXAlignment": "Center",
+				"TextYAlignment": "Center",
+				"TextWrapped": true,
+				"TextStrokeTransparency": 0.15,
+				"TextStrokeColor3": [
+					0.051,
+					0.063,
+					0.086
+				],
+				"TextScaled": true
+			}
+		}
+	]
+}

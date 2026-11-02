@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# Quality gate before every commit. Never bypass with --no-verify.
+exec sh tools/gate.sh

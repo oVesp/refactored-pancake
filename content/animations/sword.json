@@ -1,0 +1,61 @@
+{
+	"set": "Sword",
+	"kind": "skill",
+	"defaults": {
+		"origin": "Owner-authored sword and shield animations on the stock R15 rig",
+		"license": "project"
+	},
+	"clips": {
+		"BasicSwordSlash1": {
+			"looped": false,
+			"markers": {
+				"Hit": 0.68
+			},
+			"tier": "final",
+			"notes": "Diagonal cut, top right to bottom left. Authored by the owner and uploaded from Studio; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider), 1.0 s.",
+			"assetId": "84409040482136",
+			"history": []
+		},
+		"BasicSwordSlash2": {
+			"looped": false,
+			"markers": {
+				"Hit": 0.54
+			},
+			"tier": "final",
+			"notes": "Horizontal cut, left to right. Authored by the owner and uploaded from Studio; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider), 1.0 s.",
+			"assetId": "104365583971619",
+			"history": []
+		},
+		"BasicSwordSlash3": {
+			"looped": false,
+			"markers": {
+				"Hit": 0.47
+			},
+			"tier": "final",
+			"notes": "Vertical chop, top to bottom; the chain finisher. Authored by the owner and uploaded from Studio; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider), 1.0 s.",
+			"assetId": "92205821610809",
+			"history": []
+		},
+		"BasicSwordIdle": {
+			"looped": true,
+			"tier": "final",
+			"notes": "Sword idle, full body. Authored by the owner and uploaded from Studio; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider), 1.0 s.",
+			"assetId": "75413599382020",
+			"history": []
+		},
+		"BasicSwordIdleNoLegs": {
+			"looped": true,
+			"tier": "final",
+			"notes": "Sword idle without legs, layered over walking and running. Authored by the owner and uploaded from Studio; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider), 1.0 s.",
+			"assetId": "86017222558865",
+			"history": []
+		},
+		"ShieldBlock": {
+			"looped": true,
+			"tier": "final",
+			"notes": "Shield block, left arm only. Authored by the owner and uploaded from Studio; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider), 1.0 s.",
+			"assetId": "114807209446225",
+			"history": []
+		}
+	}
+}

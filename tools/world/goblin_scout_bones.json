@@ -1,0 +1,344 @@
+{
+  "bones": [
+    {
+      "name": "root.x",
+      "offset": 0.09406090527772903
+    },
+    {
+      "name": "thigh_stretch.r",
+      "offset": 0.28307676315307617,
+      "parent": "root.x"
+    },
+    {
+      "name": "thigh_stretch.l",
+      "offset": 0.28307682275772095,
+      "parent": "root.x"
+    },
+    {
+      "name": "spine_01.x",
+      "offset": 0.2568524479866028,
+      "parent": "root.x"
+    },
+    {
+      "name": "leg_stretch.r",
+      "offset": 0.8830411434173584,
+      "parent": "thigh_stretch.r"
+    },
+    {
+      "name": "thigh_twist.r",
+      "offset": 5.960464477539063e-8,
+      "parent": "thigh_stretch.r"
+    },
+    {
+      "name": "leg_stretch.l",
+      "offset": 0.8830409049987793,
+      "parent": "thigh_stretch.l"
+    },
+    {
+      "name": "thigh_twist.l",
+      "offset": 5.960464477539063e-8,
+      "parent": "thigh_stretch.l"
+    },
+    {
+      "name": "spine_02.x",
+      "offset": 0.2570183277130127,
+      "parent": "spine_01.x"
+    },
+    {
+      "name": "leg_twist.r",
+      "offset": 0.29829174280166626,
+      "parent": "leg_stretch.r"
+    },
+    {
+      "name": "foot.r",
+      "offset": 0.5965838432312012,
+      "parent": "leg_stretch.r"
+    },
+    {
+      "name": "leg_twist.l",
+      "offset": 0.2982921004295349,
+      "parent": "leg_stretch.l"
+    },
+    {
+      "name": "foot.l",
+      "offset": 0.5965840816497803,
+      "parent": "leg_stretch.l"
+    },
+    {
+      "name": "spine_03.x",
+      "offset": 0.2563145160675049,
+      "parent": "spine_02.x"
+    },
+    {
+      "name": "toes_01.r",
+      "offset": 0.39277374744415283,
+      "parent": "foot.r"
+    },
+    {
+      "name": "toes_01.l",
+      "offset": 0.3927740156650543,
+      "parent": "foot.l"
+    },
+    {
+      "name": "neck.x",
+      "offset": 0.25628185272216797,
+      "parent": "spine_03.x"
+    },
+    {
+      "name": "shoulder.r",
+      "offset": 0.21931172907352448,
+      "parent": "spine_03.x"
+    },
+    {
+      "name": "shoulder.l",
+      "offset": 0.21931172907352448,
+      "parent": "spine_03.x"
+    },
+    {
+      "name": "head.x",
+      "offset": 0.13065063953399658,
+      "parent": "neck.x"
+    },
+    {
+      "name": "arm_stretch.r",
+      "offset": 0.4279373288154602,
+      "parent": "shoulder.r"
+    },
+    {
+      "name": "arm_stretch.l",
+      "offset": 0.4279373288154602,
+      "parent": "shoulder.l"
+    },
+    {
+      "name": "arm_twist.r",
+      "offset": 1.2287812012345967e-7,
+      "parent": "arm_stretch.r"
+    },
+    {
+      "name": "forearm_stretch.r",
+      "offset": 0.6195240616798401,
+      "parent": "arm_stretch.r"
+    },
+    {
+      "name": "forearm_stretch.l",
+      "offset": 0.6195241212844849,
+      "parent": "arm_stretch.l"
+    },
+    {
+      "name": "arm_twist.l",
+      "offset": 1.2013700256829907e-7,
+      "parent": "arm_stretch.l"
+    },
+    {
+      "name": "hand.r",
+      "offset": 0.6267656683921814,
+      "parent": "forearm_stretch.r"
+    },
+    {
+      "name": "forearm_twist.r",
+      "offset": 0.31338298320770264,
+      "parent": "forearm_stretch.r"
+    },
+    {
+      "name": "hand.l",
+      "offset": 0.6267654895782471,
+      "parent": "forearm_stretch.l"
+    },
+    {
+      "name": "forearm_twist.l",
+      "offset": 0.3133827745914459,
+      "parent": "forearm_stretch.l"
+    },
+    {
+      "name": "thumb1.r",
+      "offset": 0.18835438787937164,
+      "parent": "hand.r"
+    },
+    {
+      "name": "ring1_base.r",
+      "offset": 0.1767261028289795,
+      "parent": "hand.r"
+    },
+    {
+      "name": "pinky1_base.r",
+      "offset": 0.2222851663827896,
+      "parent": "hand.r"
+    },
+    {
+      "name": "middle1_base.r",
+      "offset": 0.1527658998966217,
+      "parent": "hand.r"
+    },
+    {
+      "name": "index1_base.r",
+      "offset": 0.16561663150787354,
+      "parent": "hand.r"
+    },
+    {
+      "name": "thumb1.l",
+      "offset": 0.1883540004491806,
+      "parent": "hand.l"
+    },
+    {
+      "name": "ring1_base.l",
+      "offset": 0.17672663927078247,
+      "parent": "hand.l"
+    },
+    {
+      "name": "pinky1_base.l",
+      "offset": 0.22228530049324036,
+      "parent": "hand.l"
+    },
+    {
+      "name": "middle1_base.l",
+      "offset": 0.15276603400707245,
+      "parent": "hand.l"
+    },
+    {
+      "name": "index1_base.l",
+      "offset": 0.16561666131019592,
+      "parent": "hand.l"
+    },
+    {
+      "name": "thumb2.r",
+      "offset": 0.18835437297821045,
+      "parent": "thumb1.r"
+    },
+    {
+      "name": "ring1.r",
+      "offset": 0.290282666683197,
+      "parent": "ring1_base.r"
+    },
+    {
+      "name": "pinky1.r",
+      "offset": 0.2597780227661133,
+      "parent": "pinky1_base.r"
+    },
+    {
+      "name": "middle1.r",
+      "offset": 0.3058399558067322,
+      "parent": "middle1_base.r"
+    },
+    {
+      "name": "index1.r",
+      "offset": 0.30472901463508606,
+      "parent": "index1_base.r"
+    },
+    {
+      "name": "thumb2.l",
+      "offset": 0.18835458159446716,
+      "parent": "thumb1.l"
+    },
+    {
+      "name": "ring1.l",
+      "offset": 0.290282279253006,
+      "parent": "ring1_base.l"
+    },
+    {
+      "name": "pinky1.l",
+      "offset": 0.25977858901023865,
+      "parent": "pinky1_base.l"
+    },
+    {
+      "name": "middle1.l",
+      "offset": 0.3058401942253113,
+      "parent": "middle1_base.l"
+    },
+    {
+      "name": "index1.l",
+      "offset": 0.30472883582115173,
+      "parent": "index1_base.l"
+    },
+    {
+      "name": "thumb3.r",
+      "offset": 0.21771830320358276,
+      "parent": "thumb2.r"
+    },
+    {
+      "name": "ring2.r",
+      "offset": 0.12707553803920746,
+      "parent": "ring1.r"
+    },
+    {
+      "name": "pinky2.r",
+      "offset": 0.10918247699737549,
+      "parent": "pinky1.r"
+    },
+    {
+      "name": "middle2.r",
+      "offset": 0.16327020525932312,
+      "parent": "middle1.r"
+    },
+    {
+      "name": "index2.r",
+      "offset": 0.13280147314071655,
+      "parent": "index1.r"
+    },
+    {
+      "name": "thumb3.l",
+      "offset": 0.21771854162216187,
+      "parent": "thumb2.l"
+    },
+    {
+      "name": "ring2.l",
+      "offset": 0.12707579135894775,
+      "parent": "ring1.l"
+    },
+    {
+      "name": "pinky2.l",
+      "offset": 0.10918183624744415,
+      "parent": "pinky1.l"
+    },
+    {
+      "name": "middle2.l",
+      "offset": 0.16326995193958282,
+      "parent": "middle1.l"
+    },
+    {
+      "name": "index2.l",
+      "offset": 0.1328016221523285,
+      "parent": "index1.l"
+    },
+    {
+      "name": "ring3.r",
+      "offset": 0.1380944848060608,
+      "parent": "ring2.r"
+    },
+    {
+      "name": "pinky3.r",
+      "offset": 0.10548853874206543,
+      "parent": "pinky2.r"
+    },
+    {
+      "name": "middle3.r",
+      "offset": 0.16751956939697266,
+      "parent": "middle2.r"
+    },
+    {
+      "name": "index3.r",
+      "offset": 0.1302998661994934,
+      "parent": "index2.r"
+    },
+    {
+      "name": "ring3.l",
+      "offset": 0.13809412717819214,
+      "parent": "ring2.l"
+    },
+    {
+      "name": "pinky3.l",
+      "offset": 0.10548824071884155,
+      "parent": "pinky2.l"
+    },
+    {
+      "name": "middle3.l",
+      "offset": 0.16751974821090698,
+      "parent": "middle2.l"
+    },
+    {
+      "name": "index3.l",
+      "offset": 0.13029983639717102,
+      "parent": "index2.l"
+    }
+  ],
+  "source": "tools/world/goblin_scout_import.rbxm"
+}

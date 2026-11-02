@@ -1,0 +1,97 @@
+{
+	"className": "TextLabel",
+	"properties": {
+		"Size": {
+			"UDim2": [
+				[
+					0,
+					0
+				],
+				[
+					0,
+					20
+				]
+			]
+		},
+		"AutomaticSize": "X",
+		"BackgroundColor3": [
+			0.145,
+			0.176,
+			0.227
+		],
+		"BackgroundTransparency": 0.1,
+		"BorderSizePixel": 0,
+		"Text": "",
+		"TextColor3": [
+			0.902,
+			0.875,
+			0.812
+		],
+		"FontFace": {
+			"Font": {
+				"family": "rbxasset://fonts/families/BuilderSans.json",
+				"weight": "Bold",
+				"style": "Normal"
+			}
+		},
+		"TextSize": 12
+	},
+	"children": [
+		{
+			"name": "UICorner",
+			"className": "UICorner",
+			"properties": {
+				"CornerRadius": {
+					"UDim": [
+						0,
+						3
+					]
+				}
+			}
+		},
+		{
+			"name": "UIStroke",
+			"className": "UIStroke",
+			"properties": {
+				"Color": [
+					0.824,
+					0.718,
+					0.514
+				],
+				"Thickness": 1.5,
+				"Transparency": 0,
+				"ApplyStrokeMode": "Border"
+			}
+		},
+		{
+			"name": "UIPadding",
+			"className": "UIPadding",
+			"properties": {
+				"PaddingTop": {
+					"UDim": [
+						0,
+						3
+					]
+				},
+				"PaddingRight": {
+					"UDim": [
+						0,
+						7
+					]
+				},
+				"PaddingBottom": {
+					"UDim": [
+						0,
+						3
+					]
+				},
+				"PaddingLeft": {
+					"UDim": [
+						0,
+						7
+					]
+				}
+			}
+		}
+	]
+}

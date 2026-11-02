@@ -1,0 +1,416 @@
+{
+	"className": "Frame",
+	"properties": {
+		"Size": {
+			"UDim2": [
+				[
+					0,
+					60
+				],
+				[
+					0,
+					60
+				]
+			]
+		},
+		"BackgroundColor3": [
+			0.145,
+			0.176,
+			0.227
+		],
+		"BorderSizePixel": 0
+	},
+	"children": [
+		{
+			"name": "UICorner",
+			"className": "UICorner",
+			"properties": {
+				"CornerRadius": {
+					"UDim": [
+						0,
+						3
+					]
+				}
+			}
+		},
+		{
+			"name": "UIStroke",
+			"className": "UIStroke",
+			"properties": {
+				"Color": [
+					0.824,
+					0.718,
+					0.514
+				],
+				"Thickness": 1.5,
+				"Transparency": 0.1,
+				"ApplyStrokeMode": "Border"
+			}
+		},
+		{
+			"name": "UIGradient",
+			"className": "UIGradient",
+			"properties": {
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									1,
+									1,
+									1
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.55,
+									0.55,
+									0.55
+								]
+							}
+						]
+					}
+				},
+				"Rotation": 90
+			}
+		},
+		{
+			"name": "InnerBorder",
+			"className": "Frame",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							-6
+						],
+						[
+							1,
+							-6
+						]
+					]
+				},
+				"Position": {
+					"UDim2": [
+						[
+							0,
+							3
+						],
+						[
+							0,
+							3
+						]
+					]
+				},
+				"BackgroundTransparency": 1
+			},
+			"children": [
+				{
+					"name": "UICorner",
+					"className": "UICorner",
+					"properties": {
+						"CornerRadius": {
+							"UDim": [
+								0,
+								2
+							]
+						}
+					}
+				},
+				{
+					"name": "UIStroke",
+					"className": "UIStroke",
+					"properties": {
+						"Color": [
+							0.824,
+							0.718,
+							0.514
+						],
+						"Thickness": 1,
+						"Transparency": 0.7,
+						"ApplyStrokeMode": "Border"
+					}
+				}
+			]
+		},
+		{
+			"name": "Bind_Name",
+			"className": "TextLabel",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							-8
+						],
+						[
+							0.5,
+							0
+						]
+					]
+				},
+				"BackgroundTransparency": 1,
+				"Text": "",
+				"TextColor3": [
+					0.902,
+					0.875,
+					0.812
+				],
+				"FontFace": {
+					"Font": {
+						"family": "rbxasset://fonts/families/BuilderSans.json",
+						"weight": "Bold",
+						"style": "Normal"
+					}
+				},
+				"TextSize": 13,
+				"TextXAlignment": "Center",
+				"TextYAlignment": "Center",
+				"TextWrapped": true,
+				"Position": {
+					"UDim2": [
+						[
+							0,
+							4
+						],
+						[
+							0.22,
+							0
+						]
+					]
+				},
+				"TextStrokeTransparency": 0.5,
+				"TextStrokeColor3": [
+					0.051,
+					0.063,
+					0.086
+				],
+				"TextScaled": true
+			},
+			"children": [
+				{
+					"name": "UITextSizeConstraint",
+					"className": "UITextSizeConstraint",
+					"properties": {
+						"MaxTextSize": 14,
+						"MinTextSize": 8
+					}
+				}
+			]
+		},
+		{
+			"name": "KeyBadge",
+			"className": "Frame",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							0,
+							16
+						],
+						[
+							0,
+							16
+						]
+					]
+				},
+				"Position": {
+					"UDim2": [
+						[
+							0,
+							-3
+						],
+						[
+							0,
+							-3
+						]
+					]
+				},
+				"BackgroundColor3": [
+					0.082,
+					0.098,
+					0.133
+				],
+				"BorderSizePixel": 0,
+				"ZIndex": 4
+			},
+			"children": [
+				{
+					"name": "UICorner",
+					"className": "UICorner",
+					"properties": {
+						"CornerRadius": {
+							"UDim": [
+								0,
+								2
+							]
+						}
+					}
+				},
+				{
+					"name": "UIStroke",
+					"className": "UIStroke",
+					"properties": {
+						"Color": [
+							0.824,
+							0.718,
+							0.514
+						],
+						"Thickness": 1,
+						"Transparency": 0,
+						"ApplyStrokeMode": "Border"
+					}
+				},
+				{
+					"name": "Bind_Key",
+					"className": "TextLabel",
+					"properties": {
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									1,
+									0
+								]
+							]
+						},
+						"BackgroundTransparency": 1,
+						"Text": "1",
+						"TextColor3": [
+							0.941,
+							0.867,
+							0.69
+						],
+						"FontFace": {
+							"Font": {
+								"family": "rbxasset://fonts/families/BuilderSans.json",
+								"weight": "Bold",
+								"style": "Normal"
+							}
+						},
+						"TextSize": 11,
+						"TextXAlignment": "Center",
+						"TextYAlignment": "Center",
+						"TextWrapped": true,
+						"ZIndex": 4
+					}
+				}
+			]
+		},
+		{
+			"name": "Bind_Cost",
+			"className": "TextLabel",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							-8
+						],
+						[
+							0,
+							12
+						]
+					]
+				},
+				"BackgroundTransparency": 1,
+				"Text": "",
+				"TextColor3": [
+					0.49,
+					0.714,
+					0.886
+				],
+				"FontFace": {
+					"Font": {
+						"family": "rbxasset://fonts/families/BuilderSans.json",
+						"weight": "Bold",
+						"style": "Normal"
+					}
+				},
+				"TextSize": 10,
+				"TextXAlignment": "Right",
+				"TextYAlignment": "Center",
+				"TextWrapped": true,
+				"Position": {
+					"UDim2": [
+						[
+							0,
+							4
+						],
+						[
+							1,
+							-14
+						]
+					]
+				},
+				"TextStrokeTransparency": 0.5,
+				"TextStrokeColor3": [
+					0.051,
+					0.063,
+					0.086
+				]
+			}
+		},
+		{
+			"name": "Bind_Cooldown",
+			"className": "Frame",
+			"properties": {
+				"Size": {
+					"UDim2": [
+						[
+							1,
+							0
+						],
+						[
+							0,
+							0
+						]
+					]
+				},
+				"Position": {
+					"UDim2": [
+						[
+							0,
+							0
+						],
+						[
+							1,
+							0
+						]
+					]
+				},
+				"AnchorPoint": [
+					0,
+					1
+				],
+				"BackgroundColor3": [
+					0.051,
+					0.063,
+					0.086
+				],
+				"BackgroundTransparency": 0.3,
+				"BorderSizePixel": 0,
+				"ZIndex": 3
+			},
+			"children": [
+				{
+					"name": "UICorner",
+					"className": "UICorner",
+					"properties": {
+						"CornerRadius": {
+							"UDim": [
+								0,
+								3
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}

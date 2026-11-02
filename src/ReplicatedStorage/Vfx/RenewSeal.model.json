@@ -1,0 +1,95 @@
+{
+	"className": "Part",
+	"properties": {
+		"Anchored": true,
+		"CanCollide": false,
+		"CanQuery": false,
+		"CanTouch": false,
+		"CastShadow": false,
+		"Transparency": 1,
+		"Size": [
+			6,
+			0.05,
+			6
+		]
+	},
+	"children": [
+		{
+			"name": "Seal",
+			"className": "SurfaceGui",
+			"properties": {
+				"Face": "Top",
+				"SizingMode": "FixedSize",
+				"CanvasSize": [
+					256,
+					256
+				],
+				"LightInfluence": 0,
+				"Brightness": 3,
+				"ClipsDescendants": false,
+				"ZOffset": 0
+			},
+			"attributes": {
+				"FlipbookGrid": 1,
+				"Lifetime": 3,
+				"Fade": 0.25,
+				"Grow": 1.05,
+				"Spin": 25
+			},
+			"children": [
+				{
+					"name": "Seal",
+					"className": "ImageLabel",
+					"properties": {
+						"BackgroundTransparency": 1,
+						"AnchorPoint": [
+							0.5,
+							0.5
+						],
+						"Position": {
+							"UDim2": [
+								[
+									0.5,
+									0
+								],
+								[
+									0.5,
+									0
+								]
+							]
+						},
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									1,
+									0
+								]
+							]
+						},
+						"Rotation": 0,
+						"ImageRectSize": [
+							0,
+							0
+						],
+						"ImageColor3": {
+							"Color3": [
+								0.5098,
+								0.9412,
+								0.549
+							]
+						},
+						"ImageTransparency": 0.35,
+						"ZIndex": 1
+					},
+					"attributes": {
+						"TextureKey": "RuneCircle"
+					}
+				}
+			]
+		}
+	]
+}

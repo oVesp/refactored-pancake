@@ -1,0 +1,122 @@
+{
+	"set": "Goblin",
+	"kind": "enemy",
+	"defaults": {
+		"origin": "Action Forge (Quaternius) clips remapped to the Goblin Scout rig (assets/original/characters/mobs/Goblin Scout)",
+		"license": "CC0 1.0 (Quaternius)"
+	},
+	"clips": {
+		"GoblinIdle": {
+			"role": "Idle",
+			"looped": true,
+			"tier": "placeholder",
+			"notes": "Action Forge clip idle_loop, remapped to the Goblin Scout rig by the owner.",
+			"assetId": "93137340496358",
+			"history": [
+				{
+					"assetId": "90357216124611",
+					"tier": "placeholder",
+					"source": "Goblin_Idle_A from the retired assets/blender/goblin/goblin.blend",
+					"uploaded": "2026-10-28",
+					"retired": "2026-10-28"
+				}
+			]
+		},
+		"GoblinWalk": {
+			"role": "Walk",
+			"looped": true,
+			"tier": "placeholder",
+			"notes": "Action Forge clip walk_loop, remapped to the Goblin Scout rig by the owner.",
+			"assetId": "99302927912479",
+			"history": [
+				{
+					"assetId": "79496707204604",
+					"tier": "placeholder",
+					"source": "Goblin_Walk from the retired assets/blender/goblin/goblin.blend",
+					"uploaded": "2026-10-28",
+					"retired": "2026-10-28"
+				}
+			]
+		},
+		"GoblinRun": {
+			"role": "Run",
+			"looped": true,
+			"tier": "placeholder",
+			"notes": "Action Forge clip jog_fwd_loop, remapped to the Goblin Scout rig by the owner.",
+			"assetId": "133526960064803",
+			"history": [
+				{
+					"assetId": "71567572512919",
+					"tier": "placeholder",
+					"source": "Goblin_Jog from the retired assets/blender/goblin/goblin.blend",
+					"uploaded": "2026-10-28",
+					"retired": "2026-10-28"
+				}
+			]
+		},
+		"GoblinAttack": {
+			"role": "Attack",
+			"looped": false,
+			"tier": "placeholder",
+			"notes": "Action Forge clip sword_regular_a, remapped to the Goblin Scout rig by the owner.",
+			"assetId": "106536653497390",
+			"history": [
+				{
+					"assetId": "110563196893852",
+					"tier": "placeholder",
+					"source": "Goblin_Punch_Jab from the retired assets/blender/goblin/goblin.blend",
+					"uploaded": "2026-10-28",
+					"retired": "2026-10-28"
+				}
+			]
+		},
+		"GoblinThrow": {
+			"role": "Throw",
+			"looped": false,
+			"tier": "placeholder",
+			"notes": "Action Forge clip overhandthrow, remapped to the Goblin Scout rig by the owner.",
+			"assetId": "95138474801891",
+			"history": [
+				{
+					"assetId": "72380534780247",
+					"tier": "placeholder",
+					"source": "Goblin_OverhandThrow from the retired assets/blender/goblin/goblin.blend",
+					"uploaded": "2026-10-28",
+					"retired": "2026-10-28"
+				}
+			]
+		},
+		"GoblinHit": {
+			"role": "Hit",
+			"looped": false,
+			"tier": "placeholder",
+			"notes": "Action Forge clip hit_chest, remapped to the Goblin Scout rig by the owner.",
+			"assetId": "125369021853241",
+			"history": [
+				{
+					"assetId": "114573933190100",
+					"tier": "placeholder",
+					"source": "Goblin_Hit_Chest from the retired assets/blender/goblin/goblin.blend",
+					"uploaded": "2026-10-28",
+					"retired": "2026-10-28"
+				}
+			]
+		},
+		"GoblinDeath": {
+			"role": "Death",
+			"looped": false,
+			"tier": "placeholder",
+			"notes": "Action Forge clip death01, remapped to the Goblin Scout rig by the owner.",
+			"assetId": "122979177869235",
+			"history": [
+				{
+					"assetId": "122683815689784",
+					"tier": "placeholder",
+					"source": "Goblin_Death_B from the retired assets/blender/goblin/goblin.blend",
+					"uploaded": "2026-10-28",
+					"retired": "2026-10-28"
+				}
+			]
+		}
+	}
+}

@@ -1,0 +1,158 @@
+{
+	"className": "Model",
+	"children": [
+		{
+			"name": "Handle",
+			"className": "Part",
+			"properties": {
+				"Size": [
+					0.3,
+					6,
+					0.3
+				],
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							1,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				},
+				"Color": [
+					0.4706,
+					0.3216,
+					0.1961
+				],
+				"Material": "Wood",
+				"Shape": "Block",
+				"Anchored": true,
+				"CanCollide": false,
+				"CastShadow": true,
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth"
+			},
+			"children": [
+				{
+					"name": "Grip",
+					"className": "Attachment"
+				}
+			]
+		},
+		{
+			"name": "Crown",
+			"className": "Part",
+			"properties": {
+				"Size": [
+					0.6,
+					0.4,
+					0.6
+				],
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							4.05,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				},
+				"Color": [
+					0.4314,
+					0.4314,
+					0.4627
+				],
+				"Material": "Metal",
+				"Shape": "Block",
+				"Anchored": true,
+				"CanCollide": false,
+				"CastShadow": true,
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth"
+			}
+		},
+		{
+			"name": "Orb",
+			"className": "Part",
+			"properties": {
+				"Size": [
+					0.8,
+					0.8,
+					0.8
+				],
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							4.55,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				},
+				"Color": [
+					0.4314,
+					0.6667,
+					1.0
+				],
+				"Material": "Neon",
+				"Shape": "Ball",
+				"Anchored": true,
+				"CanCollide": false,
+				"CastShadow": true,
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth"
+			}
+		}
+	]
+}

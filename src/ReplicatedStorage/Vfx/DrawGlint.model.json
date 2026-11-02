@@ -1,0 +1,94 @@
+{
+	"className": "Part",
+	"properties": {
+		"Anchored": true,
+		"CanCollide": false,
+		"CanQuery": false,
+		"CanTouch": false,
+		"CastShadow": false,
+		"Transparency": 1,
+		"Size": [
+			1,
+			1,
+			1
+		]
+	},
+	"children": [
+		{
+			"name": "Glint",
+			"className": "ParticleEmitter",
+			"properties": {
+				"Enabled": false,
+				"Rate": 0,
+				"LightInfluence": 0,
+				"Rotation": {
+					"NumberRange": [
+						45,
+						45
+					]
+				},
+				"Speed": {
+					"NumberRange": [
+						0,
+						0
+					]
+				},
+				"Size": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0,
+								"value": 1,
+								"envelope": 0
+							},
+							{
+								"time": 0.3,
+								"value": 3.5,
+								"envelope": 0
+							},
+							{
+								"time": 1,
+								"value": 0,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Lifetime": {
+					"NumberRange": [
+						0.2,
+						0.2
+					]
+				},
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									1.0,
+									0.9412,
+									0.7451
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									1.0,
+									0.9412,
+									0.7451
+								]
+							}
+						]
+					}
+				},
+				"LightEmission": 1,
+				"Brightness": 4
+			},
+			"attributes": {
+				"TextureKey": "Glint",
+				"EmitCount": 1
+			}
+		}
+	]
+}

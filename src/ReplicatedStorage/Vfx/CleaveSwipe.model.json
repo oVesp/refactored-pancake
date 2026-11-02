@@ -1,0 +1,347 @@
+{
+	"className": "Part",
+	"properties": {
+		"Anchored": true,
+		"CanCollide": false,
+		"CanQuery": false,
+		"CanTouch": false,
+		"CastShadow": false,
+		"Transparency": 1,
+		"Size": [
+			16,
+			0.05,
+			16
+		]
+	},
+	"children": [
+		{
+			"name": "Blade",
+			"className": "SurfaceGui",
+			"properties": {
+				"Face": "Top",
+				"SizingMode": "FixedSize",
+				"CanvasSize": [
+					256,
+					256
+				],
+				"LightInfluence": 0,
+				"Brightness": 2,
+				"ClipsDescendants": false,
+				"ZOffset": 0
+			},
+			"attributes": {
+				"FlipbookGrid": 4,
+				"FramePixels": 256,
+				"Lifetime": 0.3,
+				"Grow": 1.1
+			},
+			"children": [
+				{
+					"name": "Body",
+					"className": "ImageLabel",
+					"properties": {
+						"BackgroundTransparency": 1,
+						"AnchorPoint": [
+							0.5,
+							0.5
+						],
+						"Position": {
+							"UDim2": [
+								[
+									0.5,
+									0
+								],
+								[
+									0.5,
+									0
+								]
+							]
+						},
+						"Size": {
+							"UDim2": [
+								[
+									1,
+									0
+								],
+								[
+									1,
+									0
+								]
+							]
+						},
+						"Rotation": 90,
+						"ImageRectSize": [
+							256,
+							256
+						],
+						"ImageColor3": {
+							"Color3": [
+								0.5882,
+								0.7255,
+								1.0
+							]
+						},
+						"ImageTransparency": 0,
+						"ZIndex": 2
+					},
+					"attributes": {
+						"TextureKey": "SlashArc",
+						"ColorTo": {
+							"Color3": [
+								0.2353,
+								0.3333,
+								0.6667
+							]
+						}
+					}
+				},
+				{
+					"name": "Core",
+					"className": "ImageLabel",
+					"properties": {
+						"BackgroundTransparency": 1,
+						"AnchorPoint": [
+							0.5,
+							0.5
+						],
+						"Position": {
+							"UDim2": [
+								[
+									0.5,
+									0
+								],
+								[
+									0.5,
+									0
+								]
+							]
+						},
+						"Size": {
+							"UDim2": [
+								[
+									0.97,
+									0
+								],
+								[
+									0.97,
+									0
+								]
+							]
+						},
+						"Rotation": 90,
+						"ImageRectSize": [
+							256,
+							256
+						],
+						"ImageColor3": {
+							"Color3": [
+								1.0,
+								1.0,
+								1.0
+							]
+						},
+						"ImageTransparency": 0.3,
+						"ZIndex": 3
+					},
+					"attributes": {
+						"TextureKey": "SlashArc"
+					}
+				}
+			]
+		},
+		{
+			"name": "Echo",
+			"className": "SurfaceGui",
+			"properties": {
+				"Face": "Top",
+				"SizingMode": "FixedSize",
+				"CanvasSize": [
+					256,
+					256
+				],
+				"LightInfluence": 0,
+				"Brightness": 2,
+				"ClipsDescendants": false,
+				"ZOffset": -1
+			},
+			"attributes": {
+				"FlipbookGrid": 4,
+				"FramePixels": 256,
+				"Lifetime": 0.3,
+				"Grow": 1.12,
+				"Delay": 0.05
+			},
+			"children": [
+				{
+					"name": "Body",
+					"className": "ImageLabel",
+					"properties": {
+						"BackgroundTransparency": 1,
+						"AnchorPoint": [
+							0.5,
+							0.5
+						],
+						"Position": {
+							"UDim2": [
+								[
+									0.5,
+									0
+								],
+								[
+									0.5,
+									0
+								]
+							]
+						},
+						"Size": {
+							"UDim2": [
+								[
+									1.15,
+									0
+								],
+								[
+									1.15,
+									0
+								]
+							]
+						},
+						"Rotation": 90,
+						"ImageRectSize": [
+							256,
+							256
+						],
+						"ImageColor3": {
+							"Color3": [
+								0.4314,
+								0.549,
+								0.8627
+							]
+						},
+						"ImageTransparency": 0.35,
+						"ZIndex": 1
+					},
+					"attributes": {
+						"TextureKey": "SlashArc"
+					}
+				}
+			]
+		},
+		{
+			"name": "Center",
+			"className": "Attachment",
+			"properties": {
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							0,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				}
+			},
+			"children": [
+				{
+					"name": "Sparks",
+					"className": "ParticleEmitter",
+					"properties": {
+						"Enabled": false,
+						"Rate": 0,
+						"LightInfluence": 0,
+						"Rotation": {
+							"NumberRange": [
+								0,
+								0
+							]
+						},
+						"Speed": {
+							"NumberRange": [
+								24,
+								40
+							]
+						},
+						"Orientation": "VelocityParallel",
+						"SpreadAngle": [
+							60,
+							60
+						],
+						"Drag": 6,
+						"Acceleration": [
+							0,
+							-30,
+							0
+						],
+						"Lifetime": {
+							"NumberRange": [
+								0.18,
+								0.34
+							]
+						},
+						"Size": {
+							"NumberSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"value": 1.8,
+										"envelope": 0
+									},
+									{
+										"time": 1.0,
+										"value": 0,
+										"envelope": 0
+									}
+								]
+							}
+						},
+						"Color": {
+							"ColorSequence": {
+								"keypoints": [
+									{
+										"time": 0.0,
+										"color": [
+											1.0,
+											1.0,
+											1.0
+										]
+									},
+									{
+										"time": 1.0,
+										"color": [
+											0.8039,
+											0.8627,
+											0.9804
+										]
+									}
+								]
+							}
+						},
+						"LightEmission": 1,
+						"Brightness": 3,
+						"ZOffset": 1
+					},
+					"attributes": {
+						"TextureKey": "SparkStreak",
+						"EmitCount": 14
+					}
+				}
+			]
+		}
+	]
+}

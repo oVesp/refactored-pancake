@@ -1,0 +1,42 @@
+{
+	"set": "Skeleton",
+	"kind": "enemy",
+	"defaults": {
+		"origin": "Quaternius (CC0) clips fitted to the Skeleton rig in Blender (actionforge_4_clips export)",
+		"license": "CC0 1.0 (Quaternius)"
+	},
+	"clips": {
+		"SkeletonIdle": {
+			"role": "Idle",
+			"looped": true,
+			"tier": "placeholder",
+			"notes": "Idle loop. Uploaded by the owner from Studio 2026-10-26; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider) with bones that never leave rest dropped.",
+			"assetId": "86495569494152",
+			"history": []
+		},
+		"SkeletonWalk": {
+			"role": "Walk",
+			"looped": true,
+			"tier": "placeholder",
+			"notes": "Walk loop. Uploaded by the owner from Studio 2026-10-26; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider) with bones that never leave rest dropped.",
+			"assetId": "88182025210616",
+			"history": []
+		},
+		"SkeletonAttack": {
+			"role": "Attack",
+			"looped": false,
+			"tier": "placeholder",
+			"notes": "Scratch, played as the Attack clip. Uploaded by the owner from Studio 2026-10-26; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider) with bones that never leave rest dropped.",
+			"assetId": "78738563687931",
+			"history": []
+		},
+		"SkeletonDeath": {
+			"role": "Death",
+			"looped": false,
+			"tier": "placeholder",
+			"notes": "Defeat, played as the Death clip. Uploaded by the owner from Studio 2026-10-26; the KeyframeSequence is an export of the uploaded clip (AnimationClipProvider) with bones that never leave rest dropped.",
+			"assetId": "96632426840141",
+			"history": []
+		}
+	}
+}

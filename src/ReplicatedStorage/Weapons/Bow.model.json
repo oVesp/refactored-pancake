@@ -1,0 +1,207 @@
+{
+	"className": "Model",
+	"children": [
+		{
+			"name": "Handle",
+			"className": "Part",
+			"properties": {
+				"Size": [
+					0.3,
+					0.3,
+					1.0
+				],
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							0,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				},
+				"Color": [
+					0.2745,
+					0.1961,
+					0.1373
+				],
+				"Material": "Wood",
+				"Shape": "Block",
+				"Anchored": true,
+				"CanCollide": false,
+				"CastShadow": true,
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth"
+			},
+			"children": [
+				{
+					"name": "Grip",
+					"className": "Attachment"
+				}
+			]
+		},
+		{
+			"name": "UpperLimb",
+			"className": "Part",
+			"properties": {
+				"Size": [
+					0.2,
+					0.2,
+					2.2
+				],
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							-0.25,
+							-1.55
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								0.9781,
+								0.2079
+							],
+							[
+								0,
+								-0.2079,
+								0.9781
+							]
+						]
+					}
+				},
+				"Color": [
+					0.4706,
+					0.3216,
+					0.1961
+				],
+				"Material": "Wood",
+				"Shape": "Block",
+				"Anchored": true,
+				"CanCollide": false,
+				"CastShadow": true,
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth"
+			}
+		},
+		{
+			"name": "LowerLimb",
+			"className": "Part",
+			"properties": {
+				"Size": [
+					0.2,
+					0.2,
+					2.2
+				],
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							-0.25,
+							1.55
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								0.9781,
+								-0.2079
+							],
+							[
+								0,
+								0.2079,
+								0.9781
+							]
+						]
+					}
+				},
+				"Color": [
+					0.4706,
+					0.3216,
+					0.1961
+				],
+				"Material": "Wood",
+				"Shape": "Block",
+				"Anchored": true,
+				"CanCollide": false,
+				"CastShadow": true,
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth"
+			}
+		},
+		{
+			"name": "String",
+			"className": "Part",
+			"properties": {
+				"Size": [
+					0.05,
+					0.05,
+					5.2
+				],
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							-0.5,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				},
+				"Color": [
+					0.902,
+					0.8824,
+					0.8235
+				],
+				"Material": "SmoothPlastic",
+				"Shape": "Block",
+				"Anchored": true,
+				"CanCollide": false,
+				"CastShadow": true,
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth"
+			}
+		}
+	]
+}

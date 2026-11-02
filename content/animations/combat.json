@@ -1,0 +1,83 @@
+{
+	"set": "Combat",
+	"kind": "skill",
+	"defaults": {
+		"origin": "Agent-authored placeholder on the stock Studio R15 rig in assets/blender/combat_r15/combat_r15.blend (owner exception 2026-10-25)",
+		"license": "project"
+	},
+	"clips": {
+		"BasicStrike": {
+			"looped": false,
+			"markers": {
+				"Hit": 0.13333
+			},
+			"tier": "placeholder",
+			"notes": "Light attack (strike): 0.4 s, marker Hit at 0.133 s. Upper body only. Baked to .rbxanim by the Roblox Animations add-on (3.0.1 bake, re-verified identical with 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-25 to user 82401475 by tools/upload/animations.py.",
+			"assetId": "75972502304014",
+			"history": []
+		},
+		"BasicHeavyStrike": {
+			"looped": false,
+			"markers": {
+				"Hit": 0.5
+			},
+			"tier": "placeholder",
+			"notes": "Heavy attack (heavy_strike): 1.0 s, markers Windup at 0 s and Hit at 0.5 s. Upper body only. Baked to .rbxanim by the Roblox Animations add-on (3.0.1 bake, re-verified identical with 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-25 to user 82401475 by tools/upload/animations.py.",
+			"assetId": "73823663489909",
+			"history": []
+		},
+		"BasicStrike2": {
+			"looped": false,
+			"markers": {
+				"Hit": 0.13333
+			},
+			"tier": "placeholder",
+			"notes": "Light chain hit 2 (strike_2): 0.4 s left cross, marker Hit at 0.133 s. Upper body only. Posed by tools/blender/combat_poses.py, baked by tools/blender/combat_bake.py (Roblox Animations add-on 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-27 to user 82401475 by tools/upload/animations.py.",
+			"assetId": "111687911389983",
+			"history": []
+		},
+		"BasicStrike3": {
+			"looped": false,
+			"markers": {
+				"Hit": 0.23333
+			},
+			"tier": "placeholder",
+			"notes": "Light chain finisher (strike_3): 0.6 s rising right hook with torso turn, marker Hit at 0.233 s, recovery to rest by 0.6 s. Upper body only. Posed by tools/blender/combat_poses.py, baked by tools/blender/combat_bake.py (Roblox Animations add-on 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-27 to user 82401475 by tools/upload/animations.py.",
+			"assetId": "131814313813160",
+			"history": []
+		},
+		"GuardHold": {
+			"looped": true,
+			"markers": {},
+			"tier": "placeholder",
+			"notes": "Guard pose, forearms upright in front of the face; 1 s loop, played by GuardClips while Guarding. Upper body only. Posed by tools/blender/combat_poses.py, baked by tools/blender/combat_bake.py (Roblox Animations add-on 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-27 to user 82401475 by tools/upload/animations.py.",
+			"assetId": "109555153765403",
+			"history": []
+		},
+		"GuardParry": {
+			"looped": false,
+			"markers": {
+				"Hit": 0.03333
+			},
+			"tier": "placeholder",
+			"notes": "Parry deflection: 0.333 s, left forearm sweeps outward and back to guard, marker Parry at 0.033 s; played by GuardClips on ShowParry. Upper body only. Posed by tools/blender/combat_poses.py, baked by tools/blender/combat_bake.py (Roblox Animations add-on 3.1.2), converted by tools/blender/rbxanim_to_keyframes.py; uploaded 2026-10-27 to user 82401475 by tools/upload/animations.py.",
+			"assetId": "77764665687591",
+			"history": []
+		},
+		"Dodge": {
+			"looped": false,
+			"markers": {},
+			"tier": "final",
+			"assetId": "130043066388929",
+			"notes": "Dodge roll, played when the player dodges. Authored by the owner and uploaded from Studio.",
+			"history": []
+		},
+		"PlayerRun": {
+			"looped": true,
+			"tier": "placeholder",
+			"assetId": "129808019913977",
+			"notes": "Player run, played by RunAnimations while the double-tap run is on. Uploaded by the owner from Studio.",
+			"history": []
+		}
+	}
+}

@@ -1,0 +1,225 @@
+{
+	"className": "Part",
+	"properties": {
+		"Anchored": true,
+		"CanCollide": false,
+		"CanQuery": false,
+		"CanTouch": false,
+		"CastShadow": false,
+		"Transparency": 1,
+		"Size": [
+			1,
+			1,
+			1
+		]
+	},
+	"children": [
+		{
+			"name": "Shaft",
+			"className": "ParticleEmitter",
+			"properties": {
+				"Rate": 60,
+				"LightEmission": 0,
+				"LightInfluence": 1,
+				"Rotation": {
+					"NumberRange": [
+						90,
+						90
+					]
+				},
+				"Speed": {
+					"NumberRange": [
+						0.1,
+						0.1
+					]
+				},
+				"LockedToPart": true,
+				"Orientation": "VelocityParallel",
+				"EmissionDirection": "Front",
+				"Size": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 2.4,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 2.4,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"Lifetime": {
+					"NumberRange": [
+						0.05,
+						0.05
+					]
+				},
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									0.1765,
+									0.3529,
+									0.098
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.1765,
+									0.3529,
+									0.098
+								]
+							}
+						]
+					}
+				}
+			},
+			"attributes": {
+				"TextureKey": "Streak"
+			}
+		},
+		{
+			"name": "Light",
+			"className": "PointLight",
+			"properties": {
+				"Color": {
+					"Color3": [
+						0.4706,
+						0.8235,
+						0.2353
+					]
+				},
+				"Brightness": 1,
+				"Range": 6,
+				"Shadows": false
+			}
+		},
+		{
+			"name": "TrailTop",
+			"className": "Attachment",
+			"properties": {
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							0.1,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				}
+			},
+			"children": []
+		},
+		{
+			"name": "TrailBottom",
+			"className": "Attachment",
+			"properties": {
+				"CFrame": {
+					"CFrame": {
+						"position": [
+							0,
+							-0.1,
+							0
+						],
+						"orientation": [
+							[
+								1,
+								0,
+								0
+							],
+							[
+								0,
+								1,
+								0
+							],
+							[
+								0,
+								0,
+								1
+							]
+						]
+					}
+				}
+			},
+			"children": []
+		},
+		{
+			"name": "Trail",
+			"className": "Trail",
+			"properties": {
+				"Lifetime": 0.18,
+				"Color": {
+					"ColorSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"color": [
+									0.8627,
+									1.0,
+									0.6667
+								]
+							},
+							{
+								"time": 1.0,
+								"color": [
+									0.4706,
+									0.8235,
+									0.2353
+								]
+							}
+						]
+					}
+				},
+				"Transparency": {
+					"NumberSequence": {
+						"keypoints": [
+							{
+								"time": 0.0,
+								"value": 0.1,
+								"envelope": 0
+							},
+							{
+								"time": 1.0,
+								"value": 1,
+								"envelope": 0
+							}
+						]
+					}
+				},
+				"LightEmission": 1,
+				"LightInfluence": 0,
+				"FaceCamera": true,
+				"MinLength": 0
+			},
+			"attributes": {
+				"TextureKey": "TrailStreak",
+				"From": "TrailTop",
+				"To": "TrailBottom"
+			}
+		}
+	]
+}

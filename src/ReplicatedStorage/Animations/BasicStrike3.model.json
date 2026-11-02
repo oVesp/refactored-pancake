@@ -1,0 +1,10 @@
+{
+	"className": "Animation",
+	"properties": {
+		"AnimationId": "rbxassetid://131814313813160"
+	},
+	"attributes": {
+		"Looped": false,
+		"Hit": 0.23333
+	}
+}
