@@ -7,7 +7,7 @@
 	facts, so a Types.luau edit reaches the editor with no second place to update.
 ]]
 
-local Types = require(script.Parent.Types)
+local Types = require("./Types")
 
 local Schema = {}
 

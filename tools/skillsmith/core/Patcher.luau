@@ -9,15 +9,20 @@
 	file it cannot find the target span in; it errors instead of guessing.
 ]]
 
-local Types = require(script.Parent.Types)
-local Parser = require(script.Parent.Parser)
-local Registry = require(script.Parent.Registry)
+-- Relative requires so the same module runs under Lune (no `script` global) and inside Studio,
+-- where luau-lsp resolves these to sibling Instance children of the plugin folder.
+local Types = require("./Types")
+local Parser = require("./Parser")
+local Registry = require("./Registry")
 
 local Patcher = {}
 
 -- Lune 0.11 parses single-expression type syntax conservatively, so multi-value return types go
 -- through a named alias here instead of `(number, number)?` inline.
 type SpanPair = { start: number, finish: number }
+
+-- Two character positions (an inclusive range), also a named alias for the same parser reason.
+type PosRange = { first: number, second: number }
 
 -- Finds the inclusive character range of `field = <value>` within the entry's source slice.
 -- Returns nil when the key is absent (the caller then inserts after an anchor).
@@ -69,7 +74,7 @@ local function findValueSpan(entrySource: string, field: string): SpanPair?
 				end
 				i += 1
 			end
-			return s, i - 1
+			return { start = s, finish = i - 1 }
 		end
 		searchFrom = s + 1
 	end
@@ -106,7 +111,8 @@ function Patcher.render(value: any): string
 			for _, item in value do
 				table.insert(parts, Patcher.render(item))
 			end
-			return `{ {table.concat(parts, ", ")} }`:gsub("{ %{", "{"):gsub("%} }", "}")
+			local rendered = `{ {table.concat(parts, ", ")} }`
+			return (rendered:gsub("{ %{", "{"):gsub("%} }", "}"))
 		end
 		local keys = {}
 		for k in pairs(value) do
@@ -124,7 +130,7 @@ function Patcher.render(value: any): string
 end
 
 -- Locates the character range of an entry block ("{ ... }") whose id equals `key`.
-local function entryRange(source: string, key: string): (number, number)?
+local function entryRange(source: string, key: string): PosRange?
 	local marker = string.find(source, `id = "{key}"`, 1, true)
 	if not marker then
 		return nil
@@ -153,7 +159,7 @@ local function entryRange(source: string, key: string): (number, number)?
 	if not close then
 		return nil
 	end
-	return open, close
+	return { first = open :: number, second = close }
 end
 
 --[=[
@@ -166,12 +172,12 @@ function Patcher.applyOne(source: string, patch: Types.Patch): string
 		assert(patch.entry and patch.field, "setKey/clearKey need entry and field")
 		local range = entryRange(source, patch.entry)
 		assert(range, `Entry {patch.entry} not found`)
-		local openPos, closePos = range[1], range[2]
+		local openPos, closePos = range.first, range.second
 		local block = string.sub(source, openPos, closePos)
 		local span = findValueSpan(block, patch.field)
 		if patch.patchKind == "clearKey" then
 			assert(span, `Field {patch.field} absent in {patch.entry}; nothing to clear`)
-			local s, e = span[1], span[2]
+			local s, e = span.start, span.finish
 			-- Include the trailing comma and the line break so no empty line remains.
 			local afterE = string.sub(block, e + 1, e + 1)
 			if afterE == "," then
@@ -195,7 +201,7 @@ function Patcher.applyOne(source: string, patch: Types.Patch): string
 
 		assert(patch.valueText, "setKey needs valueText")
 		if span then
-			local s, e = span[1], span[2]
+			local s, e = span.start, span.finish
 			local head = string.sub(block, 1, s - 1)
 			local tail = string.sub(block, e + 1)
 			-- Replace only the value portion: from after `field =` whitespace to e.
@@ -230,7 +236,7 @@ function Patcher.applyOne(source: string, patch: Types.Patch): string
 			block = string.sub(block, 1, closeIdx - 1) .. line .. string.sub(block, closeIdx)
 			return string.sub(source, 1, openPos - 1) .. block .. string.sub(source, closePos + 1)
 		end
-		local _, e = spanAnchor[1], spanAnchor[2]
+		local _, e = spanAnchor.start, spanAnchor.finish
 		-- Move past the comma and end-of-line.
 		local insertAt = e + 1
 		while string.sub(block, insertAt, insertAt) ~= "\n" and insertAt <= #block do
@@ -261,11 +267,11 @@ function Patcher.applyOne(source: string, patch: Types.Patch): string
 		local entryIndent = "\t"
 		local keyIndent = "\t\t"
 		local rendered = {}
-		table.insert(rendered, `{entryIndent}{{`)
+		table.insert(rendered, entryIndent .. "{ {")
 		for _, pair in patch.fields :: { { key: string, valueText: string } } do
 			table.insert(rendered, `{keyIndent}{pair.key} = {pair.valueText},`)
 		end
-		table.insert(rendered, `{entryIndent}}},`)
+		table.insert(rendered, entryIndent .. "} },")
 		local insertPos = 0
 		for l = 1, closeLine - 1 do
 			insertPos += #(lines[l] .. "\n")

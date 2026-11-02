@@ -8,8 +8,8 @@
 	table edit here plus module registration.
 ]]
 
-local Types = require(script.Parent.Types)
-local Parser = require(script.Parent.Parser)
+local Types = require("./Types")
+local Parser = require("./Parser")
 
 local Registry = {}
 
